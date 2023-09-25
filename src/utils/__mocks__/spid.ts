@@ -1,3 +1,6 @@
+import { FiscalCode } from "@pagopa/io-functions-app-sdk/FiscalCode";
+import { NonEmptyString } from "io-ts-types";
+
 export const aSAMLRequest = `<?xml version="1.0"?>
 <samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" ID="A-REQUEST-ID" Version="2.0" 
   IssueInstant="2020-02-17T10:20:28.417Z"
@@ -11,7 +14,10 @@ export const aSAMLRequest = `<?xml version="1.0"?>
   </samlp:RequestedAuthnContext>
 </samlp:AuthnRequest>`;
 
-export const aSAMLResponse = `<samlp:Response Destination="https://app-backend.dev.io.italia.it/assertionConsumerService" ID="_7080f453-78cb-4f57-9692-62dc8a5c23e8" InResponseTo="_2d2a89e99c7583e221b4" IssueInstant="2020-02-26T07:32:05Z" Version="2.0" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol">
+export const getASAMLResponse = (
+  fiscalCode: FiscalCode,
+  inResponseTo: NonEmptyString
+) => `<samlp:Response Destination="https://app-backend.dev.io.italia.it/assertionConsumerService" ID="_7080f453-78cb-4f57-9692-62dc8a5c23e8" InResponseTo="${inResponseTo}" IssueInstant="2020-02-26T07:32:05Z" Version="2.0" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol">
 <saml:Issuer Format="urn:oasis:names:tc:SAML:2.0:nameid-format:entity">
     http://localhost:8080
 </saml:Issuer>
@@ -79,7 +85,7 @@ export const aSAMLResponse = `<samlp:Response Destination="https://app-backend.d
                 _61c0122d-5e8e-48e5-98ce-d43bb3903404
         </saml:NameID>
         <saml:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
-            <saml:SubjectConfirmationData InResponseTo="_2d2a89e99c7583e221b4" NotOnOrAfter="2020-02-26T07:32:05Z" Recipient="https://app-backend.dev.io.italia.it/assertionConsumerService"/>
+            <saml:SubjectConfirmationData  InResponseTo="${inResponseTo}" NotOnOrAfter="2020-02-26T07:32:05Z" Recipient="https://app-backend.dev.io.italia.it/assertionConsumerService"/>
         </saml:SubjectConfirmation>
     </saml:Subject>
     <saml:Conditions NotBefore="2020-02-26T07:27:42Z" NotOnOrAfter="2020-02-26T07:32:05Z">
@@ -109,7 +115,7 @@ export const aSAMLResponse = `<samlp:Response Destination="https://app-backend.d
         </saml:Attribute>
         <saml:Attribute Name="fiscalNumber" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic">
             <saml:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">
-                TINIT-GDASDV00A01H501J
+                TINIT-${fiscalCode}
             </saml:AttributeValue>
         </saml:Attribute>
         <saml:Attribute Name="mobilePhone" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic">
@@ -136,10 +142,13 @@ export const aSAMLResponse = `<samlp:Response Destination="https://app-backend.d
 </saml:Assertion>
 </samlp:Response>`;
 
-export const aSAMLResponse_saml2Namespace = `<saml2p:Response
+export const getASAMLResponse_saml2Namespace = (
+  fiscalCode: FiscalCode,
+  inResponseTo: NonEmptyString
+) => `<saml2p:Response
   Destination="https://app-backend.dev.io.italia.it/assertionConsumerService"
   ID="_7080f453-78cb-4f57-9692-62dc8a5c23e8"
-  InResponseTo="_2d2a89e99c7583e221b4"
+   InResponseTo="${inResponseTo}"
   IssueInstant="2020-02-26T07:32:05Z"
   Version="2.0"
   xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion"
@@ -236,7 +245,7 @@ export const aSAMLResponse_saml2Namespace = `<saml2p:Response
       </saml2:NameID>
       <saml2:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
         <saml2:SubjectConfirmationData
-          InResponseTo="_2d2a89e99c7583e221b4"
+          InResponseTo="${inResponseTo}"
           NotOnOrAfter="2020-02-26T07:32:05Z"
           Recipient="https://app-backend.dev.io.italia.it/assertionConsumerService"
         />
@@ -294,7 +303,7 @@ export const aSAMLResponse_saml2Namespace = `<saml2p:Response
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:type="xs:string"
         >
-          TINIT-GDASDV00A01H501J
+          TINIT-${fiscalCode}
         </saml2:AttributeValue>
       </saml2:Attribute>
       <saml2:Attribute
@@ -349,3 +358,13 @@ export const aSAMLResponse_saml2Namespace = `<saml2p:Response
   </saml2:Assertion>
 </saml2p:Response>
 `;
+
+export const aSAMLResponse = getASAMLResponse(
+  "GDASDV00A01H501J" as FiscalCode,
+  "_2d2a89e99c7583e221b4" as NonEmptyString
+);
+
+export const aSAMLResponse_saml2Namespace = getASAMLResponse_saml2Namespace(
+  "GDASDV00A01H501J" as FiscalCode,
+  "_2d2a89e99c7583e221b4" as NonEmptyString
+);

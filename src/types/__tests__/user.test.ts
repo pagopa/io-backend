@@ -141,13 +141,13 @@ describe("user type", () => {
 });
 
 describe("getAuthnContextFromResponse", () => {
-  it("shoudl extract the Spid Level from a SAML Assertion with saml namespace", () => {
+  it("should extract the Spid Level from a SAML Assertion with saml namespace", () => {
     const res = getAuthnContextFromResponse(aSAMLResponse);
 
     expect(res).toEqual(O.some("https://www.spid.gov.it/SpidL2"));
   });
 
-  it("shoudl extract the Spid Level from a SAML Assertion with saml2 namespace", () => {
+  it("should extract the Spid Level from a SAML Assertion with saml2 namespace", () => {
     const res = getAuthnContextFromResponse(aSAMLResponse_saml2Namespace);
 
     expect(res).toEqual(O.some("https://www.spid.gov.it/SpidL2"));

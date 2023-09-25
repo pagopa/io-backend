@@ -27,6 +27,7 @@ import { UserIdentity } from "../../generated/auth/UserIdentity";
 import { formatDate } from "../utils/date";
 import { log } from "../utils/logger";
 import { withValidatedOrValidationError } from "../utils/responses";
+import { getSpidLevelFromSAMLResponse } from "../utils/spid";
 import { ALLOWED_TEST_ISSUER } from "../config";
 import { isSpidL } from "./spidLevel";
 import {
@@ -209,16 +210,8 @@ export function getAuthnContextFromResponse(xml: string): O.Option<string> {
     O.chain((xmlStr) =>
       O.tryCatch(() => new DOMParser().parseFromString(xmlStr))
     ),
-    O.chain((xmlResponse) =>
-      xmlResponse
-        ? O.some(xmlResponse.getElementsByTagName("saml:AuthnContextClassRef"))
-        : O.none
-    ),
-    O.chain((responseAuthLevelEl) =>
-      responseAuthLevelEl?.[0]?.textContent
-        ? O.some(responseAuthLevelEl[0].textContent.trim())
-        : O.none
-    )
+    O.chain(O.fromNullable),
+    O.chain(getSpidLevelFromSAMLResponse)
   );
 }
 
