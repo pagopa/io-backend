@@ -3,6 +3,7 @@
 /* tslint:disable:no-inferred-empty-object-type */
 
 import * as E from "fp-ts/lib/Either";
+import * as O from "fp-ts/Option";
 import mockReq from "../../__mocks__/request";
 
 import {
@@ -11,6 +12,7 @@ import {
 } from "@pagopa/io-spid-commons/dist/config";
 import {
   extractUserFromJson,
+  getAuthnContextFromResponse,
   toAppUser,
   User,
   validateSpidUser,
@@ -24,6 +26,10 @@ import {
   mockWalletToken,
   mockZendeskToken,
 } from "../../__mocks__/user_mock";
+import {
+  aSAMLResponse,
+  aSAMLResponse_saml2Namespace,
+} from "../../utils/__mocks__/spid";
 
 const anIssuer = Object.keys(SPID_IDP_IDENTIFIERS)[0] as Issuer;
 const SESSION_TOKEN_LENGTH_BYTES = 48;
@@ -131,5 +137,19 @@ describe("user type", () => {
     if (E.isLeft(userDataKO)) {
       expect(userDataKO._tag).toBe("Left");
     }
+  });
+});
+
+describe("getAuthnContextFromResponse", () => {
+  it("shoudl extract the Spid Level from a SAML Assertion with saml namespace", () => {
+    const res = getAuthnContextFromResponse(aSAMLResponse);
+
+    expect(res).toEqual(O.some("https://www.spid.gov.it/SpidL2"));
+  });
+
+  it("shoudl extract the Spid Level from a SAML Assertion with saml2 namespace", () => {
+    const res = getAuthnContextFromResponse(aSAMLResponse_saml2Namespace);
+
+    expect(res).toEqual(O.some("https://www.spid.gov.it/SpidL2"));
   });
 });

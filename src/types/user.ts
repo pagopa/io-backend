@@ -203,7 +203,7 @@ const SpidObject = t.intersection([
  * ie. for <saml2:AuthnContextClassRef>https://www.spid.gov.it/SpidL2</saml2:AuthnContextClassRef>
  * returns "https://www.spid.gov.it/SpidL2"
  */
-function getAuthnContextFromResponse(xml: string): O.Option<string> {
+export function getAuthnContextFromResponse(xml: string): O.Option<string> {
   return pipe(
     O.fromNullable(xml),
     O.chain((xmlStr) =>
