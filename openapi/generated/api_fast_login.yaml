@@ -3,7 +3,7 @@ servers:
   - url: https://api-app.io.pagopa.it/api/v1
 info:
   title: Fast login API
-  version: 13.6.2
+  version: 13.7.0
 paths:
   /fast-login:
     post:

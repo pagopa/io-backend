@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 13.6.2
+  version: 13.7.0
   title: Carta Giovani Nazionale Operator Search API
 host: localhost
 basePath: /api/v1/cgn/operator-search
