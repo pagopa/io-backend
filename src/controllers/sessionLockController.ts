@@ -83,36 +83,28 @@ export default class SessionLockController {
     | IResponseErrorValidation
     | IResponseSuccessJson<SuccessResponse>
   > =>
-    withFiscalCodeFromRequestParams(
-      req,
-      flow(
-        (fiscalCode) =>
+    withFiscalCodeFromRequestParams(req, (fiscalCode) =>
+      pipe(
+        AP.sequenceT(TE.ApplicativeSeq)(
+          // lock the account
           pipe(
-            AP.sequenceT(TE.ApplicativeSeq)(
-              // lock the account
-              pipe(
-                TE.tryCatch(
-                  () => this.sessionStorage.setBlockedUser(fiscalCode),
-                  E.toError
-                ),
-                TE.chain(TE.fromEither)
-              ),
-              ...this.buildInvalidateUserSessionTask(fiscalCode),
-              // removes all metadata
-              pipe(
-                TE.tryCatch(
-                  () => this.metadataStorage.del(fiscalCode),
-                  E.toError
-                ),
-                TE.chain(TE.fromEither)
-              )
+            TE.tryCatch(
+              () => this.sessionStorage.setBlockedUser(fiscalCode),
+              E.toError
             ),
-            TE.mapLeft((err) => ResponseErrorInternal(err.message))
+            TE.chain(TE.fromEither)
           ),
+          ...this.buildInvalidateUserSessionTask(fiscalCode),
+          // removes all metadata
+          pipe(
+            TE.tryCatch(() => this.metadataStorage.del(fiscalCode), E.toError),
+            TE.chain(TE.fromEither)
+          )
+        ),
+        TE.mapLeft((err) => ResponseErrorInternal(err.message)),
         TE.map((_) => ResponseSuccessJson({ message: "ok" })),
-        TE.toUnion,
-        (taskEither) => taskEither()
-      )
+        TE.toUnion
+      )()
     );
 
   /**
@@ -130,20 +122,15 @@ export default class SessionLockController {
     | IResponseErrorValidation
     | IResponseSuccessJson<SuccessResponse>
   > =>
-    withFiscalCodeFromRequestParams(
-      req,
-      flow(
-        (fiscalCode) =>
-          pipe(
-            ROA.sequence(TE.ApplicativeSeq)(
-              this.buildInvalidateUserSessionTask(fiscalCode)
-            ),
-            TE.mapLeft((err) => ResponseErrorInternal(err.message))
-          ),
+    withFiscalCodeFromRequestParams(req, (fiscalCode) =>
+      pipe(
+        ROA.sequence(TE.ApplicativeSeq)(
+          this.buildInvalidateUserSessionTask(fiscalCode)
+        ),
+        TE.mapLeft((err) => ResponseErrorInternal(err.message)),
         TE.map((_) => ResponseSuccessJson({ message: "ok" })),
-        TE.toUnion,
-        (taskEither) => taskEither()
-      )
+        TE.toUnion
+      )()
     );
 
   /**
