@@ -42,7 +42,7 @@ export const getSpidLevelFromSAMLResponse: (
 ) => O.Option<SpidLevelEnum> = flow(
   (doc) =>
     doc
-      .getElementsByTagNameNS(SAML_NAMESPACE.ASSERTION, "AuthnContext")
+      .getElementsByTagNameNS(SAML_NAMESPACE.ASSERTION, "AuthnContextClassRef")
       .item(0),
   O.fromNullable,
   O.chainNullableK((element) => element.textContent?.trim()),
