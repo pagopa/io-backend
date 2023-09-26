@@ -85,32 +85,6 @@ paths:
           description: Bad request
         "401":
           description: Token null or invalid.
-        "404":
-          description: User not found.
-        "500":
-          description: There was an error
-          schema:
-            $ref: "#/definitions/ProblemJson"
-    delete:
-      operationId: unlockUserSession
-      summary: Remove a lock to a user session
-      description: |-
-        Use this operation if you want to unblock a user and re-allow to login. The operation succeed if the user wasn't blocked
-      parameters:
-        - $ref: "#/parameters/FiscalCode"
-        - $ref: "#/parameters/Token"
-      responses:
-        "200":
-          description: Success.
-          schema:
-            $ref: "#/definitions/SuccessResponse"
-          examples:
-            application/json:
-              "message": "ok"
-        "400":
-          description: Bad request
-        "401":
-          description: Token null or invalid.
         "500":
           description: There was an error
           schema:
