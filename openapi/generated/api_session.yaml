@@ -89,6 +89,32 @@ paths:
           description: There was an error
           schema:
             $ref: '#/definitions/ProblemJson'
+  /sessions/{fiscalcode}/logout:
+    post:
+      operationId: deleteUserSession
+      summary: Delete user session and invalidate lollipop data
+      description: >-
+        Use this operation to invalidate the user session and disable the
+        lollipop params to prevent Fast Login token refresh
+      parameters:
+        - $ref: '#/parameters/FiscalCode'
+        - $ref: '#/parameters/Token'
+      responses:
+        '200':
+          description: Success.
+          schema:
+            $ref: '#/definitions/SuccessResponse'
+          examples:
+            application/json:
+              message: ok
+        '400':
+          description: Bad request
+        '401':
+          description: Token null or invalid.
+        '500':
+          description: There was an error
+          schema:
+            $ref: '#/definitions/ProblemJson'
 parameters:
   FiscalCode:
     name: fiscalcode

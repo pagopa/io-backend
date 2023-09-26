@@ -418,3 +418,168 @@ describe("SessionLockController#unlockUserSession", () => {
     expect(res.status).toHaveBeenCalledWith(500);
   });
 });
+
+describe("SessionLockController#deleteUserSession", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should fail on invalid fiscal code", async () => {
+    const req = mockReq({ params: { fiscal_code: "invalid" } });
+    const res = mockRes();
+
+    const controller = new SessionLockController(
+      mockRedisSessionStorage,
+      mockRedisUserMetadataStorage,
+      mockLollipopService
+    );
+
+    const response = await controller.deleteUserSession(req);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+  });
+
+  it("should fail on invalid request", async () => {
+    const req = mockReq({ params: { invalid: true } });
+    const res = mockRes();
+
+    const controller = new SessionLockController(
+      mockRedisSessionStorage,
+      mockRedisUserMetadataStorage,
+      mockLollipopService
+    );
+
+    const response = await controller.deleteUserSession(req);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+  });
+
+  it("should succeed on correct request", async () => {
+    const req = mockReq({ params: { fiscal_code: aFiscalCode } });
+    const res = mockRes();
+
+    const controller = new SessionLockController(
+      mockRedisSessionStorage,
+      mockRedisUserMetadataStorage,
+      mockLollipopService
+    );
+
+    const response = await controller.deleteUserSession(req);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(mockGetLollipop).toHaveBeenCalled();
+    expect(mockRevokePreviousAssertionRef).toHaveBeenCalled();
+    expect(mockDelLollipop).toHaveBeenCalled();
+    expect(mockDelUserAllSessions).toHaveBeenCalled();
+    expect(res.json).toHaveBeenCalledWith({
+      message: "ok",
+    });
+  });
+
+  it("should fail when get assertionRef return left", async () => {
+    const req = mockReq({ params: { fiscal_code: aFiscalCode } });
+    const res = mockRes();
+
+    mockGetLollipop.mockImplementationOnce(async () => E.left("any error"));
+
+    const controller = new SessionLockController(
+      mockRedisSessionStorage,
+      mockRedisUserMetadataStorage,
+      mockLollipopService
+    );
+
+    const response = await controller.deleteUserSession(req);
+    response.apply(res);
+
+    expect(mockRevokePreviousAssertionRef).not.toHaveBeenCalled();
+    expect(mockDelLollipop).not.toHaveBeenCalled();
+    expect(mockDelUserAllSessions).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(500);
+  });
+
+  it("should fail when get assertionRef throws", async () => {
+    const req = mockReq({ params: { fiscal_code: aFiscalCode } });
+    const res = mockRes();
+
+    mockGetLollipop.mockImplementationOnce(async () => {
+      throw "error";
+    });
+
+    const controller = new SessionLockController(
+      mockRedisSessionStorage,
+      mockRedisUserMetadataStorage,
+      mockLollipopService
+    );
+
+    const response = await controller.deleteUserSession(req);
+    response.apply(res);
+
+    expect(mockRevokePreviousAssertionRef).not.toHaveBeenCalled();
+    expect(mockDelLollipop).not.toHaveBeenCalled();
+    expect(mockDelUserAllSessions).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(500);
+  });
+
+  it("should fail when delete assertionRef return left", async () => {
+    const req = mockReq({ params: { fiscal_code: aFiscalCode } });
+    const res = mockRes();
+
+    mockDelLollipop.mockImplementationOnce(async () => E.left("any error"));
+
+    const controller = new SessionLockController(
+      mockRedisSessionStorage,
+      mockRedisUserMetadataStorage,
+      mockLollipopService
+    );
+
+    const response = await controller.deleteUserSession(req);
+    response.apply(res);
+    expect(mockRevokePreviousAssertionRef).toHaveBeenCalled();
+    expect(mockDelUserAllSessions).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(500);
+  });
+
+  it("should fail when delete assertionRef throws", async () => {
+    const req = mockReq({ params: { fiscal_code: aFiscalCode } });
+    const res = mockRes();
+
+    mockDelLollipop.mockImplementationOnce(async () => {
+      throw "error";
+    });
+
+    const controller = new SessionLockController(
+      mockRedisSessionStorage,
+      mockRedisUserMetadataStorage,
+      mockLollipopService
+    );
+
+    const response = await controller.deleteUserSession(req);
+    response.apply(res);
+    expect(mockRevokePreviousAssertionRef).toHaveBeenCalled();
+    expect(mockDelUserAllSessions).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(500);
+  });
+
+  it("should fail on delete session error", async () => {
+    const req = mockReq({ params: { fiscal_code: aFiscalCode } });
+    const res = mockRes();
+
+    mockDelUserAllSessions.mockImplementationOnce(async () =>
+      E.left("any error")
+    );
+
+    const controller = new SessionLockController(
+      mockRedisSessionStorage,
+      mockRedisUserMetadataStorage,
+      mockLollipopService
+    );
+
+    const response = await controller.lockUserSession(req);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+  });
+});

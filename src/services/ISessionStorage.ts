@@ -152,4 +152,8 @@ export interface ISessionStorage {
   readonly getPagoPaNoticeEmail: (
     user: User
   ) => Promise<Either<Error, EmailString>>;
+
+  readonly delUserAllSessions: (
+    fiscalCode: FiscalCode
+  ) => Promise<Either<Error, boolean>>;
 }
