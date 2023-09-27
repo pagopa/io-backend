@@ -3,6 +3,7 @@
  */
 
 import {
+  HttpStatusCodeEnum,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
@@ -18,6 +19,8 @@ import {
 
 import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
+
+import * as t from "io-ts";
 
 import {
   EmailString,
@@ -45,12 +48,14 @@ import {
 import { readableProblem } from "../utils/errorsFormatter";
 import { IoSignLollipopLocalsType } from "../controllers/ioSignController";
 import { ResponseErrorNotFound403 } from "./eucovidcertService";
+import { lookup } from "fp-ts/lib/ReadonlyRecord";
 
 const internalServerError = "Internal server error";
 const invalidRequest = "Invalid request";
 const resourcesNotFound = "Resources not found";
 const userNotFound =
   "The user associated with this profile could not be found.";
+
 export default class IoSignService {
   constructor(private readonly ioSignApiClient: ReturnType<IoSignAPIClient>) {}
 
@@ -72,7 +77,24 @@ export default class IoSignService {
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
           case 200:
-            return ResponseSuccessJson(response.value);
+            return {
+              apply: (res) =>
+                res
+                  .status(HttpStatusCodeEnum.HTTP_STATUS_200)
+                  .header(
+                    "x-io-sign-environment",
+                    pipe(
+                      response.headers,
+                      lookup("x-io-sign-environment"),
+                      E.fromOption(() => "prod"),
+                      E.chainW(t.keyof({ test: true, prod: true }).decode),
+                      E.getOrElse(() => "prod")
+                    )
+                  )
+                  .json(response.value),
+              kind: "IResponseSuccessJson",
+              value: response.value,
+            };
           case 400:
             return ResponseErrorValidation(
               invalidRequest,

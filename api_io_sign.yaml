@@ -249,6 +249,11 @@ paths:
       responses:
         "200":
           description: The Signature Request detail
+          headers:
+            x-io-sign-environment:
+              schema:
+                $ref: "#/components/schemas/Environment"
+              description: The environment to which the signature request belongs.
           content:
             application/json:
               schema:
@@ -721,3 +726,8 @@ components:
     AssertionRefSha512:
       type: string
       pattern: ^(sha512-[A-Za-z0-9-_=]{1,88})$
+
+
+    Environment:
+      type: string
+      enum: ["test", "prod"]
