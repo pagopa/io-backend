@@ -77,25 +77,7 @@ export default class IoSignService {
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
           case 200:
-            return {
-              apply: (res) =>
-                res
-                  .status(HttpStatusCodeEnum.HTTP_STATUS_200)
-                  .header(
-                    "x-io-sign-environment",
-                    pipe(
-                      response.headers,
-                      lookup("x-io-sign-environment"),
-                      O.chainEitherK(
-                        t.keyof({ prod: true, test: true }).decode
-                      ),
-                      O.getOrElse(() => "prod")
-                    )
-                  )
-                  .json(response.value),
-              kind: "IResponseSuccessJson",
-              value: response.value,
-            };
+            return ResponseSuccessJson(response.value);
           case 400:
             return ResponseErrorValidation(
               invalidRequest,
@@ -276,7 +258,25 @@ export default class IoSignService {
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
           case 200:
-            return ResponseSuccessJson(response.value);
+            return {
+              apply: (res) =>
+                res
+                  .status(HttpStatusCodeEnum.HTTP_STATUS_200)
+                  .header(
+                    "x-io-sign-environment",
+                    pipe(
+                      response.headers,
+                      lookup("x-io-sign-environment"),
+                      O.chainEitherK(
+                        t.keyof({ prod: true, test: true }).decode
+                      ),
+                      O.getOrElse(() => "prod")
+                    )
+                  )
+                  .json(response.value),
+              kind: "IResponseSuccessJson",
+              value: response.value,
+            };
           case 404:
             return ResponseErrorNotFound(
               resourcesNotFound,

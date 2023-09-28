@@ -5,7 +5,7 @@ import { Id } from "../../../generated/io-sign-api/Id";
 import { QtspClauses } from "../../../generated/io-sign-api/QtspClauses";
 import {
   SignatureDetailView,
-  StatusEnum as SignatureStatusEnum
+  StatusEnum as SignatureStatusEnum,
 } from "../../../generated/io-sign-api/SignatureDetailView";
 import { TypeEnum as ClauseTypeEnum } from "../../../generated/io-sign-api/Clause";
 import { SignatureRequestDetailView } from "../../../generated/io-sign-api/SignatureRequestDetailView";
@@ -16,7 +16,7 @@ import { NonNegativeNumber } from "@pagopa/ts-commons/lib/numbers";
 import {
   aLollipopOriginalUrl,
   anAssertionRef,
-  aSignatureInput
+  aSignatureInput,
 } from "../../__mocks__/lollipop";
 import { AssertionTypeEnum } from "../../../generated/io-sign-api/AssertionType";
 import { aSignature } from "../../__mocks__/lollipop";
@@ -26,6 +26,7 @@ import { LollipopPublicKey } from "../../../generated/io-sign-api/LollipopPublic
 import { SignatureRequestStatusEnum } from "../../../generated/io-sign-api/SignatureRequestStatus";
 import { IssuerEnvironmentEnum } from "../../../generated/io-sign-api/IssuerEnvironment";
 import { SignatureRequestList } from "../../../generated/io-sign-api/SignatureRequestList";
+import mockRes from "../../__mocks__/response";
 
 const mockCreateFilledDocument = jest.fn();
 const mockGetSignerByFiscalCode = jest.fn();
@@ -50,13 +51,15 @@ const lollipopRequestHeaders = {
   ["signature-input"]: aSignatureInput,
   ["x-pagopa-lollipop-original-method"]: LollipopMethodEnum.POST,
   ["x-pagopa-lollipop-original-url"]: aLollipopOriginalUrl,
-  ["x-pagopa-lollipop-custom-sign-challenge"]: "customTosChallenge" as NonEmptyString,
-  ["x-pagopa-lollipop-custom-tos-challenge"]: "customSignChallenge" as NonEmptyString,
+  ["x-pagopa-lollipop-custom-sign-challenge"]:
+    "customTosChallenge" as NonEmptyString,
+  ["x-pagopa-lollipop-custom-tos-challenge"]:
+    "customSignChallenge" as NonEmptyString,
   ["x-pagopa-lollipop-assertion-ref"]: anAssertionRef,
   ["x-pagopa-lollipop-assertion-type"]: AssertionTypeEnum.SAML,
   ["x-pagopa-lollipop-auth-jwt"]: aBearerToken,
   ["x-pagopa-lollipop-public-key"]: aPubKey,
-  ["x-pagopa-lollipop-user-id"]: aFiscalCode
+  ["x-pagopa-lollipop-user-id"]: aFiscalCode,
 };
 
 const fakeSignatureRequest: SignatureRequestDetailView = {
@@ -66,7 +69,7 @@ const fakeSignatureRequest: SignatureRequestDetailView = {
   issuer: {
     email: fakeIssuerEmail,
     description: fakeIssuerDescription,
-    environment: IssuerEnvironmentEnum.TEST
+    environment: IssuerEnvironmentEnum.TEST,
   },
   dossier_id: "01ARZ3NDEKTSV4RRFFQ69G5FAV" as Id,
   dossier_title: "Dossier title mock" as NonEmptyString,
@@ -78,13 +81,13 @@ const fakeSignatureRequest: SignatureRequestDetailView = {
       url: fakeDocumentUrl,
       metadata: {
         title: "My document title",
-        signature_fields: []
-      }
-    }
+        signature_fields: [],
+      },
+    },
   ],
   created_at: new Date(),
   updated_at: new Date(),
-  expires_at: new Date()
+  expires_at: new Date(),
 };
 
 const fakeSignatureRequestList: SignatureRequestList = {
@@ -97,22 +100,22 @@ const fakeSignatureRequestList: SignatureRequestList = {
       status: fakeSignatureRequest.status,
       created_at: fakeSignatureRequest.created_at,
       updated_at: fakeSignatureRequest.updated_at,
-      expires_at: fakeSignatureRequest.expires_at
-    }
-  ]
+      expires_at: fakeSignatureRequest.expires_at,
+    },
+  ],
 };
 
 const fakeSignature: SignatureDetailView = {
   id: "01GKVMRN408NXRT3R5HN3ADBJJ" as Id,
   signature_request_id: "01GKVMRN408NXRT3R5HN3ADBJJ" as Id,
   qtsp_signature_request_id: "01GKVMRN408NXRT3R5HN3ADBJJ" as Id,
-  status: SignatureStatusEnum.CREATED
+  status: SignatureStatusEnum.CREATED,
 };
 
 const fakeQtspAcceptedClauses: QtspClauses = {
   accepted_clauses: [{ text: "fake caluses...." as NonEmptyString }],
   filled_document_url: fakeDocumentUrl,
-  nonce: "000000000==" as NonEmptyString
+  nonce: "000000000==" as NonEmptyString,
 };
 
 const fakeDocumentsToSign: ReadonlyArray<DocumentToSign> = [
@@ -122,25 +125,25 @@ const fakeDocumentsToSign: ReadonlyArray<DocumentToSign> = [
       {
         clause: {
           title: "Firma document",
-          type: ClauseTypeEnum.REQUIRED
+          type: ClauseTypeEnum.REQUIRED,
         },
         attrs: {
-          unique_name: "field1" as NonEmptyString
-        }
+          unique_name: "field1" as NonEmptyString,
+        },
       },
       {
         clause: {
           title: "Firma document",
-          type: ClauseTypeEnum.REQUIRED
+          type: ClauseTypeEnum.REQUIRED,
         },
         attrs: {
           bottom_left: { x: 10, y: 10 },
           top_right: { x: 100, y: 20 },
-          page: 1 as NonNegativeNumber
-        }
-      }
-    ]
-  }
+          page: 1 as NonNegativeNumber,
+        },
+      },
+    ],
+  },
 ];
 
 mockGetInfo.mockImplementation(() =>
@@ -152,8 +155,8 @@ mockCreateFilledDocument.mockImplementation(() =>
     status: 201,
     headers: { Location: "http://mockdocument.com/doc.pdf" },
     value: {
-      filled_document_url: "http://mockdocument.com/doc.pdf"
-    }
+      filled_document_url: "http://mockdocument.com/doc.pdf",
+    },
   })
 );
 
@@ -161,8 +164,8 @@ mockGetSignerByFiscalCode.mockImplementation(() =>
   t.success({
     status: 200,
     value: {
-      id: "000000000000"
-    }
+      id: "000000000000",
+    },
   })
 );
 
@@ -172,45 +175,45 @@ mockGetQtspClausesMetadata.mockImplementation(() =>
     value: {
       clauses: [
         {
-          text: "(1) Io sottoscritto/a dichiaro quanto...."
+          text: "(1) Io sottoscritto/a dichiaro quanto....",
         },
         {
-          text: "(2) Io sottoscritto/a accetto..."
-        }
+          text: "(2) Io sottoscritto/a accetto...",
+        },
       ],
       document_url: "https://mock.com/modulo.pdf",
       privacy_url: "https://mock.com/privacy.pdf",
       terms_and_conditions_url: "https://mock.com/tos.pdf",
       privacy_text: "[PLACE HOLDER]",
-      nonce: "acSPlAeZY9TM0gdzJcl9+Cp3NxlUTPyk/+B9CqHsufWQmib+QHpe=="
-    }
+      nonce: "acSPlAeZY9TM0gdzJcl9+Cp3NxlUTPyk/+B9CqHsufWQmib+QHpe==",
+    },
   })
 );
 
 mockGetSignatureRequests.mockImplementation(() =>
   t.success({
     status: 200,
-    value: fakeSignatureRequestList
+    value: fakeSignatureRequestList,
   })
 );
 
 mockGetSignatureRequest.mockImplementation(() =>
   t.success({
     status: 200,
-    value: fakeSignatureRequest
+    value: fakeSignatureRequest,
   })
 );
 
 mockCreateSignature.mockImplementation(() =>
   t.success({
     status: 200,
-    value: fakeSignature
+    value: fakeSignature,
   })
 );
 
 mockFakeSuccess.mockImplementation(() =>
   t.success({
-    status: 200
+    status: 200,
   })
 );
 
@@ -223,7 +226,7 @@ const api = {
   getSignatureRequestById: mockGetSignatureRequest,
   createSignature: mockCreateSignature,
   getThirdPartyMessageDetails: mockFakeSuccess,
-  getThirdPartyMessageAttachmentContent: mockFakeSuccess
+  getThirdPartyMessageAttachmentContent: mockFakeSuccess,
 } as ReturnType<IoSignAPIClient>;
 
 describe("IoSignService#getSignerByFiscalCode", () => {
@@ -238,8 +241,8 @@ describe("IoSignService#getSignerByFiscalCode", () => {
 
     expect(mockGetSignerByFiscalCode).toHaveBeenCalledWith({
       body: {
-        fiscal_code: mockedUser.fiscal_code
-      }
+        fiscal_code: mockedUser.fiscal_code,
+      },
     });
   });
 
@@ -249,7 +252,7 @@ describe("IoSignService#getSignerByFiscalCode", () => {
     const res = await service.getSignerByFiscalCode(mockedUser.fiscal_code);
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessJson"
+      kind: "IResponseSuccessJson",
     });
   });
 
@@ -263,7 +266,7 @@ describe("IoSignService#getSignerByFiscalCode", () => {
     const res = await service.getSignerByFiscalCode(mockedUser.fiscal_code);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorValidation"
+      kind: "IResponseErrorValidation",
     });
   });
 
@@ -277,7 +280,7 @@ describe("IoSignService#getSignerByFiscalCode", () => {
     const res = await service.getSignerByFiscalCode(mockedUser.fiscal_code);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorNotFound"
+      kind: "IResponseErrorNotFound",
     });
   });
 
@@ -292,7 +295,7 @@ describe("IoSignService#getSignerByFiscalCode", () => {
     const res = await service.getSignerByFiscalCode(mockedUser.fiscal_code);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -306,7 +309,7 @@ describe("IoSignService#getSignerByFiscalCode", () => {
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal",
-      detail: "Internal server error: unhandled API response status [123]"
+      detail: "Internal server error: unhandled API response status [123]",
     });
   });
 
@@ -319,7 +322,7 @@ describe("IoSignService#getSignerByFiscalCode", () => {
     const res = await service.getSignerByFiscalCode(mockedUser.fiscal_code);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 });
@@ -345,9 +348,9 @@ describe("IoSignService#createFilledDocument", () => {
         document_url: fakeDocumentUrl,
         email: fakeEmail,
         family_name: mockedUser.family_name,
-        name: mockedUser.name
+        name: mockedUser.name,
       },
-      "x-iosign-signer-id": fakeSignerId
+      "x-iosign-signer-id": fakeSignerId,
     });
   });
 
@@ -363,7 +366,7 @@ describe("IoSignService#createFilledDocument", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessRedirectToResource"
+      kind: "IResponseSuccessRedirectToResource",
     });
   });
 
@@ -383,7 +386,7 @@ describe("IoSignService#createFilledDocument", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorValidation"
+      kind: "IResponseErrorValidation",
     });
   });
 
@@ -403,7 +406,7 @@ describe("IoSignService#createFilledDocument", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorNotFound"
+      kind: "IResponseErrorNotFound",
     });
   });
 
@@ -424,7 +427,7 @@ describe("IoSignService#createFilledDocument", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -444,7 +447,7 @@ describe("IoSignService#createFilledDocument", () => {
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal",
-      detail: "Internal server error: unhandled API response status [123]"
+      detail: "Internal server error: unhandled API response status [123]",
     });
   });
 
@@ -463,7 +466,7 @@ describe("IoSignService#createFilledDocument", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 });
@@ -481,11 +484,11 @@ describe("IoSignService#getQtspClausesMetadata", () => {
     );
 
     expect(mockGetQtspClausesMetadata).toHaveBeenCalledWith({
-      "x-iosign-issuer-environment": "TEST"
+      "x-iosign-issuer-environment": "TEST",
     });
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessJson"
+      kind: "IResponseSuccessJson",
     });
   });
 
@@ -497,11 +500,11 @@ describe("IoSignService#getQtspClausesMetadata", () => {
     );
 
     expect(mockGetQtspClausesMetadata).toHaveBeenCalledWith({
-      "x-iosign-issuer-environment": "DEFAULT"
+      "x-iosign-issuer-environment": "DEFAULT",
     });
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessJson"
+      kind: "IResponseSuccessJson",
     });
   });
 
@@ -516,7 +519,7 @@ describe("IoSignService#getQtspClausesMetadata", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -530,7 +533,7 @@ describe("IoSignService#getQtspClausesMetadata", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -544,7 +547,7 @@ describe("IoSignService#getQtspClausesMetadata", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 });
@@ -560,7 +563,7 @@ describe("IoSignService#getSignatureRequests", () => {
     await service.getSignatureRequests(fakeSignatureRequest.signer_id);
 
     expect(mockGetSignatureRequests).toHaveBeenCalledWith({
-      "x-iosign-signer-id": fakeSignatureRequest.signer_id
+      "x-iosign-signer-id": fakeSignatureRequest.signer_id,
     });
   });
 
@@ -572,7 +575,7 @@ describe("IoSignService#getSignatureRequests", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessJson"
+      kind: "IResponseSuccessJson",
     });
   });
 
@@ -588,7 +591,7 @@ describe("IoSignService#getSignatureRequests", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorNotFound"
+      kind: "IResponseErrorNotFound",
     });
   });
 
@@ -606,7 +609,7 @@ describe("IoSignService#getSignatureRequests", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -622,7 +625,7 @@ describe("IoSignService#getSignatureRequests", () => {
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal",
-      detail: "Internal server error: unhandled API response status [123]"
+      detail: "Internal server error: unhandled API response status [123]",
     });
   });
 
@@ -637,7 +640,7 @@ describe("IoSignService#getSignatureRequests", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 });
@@ -657,11 +660,11 @@ describe("IoSignService#getSignatureRequest", () => {
 
     expect(mockGetSignatureRequest).toHaveBeenCalledWith({
       id: fakeSignatureRequest.id,
-      "x-iosign-signer-id": fakeSignatureRequest.signer_id
+      "x-iosign-signer-id": fakeSignatureRequest.signer_id,
     });
   });
 
-  it("should handle a success response", async () => {
+  it("should handle a success response with the correct header", async () => {
     const service = new IoSignService(api);
 
     const res = await service.getSignatureRequest(
@@ -670,8 +673,17 @@ describe("IoSignService#getSignatureRequest", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessJson"
+      kind: "IResponseSuccessJson",
     });
+
+    const mockResponse = mockRes();
+
+    res.apply(mockResponse);
+
+    expect(mockResponse.header).toHaveBeenCalledWith(
+      "x-io-sign-environment",
+      expect.any(String)
+    );
   });
 
   it("should handle a not found error when the client returns 404 when the signature request is not found", async () => {
@@ -687,7 +699,7 @@ describe("IoSignService#getSignatureRequest", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorNotFound"
+      kind: "IResponseErrorNotFound",
     });
   });
 
@@ -704,7 +716,7 @@ describe("IoSignService#getSignatureRequest", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorNotFound"
+      kind: "IResponseErrorNotFound",
     });
   });
 
@@ -723,7 +735,7 @@ describe("IoSignService#getSignatureRequest", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -740,7 +752,7 @@ describe("IoSignService#getSignatureRequest", () => {
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal",
-      detail: "Internal server error: unhandled API response status [123]"
+      detail: "Internal server error: unhandled API response status [123]",
     });
   });
 
@@ -756,7 +768,7 @@ describe("IoSignService#getSignatureRequest", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 });
@@ -770,7 +782,7 @@ describe("IoSignService#createSignature", () => {
     signature_request_id: fakeSignature.id,
     documents_to_sign: fakeDocumentsToSign,
     qtsp_clauses: fakeQtspAcceptedClauses,
-    email: fakeEmail
+    email: fakeEmail,
   };
 
   it("should make the correct api call", async () => {
@@ -787,10 +799,10 @@ describe("IoSignService#createSignature", () => {
         signature_request_id: fakeSignature.signature_request_id,
         email: fakeEmail,
         documents_to_sign: fakeDocumentsToSign,
-        qtsp_clauses: fakeQtspAcceptedClauses
+        qtsp_clauses: fakeQtspAcceptedClauses,
       },
       "x-iosign-signer-id": fakeSignerId,
-      ...lollipopRequestHeaders
+      ...lollipopRequestHeaders,
     });
   });
 
@@ -804,7 +816,7 @@ describe("IoSignService#createSignature", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessJson"
+      kind: "IResponseSuccessJson",
     });
   });
 
@@ -822,7 +834,7 @@ describe("IoSignService#createSignature", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorValidation"
+      kind: "IResponseErrorValidation",
     });
   });
 
@@ -840,7 +852,7 @@ describe("IoSignService#createSignature", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorNotFound"
+      kind: "IResponseErrorNotFound",
     });
   });
 
@@ -858,7 +870,7 @@ describe("IoSignService#createSignature", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorNotFound"
+      kind: "IResponseErrorNotFound",
     });
   });
 
@@ -878,7 +890,7 @@ describe("IoSignService#createSignature", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -896,7 +908,7 @@ describe("IoSignService#createSignature", () => {
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal",
-      detail: "Internal server error: unhandled API response status [123]"
+      detail: "Internal server error: unhandled API response status [123]",
     });
   });
 
@@ -913,7 +925,7 @@ describe("IoSignService#createSignature", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 });
