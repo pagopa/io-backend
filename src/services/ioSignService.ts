@@ -28,6 +28,7 @@ import {
   NonEmptyString,
 } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/Either";
+import { lookup } from "fp-ts/lib/ReadonlyRecord";
 import { CreateSignatureBody as CreateSignatureBodyApiModel } from "../../generated/io-sign-api/CreateSignatureBody";
 import { IssuerEnvironment } from "../../generated/io-sign/IssuerEnvironment";
 import { SignerDetailView } from "../../generated/io-sign-api/SignerDetailView";
@@ -48,7 +49,6 @@ import {
 import { readableProblem } from "../utils/errorsFormatter";
 import { IoSignLollipopLocalsType } from "../controllers/ioSignController";
 import { ResponseErrorNotFound403 } from "./eucovidcertService";
-import { lookup } from "fp-ts/lib/ReadonlyRecord";
 
 const internalServerError = "Internal server error";
 const invalidRequest = "Invalid request";
@@ -86,9 +86,10 @@ export default class IoSignService {
                     pipe(
                       response.headers,
                       lookup("x-io-sign-environment"),
-                      E.fromOption(() => "prod"),
-                      E.chainW(t.keyof({ test: true, prod: true }).decode),
-                      E.getOrElse(() => "prod")
+                      O.chainEitherK(
+                        t.keyof({ prod: true, test: true }).decode
+                      ),
+                      O.getOrElse(() => "prod")
                     )
                   )
                   .json(response.value),
