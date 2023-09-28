@@ -18,7 +18,7 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 
 import * as O from "fp-ts/lib/Option";
-import { pipe } from "fp-ts/lib/function";
+import { flow, pipe } from "fp-ts/lib/function";
 
 import * as t from "io-ts";
 
@@ -55,6 +55,12 @@ const invalidRequest = "Invalid request";
 const resourcesNotFound = "Resources not found";
 const userNotFound =
   "The user associated with this profile could not be found.";
+
+export const getEnvironmentFromHeaders = flow(
+  lookup("x-io-sign-environment"),
+  O.chainEitherK(t.keyof({ prod: true, test: true }).decode),
+  O.getOrElse(() => "prod")
+);
 
 export default class IoSignService {
   constructor(private readonly ioSignApiClient: ReturnType<IoSignAPIClient>) {}
@@ -264,14 +270,7 @@ export default class IoSignService {
                   .status(HttpStatusCodeEnum.HTTP_STATUS_200)
                   .header(
                     "x-io-sign-environment",
-                    pipe(
-                      response.headers,
-                      lookup("x-io-sign-environment"),
-                      O.chainEitherK(
-                        t.keyof({ prod: true, test: true }).decode
-                      ),
-                      O.getOrElse(() => "prod")
-                    )
+                    getEnvironmentFromHeaders(response.headers)
                   )
                   .json(response.value),
               kind: "IResponseSuccessJson",

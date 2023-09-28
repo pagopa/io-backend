@@ -11,7 +11,7 @@ import { TypeEnum as ClauseTypeEnum } from "../../../generated/io-sign-api/Claus
 import { SignatureRequestDetailView } from "../../../generated/io-sign-api/SignatureRequestDetailView";
 import { IoSignAPIClient } from "../../clients/io-sign";
 import { aFiscalCode, mockedUser } from "../../__mocks__/user_mock";
-import IoSignService from "../ioSignService";
+import IoSignService, { getEnvironmentFromHeaders } from "../ioSignService";
 import { NonNegativeNumber } from "@pagopa/ts-commons/lib/numbers";
 import {
   aLollipopOriginalUrl,
@@ -37,7 +37,7 @@ const mockGetSignatureRequest = jest.fn();
 const mockCreateSignature = jest.fn();
 const mockFakeSuccess = jest.fn();
 
-const fakeDocumentUrl = "http://fakedomain.com/mock.pdf" as NonEmptyString;
+const fakeDocumentUrl = "https://fakedomain.com/mock.pdf" as NonEmptyString;
 const fakeEmail = "mock@fakedomain.com" as EmailString;
 const fakeSignerId = "0000000000000" as NonEmptyString;
 const fakeIssuerEmail = "issuer@fakedomain.com" as EmailString;
@@ -153,9 +153,9 @@ mockGetInfo.mockImplementation(() =>
 mockCreateFilledDocument.mockImplementation(() =>
   t.success({
     status: 201,
-    headers: { Location: "http://mockdocument.com/doc.pdf" },
+    headers: { Location: "https://mockdocument.com/doc.pdf" },
     value: {
-      filled_document_url: "http://mockdocument.com/doc.pdf",
+      filled_document_url: "https://mockdocument.com/doc.pdf",
     },
   })
 );
@@ -685,6 +685,28 @@ describe("IoSignService#getSignatureRequest", () => {
       expect.any(String)
     );
   });
+
+  it("should use prod as default environment if x-io-sign-environment is not defined", () => {
+    const headers = {};
+    expect(getEnvironmentFromHeaders(headers)).toBe("prod");
+  });
+
+  it("should use prod as default environment if x-io-sign-environment is not valid", () => {
+    const headers = {
+      "x-io-sign-environment": "uat",
+    };
+    expect(getEnvironmentFromHeaders(headers)).toBe("prod");
+  });
+
+  it.each(["test", "prod"])(
+    "should use the valid value of x-io-sign-environment if it's defined",
+    (environment) => {
+      const headers = {
+        "x-io-sign-environment": environment,
+      };
+      expect(getEnvironmentFromHeaders(headers)).toBe(environment);
+    }
+  );
 
   it("should handle a not found error when the client returns 404 when the signature request is not found", async () => {
     mockGetSignatureRequest.mockImplementationOnce(() =>
