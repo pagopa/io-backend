@@ -122,7 +122,7 @@ paths:
       parameters:
         - $ref: "#/parameters/FiscalCode"
         - in: body
-          name: unlockCode
+          name: unlockcode
           required: true
           schema:
             $ref: '#/definitions/UnlockCode'
