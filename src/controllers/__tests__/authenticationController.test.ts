@@ -73,7 +73,7 @@ import {
   SPID_IDP_IDENTIFIERS,
   CIE_IDP_IDENTIFIERS,
 } from "@pagopa/io-spid-commons/dist/config";
-import UserProfileLockService from "../../services/UserProfileLockService";
+import UserProfileLockService from "../../services/userProfileLockService";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 
 const req = mockReq();

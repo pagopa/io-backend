@@ -11,9 +11,9 @@ export async function* noProfileLockedRecordIterator(): ReturnType<
 export async function* errorProfileLockedRecordIterator(): ReturnType<
   typeof profileLockedRecordIterator
 > {
-  throw new Error("an Error");
-  //Sonarcloud requires at least one `yield`
+  //Sonarcloud requires at least one `yield` before `throw` operation
   yield { partitionKey: "CF" as FiscalCode, rowKey: "" };
+  throw new Error("an Error");
 }
 export const listLockedProfileEntitiesMock = jest.fn(
   noProfileLockedRecordIterator

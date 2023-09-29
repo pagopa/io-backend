@@ -1,7 +1,7 @@
 import * as E from "fp-ts/Either";
 import { APIClient } from "../../clients/api";
 import { aFiscalCode } from "../../__mocks__/user_mock";
-import UserProfileLockService from "../UserProfileLockService";
+import UserProfileLockService from "../userProfileLockService";
 import {
   errorProfileLockedRecordIterator,
   listLockedProfileEntitiesMock,
