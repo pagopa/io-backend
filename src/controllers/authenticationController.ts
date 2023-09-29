@@ -72,7 +72,6 @@ import {
 import { ISessionStorage } from "../services/ISessionStorage";
 import ProfileService from "../services/profileService";
 import TokenService from "../services/tokenService";
-import { SpidLevelEnum } from "../../generated/backend/SpidLevel";
 
 import {
   BPDToken,
@@ -82,6 +81,7 @@ import {
   WalletToken,
   ZendeskToken,
 } from "../types/token";
+import { isSpidL3 } from "../types/spidLevel";
 import {
   exactUserIdentityDecode,
   toAppUser,
@@ -280,8 +280,7 @@ export default class AuthenticationController {
       this.sessionStorage.isBlockedUser(spidUser.fiscalNumber),
       // ask the profile service whether this user profile has been locked from IO-WEB by the user.
       // NOTE: login with SpidL3 are always allowed
-      spidUser.authnContextClassRef ===
-      SpidLevelEnum["https://www.spid.gov.it/SpidL3"]
+      isSpidL3(spidUser.authnContextClassRef)
         ? E.of(false)
         : this.userProfileLockService.isUserProfileLocked(
             spidUser.fiscalNumber
