@@ -10,6 +10,7 @@ import * as redisUtils from "../utils/redis";
 import * as redis from "redis";
 
 jest.mock("@azure/storage-queue");
+jest.mock("@azure/data-tables");
 
 jest.mock("../services/redisSessionStorage");
 jest.mock("../services/redisUserMetadataStorage");
