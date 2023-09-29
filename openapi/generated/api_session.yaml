@@ -115,6 +115,38 @@ paths:
           description: There was an error
           schema:
             $ref: '#/definitions/ProblemJson'
+  /auth/{fiscalcode}/lock:
+    post:
+      operationId: authLock
+      description: |-
+        Locks the user for the IO app.
+        This is intended to use with ioweb-profile lock functionality.
+      parameters:
+        - $ref: '#/parameters/FiscalCode'
+        - in: body
+          name: unlockCode
+          required: true
+          schema:
+            $ref: '#/definitions/UnlockCode'
+      responses:
+        '201':
+          description: Lock created.
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '401':
+          description: Token null or invalid.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '409':
+          description: The user lock has been already created.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '500':
+          description: There was an error
+          schema:
+            $ref: '#/definitions/ProblemJson'
 parameters:
   FiscalCode:
     name: fiscalcode
@@ -182,6 +214,10 @@ definitions:
           problem.
 
           It may or may not yield further information if dereferenced.
+  UnlockCode:
+    type: string
+    minLength: 9
+    maxLength: 9
   SuccessResponse:
     type: object
     properties:
