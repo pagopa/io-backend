@@ -127,7 +127,7 @@ paths:
           schema:
             $ref: '#/definitions/UnlockCode'
       responses:
-        "201":
+        "204":
           description: Lock created.
         "400":
           description: Bad request
