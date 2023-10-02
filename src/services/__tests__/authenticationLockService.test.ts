@@ -42,7 +42,7 @@ describe("AuthenticationLockService#isUserAuthenticationLocked", () => {
     expect(result).toEqual(E.right(false));
   });
 
-  it("should return true if one or more records are found it table storage", async () => {
+  it("should return true if one or more not Released records are found it table storage", async () => {
     listLockedProfileEntitiesMock.mockImplementationOnce(
       profileLockedRecordIterator
     );

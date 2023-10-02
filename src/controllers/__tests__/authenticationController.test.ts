@@ -1197,7 +1197,7 @@ describe("AuthenticationController|>LV|>acs", () => {
     );
   });
 
-  it("should return a new token when user is NOT eligible for LV, regardless of the profile's status", async () => {
+  it("should return a new token when user is NOT eligible for LV, regardless of the auth lock status", async () => {
     const res = mockRes();
 
     mockIsBlockedUser.mockReturnValueOnce(Promise.resolve(E.right(false)));
@@ -1234,7 +1234,7 @@ describe("AuthenticationController|>LV|>acs", () => {
     );
   });
 
-  it("should redirect to error page with `AUTHENTICATION_LOCKED_ERROR` code when user is eligible for LV, user profile is locked and login level < SpidL3", async () => {
+  it("should redirect to error page with `AUTHENTICATION_LOCKED_ERROR` code when user is eligible for LV, user auth is locked and login level < SpidL3", async () => {
     const res = mockRes();
 
     jest
