@@ -10,6 +10,8 @@ import * as passport from "passport";
 
 import { Express } from "express";
 import expressEnforcesSsl = require("express-enforces-ssl");
+
+import { TableClient } from "@azure/data-tables";
 import {
   NodeEnvironment,
   NodeEnvironmentEnum,
@@ -87,6 +89,8 @@ import {
   FF_FAST_LOGIN,
   FAST_LOGIN_LOLLIPOP_CONSUMER_CLIENT,
   ALLOWED_CIE_TEST_FISCAL_CODES,
+  LOCKED_PROFILES_STORAGE_CONNECTION_STRING,
+  LOCKED_PROFILES_TABLE_NAME,
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -185,6 +189,7 @@ import { AdditionalLoginProps, acsRequestMapper } from "./utils/fastLogin";
 import { fastLoginEndpoint } from "./controllers/fastLoginController";
 import { getFastLoginLollipopConsumerClient } from "./clients/fastLoginLollipopConsumerClient";
 import { FeatureFlagEnum } from "./utils/featureFlag";
+import AuthenticationLockService from "./services/authenticationLockService";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -396,7 +401,14 @@ export async function newApp({
         const TOKEN_SERVICE = new TokenService();
 
         // Create the profile service
+        const tableClient = TableClient.fromConnectionString(
+          LOCKED_PROFILES_STORAGE_CONNECTION_STRING,
+          LOCKED_PROFILES_TABLE_NAME
+        );
         const PROFILE_SERVICE = new ProfileService(API_CLIENT);
+        const AUTHENTICATION_LOCK_SERVICE = new AuthenticationLockService(
+          tableClient
+        );
 
         // Create the bonus service
         const BONUS_SERVICE = new BonusService(BONUS_API_CLIENT);
@@ -504,6 +516,7 @@ export async function newApp({
             getClientProfileRedirectionUrl,
             getClientErrorRedirectionUrl,
             PROFILE_SERVICE,
+            AUTHENTICATION_LOCK_SERVICE,
             notificationServiceFactory,
             USERS_LOGIN_LOG_SERVICE,
             onUserLogin(API_CLIENT),

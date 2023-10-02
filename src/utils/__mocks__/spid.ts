@@ -1,5 +1,6 @@
 import { FiscalCode } from "@pagopa/io-functions-app-sdk/FiscalCode";
 import { NonEmptyString } from "io-ts-types";
+import { SpidLevel, SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 
 export const aSAMLRequest = `<?xml version="1.0"?>
 <samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" ID="A-REQUEST-ID" Version="2.0" 
@@ -16,7 +17,8 @@ export const aSAMLRequest = `<?xml version="1.0"?>
 
 export const getASAMLResponse = (
   fiscalCode: FiscalCode,
-  inResponseTo: NonEmptyString
+  inResponseTo: NonEmptyString,
+  spidLevel: SpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"]
 ) => `<samlp:Response Destination="https://app-backend.dev.io.italia.it/assertionConsumerService" ID="_7080f453-78cb-4f57-9692-62dc8a5c23e8" InResponseTo="${inResponseTo}" IssueInstant="2020-02-26T07:32:05Z" Version="2.0" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol">
 <saml:Issuer Format="urn:oasis:names:tc:SAML:2.0:nameid-format:entity">
     http://localhost:8080
@@ -98,7 +100,7 @@ export const getASAMLResponse = (
     <saml:AuthnStatement AuthnInstant="2020-02-26T07:27:42Z" SessionIndex="_09d40021-a5f7-4c1c-8388-cd737546eec3">
         <saml:AuthnContext>
             <saml:AuthnContextClassRef>
-                https://www.spid.gov.it/SpidL2
+                ${spidLevel}
             </saml:AuthnContextClassRef>
         </saml:AuthnContext>
     </saml:AuthnStatement>
@@ -144,7 +146,8 @@ export const getASAMLResponse = (
 
 export const getASAMLResponse_saml2Namespace = (
   fiscalCode: FiscalCode,
-  inResponseTo: NonEmptyString
+  inResponseTo: NonEmptyString,
+  spidLevel: SpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"]
 ) => `<saml2p:Response
   Destination="https://app-backend.dev.io.italia.it/assertionConsumerService"
   ID="_7080f453-78cb-4f57-9692-62dc8a5c23e8"
@@ -265,7 +268,7 @@ export const getASAMLResponse_saml2Namespace = (
     >
       <saml2:AuthnContext>
         <saml2:AuthnContextClassRef>
-          https://www.spid.gov.it/SpidL2
+          ${spidLevel}
         </saml2:AuthnContextClassRef>
       </saml2:AuthnContext>
     </saml2:AuthnStatement>

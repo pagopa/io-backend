@@ -747,6 +747,14 @@ export const PUSH_NOTIFICATIONS_QUEUE_NAME = getRequiredENVVar(
   "PUSH_NOTIFICATIONS_QUEUE_NAME"
 );
 
+// Needed to verify if a profile has been locked
+export const LOCKED_PROFILES_STORAGE_CONNECTION_STRING = getRequiredENVVar(
+  "LOCKED_PROFILES_STORAGE_CONNECTION_STRING"
+);
+export const LOCKED_PROFILES_TABLE_NAME = getRequiredENVVar(
+  "LOCKED_PROFILES_TABLE_NAME"
+);
+
 // Push notifications
 export const NOTIFICATION_DEFAULT_SUBJECT =
   "Entra nell'app per leggere il contenuto";

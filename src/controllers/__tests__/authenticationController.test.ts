@@ -59,6 +59,7 @@ import { AssertionTypeEnum } from "../../../generated/lollipop-api/AssertionType
 import { JwkPubKey } from "../../../generated/lollipop-api/JwkPubKey";
 import {
   aLollipopAssertion,
+  aSpidL3LollipopAssertion,
   anAssertionRef,
   anotherAssertionRef,
   lollipopData,
@@ -72,6 +73,8 @@ import {
   SPID_IDP_IDENTIFIERS,
   CIE_IDP_IDENTIFIERS,
 } from "@pagopa/io-spid-commons/dist/config";
+import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
+import AuthenticationLockService from "../../services/authenticationLockService";
 
 const req = mockReq();
 req.ip = "127.0.0.2";
@@ -91,6 +94,19 @@ const validUserPayload = {
   getAcsOriginalRequest: () => req,
   getAssertionXml: () => aLollipopAssertion,
   getSamlResponseXml: () => aLollipopAssertion,
+};
+// validSpidL3User has all every field correctly set.
+const validSpidL3UserPayload = {
+  authnContextClassRef: SpidLevelEnum["https://www.spid.gov.it/SpidL3"],
+  email: aSpidEmailAddress,
+  familyName: aValidFamilyname,
+  fiscalNumber: aFiscalCode,
+  issuer: aValidEntityID,
+  dateOfBirth: aValidDateofBirth,
+  name: aValidName,
+  getAcsOriginalRequest: () => req,
+  getAssertionXml: () => aSpidL3LollipopAssertion,
+  getSamlResponseXml: () => aSpidL3LollipopAssertion,
 };
 // invalidUser lacks the required familyName and optional email fields.
 const invalidUserPayload = {
@@ -263,6 +279,12 @@ const getClientProfileRedirectionUrl = (token: string): UrlFromString => {
 
 const api = new ApiClientFactory("", "");
 const profileService = new ProfileService(api);
+
+const isUserAuthenticationLockedMock = jest.fn(() => TE.of(false));
+const AuthenticationLockServiceMock = {
+  isUserAuthenticationLocked: isUserAuthenticationLockedMock,
+} as any as AuthenticationLockService;
+
 const lollipopService = new LollipopService(
   {} as ReturnType<LollipopApiClient>,
   "",
@@ -279,6 +301,7 @@ const controller = new AuthenticationController(
   getClientProfileRedirectionUrl,
   getClientErrorRedirectionUrl,
   profileService,
+  AuthenticationLockServiceMock,
   notificationServiceFactory,
   usersLoginLogService,
   mockOnUserLogin,
@@ -301,6 +324,7 @@ const lollipopActivatedController = new AuthenticationController(
   getClientProfileRedirectionUrl,
   getClientErrorRedirectionUrl,
   profileService,
+  AuthenticationLockServiceMock,
   notificationServiceFactory,
   usersLoginLogService,
   mockOnUserLogin,
@@ -1136,6 +1160,100 @@ describe("AuthenticationController|>LV|>acs", () => {
       );
     }
   );
+
+  it("should return a new token when user is eligible for LV and login level === SpidL3", async () => {
+    const res = mockRes();
+
+    jest
+      .spyOn(authCtrl, "isUserElegibleForFastLogin")
+      .mockImplementationOnce((_) => true);
+
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
+
+    mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anotherAssertionRef)));
+    mockDelLollipop.mockResolvedValueOnce(E.right(true));
+    mockActivateLolliPoPKey.mockImplementationOnce((newAssertionRef, __, ___) =>
+      TE.of({
+        ...anActivatedPubKey,
+        assertion_ref: newAssertionRef,
+      } as ActivatedPubKey)
+    );
+
+    mockSet.mockReturnValue(Promise.resolve(E.right(true)));
+
+    setupGetNewTokensMocks();
+
+    mockGetProfile.mockReturnValue(
+      ResponseSuccessJson(mockedInitializedProfile)
+    );
+    const response = await controller.acs(validSpidL3UserPayload);
+    response.apply(res);
+
+    expect(isUserAuthenticationLockedMock).not.toHaveBeenCalled();
+
+    expect(res.redirect).toHaveBeenCalledWith(
+      301,
+      expect.stringContaining("/profile.html?token=" + mockSessionToken)
+    );
+  });
+
+  it("should return a new token when user is NOT eligible for LV, regardless of the auth lock status", async () => {
+    const res = mockRes();
+
+    mockIsBlockedUser.mockReturnValueOnce(Promise.resolve(E.right(false)));
+    isUserAuthenticationLockedMock.mockReturnValueOnce(TE.of(true));
+
+    jest
+      .spyOn(authCtrl, "isUserElegibleForFastLogin")
+      .mockImplementationOnce((_) => false);
+
+    mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anotherAssertionRef)));
+    mockDelLollipop.mockResolvedValueOnce(E.right(true));
+    mockActivateLolliPoPKey.mockImplementationOnce((newAssertionRef, __, ___) =>
+      TE.of({
+        ...anActivatedPubKey,
+        assertion_ref: newAssertionRef,
+      } as ActivatedPubKey)
+    );
+
+    mockSet.mockReturnValue(Promise.resolve(E.right(true)));
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
+
+    setupGetNewTokensMocks();
+
+    mockGetProfile.mockReturnValue(
+      ResponseSuccessJson(mockedInitializedProfile)
+    );
+
+    const response = await controller.acs(validUserPayload);
+    response.apply(res);
+
+    expect(res.redirect).toHaveBeenCalledWith(
+      301,
+      expect.stringContaining("/profile.html?token=" + mockSessionToken)
+    );
+  });
+
+  it("should redirect to error page with `AUTHENTICATION_LOCKED_ERROR` code when user is eligible for LV, user auth is locked and login level < SpidL3", async () => {
+    const res = mockRes();
+
+    jest
+      .spyOn(authCtrl, "isUserElegibleForFastLogin")
+      .mockImplementationOnce((_) => true);
+
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
+    isUserAuthenticationLockedMock.mockReturnValueOnce(TE.of(true));
+
+    const response = await controller.acs(validUserPayload);
+    response.apply(res);
+
+    expect(res.redirect).toHaveBeenCalledWith(
+      301,
+      expect.stringContaining(
+        `/error.html?errorCode=${authCtrl.AUTHENTICATION_LOCKED_ERROR}`
+      )
+    );
+  });
 });
 
 describe("AuthenticationController|>LV|>acs|>notify user login", () => {
