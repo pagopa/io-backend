@@ -189,7 +189,7 @@ import { AdditionalLoginProps, acsRequestMapper } from "./utils/fastLogin";
 import { fastLoginEndpoint } from "./controllers/fastLoginController";
 import { getFastLoginLollipopConsumerClient } from "./clients/fastLoginLollipopConsumerClient";
 import { FeatureFlagEnum } from "./utils/featureFlag";
-import UserProfileLockService from "./services/userProfileLockService";
+import AuthenticationLockService from "./services/authenticationLockService";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -406,7 +406,7 @@ export async function newApp({
           LOCKED_PROFILES_TABLE_NAME
         );
         const PROFILE_SERVICE = new ProfileService(API_CLIENT);
-        const USER_PROFILE_LOCK_SERVICE = new UserProfileLockService(
+        const AUTHENTICATION_LOCK_SERVICE = new AuthenticationLockService(
           tableClient
         );
 
@@ -516,7 +516,7 @@ export async function newApp({
             getClientProfileRedirectionUrl,
             getClientErrorRedirectionUrl,
             PROFILE_SERVICE,
-            USER_PROFILE_LOCK_SERVICE,
+            AUTHENTICATION_LOCK_SERVICE,
             notificationServiceFactory,
             USERS_LOGIN_LOG_SERVICE,
             onUserLogin(API_CLIENT),

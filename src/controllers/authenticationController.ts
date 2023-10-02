@@ -45,7 +45,7 @@ import { addSeconds } from "date-fns";
 import { Second } from "@pagopa/ts-commons/lib/units";
 import { UserLoginParams } from "@pagopa/io-functions-app-sdk/UserLoginParams";
 import { IDP_NAMES, Issuer } from "@pagopa/io-spid-commons/dist/config";
-import UserProfileLockService from "src/services/userProfileLockService";
+import AuthenticationLockService from "src/services/authenticationLockService";
 import { NotificationServiceFactory } from "../services/notificationServiceFactory";
 import UsersLoginLogService from "../services/usersLoginLogService";
 import { LollipopParams } from "../types/lollipop";
@@ -108,7 +108,7 @@ export const SESSION_ID_LENGTH_BYTES = 32;
 export const AGE_LIMIT_ERROR_MESSAGE = "The age of the user is less than 14";
 // Custom error codes handled by the client to show a specific error page
 export const AGE_LIMIT_ERROR_CODE = 1001;
-export const USER_PROFILE_LOCKED_ERROR = 1002;
+export const AUTHENTICATION_LOCKED_ERROR = 1002;
 // Minimum user age allowed to login if the Age limit is enabled
 export const AGE_LIMIT = 14;
 
@@ -138,7 +138,7 @@ export default class AuthenticationController {
       params: ClientErrorRedirectionUrlParams
     ) => UrlFromString,
     private readonly profileService: ProfileService,
-    private readonly userProfileLockService: UserProfileLockService,
+    private readonly userProfileLockService: AuthenticationLockService,
     private readonly notificationServiceFactory: NotificationServiceFactory,
     private readonly usersLoginLogService: UsersLoginLogService,
     private readonly onUserLogin: OnUserLogin,
@@ -282,7 +282,7 @@ export default class AuthenticationController {
       // NOTE: login with SpidL3 are always allowed
       isSpidL3(spidUser.authnContextClassRef)
         ? E.of(false)
-        : this.userProfileLockService.isUserProfileLocked(
+        : this.userProfileLockService.isUserAuthenticationLocked(
             spidUser.fiscalNumber
           )(),
       // authentication token for app backend
@@ -324,7 +324,7 @@ export default class AuthenticationController {
       const isUserProfileLocked = errorOrIsUserProfileLocked.right;
       if (isUserProfileLocked) {
         const redirectionUrl = this.getClientErrorRedirectionUrl({
-          errorCode: USER_PROFILE_LOCKED_ERROR,
+          errorCode: AUTHENTICATION_LOCKED_ERROR,
         });
         log.error(
           `acs: ${sha256(spidUser.fiscalNumber)} - The user profile is locked.`

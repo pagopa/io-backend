@@ -1,7 +1,7 @@
 import * as E from "fp-ts/Either";
 import { APIClient } from "../../clients/api";
 import { aFiscalCode } from "../../__mocks__/user_mock";
-import UserProfileLockService from "../userProfileLockService";
+import AuthenticationLockService from "../authenticationLockService";
 import {
   errorProfileLockedRecordIterator,
   listLockedProfileEntitiesMock,
@@ -33,11 +33,11 @@ jest.mock("../../services/apiClientFactory", () => {
 // Tests
 // -------------------------------------------
 
-describe("UserProfileLockService#isUserProfileLocked", () => {
+describe("AuthenticationLockService#isUserAuthenticationLocked", () => {
   it("should return false if query returns no records from table storage", async () => {
-    const service = new UserProfileLockService(lockedProfileTableClient);
+    const service = new AuthenticationLockService(lockedProfileTableClient);
 
-    const result = await service.isUserProfileLocked(aFiscalCode)();
+    const result = await service.isUserAuthenticationLocked(aFiscalCode)();
 
     expect(result).toEqual(E.right(false));
   });
@@ -47,9 +47,9 @@ describe("UserProfileLockService#isUserProfileLocked", () => {
       profileLockedRecordIterator
     );
 
-    const service = new UserProfileLockService(lockedProfileTableClient);
+    const service = new AuthenticationLockService(lockedProfileTableClient);
 
-    const result = await service.isUserProfileLocked(aFiscalCode)();
+    const result = await service.isUserAuthenticationLocked(aFiscalCode)();
 
     expect(result).toEqual(E.right(true));
   });
@@ -59,9 +59,9 @@ describe("UserProfileLockService#isUserProfileLocked", () => {
       errorProfileLockedRecordIterator
     );
 
-    const service = new UserProfileLockService(lockedProfileTableClient);
+    const service = new AuthenticationLockService(lockedProfileTableClient);
 
-    const result = await service.isUserProfileLocked(aFiscalCode)();
+    const result = await service.isUserAuthenticationLocked(aFiscalCode)();
 
     expect(result).toEqual(E.left(Error("an Error")));
   });

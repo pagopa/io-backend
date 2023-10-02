@@ -13,10 +13,10 @@ import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
 import * as AI from "../utils/AsyncIterableTask";
 
-export default class UserProfileLockService {
+export default class AuthenticationLockService {
   constructor(private readonly tableClient: TableClient) {}
 
-  public readonly isUserProfileLocked = (fiscalCode: FiscalCode) => {
+  public readonly isUserAuthenticationLocked = (fiscalCode: FiscalCode) => {
     const queryFilter = odata`PartitionKey eq ${fiscalCode} and not Released`;
 
     return pipe(
