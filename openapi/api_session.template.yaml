@@ -122,12 +122,12 @@ paths:
       parameters:
         - $ref: "#/parameters/FiscalCode"
         - in: body
-          name: unlockCode
+          name: unlockcode
           required: true
           schema:
             $ref: '#/definitions/UnlockCode'
       responses:
-        "201":
+        "204":
           description: Lock created.
         "400":
           description: Bad request
@@ -137,8 +137,6 @@ paths:
           description: Token null or invalid.
           schema:
             $ref: "#/definitions/ProblemJson"
-        '403':
-          description: Operation forbidden.
         "409":
           description: The user lock has been already created.
           schema:

@@ -122,12 +122,12 @@ paths:
       parameters:
         - $ref: "#/parameters/FiscalCode"
         - in: body
-          name: unlockCode
+          name: unlockcode
           required: true
           schema:
             $ref: '#/definitions/UnlockCode'
       responses:
-        "201":
+        "204":
           description: Lock created.
         "400":
           description: Bad request

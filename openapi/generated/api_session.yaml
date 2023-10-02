@@ -123,20 +123,19 @@ paths:
         This is intended to use with ioweb-profile lock functionality.
       parameters:
         - $ref: '#/parameters/FiscalCode'
+        - $ref: '#/parameters/Token'
         - in: body
-          name: unlockCode
+          name: unlockcode
           required: true
           schema:
             $ref: '#/definitions/UnlockCode'
       responses:
-        '201':
+        '204':
           description: Lock created.
         '400':
           description: Bad request
           schema:
             $ref: '#/definitions/ProblemJson'
-        '403':
-          description: Operation forbidden.
         '401':
           description: Token null or invalid.
           schema:
