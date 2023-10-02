@@ -610,7 +610,8 @@ export async function newApp({
           authMiddlewares.urlToken,
           SESSION_STORAGE,
           USER_METADATA_STORAGE,
-          LOLLIPOP_SERVICE
+          LOLLIPOP_SERVICE,
+          AUTHENTICATION_LOCK_SERVICE
         );
         if (FF_BONUS_ENABLED) {
           // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -1247,14 +1248,16 @@ function registerSessionAPIRoutes(
   urlTokenAuth: any,
   sessionStorage: RedisSessionStorage,
   userMetadataStorage: RedisUserMetadataStorage,
-  lollipopService: LollipopService
+  lollipopService: LollipopService,
+  authenticationLockService: AuthenticationLockService
 ): void {
   if (FF_ENABLE_SESSION_ENDPOINTS) {
     const sessionLockController: SessionLockController =
       new SessionLockController(
         sessionStorage,
         userMetadataStorage,
-        lollipopService
+        lollipopService,
+        authenticationLockService
       );
 
     app.get(

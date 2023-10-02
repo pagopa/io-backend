@@ -24,13 +24,15 @@ import LollipopService from "../services/lollipopService";
 import { withFiscalCodeFromRequestParams } from "../types/fiscalCode";
 import RedisSessionStorage from "../services/redisSessionStorage";
 import RedisUserMetadataStorage from "../services/redisUserMetadataStorage";
+import AuthenticationLockService from "../services/authenticationLockService";
 import { UserSessionInfo } from "../../generated/session/UserSessionInfo";
 
 export default class SessionLockController {
   constructor(
     private readonly sessionStorage: RedisSessionStorage,
     private readonly metadataStorage: RedisUserMetadataStorage,
-    private readonly lollipopService: LollipopService
+    private readonly lollipopService: LollipopService,
+    private readonly authenticationLockService: AuthenticationLockService
   ) {}
 
   /**

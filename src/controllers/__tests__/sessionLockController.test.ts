@@ -17,6 +17,8 @@ import LollipopService from "../../services/lollipopService";
 import { LollipopApiClient } from "../../clients/lollipop";
 import { anAssertionRef } from "../../__mocks__/lollipop";
 
+import { AuthenticationLockServiceMock } from "../../__mocks__/controllers.mock";
+
 const aFiscalCode = pipe(
   "AAABBB80A01C123D",
   FiscalCode.decode,
@@ -100,7 +102,8 @@ describe("SessionLockController#getUserSession", () => {
     const controller = new SessionLockController(
       mockRedisSessionStorage,
       mockRedisUserMetadataStorage,
-      mockLollipopService
+      mockLollipopService,
+      AuthenticationLockServiceMock
     );
 
     const response = await controller.getUserSession(req);
@@ -120,7 +123,8 @@ describe("SessionLockController#getUserSession", () => {
     const controller = new SessionLockController(
       mockRedisSessionStorage,
       mockRedisUserMetadataStorage,
-      mockLollipopService
+      mockLollipopService,
+      AuthenticationLockServiceMock
     );
 
     const response = await controller.getUserSession(req);
@@ -136,7 +140,8 @@ describe("SessionLockController#getUserSession", () => {
     const controller = new SessionLockController(
       mockRedisSessionStorage,
       mockRedisUserMetadataStorage,
-      mockLollipopService
+      mockLollipopService,
+      AuthenticationLockServiceMock
     );
 
     const response = await controller.getUserSession(req);
@@ -161,7 +166,8 @@ describe("SessionLockController#lockUserSession", () => {
     const controller = new SessionLockController(
       mockRedisSessionStorage,
       mockRedisUserMetadataStorage,
-      mockLollipopService
+      mockLollipopService,
+      AuthenticationLockServiceMock
     );
 
     const response = await controller.lockUserSession(req);
@@ -177,7 +183,8 @@ describe("SessionLockController#lockUserSession", () => {
     const controller = new SessionLockController(
       mockRedisSessionStorage,
       mockRedisUserMetadataStorage,
-      mockLollipopService
+      mockLollipopService,
+      AuthenticationLockServiceMock
     );
 
     const response = await controller.lockUserSession(req);
@@ -193,7 +200,8 @@ describe("SessionLockController#lockUserSession", () => {
     const controller = new SessionLockController(
       mockRedisSessionStorage,
       mockRedisUserMetadataStorage,
-      mockLollipopService
+      mockLollipopService,
+      AuthenticationLockServiceMock
     );
 
     const response = await controller.lockUserSession(req);
@@ -214,7 +222,8 @@ describe("SessionLockController#lockUserSession", () => {
     const controller = new SessionLockController(
       mockRedisSessionStorage,
       mockRedisUserMetadataStorage,
-      mockLollipopService
+      mockLollipopService,
+      AuthenticationLockServiceMock
     );
 
     const response = await controller.lockUserSession(req);
@@ -232,7 +241,8 @@ describe("SessionLockController#lockUserSession", () => {
     const controller = new SessionLockController(
       mockRedisSessionStorage,
       mockRedisUserMetadataStorage,
-      mockLollipopService
+      mockLollipopService,
+      AuthenticationLockServiceMock
     );
 
     const response = await controller.lockUserSession(req);
@@ -255,7 +265,8 @@ describe("SessionLockController#lockUserSession", () => {
     const controller = new SessionLockController(
       mockRedisSessionStorage,
       mockRedisUserMetadataStorage,
-      mockLollipopService
+      mockLollipopService,
+      AuthenticationLockServiceMock
     );
 
     const response = await controller.lockUserSession(req);
@@ -276,7 +287,8 @@ describe("SessionLockController#lockUserSession", () => {
     const controller = new SessionLockController(
       mockRedisSessionStorage,
       mockRedisUserMetadataStorage,
-      mockLollipopService
+      mockLollipopService,
+      AuthenticationLockServiceMock
     );
 
     const response = await controller.lockUserSession(req);
@@ -297,7 +309,8 @@ describe("SessionLockController#lockUserSession", () => {
     const controller = new SessionLockController(
       mockRedisSessionStorage,
       mockRedisUserMetadataStorage,
-      mockLollipopService
+      mockLollipopService,
+      AuthenticationLockServiceMock
     );
 
     const response = await controller.lockUserSession(req);
@@ -318,7 +331,8 @@ describe("SessionLockController#lockUserSession", () => {
     const controller = new SessionLockController(
       mockRedisSessionStorage,
       mockRedisUserMetadataStorage,
-      mockLollipopService
+      mockLollipopService,
+      AuthenticationLockServiceMock
     );
 
     const response = await controller.lockUserSession(req);
@@ -336,7 +350,8 @@ describe("SessionLockController#lockUserSession", () => {
     const controller = new SessionLockController(
       mockRedisSessionStorage,
       mockRedisUserMetadataStorage,
-      mockLollipopService
+      mockLollipopService,
+      AuthenticationLockServiceMock
     );
 
     const response = await controller.lockUserSession(req);
@@ -354,7 +369,8 @@ describe("SessionLockController#unlockUserSession", () => {
     const controller = new SessionLockController(
       mockRedisSessionStorage,
       mockRedisUserMetadataStorage,
-      mockLollipopService
+      mockLollipopService,
+      AuthenticationLockServiceMock
     );
 
     const response = await controller.unlockUserSession(req);
@@ -370,7 +386,8 @@ describe("SessionLockController#unlockUserSession", () => {
     const controller = new SessionLockController(
       mockRedisSessionStorage,
       mockRedisUserMetadataStorage,
-      mockLollipopService
+      mockLollipopService,
+      AuthenticationLockServiceMock
     );
 
     const response = await controller.unlockUserSession(req);
@@ -386,7 +403,8 @@ describe("SessionLockController#unlockUserSession", () => {
     const controller = new SessionLockController(
       mockRedisSessionStorage,
       mockRedisUserMetadataStorage,
-      mockLollipopService
+      mockLollipopService,
+      AuthenticationLockServiceMock
     );
 
     const response = await controller.lockUserSession(req);
@@ -409,7 +427,8 @@ describe("SessionLockController#unlockUserSession", () => {
     const controller = new SessionLockController(
       mockRedisSessionStorage,
       mockRedisUserMetadataStorage,
-      mockLollipopService
+      mockLollipopService,
+      AuthenticationLockServiceMock
     );
 
     const response = await controller.unlockUserSession(req);
@@ -431,7 +450,8 @@ describe("SessionLockController#deleteUserSession", () => {
     const controller = new SessionLockController(
       mockRedisSessionStorage,
       mockRedisUserMetadataStorage,
-      mockLollipopService
+      mockLollipopService,
+      AuthenticationLockServiceMock
     );
 
     const response = await controller.deleteUserSession(req);
@@ -447,7 +467,8 @@ describe("SessionLockController#deleteUserSession", () => {
     const controller = new SessionLockController(
       mockRedisSessionStorage,
       mockRedisUserMetadataStorage,
-      mockLollipopService
+      mockLollipopService,
+      AuthenticationLockServiceMock
     );
 
     const response = await controller.deleteUserSession(req);
@@ -463,7 +484,8 @@ describe("SessionLockController#deleteUserSession", () => {
     const controller = new SessionLockController(
       mockRedisSessionStorage,
       mockRedisUserMetadataStorage,
-      mockLollipopService
+      mockLollipopService,
+      AuthenticationLockServiceMock
     );
 
     const response = await controller.deleteUserSession(req);
@@ -488,7 +510,8 @@ describe("SessionLockController#deleteUserSession", () => {
     const controller = new SessionLockController(
       mockRedisSessionStorage,
       mockRedisUserMetadataStorage,
-      mockLollipopService
+      mockLollipopService,
+      AuthenticationLockServiceMock
     );
 
     const response = await controller.deleteUserSession(req);
@@ -511,7 +534,8 @@ describe("SessionLockController#deleteUserSession", () => {
     const controller = new SessionLockController(
       mockRedisSessionStorage,
       mockRedisUserMetadataStorage,
-      mockLollipopService
+      mockLollipopService,
+      AuthenticationLockServiceMock
     );
 
     const response = await controller.deleteUserSession(req);
@@ -532,7 +556,8 @@ describe("SessionLockController#deleteUserSession", () => {
     const controller = new SessionLockController(
       mockRedisSessionStorage,
       mockRedisUserMetadataStorage,
-      mockLollipopService
+      mockLollipopService,
+      AuthenticationLockServiceMock
     );
 
     const response = await controller.deleteUserSession(req);
@@ -553,7 +578,8 @@ describe("SessionLockController#deleteUserSession", () => {
     const controller = new SessionLockController(
       mockRedisSessionStorage,
       mockRedisUserMetadataStorage,
-      mockLollipopService
+      mockLollipopService,
+      AuthenticationLockServiceMock
     );
 
     const response = await controller.deleteUserSession(req);
@@ -574,7 +600,8 @@ describe("SessionLockController#deleteUserSession", () => {
     const controller = new SessionLockController(
       mockRedisSessionStorage,
       mockRedisUserMetadataStorage,
-      mockLollipopService
+      mockLollipopService,
+      AuthenticationLockServiceMock
     );
 
     const response = await controller.lockUserSession(req);
