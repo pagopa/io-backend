@@ -9,7 +9,7 @@ import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/lib/Either";
 
-import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 import * as AI from "../utils/AsyncIterableTask";
 
@@ -28,4 +28,26 @@ export default class AuthenticationLockService {
       TE.map((entities) => entities.length > 0)
     );
   };
+
+  /**
+   * Lock the user authentication
+   * @param fiscalCode the CF of the user
+   * @param unlockCode the code to verify while performing unlock
+   * @returns
+   */
+  public readonly lockUserAuthentication = (
+    fiscalCode: FiscalCode,
+    unlockCode: NonEmptyString
+  ): TE.TaskEither<Error, true> =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          this.tableClient.createEntity({
+            partitionKey: fiscalCode,
+            rowKey: unlockCode,
+          }),
+        (_) => new Error("Something went wrong creating the record")
+      ),
+      TE.map((_) => true as const)
+    );
 }

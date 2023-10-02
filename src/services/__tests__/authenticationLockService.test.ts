@@ -1,33 +1,15 @@
 import * as E from "fp-ts/Either";
-import { APIClient } from "../../clients/api";
 import { aFiscalCode } from "../../__mocks__/user_mock";
 import AuthenticationLockService from "../authenticationLockService";
 import {
+  createEntityMock,
   errorProfileLockedRecordIterator,
   listLockedProfileEntitiesMock,
   lockedProfileTableClient,
   profileLockedRecordIterator,
 } from "../../__mocks__/lockedProfileTableClient";
-
-const mockGetProfile = jest.fn();
-const mockUpdateProfile = jest.fn();
-const mockCreateProfile = jest.fn();
-const mockStartEmailValidationProcess = jest.fn();
-
-// partial because we may not mock every method
-const mockClient: Partial<ReturnType<APIClient>> = {
-  createProfile: mockCreateProfile,
-  startEmailValidationProcess: mockStartEmailValidationProcess,
-  getProfile: mockGetProfile,
-  updateProfile: mockUpdateProfile,
-};
-jest.mock("../../services/apiClientFactory", () => {
-  return {
-    default: jest.fn().mockImplementation(() => ({
-      getClient: () => mockClient,
-    })),
-  };
-});
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { RestError } from "@azure/data-tables";
 
 // -------------------------------------------
 // Tests
@@ -64,5 +46,47 @@ describe("AuthenticationLockService#isUserAuthenticationLocked", () => {
     const result = await service.isUserAuthenticationLocked(aFiscalCode)();
 
     expect(result).toEqual(E.left(Error("an Error")));
+  });
+});
+
+describe("AuthenticationLockService#lockUserAuthentication", () => {
+  const service = new AuthenticationLockService(lockedProfileTableClient);
+  const anUnlockCode = "anUnlockCode" as NonEmptyString;
+
+  it("should return true if CF-unlockcode has been stored sucessfully in table storage", async () => {
+    const result = await service.lockUserAuthentication(
+      aFiscalCode,
+      anUnlockCode
+    )();
+
+    expect(result).toEqual(E.right(true));
+  });
+
+  it("should return an Error when CF-unlockcode has already been stored in table storage", async () => {
+    createEntityMock.mockRejectedValueOnce(
+      new RestError("Conflict", { statusCode: 409 })
+    );
+    const result = await service.lockUserAuthentication(
+      aFiscalCode,
+      anUnlockCode
+    )();
+
+    expect(result).toEqual(
+      E.left(new Error("Something went wrong creating the record"))
+    );
+  });
+
+  it("should return an Error when an error occurred while storing value in table storage", async () => {
+    createEntityMock.mockRejectedValueOnce(
+      new RestError("Another Error", { statusCode: 418 })
+    );
+    const result = await service.lockUserAuthentication(
+      aFiscalCode,
+      anUnlockCode
+    )();
+
+   expect(result).toEqual(
+     E.left(new Error("Something went wrong creating the record"))
+   );
   });
 });
