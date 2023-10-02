@@ -71,4 +71,4 @@ components:
     FastLoginResponse:
       $ref: "./generated/api_public.yaml#/definitions/AccessToken"
     ProblemJson:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v28.2.0/openapi/definitions.yaml#/ProblemJson"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v28.4.0/openapi/definitions.yaml#/ProblemJson"
