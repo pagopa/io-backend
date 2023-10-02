@@ -137,6 +137,8 @@ paths:
           description: Token null or invalid.
           schema:
             $ref: "#/definitions/ProblemJson"
+        '403':
+          description: Operation forbidden.
         "409":
           description: The user lock has been already created.
           schema:

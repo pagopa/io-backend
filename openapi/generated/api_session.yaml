@@ -135,6 +135,8 @@ paths:
           description: Bad request
           schema:
             $ref: '#/definitions/ProblemJson'
+        '403':
+          description: Operation forbidden.
         '401':
           description: Token null or invalid.
           schema:
