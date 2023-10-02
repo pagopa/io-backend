@@ -74,7 +74,11 @@ import {
   CIE_IDP_IDENTIFIERS,
 } from "@pagopa/io-spid-commons/dist/config";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
-import AuthenticationLockService from "../../services/authenticationLockService";
+
+import {
+  AuthenticationLockServiceMock,
+  isUserAuthenticationLockedMock,
+} from "../../__mocks__/controllers.mock";
 
 const req = mockReq();
 req.ip = "127.0.0.2";
@@ -279,11 +283,6 @@ const getClientProfileRedirectionUrl = (token: string): UrlFromString => {
 
 const api = new ApiClientFactory("", "");
 const profileService = new ProfileService(api);
-
-const isUserAuthenticationLockedMock = jest.fn(() => TE.of(false));
-const AuthenticationLockServiceMock = {
-  isUserAuthenticationLocked: isUserAuthenticationLockedMock,
-} as any as AuthenticationLockService;
 
 const lollipopService = new LollipopService(
   {} as ReturnType<LollipopApiClient>,
