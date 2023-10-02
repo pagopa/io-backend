@@ -17,7 +17,11 @@ import LollipopService from "../../services/lollipopService";
 import { LollipopApiClient } from "../../clients/lollipop";
 import { anAssertionRef } from "../../__mocks__/lollipop";
 
-import { AuthenticationLockServiceMock } from "../../__mocks__/controllers.mock";
+import {
+  AuthenticationLockServiceMock,
+  isUserAuthenticationLockedMock,
+  lockUserAuthenticationMock,
+} from "../../__mocks__/services.mock";
 
 const aFiscalCode = pipe(
   "AAABBB80A01C123D",
@@ -608,5 +612,130 @@ describe("SessionLockController#deleteUserSession", () => {
     response.apply(res);
 
     expect(res.status).toHaveBeenCalledWith(500);
+  });
+});
+
+describe("SessionLockController#lockUserAuthentication", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const anUnlockCode = "anUnlockCode";
+
+  const controller = new SessionLockController(
+    mockRedisSessionStorage,
+    mockRedisUserMetadataStorage,
+    mockLollipopService,
+    AuthenticationLockServiceMock
+  );
+  it("should succeed storing CF-unlockcode when request is valid and the association has not been previously stored", async () => {
+    const req = mockReq({
+      params: { fiscal_code: aFiscalCode },
+      body: { unlockcode: anUnlockCode },
+    });
+    const res = mockRes();
+
+    const response = await controller.lockUserAuthentication(req);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(204);
+
+    expect(isUserAuthenticationLockedMock).toHaveBeenCalledWith(aFiscalCode);
+    expect(lockUserAuthenticationMock).toHaveBeenCalledWith(
+      aFiscalCode,
+      anUnlockCode
+    );
+
+    // Check user session clean up
+    expect(mockGetLollipop).toHaveBeenCalled();
+    expect(mockRevokePreviousAssertionRef).toHaveBeenCalled();
+    expect(mockDelLollipop).toHaveBeenCalled();
+    expect(mockDelUserAllSessions).toHaveBeenCalled();
+  });
+
+  it("should return 409 when request is valid and the user authentication is already locked", async () => {
+    isUserAuthenticationLockedMock.mockReturnValueOnce(TE.of(true));
+
+    const req = mockReq({
+      params: { fiscal_code: aFiscalCode },
+      body: { unlockcode: "anUnlockCode" },
+    });
+    const res = mockRes();
+
+    const response = await controller.lockUserAuthentication(req);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(409);
+    expect(lockUserAuthenticationMock).not.toHaveBeenCalled();
+  });
+
+  it("should return 500 when request is valid and an error occurred storing cf-unlockcode", async () => {
+    lockUserAuthenticationMock.mockReturnValueOnce(
+      TE.left(new Error("an error"))
+    );
+    const req = mockReq({
+      params: { fiscal_code: aFiscalCode },
+      body: { unlockcode: "anUnlockCode" },
+    });
+    const res = mockRes();
+
+    const response = await controller.lockUserAuthentication(req);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+  });
+
+  it("should return 500 when request is valid and an something went wrong checking user authentication lock", async () => {
+    isUserAuthenticationLockedMock.mockReturnValueOnce(
+      TE.left(new Error("an error"))
+    );
+    const req = mockReq({
+      params: { fiscal_code: aFiscalCode },
+      body: { unlockcode: "anUnlockCode" },
+    });
+    const res = mockRes();
+
+    const response = await controller.lockUserAuthentication(req);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(lockUserAuthenticationMock).not.toHaveBeenCalled();
+  });
+
+  it("should return 500 when request is valid and an something went wrong deleting user session", async () => {
+    mockDelLollipop.mockImplementationOnce(async () => {
+      throw "error";
+    });
+
+    const req = mockReq({
+      params: { fiscal_code: aFiscalCode },
+      body: { unlockcode: "anUnlockCode" },
+    });
+    const res = mockRes();
+
+    const response = await controller.lockUserAuthentication(req);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(lockUserAuthenticationMock).not.toHaveBeenCalled();
+  });
+
+  it.each`
+    title                       | unlockCode      | fiscalCode
+    ${"unlock code is empty"}   | ${""}           | ${aFiscalCode}
+    ${"unlock code is invalid"} | ${123}          | ${aFiscalCode}
+    ${"fiscal code is invalid"} | ${anUnlockCode} | ${"INVALID"}
+  `("should return 400 when $title", async ({ unlockCode, fiscalCode }) => {
+    const req = mockReq({
+      params: { fiscal_code: fiscalCode },
+      body: { unlockCode },
+    });
+    const res = mockRes();
+
+    const response = await controller.lockUserAuthentication(req);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(lockUserAuthenticationMock).not.toHaveBeenCalled();
   });
 });

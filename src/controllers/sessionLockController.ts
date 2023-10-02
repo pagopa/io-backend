@@ -4,9 +4,11 @@
 
 import * as express from "express";
 import {
+  IResponseErrorConflict,
   IResponseErrorInternal,
   IResponseErrorValidation,
   IResponseSuccessJson,
+  ResponseErrorConflict,
   ResponseErrorInternal,
   ResponseErrorValidation,
   ResponseSuccessJson,
@@ -17,8 +19,13 @@ import * as TE from "fp-ts/lib/TaskEither";
 import * as O from "fp-ts/lib/Option";
 import * as ROA from "fp-ts/lib/ReadonlyArray";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { pipe, flow, constVoid } from "fp-ts/lib/function";
+import {
+  IResponseNoContent,
+  ResponseNoContent,
+  withValidatedOrValidationError,
+} from "../utils/responses";
 import { SuccessResponse } from "../types/commons";
 import LollipopService from "../services/lollipopService";
 import { withFiscalCodeFromRequestParams } from "../types/fiscalCode";
@@ -26,6 +33,15 @@ import RedisSessionStorage from "../services/redisSessionStorage";
 import RedisUserMetadataStorage from "../services/redisUserMetadataStorage";
 import AuthenticationLockService from "../services/authenticationLockService";
 import { UserSessionInfo } from "../../generated/session/UserSessionInfo";
+
+export const withUnlockCodeParams = async <T>(
+  req: express.Request,
+  f: (unlockCode: NonEmptyString) => Promise<T>
+) =>
+  withValidatedOrValidationError(
+    NonEmptyString.decode(req.body.unlockcode),
+    (unlockCode) => f(unlockCode)
+  );
 
 export default class SessionLockController {
   constructor(
@@ -171,53 +187,121 @@ export default class SessionLockController {
       TE.toUnion
     )();
 
-  private readonly buildInvalidateUserSessionTask = (
-    fiscalCode: FiscalCode
-  ) => [
-    // revoke pubkey
-    pipe(
-      TE.tryCatch(
-        () =>
-          // retrieve the assertionRef for the user
-          this.sessionStorage.getLollipopAssertionRefForUser(fiscalCode),
-        E.toError
-      ),
-      TE.chain(TE.fromEither),
-      TE.chain(
-        flow(
-          O.map((assertionRef) =>
-            TE.tryCatch(
-              () =>
-                // fire and forget the queue message
-                new Promise<true>((resolve) => {
-                  this.lollipopService
-                    .revokePreviousAssertionRef(assertionRef)
-                    .catch(constVoid);
-                  resolve(true);
-                }),
-              E.toError
+  /**
+   * Lock a user authentication and clear all its session data
+   *
+   * @param req expects fiscal_code as a path param
+   *
+   * @returns a promise with the encoded response object
+   */
+  public readonly lockUserAuthentication = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorConflict
+    | IResponseNoContent
+  > =>
+    withFiscalCodeFromRequestParams(req, (fiscalCode) =>
+      withUnlockCodeParams(req, (unlockCode) =>
+        pipe(
+          // lock the authentication
+          this.authenticationLockService.isUserAuthenticationLocked(fiscalCode),
+          TE.mapLeft((_) =>
+            ResponseErrorInternal(
+              "Something went wrong while checking the user authentication lock"
             )
           ),
-          // continue if there's no assertionRef on redis
-          O.getOrElse(() => TE.of(true))
-        )
+          TE.filterOrElseW(
+            (isUserAuthenticationLocked) => !isUserAuthenticationLocked,
+            () =>
+              ResponseErrorConflict(
+                "Another user authentication lock has already been applied"
+              )
+          ),
+          // clear session data
+          TE.chainW((_) =>
+            pipe(
+              AP.sequenceT(TE.ApplicativeSeq)(
+                ...this.buildInvalidateUserSessionTask(fiscalCode),
+                // removes all metadata
+                pipe(
+                  TE.tryCatch(
+                    () => this.metadataStorage.del(fiscalCode),
+                    E.toError
+                  ),
+                  TE.chain(TE.fromEither)
+                )
+              ),
+              TE.mapLeft((err) => ResponseErrorInternal(err.message))
+            )
+          ),
+          // if clean up went well, lock user session
+          TE.chainW((_) =>
+            pipe(
+              this.authenticationLockService.lockUserAuthentication(
+                fiscalCode,
+                unlockCode
+              ),
+              TE.mapLeft((err) => ResponseErrorInternal(err.message))
+            )
+          ),
+          TE.map((_) => ResponseNoContent()),
+          TE.toUnion
+        )()
       )
-    ),
-    // delete the assertionRef for the user
-    pipe(
-      TE.tryCatch(
-        () => this.sessionStorage.delLollipopDataForUser(fiscalCode),
-        E.toError
+    );
+
+  // ------------------------------
+  // private methods
+  // ------------------------------
+
+  private readonly buildInvalidateUserSessionTask = (fiscalCode: FiscalCode) =>
+    [
+      // revoke pubkey
+      pipe(
+        TE.tryCatch(
+          () =>
+            // retrieve the assertionRef for the user
+            this.sessionStorage.getLollipopAssertionRefForUser(fiscalCode),
+          E.toError
+        ),
+        TE.chain(TE.fromEither),
+        TE.chain(
+          flow(
+            O.map((assertionRef) =>
+              TE.tryCatch(
+                () =>
+                  // fire and forget the queue message
+                  new Promise<true>((resolve) => {
+                    this.lollipopService
+                      .revokePreviousAssertionRef(assertionRef)
+                      .catch(constVoid);
+                    resolve(true);
+                  }),
+                E.toError
+              )
+            ),
+            // continue if there's no assertionRef on redis
+            O.getOrElse(() => TE.of(true))
+          )
+        )
       ),
-      TE.chain(TE.fromEither)
-    ),
-    // removes all sessions
-    pipe(
-      TE.tryCatch(
-        () => this.sessionStorage.delUserAllSessions(fiscalCode),
-        E.toError
+      // delete the assertionRef for the user
+      pipe(
+        TE.tryCatch(
+          () => this.sessionStorage.delLollipopDataForUser(fiscalCode),
+          E.toError
+        ),
+        TE.chain(TE.fromEither)
       ),
-      TE.chain(TE.fromEither)
-    ),
-  ];
+      // removes all sessions
+      pipe(
+        TE.tryCatch(
+          () => this.sessionStorage.delUserAllSessions(fiscalCode),
+          E.toError
+        ),
+        TE.chain(TE.fromEither)
+      ),
+    ] as const;
 }

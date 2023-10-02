@@ -31,6 +31,7 @@ export default class AuthenticationLockService {
 
   /**
    * Lock the user authentication
+   *
    * @param fiscalCode the CF of the user
    * @param unlockCode the code to verify while performing unlock
    * @returns

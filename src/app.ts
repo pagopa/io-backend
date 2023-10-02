@@ -1295,6 +1295,15 @@ function registerSessionAPIRoutes(
         sessionLockController
       )
     );
+
+    app.post(
+      `${basePath}/auth/:fiscal_code/lock`,
+      urlTokenAuth,
+      toExpressHandler(
+        sessionLockController.lockUserAuthentication,
+        sessionLockController
+      )
+    );
   }
 }
 

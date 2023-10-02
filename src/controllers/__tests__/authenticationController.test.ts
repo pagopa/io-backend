@@ -78,7 +78,7 @@ import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import {
   AuthenticationLockServiceMock,
   isUserAuthenticationLockedMock,
-} from "../../__mocks__/controllers.mock";
+} from "../../__mocks__/services.mock";
 
 const req = mockReq();
 req.ip = "127.0.0.2";
