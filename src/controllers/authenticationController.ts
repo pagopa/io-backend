@@ -138,7 +138,7 @@ export default class AuthenticationController {
       params: ClientErrorRedirectionUrlParams
     ) => UrlFromString,
     private readonly profileService: ProfileService,
-    private readonly userProfileLockService: AuthenticationLockService,
+    private readonly authenticationLockService: AuthenticationLockService,
     private readonly notificationServiceFactory: NotificationServiceFactory,
     private readonly usersLoginLogService: UsersLoginLogService,
     private readonly onUserLogin: OnUserLogin,
@@ -282,7 +282,7 @@ export default class AuthenticationController {
       // NOTE: login with SpidL3 are always allowed
       isSpidL3(spidUser.authnContextClassRef)
         ? E.of(false)
-        : this.userProfileLockService.isUserAuthenticationLocked(
+        : this.authenticationLockService.isUserAuthenticationLocked(
             spidUser.fiscalNumber
           )(),
       // authentication token for app backend
