@@ -706,7 +706,7 @@ paths:
           x-examples:
             application/json:
               platform: "gcm"
-              pushChannel: "fLKP3EATnBI:APA91bEy4go681jeSEpLkNqhtIrdPnEKu6Dfi-STtUiEnQn8RwMfBiPGYaqdWrmzJyXIh5Yms4017MYRS9O1LGPZwA4sOLCNIoKl4Fwg7cSeOkliAAtlQ0rVg71Kr5QmQiLlDJyxcq3p"
+              pushChannel: "push-notification-service-handle"
       responses:
         "200":
           description: Success.
