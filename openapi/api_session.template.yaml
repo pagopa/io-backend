@@ -121,6 +121,7 @@ paths:
         This is intended to use with ioweb-profile lock functionality.
       parameters:
         - $ref: "#/parameters/FiscalCode"
+        - $ref: '#/parameters/Token'
         - in: body
           name: unlockcode
           required: true
