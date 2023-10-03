@@ -19,7 +19,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import * as O from "fp-ts/lib/Option";
 import * as ROA from "fp-ts/lib/ReadonlyArray";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { pipe, flow, constVoid } from "fp-ts/lib/function";
 import {
   IResponseNoContent,
@@ -33,13 +33,14 @@ import RedisSessionStorage from "../services/redisSessionStorage";
 import RedisUserMetadataStorage from "../services/redisUserMetadataStorage";
 import AuthenticationLockService from "../services/authenticationLockService";
 import { UserSessionInfo } from "../../generated/session/UserSessionInfo";
+import { UnlockCode } from "../../generated/session/UnlockCode";
 
 export const withUnlockCodeParams = async <T>(
   req: express.Request,
-  f: (unlockCode: NonEmptyString) => Promise<T>
+  f: (unlockCode: UnlockCode) => Promise<T>
 ) =>
   withValidatedOrValidationError(
-    NonEmptyString.decode(req.body.unlockcode),
+    UnlockCode.decode(req.body.unlockcode),
     (unlockCode) => f(unlockCode)
   );
 
@@ -224,24 +225,11 @@ export default class SessionLockController {
             pipe(
               AP.sequenceT(TE.ApplicativeSeq)(
                 ...this.buildInvalidateUserSessionTask(fiscalCode),
-                // removes all metadata
-                pipe(
-                  TE.tryCatch(
-                    () => this.metadataStorage.del(fiscalCode),
-                    E.toError
-                  ),
-                  TE.chain(TE.fromEither)
+                // if clean up went well, lock user session
+                this.authenticationLockService.lockUserAuthentication(
+                  fiscalCode,
+                  unlockCode
                 )
-              ),
-              TE.mapLeft((err) => ResponseErrorInternal(err.message))
-            )
-          ),
-          // if clean up went well, lock user session
-          TE.chainW((_) =>
-            pipe(
-              this.authenticationLockService.lockUserAuthentication(
-                fiscalCode,
-                unlockCode
               ),
               TE.mapLeft((err) => ResponseErrorInternal(err.message))
             )

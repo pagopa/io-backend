@@ -9,9 +9,11 @@ import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/lib/Either";
 
-import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
 import * as AI from "../utils/AsyncIterableTask";
+
+import { UnlockCode } from "../../generated/session/UnlockCode";
 
 export default class AuthenticationLockService {
   constructor(private readonly tableClient: TableClient) {}
@@ -38,7 +40,7 @@ export default class AuthenticationLockService {
    */
   public readonly lockUserAuthentication = (
     fiscalCode: FiscalCode,
-    unlockCode: NonEmptyString
+    unlockCode: UnlockCode
   ): TE.TaskEither<Error, true> =>
     pipe(
       TE.tryCatch(

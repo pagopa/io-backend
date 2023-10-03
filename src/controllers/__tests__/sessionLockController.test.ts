@@ -20,7 +20,7 @@ import { anAssertionRef } from "../../__mocks__/lollipop";
 import {
   AuthenticationLockServiceMock,
   isUserAuthenticationLockedMock,
-  lockUserAuthenticationMock,
+  lockUserAuthenticationMockLazy,
 } from "../../__mocks__/services.mock";
 
 const aFiscalCode = pipe(
@@ -620,7 +620,7 @@ describe("SessionLockController#lockUserAuthentication", () => {
     jest.clearAllMocks();
   });
 
-  const anUnlockCode = "anUnlockCode";
+  const anUnlockCode = "123456789";
 
   const controller = new SessionLockController(
     mockRedisSessionStorage,
@@ -628,6 +628,7 @@ describe("SessionLockController#lockUserAuthentication", () => {
     mockLollipopService,
     AuthenticationLockServiceMock
   );
+
   it("should succeed storing CF-unlockcode when request is valid and the association has not been previously stored", async () => {
     const req = mockReq({
       params: { fiscal_code: aFiscalCode },
@@ -641,7 +642,7 @@ describe("SessionLockController#lockUserAuthentication", () => {
     expect(res.status).toHaveBeenCalledWith(204);
 
     expect(isUserAuthenticationLockedMock).toHaveBeenCalledWith(aFiscalCode);
-    expect(lockUserAuthenticationMock).toHaveBeenCalledWith(
+    expect(lockUserAuthenticationMockLazy).toHaveBeenCalledWith(
       aFiscalCode,
       anUnlockCode
     );
@@ -658,7 +659,7 @@ describe("SessionLockController#lockUserAuthentication", () => {
 
     const req = mockReq({
       params: { fiscal_code: aFiscalCode },
-      body: { unlockcode: "anUnlockCode" },
+      body: { unlockcode: anUnlockCode },
     });
     const res = mockRes();
 
@@ -666,16 +667,16 @@ describe("SessionLockController#lockUserAuthentication", () => {
     response.apply(res);
 
     expect(res.status).toHaveBeenCalledWith(409);
-    expect(lockUserAuthenticationMock).not.toHaveBeenCalled();
+    expect(lockUserAuthenticationMockLazy).not.toHaveBeenCalled();
   });
 
   it("should return 500 when request is valid and an error occurred storing cf-unlockcode", async () => {
-    lockUserAuthenticationMock.mockReturnValueOnce(
-      TE.left(new Error("an error"))
+    lockUserAuthenticationMockLazy.mockResolvedValueOnce(
+      E.left(new Error("an error"))
     );
     const req = mockReq({
       params: { fiscal_code: aFiscalCode },
-      body: { unlockcode: "anUnlockCode" },
+      body: { unlockcode: anUnlockCode },
     });
     const res = mockRes();
 
@@ -691,7 +692,7 @@ describe("SessionLockController#lockUserAuthentication", () => {
     );
     const req = mockReq({
       params: { fiscal_code: aFiscalCode },
-      body: { unlockcode: "anUnlockCode" },
+      body: { unlockcode: anUnlockCode },
     });
     const res = mockRes();
 
@@ -699,7 +700,7 @@ describe("SessionLockController#lockUserAuthentication", () => {
     response.apply(res);
 
     expect(res.status).toHaveBeenCalledWith(500);
-    expect(lockUserAuthenticationMock).not.toHaveBeenCalled();
+    expect(lockUserAuthenticationMockLazy).not.toHaveBeenCalled();
   });
 
   it("should return 500 when request is valid and an something went wrong deleting user session", async () => {
@@ -709,7 +710,7 @@ describe("SessionLockController#lockUserAuthentication", () => {
 
     const req = mockReq({
       params: { fiscal_code: aFiscalCode },
-      body: { unlockcode: "anUnlockCode" },
+      body: { unlockcode: anUnlockCode },
     });
     const res = mockRes();
 
@@ -717,7 +718,7 @@ describe("SessionLockController#lockUserAuthentication", () => {
     response.apply(res);
 
     expect(res.status).toHaveBeenCalledWith(500);
-    expect(lockUserAuthenticationMock).not.toHaveBeenCalled();
+    expect(lockUserAuthenticationMockLazy).not.toHaveBeenCalled();
   });
 
   it.each`
@@ -736,6 +737,6 @@ describe("SessionLockController#lockUserAuthentication", () => {
     response.apply(res);
 
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(lockUserAuthenticationMock).not.toHaveBeenCalled();
+    expect(lockUserAuthenticationMockLazy).not.toHaveBeenCalled();
   });
 });

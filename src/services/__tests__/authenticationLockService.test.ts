@@ -8,8 +8,8 @@ import {
   lockedProfileTableClient,
   profileLockedRecordIterator,
 } from "../../__mocks__/lockedProfileTableClient";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { RestError } from "@azure/data-tables";
+import { UnlockCode } from "../../../generated/session/UnlockCode";
 
 // -------------------------------------------
 // Tests
@@ -51,7 +51,7 @@ describe("AuthenticationLockService#isUserAuthenticationLocked", () => {
 
 describe("AuthenticationLockService#lockUserAuthentication", () => {
   const service = new AuthenticationLockService(lockedProfileTableClient);
-  const anUnlockCode = "anUnlockCode" as NonEmptyString;
+  const anUnlockCode = "anUnlockCode" as UnlockCode;
 
   it("should return true if CF-unlockcode has been stored sucessfully in table storage", async () => {
     const result = await service.lockUserAuthentication(
@@ -85,8 +85,8 @@ describe("AuthenticationLockService#lockUserAuthentication", () => {
       anUnlockCode
     )();
 
-   expect(result).toEqual(
-     E.left(new Error("Something went wrong creating the record"))
-   );
+    expect(result).toEqual(
+      E.left(new Error("Something went wrong creating the record"))
+    );
   });
 });
