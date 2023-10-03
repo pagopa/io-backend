@@ -98,17 +98,17 @@ const mockLollipopService = new LollipopService(
   ""
 );
 
+const controller = new SessionLockController(
+  mockRedisSessionStorage,
+  mockRedisUserMetadataStorage,
+  mockLollipopService,
+  AuthenticationLockServiceMock
+);
+
 describe("SessionLockController#getUserSession", () => {
   it("should fail on invalid fiscal code", async () => {
     const req = mockReq({ params: { fiscal_code: "invalid" } });
     const res = mockRes();
-
-    const controller = new SessionLockController(
-      mockRedisSessionStorage,
-      mockRedisUserMetadataStorage,
-      mockLollipopService,
-      AuthenticationLockServiceMock
-    );
 
     const response = await controller.getUserSession(req);
     response.apply(res);
@@ -124,13 +124,6 @@ describe("SessionLockController#getUserSession", () => {
       E.left(new Error("any error"))
     );
 
-    const controller = new SessionLockController(
-      mockRedisSessionStorage,
-      mockRedisUserMetadataStorage,
-      mockLollipopService,
-      AuthenticationLockServiceMock
-    );
-
     const response = await controller.getUserSession(req);
     response.apply(res);
 
@@ -140,13 +133,6 @@ describe("SessionLockController#getUserSession", () => {
   it("should succeed on correct request", async () => {
     const req = mockReq({ params: { fiscal_code: aFiscalCode } });
     const res = mockRes();
-
-    const controller = new SessionLockController(
-      mockRedisSessionStorage,
-      mockRedisUserMetadataStorage,
-      mockLollipopService,
-      AuthenticationLockServiceMock
-    );
 
     const response = await controller.getUserSession(req);
     response.apply(res);
@@ -167,13 +153,6 @@ describe("SessionLockController#lockUserSession", () => {
     const req = mockReq({ params: { fiscal_code: "invalid" } });
     const res = mockRes();
 
-    const controller = new SessionLockController(
-      mockRedisSessionStorage,
-      mockRedisUserMetadataStorage,
-      mockLollipopService,
-      AuthenticationLockServiceMock
-    );
-
     const response = await controller.lockUserSession(req);
     response.apply(res);
 
@@ -184,13 +163,6 @@ describe("SessionLockController#lockUserSession", () => {
     const req = mockReq({ params: { invalid: true } });
     const res = mockRes();
 
-    const controller = new SessionLockController(
-      mockRedisSessionStorage,
-      mockRedisUserMetadataStorage,
-      mockLollipopService,
-      AuthenticationLockServiceMock
-    );
-
     const response = await controller.lockUserSession(req);
     response.apply(res);
 
@@ -200,13 +172,6 @@ describe("SessionLockController#lockUserSession", () => {
   it("should succeed on correct request", async () => {
     const req = mockReq({ params: { fiscal_code: aFiscalCode } });
     const res = mockRes();
-
-    const controller = new SessionLockController(
-      mockRedisSessionStorage,
-      mockRedisUserMetadataStorage,
-      mockLollipopService,
-      AuthenticationLockServiceMock
-    );
 
     const response = await controller.lockUserSession(req);
     response.apply(res);
@@ -223,13 +188,6 @@ describe("SessionLockController#lockUserSession", () => {
 
     mockSetBlockedUser.mockImplementationOnce(async () => E.left("any error"));
 
-    const controller = new SessionLockController(
-      mockRedisSessionStorage,
-      mockRedisUserMetadataStorage,
-      mockLollipopService,
-      AuthenticationLockServiceMock
-    );
-
     const response = await controller.lockUserSession(req);
     response.apply(res);
 
@@ -241,13 +199,6 @@ describe("SessionLockController#lockUserSession", () => {
     const res = mockRes();
 
     mockGetLollipop.mockImplementationOnce(async () => E.left("any error"));
-
-    const controller = new SessionLockController(
-      mockRedisSessionStorage,
-      mockRedisUserMetadataStorage,
-      mockLollipopService,
-      AuthenticationLockServiceMock
-    );
 
     const response = await controller.lockUserSession(req);
     response.apply(res);
@@ -266,13 +217,6 @@ describe("SessionLockController#lockUserSession", () => {
       throw "error";
     });
 
-    const controller = new SessionLockController(
-      mockRedisSessionStorage,
-      mockRedisUserMetadataStorage,
-      mockLollipopService,
-      AuthenticationLockServiceMock
-    );
-
     const response = await controller.lockUserSession(req);
     response.apply(res);
 
@@ -287,13 +231,6 @@ describe("SessionLockController#lockUserSession", () => {
     const res = mockRes();
 
     mockDelLollipop.mockImplementationOnce(async () => E.left("any error"));
-
-    const controller = new SessionLockController(
-      mockRedisSessionStorage,
-      mockRedisUserMetadataStorage,
-      mockLollipopService,
-      AuthenticationLockServiceMock
-    );
 
     const response = await controller.lockUserSession(req);
     response.apply(res);
@@ -310,13 +247,6 @@ describe("SessionLockController#lockUserSession", () => {
       throw "error";
     });
 
-    const controller = new SessionLockController(
-      mockRedisSessionStorage,
-      mockRedisUserMetadataStorage,
-      mockLollipopService,
-      AuthenticationLockServiceMock
-    );
-
     const response = await controller.lockUserSession(req);
     response.apply(res);
     expect(mockRevokePreviousAssertionRef).toHaveBeenCalled();
@@ -332,13 +262,6 @@ describe("SessionLockController#lockUserSession", () => {
       E.left("any error")
     );
 
-    const controller = new SessionLockController(
-      mockRedisSessionStorage,
-      mockRedisUserMetadataStorage,
-      mockLollipopService,
-      AuthenticationLockServiceMock
-    );
-
     const response = await controller.lockUserSession(req);
     response.apply(res);
 
@@ -350,13 +273,6 @@ describe("SessionLockController#lockUserSession", () => {
     const res = mockRes();
 
     mockDel.mockImplementationOnce(async () => E.left("any error"));
-
-    const controller = new SessionLockController(
-      mockRedisSessionStorage,
-      mockRedisUserMetadataStorage,
-      mockLollipopService,
-      AuthenticationLockServiceMock
-    );
 
     const response = await controller.lockUserSession(req);
     response.apply(res);
@@ -370,13 +286,6 @@ describe("SessionLockController#unlockUserSession", () => {
     const req = mockReq({ params: { fiscal_code: "invalid" } });
     const res = mockRes();
 
-    const controller = new SessionLockController(
-      mockRedisSessionStorage,
-      mockRedisUserMetadataStorage,
-      mockLollipopService,
-      AuthenticationLockServiceMock
-    );
-
     const response = await controller.unlockUserSession(req);
     response.apply(res);
 
@@ -387,13 +296,6 @@ describe("SessionLockController#unlockUserSession", () => {
     const req = mockReq({ params: { invalid: true } });
     const res = mockRes();
 
-    const controller = new SessionLockController(
-      mockRedisSessionStorage,
-      mockRedisUserMetadataStorage,
-      mockLollipopService,
-      AuthenticationLockServiceMock
-    );
-
     const response = await controller.unlockUserSession(req);
     response.apply(res);
 
@@ -403,13 +305,6 @@ describe("SessionLockController#unlockUserSession", () => {
   it("should succeed on correct request", async () => {
     const req = mockReq({ params: { fiscal_code: aFiscalCode } });
     const res = mockRes();
-
-    const controller = new SessionLockController(
-      mockRedisSessionStorage,
-      mockRedisUserMetadataStorage,
-      mockLollipopService,
-      AuthenticationLockServiceMock
-    );
 
     const response = await controller.lockUserSession(req);
     response.apply(res);
@@ -428,13 +323,6 @@ describe("SessionLockController#unlockUserSession", () => {
       E.left("any error")
     );
 
-    const controller = new SessionLockController(
-      mockRedisSessionStorage,
-      mockRedisUserMetadataStorage,
-      mockLollipopService,
-      AuthenticationLockServiceMock
-    );
-
     const response = await controller.unlockUserSession(req);
     response.apply(res);
 
@@ -451,13 +339,6 @@ describe("SessionLockController#deleteUserSession", () => {
     const req = mockReq({ params: { fiscal_code: "invalid" } });
     const res = mockRes();
 
-    const controller = new SessionLockController(
-      mockRedisSessionStorage,
-      mockRedisUserMetadataStorage,
-      mockLollipopService,
-      AuthenticationLockServiceMock
-    );
-
     const response = await controller.deleteUserSession(req);
     response.apply(res);
 
@@ -468,13 +349,6 @@ describe("SessionLockController#deleteUserSession", () => {
     const req = mockReq({ params: { invalid: true } });
     const res = mockRes();
 
-    const controller = new SessionLockController(
-      mockRedisSessionStorage,
-      mockRedisUserMetadataStorage,
-      mockLollipopService,
-      AuthenticationLockServiceMock
-    );
-
     const response = await controller.deleteUserSession(req);
     response.apply(res);
 
@@ -484,13 +358,6 @@ describe("SessionLockController#deleteUserSession", () => {
   it("should succeed on correct request", async () => {
     const req = mockReq({ params: { fiscal_code: aFiscalCode } });
     const res = mockRes();
-
-    const controller = new SessionLockController(
-      mockRedisSessionStorage,
-      mockRedisUserMetadataStorage,
-      mockLollipopService,
-      AuthenticationLockServiceMock
-    );
 
     const response = await controller.deleteUserSession(req);
     response.apply(res);
@@ -511,13 +378,6 @@ describe("SessionLockController#deleteUserSession", () => {
 
     mockGetLollipop.mockImplementationOnce(async () => E.left("any error"));
 
-    const controller = new SessionLockController(
-      mockRedisSessionStorage,
-      mockRedisUserMetadataStorage,
-      mockLollipopService,
-      AuthenticationLockServiceMock
-    );
-
     const response = await controller.deleteUserSession(req);
     response.apply(res);
 
@@ -535,13 +395,6 @@ describe("SessionLockController#deleteUserSession", () => {
       throw "error";
     });
 
-    const controller = new SessionLockController(
-      mockRedisSessionStorage,
-      mockRedisUserMetadataStorage,
-      mockLollipopService,
-      AuthenticationLockServiceMock
-    );
-
     const response = await controller.deleteUserSession(req);
     response.apply(res);
 
@@ -556,13 +409,6 @@ describe("SessionLockController#deleteUserSession", () => {
     const res = mockRes();
 
     mockDelLollipop.mockImplementationOnce(async () => E.left("any error"));
-
-    const controller = new SessionLockController(
-      mockRedisSessionStorage,
-      mockRedisUserMetadataStorage,
-      mockLollipopService,
-      AuthenticationLockServiceMock
-    );
 
     const response = await controller.deleteUserSession(req);
     response.apply(res);
@@ -579,13 +425,6 @@ describe("SessionLockController#deleteUserSession", () => {
       throw "error";
     });
 
-    const controller = new SessionLockController(
-      mockRedisSessionStorage,
-      mockRedisUserMetadataStorage,
-      mockLollipopService,
-      AuthenticationLockServiceMock
-    );
-
     const response = await controller.deleteUserSession(req);
     response.apply(res);
     expect(mockRevokePreviousAssertionRef).toHaveBeenCalled();
@@ -601,13 +440,6 @@ describe("SessionLockController#deleteUserSession", () => {
       E.left("any error")
     );
 
-    const controller = new SessionLockController(
-      mockRedisSessionStorage,
-      mockRedisUserMetadataStorage,
-      mockLollipopService,
-      AuthenticationLockServiceMock
-    );
-
     const response = await controller.lockUserSession(req);
     response.apply(res);
 
@@ -621,13 +453,6 @@ describe("SessionLockController#lockUserAuthentication", () => {
   });
 
   const anUnlockCode = "123456789";
-
-  const controller = new SessionLockController(
-    mockRedisSessionStorage,
-    mockRedisUserMetadataStorage,
-    mockLollipopService,
-    AuthenticationLockServiceMock
-  );
 
   const aValidRequest = {
     params: { fiscal_code: aFiscalCode },
