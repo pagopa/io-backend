@@ -629,11 +629,13 @@ describe("SessionLockController#lockUserAuthentication", () => {
     AuthenticationLockServiceMock
   );
 
+  const aValidRequest = {
+    params: { fiscal_code: aFiscalCode },
+    body: { unlockcode: anUnlockCode },
+  };
+
   it("should succeed storing CF-unlockcode when request is valid and the association has not been previously stored", async () => {
-    const req = mockReq({
-      params: { fiscal_code: aFiscalCode },
-      body: { unlockcode: anUnlockCode },
-    });
+    const req = mockReq(aValidRequest);
     const res = mockRes();
 
     const response = await controller.lockUserAuthentication(req);
@@ -657,10 +659,7 @@ describe("SessionLockController#lockUserAuthentication", () => {
   it("should return 409 when request is valid and the user authentication is already locked", async () => {
     isUserAuthenticationLockedMock.mockReturnValueOnce(TE.of(true));
 
-    const req = mockReq({
-      params: { fiscal_code: aFiscalCode },
-      body: { unlockcode: anUnlockCode },
-    });
+    const req = mockReq(aValidRequest);
     const res = mockRes();
 
     const response = await controller.lockUserAuthentication(req);
@@ -674,10 +673,7 @@ describe("SessionLockController#lockUserAuthentication", () => {
     lockUserAuthenticationMockLazy.mockResolvedValueOnce(
       E.left(new Error("an error"))
     );
-    const req = mockReq({
-      params: { fiscal_code: aFiscalCode },
-      body: { unlockcode: anUnlockCode },
-    });
+    const req = mockReq(aValidRequest);
     const res = mockRes();
 
     const response = await controller.lockUserAuthentication(req);
@@ -686,14 +682,11 @@ describe("SessionLockController#lockUserAuthentication", () => {
     expect(res.status).toHaveBeenCalledWith(500);
   });
 
-  it("should return 500 when request is valid and an something went wrong checking user authentication lock", async () => {
+  it("should return 500 when request is valid and something went wrong checking user authentication lock", async () => {
     isUserAuthenticationLockedMock.mockReturnValueOnce(
       TE.left(new Error("an error"))
     );
-    const req = mockReq({
-      params: { fiscal_code: aFiscalCode },
-      body: { unlockcode: anUnlockCode },
-    });
+    const req = mockReq(aValidRequest);
     const res = mockRes();
 
     const response = await controller.lockUserAuthentication(req);
@@ -703,15 +696,12 @@ describe("SessionLockController#lockUserAuthentication", () => {
     expect(lockUserAuthenticationMockLazy).not.toHaveBeenCalled();
   });
 
-  it("should return 500 when request is valid and an something went wrong deleting user session", async () => {
+  it("should return 500 when request is valid and something went wrong deleting user session", async () => {
     mockDelLollipop.mockImplementationOnce(async () => {
       throw "error";
     });
 
-    const req = mockReq({
-      params: { fiscal_code: aFiscalCode },
-      body: { unlockcode: anUnlockCode },
-    });
+    const req = mockReq(aValidRequest);
     const res = mockRes();
 
     const response = await controller.lockUserAuthentication(req);
