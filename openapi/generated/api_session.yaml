@@ -217,8 +217,7 @@ definitions:
           It may or may not yield further information if dereferenced.
   UnlockCode:
     type: string
-    minLength: 9
-    maxLength: 9
+    pattern: ^\\d{9}$
   SuccessResponse:
     type: object
     properties:

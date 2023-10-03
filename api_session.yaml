@@ -169,7 +169,7 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.5.3/openapi/definitions.yaml#/ProblemJson"
   UnlockCode:
     type: string
-    pattern: ^\d{9}$
+    pattern: ^\\d{9}$
   SuccessResponse:
     type: object
     properties:
