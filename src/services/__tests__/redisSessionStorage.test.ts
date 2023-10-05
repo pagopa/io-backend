@@ -2021,3 +2021,62 @@ describe("RedisSessionStorage#delLollipopDataForUser", () => {
     if (E.isRight(response)) expect(response.right).toEqual(true);
   });
 });
+
+describe("RedisSessionStorage#getSessionRemaningTTL", () => {
+  it("should return the remining TTL of a session", async () => {
+    const expectedTtl = 1000;
+    mockTtl.mockImplementationOnce((_) => Promise.resolve(expectedTtl));
+    mockGet.mockImplementationOnce((_) => Promise.resolve(anAssertionRef));
+    const response = await sessionStorage.getSessionRemainingTTL(
+      aValidUser.fiscal_code
+    );
+    expect(mockTtl).toHaveBeenCalledTimes(1);
+    expect(mockTtl).toBeCalledWith(`KEYS-${aValidUser.fiscal_code}`);
+    expect(mockGet).toHaveBeenCalledTimes(1);
+    expect(E.isRight(response)).toBeTruthy();
+    if (E.isRight(response))
+      expect(response.right).toEqual(
+        O.some({
+          ttl: expectedTtl,
+          type: LoginTypeEnum.LEGACY,
+        })
+      );
+  });
+
+  it("should return none if no CF-AssertionRef ref exists in redis", async () => {
+    const expectedTtl = -2;
+    mockTtl.mockImplementationOnce((_) => Promise.resolve(expectedTtl));
+    const response = await sessionStorage.getSessionRemainingTTL(
+      aValidUser.fiscal_code
+    );
+    expect(mockTtl).toHaveBeenCalledTimes(1);
+    expect(mockTtl).toBeCalledWith(`KEYS-${aValidUser.fiscal_code}`);
+    expect(mockGet).not.toBeCalled();
+    expect(E.isRight(response)).toBeTruthy();
+    if (E.isRight(response)) expect(response.right).toEqual(O.none);
+  });
+
+  it("should return an error if exists a CF-AssertionRef without a TTL", async () => {
+    const expectedTtl = -1;
+    mockTtl.mockImplementationOnce((_) => Promise.resolve(expectedTtl));
+    const response = await sessionStorage.getSessionRemainingTTL(
+      aValidUser.fiscal_code
+    );
+    expect(mockTtl).toHaveBeenCalledTimes(1);
+    expect(mockTtl).toBeCalledWith(`KEYS-${aValidUser.fiscal_code}`);
+    expect(mockGet).not.toBeCalled();
+    expect(E.isLeft(response)).toBeTruthy();
+  });
+
+  it("should return an error if we retrieve a TTL but we can't retrieve the value", async () => {
+    const expectedTtl = 1000;
+    mockTtl.mockImplementationOnce((_) => Promise.resolve(expectedTtl));
+    mockGet.mockImplementationOnce((_) => Promise.resolve(null));
+    const response = await sessionStorage.getSessionRemainingTTL(
+      aValidUser.fiscal_code
+    );
+    expect(mockTtl).toHaveBeenCalledTimes(1);
+    expect(mockTtl).toBeCalledWith(`KEYS-${aValidUser.fiscal_code}`);
+    expect(E.isLeft(response)).toBeTruthy();
+  });
+});
