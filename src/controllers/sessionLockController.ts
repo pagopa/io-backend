@@ -274,11 +274,11 @@ export default class SessionLockController {
         TE.map(({ isUserAuthenticationLocked, maybeSessionRemaningTTL }) =>
           O.isNone(maybeSessionRemaningTTL)
             ? SessionState.encode({
-                access_enabled: isUserAuthenticationLocked,
+                access_enabled: !isUserAuthenticationLocked,
                 session_info: { active: false },
               })
             : SessionState.encode({
-                access_enabled: isUserAuthenticationLocked,
+                access_enabled: !isUserAuthenticationLocked,
                 session_info: {
                   active: true,
                   expiration_date: addSeconds(
