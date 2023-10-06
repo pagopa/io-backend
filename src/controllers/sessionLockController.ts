@@ -263,23 +263,10 @@ export default class SessionLockController {
             )
           ),
           maybeSessionRemaningTTL: pipe(
-            TE.tryCatch(
-              () => this.sessionStorage.getSessionRemainingTTL(fiscalCode),
-              (err) =>
-                ResponseErrorInternal(
-                  `Unexpected promise rejection getSessionRemainingTTL: [${
-                    E.toError(err).message
-                  }]`
-                )
-            ),
-            TE.chain(
-              flow(
-                TE.fromEither,
-                TE.mapLeft((err) =>
-                  ResponseErrorInternal(
-                    `Error reading the session info: [${err.message}]`
-                  )
-                )
+            this.sessionStorage.getSessionRemainingTTL(fiscalCode),
+            TE.mapLeft((err) =>
+              ResponseErrorInternal(
+                `Error reading the session info: [${err.message}]`
               )
             )
           ),

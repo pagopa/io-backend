@@ -849,9 +849,9 @@ export default class RedisSessionStorage
   /**
    * {@inheritDoc}
    */
-  public async getSessionRemainingTTL(
+  public getSessionRemainingTTL(
     fiscalCode: FiscalCode
-  ): Promise<Either<Error, O.Option<ActiveSessionInfo>>> {
+  ): TE.TaskEither<Error, O.Option<ActiveSessionInfo>> {
     return pipe(
       TE.tryCatch(
         // The `setLollipopDataForUser` has a default value for key `expire`
@@ -887,7 +887,7 @@ export default class RedisSessionStorage
               )
             )
       )
-    )();
+    );
   }
 
   /**

@@ -7,6 +7,7 @@ import { Option } from "fp-ts/lib/Option";
 import { EmailString, FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { Second } from "@pagopa/ts-commons/lib/units";
 import * as O from "fp-ts/lib/Option";
+import * as TE from "fp-ts/lib/TaskEither";
 import { AssertionRef as BackendAssertionRef } from "../../generated/backend/AssertionRef";
 import {
   BPDToken,
@@ -169,5 +170,5 @@ export interface ISessionStorage {
    */
   readonly getSessionRemainingTTL: (
     fiscalCode: FiscalCode
-  ) => Promise<Either<Error, O.Option<ActiveSessionInfo>>>;
+  ) => TE.TaskEither<Error, O.Option<ActiveSessionInfo>>;
 }

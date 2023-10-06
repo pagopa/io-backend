@@ -2029,7 +2029,7 @@ describe("RedisSessionStorage#getSessionRemaningTTL", () => {
     mockGet.mockImplementationOnce((_) => Promise.resolve(anAssertionRef));
     const response = await sessionStorage.getSessionRemainingTTL(
       aValidUser.fiscal_code
-    );
+    )();
     expect(mockTtl).toHaveBeenCalledTimes(1);
     expect(mockTtl).toBeCalledWith(`KEYS-${aValidUser.fiscal_code}`);
     expect(mockGet).toHaveBeenCalledTimes(1);
@@ -2049,7 +2049,7 @@ describe("RedisSessionStorage#getSessionRemaningTTL", () => {
     mockTtl.mockImplementationOnce((_) => Promise.resolve(expectedTtl));
     const response = await sessionStorage.getSessionRemainingTTL(
       aValidUser.fiscal_code
-    );
+    )();
     expect(mockTtl).toHaveBeenCalledTimes(1);
     expect(mockTtl).toBeCalledWith(`KEYS-${aValidUser.fiscal_code}`);
     expect(mockGet).not.toBeCalled();
@@ -2062,7 +2062,7 @@ describe("RedisSessionStorage#getSessionRemaningTTL", () => {
     mockTtl.mockImplementationOnce((_) => Promise.resolve(expectedTtl));
     const response = await sessionStorage.getSessionRemainingTTL(
       aValidUser.fiscal_code
-    );
+    )();
     expect(mockTtl).toHaveBeenCalledTimes(1);
     expect(mockTtl).toBeCalledWith(`KEYS-${aValidUser.fiscal_code}`);
     expect(mockGet).not.toBeCalled();
@@ -2075,7 +2075,7 @@ describe("RedisSessionStorage#getSessionRemaningTTL", () => {
     mockGet.mockImplementationOnce((_) => Promise.resolve(null));
     const response = await sessionStorage.getSessionRemainingTTL(
       aValidUser.fiscal_code
-    );
+    )();
     expect(mockTtl).toHaveBeenCalledTimes(1);
     expect(mockTtl).toBeCalledWith(`KEYS-${aValidUser.fiscal_code}`);
     expect(E.isLeft(response)).toBeTruthy();
