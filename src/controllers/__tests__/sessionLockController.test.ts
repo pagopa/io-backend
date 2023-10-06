@@ -16,6 +16,8 @@ import { ActivatedPubKey } from "../../../generated/lollipop-api/ActivatedPubKey
 import LollipopService from "../../services/lollipopService";
 import { LollipopApiClient } from "../../clients/lollipop";
 import { anAssertionRef } from "../../__mocks__/lollipop";
+import AuthenticationLockService from "../../services/authenticationLockService";
+import { TableClient } from "@azure/data-tables";
 
 import {
   AuthenticationLockServiceMock,

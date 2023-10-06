@@ -2033,6 +2033,7 @@ describe("RedisSessionStorage#getSessionRemaningTTL", () => {
     expect(mockTtl).toHaveBeenCalledTimes(1);
     expect(mockTtl).toBeCalledWith(`KEYS-${aValidUser.fiscal_code}`);
     expect(mockGet).toHaveBeenCalledTimes(1);
+    expect(mockGet).toBeCalledWith(`KEYS-${aValidUser.fiscal_code}`);
     expect(E.isRight(response)).toBeTruthy();
     if (E.isRight(response))
       expect(response.right).toEqual(

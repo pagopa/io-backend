@@ -146,6 +146,30 @@ paths:
           description: There was an error
           schema:
             $ref: "#/definitions/ProblemJson"
+  "/sessions/{fiscalcode}/state":
+    get:
+      operationId: getUserSessionState
+      summary: Get User Session State on IO App
+      parameters:
+        - $ref: "#/parameters/FiscalCode"
+        - $ref: "#/parameters/Token"
+      responses:
+        "200":
+          description: Success.
+          schema:
+            $ref: "#/definitions/SessionState"
+          examples:
+            application/json:
+              "ttl": 2500
+              "type": "LV"
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "500":
+          description: There was an error
+          schema:
+            $ref: "#/definitions/ProblemJson"
 parameters:
   FiscalCode:
     name: fiscalcode
@@ -189,6 +213,48 @@ definitions:
         type: boolean
     required:
       - active
+  SessionInfo:
+    description: Info about an user session
+    x-one-of: true
+    allOf:
+      - type: object
+        description: Inactive session
+        properties:
+          active:
+            type: boolean
+            enum:
+              - false
+        required:
+          - active
+      - type: object
+        description: Active session
+        properties:
+          active:
+            type: boolean
+            enum:
+              - true
+          expiration_date:
+            type: string
+            format: date
+          type:
+            type: string
+            enum:
+              - LV
+              - LEGACY
+        required:
+          - active
+          - expiration_date
+  SessionState:
+    description: The state of the user' session
+    type: object
+    properties:
+      access_enabled:
+        type: boolean
+      session_info:
+        $ref: '#/definitions/SessionInfo'
+    required:
+      - access_enabled
+      - session_info
 responses: {}
 consumes:
   - application/json

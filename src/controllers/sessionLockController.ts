@@ -26,6 +26,8 @@ import {
   ResponseNoContent,
   withValidatedOrValidationError,
 } from "../utils/responses";
+import { addSeconds } from "date-fns";
+import { OutputOf } from "io-ts";
 import { SuccessResponse } from "../types/commons";
 import LollipopService from "../services/lollipopService";
 import { withFiscalCodeFromRequestParams } from "../types/fiscalCode";
@@ -42,6 +44,7 @@ export const withUnlockCodeParams = async <T>(
   withValidatedOrValidationError(AuthLockBody.decode(req.body), (unlockCode) =>
     f(unlockCode)
   );
+import { SessionState } from "../../generated/session/SessionState";
 
 export default class SessionLockController {
   constructor(
@@ -237,6 +240,71 @@ export default class SessionLockController {
           TE.toUnion
         )()
       )
+    );
+
+  public readonly getUserSessionState = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseSuccessJson<OutputOf<typeof SessionState>>
+  > =>
+    withFiscalCodeFromRequestParams(req, (fiscalCode) =>
+      pipe(
+        AP.sequenceS(TE.ApplicativePar)({
+          isUserAuthenticationLocked: pipe(
+            this.authenticationLockService.isUserAuthenticationLocked(
+              fiscalCode
+            ),
+            TE.mapLeft((_) =>
+              ResponseErrorInternal(
+                `Error reading the auth lock info: [${_.message}]`
+              )
+            )
+          ),
+          maybeSessionRemaningTTL: pipe(
+            TE.tryCatch(
+              () => this.sessionStorage.getSessionRemainingTTL(fiscalCode),
+              (err) =>
+                ResponseErrorInternal(
+                  `Unexpected promise rejection getSessionRemainingTTL: [${
+                    E.toError(err).message
+                  }]`
+                )
+            ),
+            TE.chain(
+              flow(
+                TE.fromEither,
+                TE.mapLeft((err) =>
+                  ResponseErrorInternal(
+                    `Error reading the session info: [${err.message}]`
+                  )
+                )
+              )
+            )
+          ),
+        }),
+        TE.map(({ isUserAuthenticationLocked, maybeSessionRemaningTTL }) =>
+          O.isNone(maybeSessionRemaningTTL)
+            ? SessionState.encode({
+                access_enabled: isUserAuthenticationLocked,
+                session_info: { active: false },
+              })
+            : SessionState.encode({
+                access_enabled: isUserAuthenticationLocked,
+                session_info: {
+                  active: true,
+                  expiration_date: addSeconds(
+                    new Date(),
+                    maybeSessionRemaningTTL.value.ttl
+                  ),
+                  type: maybeSessionRemaningTTL.value.type,
+                },
+              })
+        ),
+        TE.map(ResponseSuccessJson),
+        TE.toUnion
+      )()
     );
 
   // ------------------------------
