@@ -125,10 +125,9 @@ paths:
         - $ref: '#/parameters/FiscalCode'
         - $ref: '#/parameters/Token'
         - in: body
-          name: unlockcode
-          required: true
+          name: body
           schema:
-            $ref: '#/definitions/UnlockCode'
+            $ref: '#/definitions/AuthLockBody'
       responses:
         '204':
           description: Lock created.
@@ -218,6 +217,13 @@ definitions:
   UnlockCode:
     type: string
     pattern: ^\\d{9}$
+  AuthLockBody:
+    type: object
+    properties:
+      unlockcode:
+        $ref: '#/definitions/UnlockCode'
+    required:
+      - unlockcode
   SuccessResponse:
     type: object
     properties:
