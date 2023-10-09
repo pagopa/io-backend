@@ -124,6 +124,7 @@ paths:
         - $ref: "#/parameters/Token"
         - in: body
           name: body
+          required: true
           schema:
             $ref: "#/definitions/AuthLockBody"
       responses:
