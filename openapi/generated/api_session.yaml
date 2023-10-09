@@ -295,6 +295,7 @@ definitions:
         required:
           - active
           - expiration_date
+          - type
   SessionState:
     description: The state of the user' session
     type: object

@@ -45,8 +45,7 @@ export const withUnlockCodeParams = async <T>(
     f(unlockCode)
   );
 import { SessionState } from "../../generated/session/SessionState";
-import { TypeEnum } from "../../generated/session/SessionInfo";
-import { LoginTypeEnum } from "../utils/fastLogin";
+import { TypeEnum as LoginTypeEnum } from "../../generated/session/SessionInfo";
 
 export default class SessionLockController {
   constructor(
@@ -287,10 +286,7 @@ export default class SessionLockController {
                     new Date(),
                     maybeSessionRemaningTTL.value.ttl
                   ),
-                  type:
-                    maybeSessionRemaningTTL.value.type === LoginTypeEnum.LV
-                      ? TypeEnum.LV
-                      : TypeEnum.LEGACY,
+                  type: LoginTypeEnum[maybeSessionRemaningTTL.value.type],
                 },
               })
         ),
