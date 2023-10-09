@@ -21,6 +21,8 @@ import * as ROA from "fp-ts/lib/ReadonlyArray";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { pipe, flow, constVoid } from "fp-ts/lib/function";
+import { OutputOf } from "io-ts";
+import { addSeconds } from "date-fns";
 import {
   IResponseNoContent,
   ResponseNoContent,
@@ -42,6 +44,8 @@ export const withUnlockCodeParams = async <T>(
   withValidatedOrValidationError(AuthLockBody.decode(req.body), (unlockCode) =>
     f(unlockCode)
   );
+import { SessionState } from "../../generated/session/SessionState";
+import { TypeEnum as LoginTypeEnum } from "../../generated/session/SessionInfo";
 
 export default class SessionLockController {
   constructor(
@@ -237,6 +241,58 @@ export default class SessionLockController {
           TE.toUnion
         )()
       )
+    );
+
+  public readonly getUserSessionState = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseSuccessJson<OutputOf<typeof SessionState>>
+  > =>
+    withFiscalCodeFromRequestParams(req, (fiscalCode) =>
+      pipe(
+        AP.sequenceS(TE.ApplicativePar)({
+          isUserAuthenticationLocked: pipe(
+            this.authenticationLockService.isUserAuthenticationLocked(
+              fiscalCode
+            ),
+            TE.mapLeft((_) =>
+              ResponseErrorInternal(
+                `Error reading the auth lock info: [${_.message}]`
+              )
+            )
+          ),
+          maybeSessionRemaningTTL: pipe(
+            this.sessionStorage.getSessionRemainingTTL(fiscalCode),
+            TE.mapLeft((err) =>
+              ResponseErrorInternal(
+                `Error reading the session info: [${err.message}]`
+              )
+            )
+          ),
+        }),
+        TE.map(({ isUserAuthenticationLocked, maybeSessionRemaningTTL }) =>
+          O.isNone(maybeSessionRemaningTTL)
+            ? SessionState.encode({
+                access_enabled: !isUserAuthenticationLocked,
+                session_info: { active: false },
+              })
+            : SessionState.encode({
+                access_enabled: !isUserAuthenticationLocked,
+                session_info: {
+                  active: true,
+                  expiration_date: addSeconds(
+                    new Date(),
+                    maybeSessionRemaningTTL.value.ttl
+                  ),
+                  type: LoginTypeEnum[maybeSessionRemaningTTL.value.type],
+                },
+              })
+        ),
+        TE.map(ResponseSuccessJson),
+        TE.toUnion
+      )()
     );
 
   // ------------------------------

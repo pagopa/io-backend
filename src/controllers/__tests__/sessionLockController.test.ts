@@ -16,6 +16,8 @@ import { ActivatedPubKey } from "../../../generated/lollipop-api/ActivatedPubKey
 import LollipopService from "../../services/lollipopService";
 import { LollipopApiClient } from "../../clients/lollipop";
 import { anAssertionRef } from "../../__mocks__/lollipop";
+import { LoginTypeEnum } from "../../utils/fastLogin";
+import { addSeconds } from "date-fns";
 
 import {
   AuthenticationLockServiceMock,
@@ -48,6 +50,13 @@ const mockGetLollipop = jest
   .fn()
   .mockResolvedValue(E.right(O.some(anAssertionRef)));
 const mockSetLollipop = jest.fn().mockResolvedValue(E.right(true));
+
+const expectedSessionTTL = 123;
+const mockGetSessionRemainingTTL = jest
+  .fn()
+  .mockReturnValue(
+    TE.right(O.some({ ttl: expectedSessionTTL, type: LoginTypeEnum.LV }))
+  );
 const mockRedisSessionStorage = {
   delUserAllSessions: mockDelUserAllSessions,
   setBlockedUser: mockSetBlockedUser,
@@ -56,6 +65,7 @@ const mockRedisSessionStorage = {
   getLollipopAssertionRefForUser: mockGetLollipop,
   delLollipopDataForUser: mockDelLollipop,
   setLollipopAssertionRefForUser: mockSetLollipop,
+  getSessionRemainingTTL: mockGetSessionRemainingTTL,
 } as unknown as RedisSessionStorage;
 
 const mockDel = jest.fn().mockImplementation(async () => E.right(true));
@@ -553,5 +563,115 @@ describe("SessionLockController#lockUserAuthentication", () => {
 
     expect(res.status).toHaveBeenCalledWith(400);
     expect(lockUserAuthenticationMockLazy).not.toHaveBeenCalled();
+  });
+});
+
+describe("SessionLockController#getUserSessionState", () => {
+  const froxenNowDate = new Date();
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.useFakeTimers().setSystemTime(froxenNowDate);
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+  it("should return success if an unlocked session exists", async () => {
+    const req = mockReq({ params: { fiscal_code: aFiscalCode } });
+    const res = mockRes();
+    const response = await controller.getUserSessionState(req);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(response.kind).toEqual("IResponseSuccessJson");
+    if (response.kind === "IResponseSuccessJson")
+      expect(response.value).toEqual({
+        access_enabled: true,
+        session_info: expect.objectContaining({
+          active: true,
+          expiration_date: addSeconds(
+            froxenNowDate,
+            expectedSessionTTL
+          ).toISOString(),
+          type: LoginTypeEnum.LV,
+        }),
+      });
+  });
+
+  it("should return success if a locked session exists", async () => {
+    const req = mockReq({ params: { fiscal_code: aFiscalCode } });
+    const res = mockRes();
+    isUserAuthenticationLockedMock.mockReturnValueOnce(TE.right(true));
+    const response = await controller.getUserSessionState(req);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(response.kind).toEqual("IResponseSuccessJson");
+    if (response.kind === "IResponseSuccessJson")
+      expect(response.value).toEqual({
+        access_enabled: false,
+        session_info: expect.objectContaining({
+          active: true,
+          expiration_date: addSeconds(
+            froxenNowDate,
+            expectedSessionTTL
+          ).toISOString(),
+          type: LoginTypeEnum.LV,
+        }),
+      });
+  });
+
+  it("should return success if a session doens't exists", async () => {
+    const req = mockReq({ params: { fiscal_code: aFiscalCode } });
+    const res = mockRes();
+    mockGetSessionRemainingTTL.mockReturnValueOnce(TE.right(O.none));
+    const response = await controller.getUserSessionState(req);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(response.kind).toEqual("IResponseSuccessJson");
+    if (response.kind === "IResponseSuccessJson")
+      expect(response.value).toEqual({
+        access_enabled: true,
+        session_info: {
+          active: false,
+        },
+      });
+  });
+
+  it("should fail if an invalid CF was provided", async () => {
+    const req = mockReq({ params: { fiscal_code: "invalid_cf" } });
+    const res = mockRes();
+    mockGetSessionRemainingTTL.mockReturnValueOnce(TE.right(O.none));
+    const response = await controller.getUserSessionState(req);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(response.kind).toEqual("IResponseErrorValidation");
+  });
+
+  it("should fail if an error occours reading the session lock state", async () => {
+    const req = mockReq({ params: { fiscal_code: aFiscalCode } });
+    const res = mockRes();
+    isUserAuthenticationLockedMock.mockReturnValueOnce(
+      TE.left(new Error("an error"))
+    );
+    const response = await controller.getUserSessionState(req);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(response.kind).toEqual("IResponseErrorInternal");
+  });
+
+  it("should fail if an error occours reading the session TTL", async () => {
+    const req = mockReq({ params: { fiscal_code: aFiscalCode } });
+    const res = mockRes();
+    mockGetSessionRemainingTTL.mockReturnValueOnce(
+      TE.left(new Error("an error"))
+    );
+    const response = await controller.getUserSessionState(req);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(response.kind).toEqual("IResponseErrorInternal");
   });
 });

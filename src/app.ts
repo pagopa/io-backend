@@ -1304,6 +1304,15 @@ function registerSessionAPIRoutes(
         sessionLockController
       )
     );
+
+    app.get(
+      `${basePath}/sessions/:fiscal_code/state`,
+      urlTokenAuth,
+      toExpressHandler(
+        sessionLockController.getUserSessionState,
+        sessionLockController
+      )
+    );
   }
 }
 

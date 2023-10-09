@@ -14,6 +14,13 @@ export const LoginType = enumType<LoginTypeEnum>(LoginTypeEnum, "LoginType");
 export type AdditionalLoginPropsT = t.TypeOf<typeof AdditionalLoginProps>;
 export const AdditionalLoginProps = t.partial({ loginType: LoginType });
 
+export const ActiveSessionInfo = t.type({
+  ttl: t.number,
+  type: LoginType,
+});
+
+export type ActiveSessionInfo = t.TypeOf<typeof ActiveSessionInfo>;
+
 export const acsRequestMapper = (
   req: express.Request
 ): t.Validation<AdditionalLoginPropsT> =>

@@ -7,6 +7,7 @@ import { Option } from "fp-ts/lib/Option";
 import { EmailString, FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { Second } from "@pagopa/ts-commons/lib/units";
 import * as O from "fp-ts/lib/Option";
+import * as TE from "fp-ts/lib/TaskEither";
 import { AssertionRef as BackendAssertionRef } from "../../generated/backend/AssertionRef";
 import {
   BPDToken,
@@ -18,6 +19,7 @@ import {
 } from "../types/token";
 import { User, UserV5 } from "../types/user";
 import { LollipopData } from "../types/assertionRef";
+import { ActiveSessionInfo } from "../utils/fastLogin";
 
 export interface ISessionStorage {
   /**
@@ -156,4 +158,17 @@ export interface ISessionStorage {
   readonly delUserAllSessions: (
     fiscalCode: FiscalCode
   ) => Promise<Either<Error, boolean>>;
+
+  /**
+   * Retrieve the remining TTL for the CF-AssertionRef record
+   * and the Login Type (`LEGACY` of `LV`).
+   * The TTL value is the same of the Session expire time.
+   * If the record is missing the result value is `None`.
+   * If the recors hasn't an expire time an error is returned.
+   *
+   * @param fiscalCode
+   */
+  readonly getSessionRemainingTTL: (
+    fiscalCode: FiscalCode
+  ) => TE.TaskEither<Error, O.Option<ActiveSessionInfo>>;
 }

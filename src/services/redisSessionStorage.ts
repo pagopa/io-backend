@@ -40,7 +40,7 @@ import {
 import { User, UserV1, UserV2, UserV3, UserV4, UserV5 } from "../types/user";
 import { multipleErrorsFormatter } from "../utils/errorsFormatter";
 import { log } from "../utils/logger";
-import { LoginTypeEnum } from "../utils/fastLogin";
+import { ActiveSessionInfo, LoginTypeEnum } from "../utils/fastLogin";
 import { ISessionStorage } from "./ISessionStorage";
 import RedisStorageUtils from "./redisStorageUtils";
 
@@ -844,6 +844,50 @@ export default class RedisSessionStorage
         )
       )
     )();
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public getSessionRemainingTTL(
+    fiscalCode: FiscalCode
+  ): TE.TaskEither<Error, O.Option<ActiveSessionInfo>> {
+    return pipe(
+      TE.tryCatch(
+        // The `setLollipopDataForUser` has a default value for key `expire`
+        // If the assertionRef is saved whidout providing an expire time related
+        // with the session validity it will invalidate this implementation.
+        () => this.redisClient.ttl(`${lollipopDataPrefix}${fiscalCode}`),
+        E.toError
+      ),
+      TE.chain(
+        TE.fromPredicate(
+          (_) => _ !== -1,
+          () => new Error("Unexpected missing CF-AssertionRef TTL")
+        )
+      ),
+      TE.map(flow(O.fromPredicate((ttl) => ttl > 0))),
+      TE.chain((maybeTtl) =>
+        O.isNone(maybeTtl)
+          ? TE.right(O.none)
+          : pipe(
+              TE.tryCatch(
+                () => this.getLollipopDataForUser(fiscalCode),
+                E.toError
+              ),
+              TE.chain(TE.fromEither),
+              TE.chain(
+                TE.fromPredicate(
+                  O.isSome,
+                  () => new Error("Unexpected missing value")
+                )
+              ),
+              TE.map(({ value }) =>
+                O.some({ ttl: maybeTtl.value, type: value.loginType })
+              )
+            )
+      )
+    );
   }
 
   /**
