@@ -21,13 +21,13 @@ import * as ROA from "fp-ts/lib/ReadonlyArray";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { pipe, flow, constVoid } from "fp-ts/lib/function";
+import { OutputOf } from "io-ts";
+import { addSeconds } from "date-fns";
 import {
   IResponseNoContent,
   ResponseNoContent,
   withValidatedOrValidationError,
 } from "../utils/responses";
-import { addSeconds } from "date-fns";
-import { OutputOf } from "io-ts";
 import { SuccessResponse } from "../types/commons";
 import LollipopService from "../services/lollipopService";
 import { withFiscalCodeFromRequestParams } from "../types/fiscalCode";
@@ -45,6 +45,8 @@ export const withUnlockCodeParams = async <T>(
     f(unlockCode)
   );
 import { SessionState } from "../../generated/session/SessionState";
+import { TypeEnum } from "../../generated/session/SessionInfo";
+import { LoginTypeEnum } from "../utils/fastLogin";
 
 export default class SessionLockController {
   constructor(
@@ -285,7 +287,10 @@ export default class SessionLockController {
                     new Date(),
                     maybeSessionRemaningTTL.value.ttl
                   ),
-                  type: maybeSessionRemaningTTL.value.type,
+                  type:
+                    maybeSessionRemaningTTL.value.type === LoginTypeEnum.LV
+                      ? TypeEnum.LV
+                      : TypeEnum.LEGACY,
                 },
               })
         ),
