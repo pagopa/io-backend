@@ -221,10 +221,10 @@ definitions:
   AuthLockBody:
     type: object
     properties:
-      unlockcode:
+      unlock_code:
         $ref: '#/definitions/UnlockCode'
     required:
-      - unlockcode
+      - unlock_code
   SuccessResponse:
     type: object
     properties:
