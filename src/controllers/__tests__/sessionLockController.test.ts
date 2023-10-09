@@ -456,7 +456,7 @@ describe("SessionLockController#lockUserAuthentication", () => {
 
   const aValidRequest = {
     params: { fiscal_code: aFiscalCode },
-    body: { unlockcode: anUnlockCode },
+    body: { unlock_code: anUnlockCode },
   };
 
   it("should succeed storing CF-unlockcode when request is valid and the association has not been previously stored", async () => {
