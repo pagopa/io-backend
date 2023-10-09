@@ -1236,9 +1236,6 @@ definitions:
         $ref: '#/definitions/MessageSubject'
       markdown:
         $ref: '#/definitions/MessageBodyMarkdown'
-      require_secure_channels:
-        type: boolean
-        description: When true, messages won't trigger email notifications (only push).
     required:
       - subject
       - markdown
@@ -1785,9 +1782,6 @@ definitions:
           has_attachments:
             type: boolean
             default: false
-          has_precondition:
-            type: boolean
-            default: false
         required:
           - id
           - fiscal_code
@@ -1897,12 +1891,6 @@ definitions:
       has_attachments:
         type: boolean
         default: false
-      has_precondition:
-        type: string
-        x-extensible-enum:
-          - ALWAYS
-          - ONCE
-          - NEVER
       summary:
         type: string
         minLength: 1
@@ -1942,9 +1930,6 @@ definitions:
       url:
         type: string
         minLength: 1
-      category:
-        type: string
-        default: DOCUMENT
     required:
       - id
       - url

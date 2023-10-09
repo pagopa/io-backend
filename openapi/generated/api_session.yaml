@@ -284,6 +284,11 @@ definitions:
           expiration_date:
             type: string
             format: date
+          type:
+            type: string
+            enum:
+              - LV
+              - LEGACY
         required:
           - active
           - expiration_date
