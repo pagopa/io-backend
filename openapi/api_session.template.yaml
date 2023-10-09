@@ -121,12 +121,12 @@ paths:
         This is intended to use with ioweb-profile lock functionality.
       parameters:
         - $ref: "#/parameters/FiscalCode"
-        - $ref: '#/parameters/Token'
+        - $ref: "#/parameters/Token"
         - in: body
-          name: unlockcode
+          name: body
           required: true
           schema:
-            $ref: '#/definitions/UnlockCode'
+            $ref: "#/definitions/AuthLockBody"
       responses:
         "204":
           description: Lock created.
@@ -170,6 +170,13 @@ definitions:
   UnlockCode:
     type: string
     pattern: ^\\d{9}$
+  AuthLockBody:
+    type: object
+    properties:
+      unlock_code:
+        $ref: "#/definitions/UnlockCode"
+    required:
+      - unlock_code
   SuccessResponse:
     type: object
     properties:

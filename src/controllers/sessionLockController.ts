@@ -33,15 +33,14 @@ import RedisSessionStorage from "../services/redisSessionStorage";
 import RedisUserMetadataStorage from "../services/redisUserMetadataStorage";
 import AuthenticationLockService from "../services/authenticationLockService";
 import { UserSessionInfo } from "../../generated/session/UserSessionInfo";
-import { UnlockCode } from "../../generated/session/UnlockCode";
+import { AuthLockBody } from "../../generated/session/AuthLockBody";
 
 export const withUnlockCodeParams = async <T>(
   req: express.Request,
-  f: (unlockCode: UnlockCode) => Promise<T>
+  f: (authLockBody: AuthLockBody) => Promise<T>
 ) =>
-  withValidatedOrValidationError(
-    UnlockCode.decode(req.body.unlockcode),
-    (unlockCode) => f(unlockCode)
+  withValidatedOrValidationError(AuthLockBody.decode(req.body), (unlockCode) =>
+    f(unlockCode)
   );
 
 export default class SessionLockController {
@@ -204,7 +203,7 @@ export default class SessionLockController {
     | IResponseNoContent
   > =>
     withFiscalCodeFromRequestParams(req, (fiscalCode) =>
-      withUnlockCodeParams(req, (unlockCode) =>
+      withUnlockCodeParams(req, (authLockBody) =>
         pipe(
           // lock the authentication
           this.authenticationLockService.isUserAuthenticationLocked(fiscalCode),
@@ -228,7 +227,7 @@ export default class SessionLockController {
                 // if clean up went well, lock user session
                 this.authenticationLockService.lockUserAuthentication(
                   fiscalCode,
-                  unlockCode
+                  authLockBody.unlock_code
                 )
               ),
               TE.mapLeft((err) => ResponseErrorInternal(err.message))
