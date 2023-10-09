@@ -23,7 +23,7 @@ import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
 import * as B from "fp-ts/boolean";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { NonEmptyString, Ulid } from "@pagopa/ts-commons/lib/strings";
 import NewMessagesService from "src/services/newMessagesService";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { ThirdPartyConfigList } from "src/utils/thirdPartyConfig";
@@ -50,9 +50,9 @@ import { checkIfLollipopIsEnabled } from "../utils/lollipop";
 
 export const withGetThirdPartyAttachmentParams = async <T>(
   req: express.Request,
-  f: (id: NonEmptyString, attachment_url: NonEmptyString) => Promise<T>
+  f: (id: Ulid, attachment_url: NonEmptyString) => Promise<T>
 ) =>
-  withValidatedOrValidationError(NonEmptyString.decode(req.params.id), (id) =>
+  withValidatedOrValidationError(Ulid.decode(req.params.id), (id) =>
     withValidatedOrValidationError(
       NonEmptyString.decode(req.params.attachment_url),
       (attachment_url) => f(id, attachment_url)
@@ -128,25 +128,23 @@ export default class MessagesController {
     | IResponseSuccessJson<MessageStatusAttributes>
   > =>
     withUserFromRequest(req, async (user) =>
-      withValidatedOrValidationError(
-        NonEmptyString.decode(req.params.id),
-        (messageId) =>
-          withValidatedOrValidationError(
-            MessageStatusChange.decode(req.body),
-            (change) =>
-              this.messageService.upsertMessageStatus(
-                user.fiscal_code,
-                messageId,
-                change
-              )
-          )
+      withValidatedOrValidationError(Ulid.decode(req.params.id), (messageId) =>
+        withValidatedOrValidationError(
+          MessageStatusChange.decode(req.body),
+          (change) =>
+            this.messageService.upsertMessageStatus(
+              user.fiscal_code,
+              messageId,
+              change
+            )
+        )
       )
     );
 
   public readonly checkLollipopAndGetLocalsOrDefault = (
     req: express.Request,
     user: User,
-    messageId: NonEmptyString
+    messageId: Ulid
   ) =>
     pipe(
       this.messageService.getThirdPartyMessageFnApp(
@@ -219,26 +217,24 @@ export default class MessagesController {
     | IResponseSuccessJson<ThirdPartyMessagePrecondition>
   > =>
     withUserFromRequest(req, async (user) =>
-      withValidatedOrValidationError(
-        NonEmptyString.decode(req.params.id),
-        (messageId) =>
-          pipe(
-            this.checkLollipopAndGetLocalsOrDefault(req, user, messageId),
-            TE.chainW(({ message, lollipopLocals }) =>
-              TE.tryCatch(
-                () =>
-                  this.messageService.getThirdPartyMessagePrecondition(
-                    message,
-                    lollipopLocals as LollipopLocalsType
-                  ),
-                (_) =>
-                  ResponseErrorInternal(
-                    "Error getting preconditions from third party service"
-                  )
-              )
-            ),
-            TE.toUnion
-          )()
+      withValidatedOrValidationError(Ulid.decode(req.params.id), (messageId) =>
+        pipe(
+          this.checkLollipopAndGetLocalsOrDefault(req, user, messageId),
+          TE.chainW(({ message, lollipopLocals }) =>
+            TE.tryCatch(
+              () =>
+                this.messageService.getThirdPartyMessagePrecondition(
+                  message,
+                  lollipopLocals as LollipopLocalsType
+                ),
+              (_) =>
+                ResponseErrorInternal(
+                  "Error getting preconditions from third party service"
+                )
+            )
+          ),
+          TE.toUnion
+        )()
       )
     );
 
@@ -256,26 +252,24 @@ export default class MessagesController {
     | IResponseSuccessJson<ThirdPartyMessageWithContent>
   > =>
     withUserFromRequest(req, async (user) =>
-      withValidatedOrValidationError(
-        NonEmptyString.decode(req.params.id),
-        (messageId) =>
-          pipe(
-            this.checkLollipopAndGetLocalsOrDefault(req, user, messageId),
-            TE.chainW(({ message, lollipopLocals }) =>
-              TE.tryCatch(
-                () =>
-                  this.messageService.getThirdPartyMessage(
-                    message,
-                    lollipopLocals as LollipopLocalsType
-                  ),
-                (_) =>
-                  ResponseErrorInternal(
-                    "Error getting message from third party service"
-                  )
-              )
-            ),
-            TE.toUnion
-          )()
+      withValidatedOrValidationError(Ulid.decode(req.params.id), (messageId) =>
+        pipe(
+          this.checkLollipopAndGetLocalsOrDefault(req, user, messageId),
+          TE.chainW(({ message, lollipopLocals }) =>
+            TE.tryCatch(
+              () =>
+                this.messageService.getThirdPartyMessage(
+                  message,
+                  lollipopLocals as LollipopLocalsType
+                ),
+              (_) =>
+                ResponseErrorInternal(
+                  "Error getting message from third party service"
+                )
+            )
+          ),
+          TE.toUnion
+        )()
       )
     );
 

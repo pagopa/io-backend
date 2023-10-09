@@ -19,6 +19,7 @@ import * as TE from "fp-ts/TaskEither";
 import * as lollipopUtils from "../../utils/lollipop";
 import { ThirdPartyConfigList } from "../../utils/thirdPartyConfig";
 import { aThirdPartyPrecondition } from "../../__mocks__/third-party";
+import { Ulid } from "@pagopa/ts-commons/lib/strings";
 
 const dummyExtractLollipopLocalsFromLollipopHeaders = jest.spyOn(
   lollipopUtils,
@@ -34,6 +35,7 @@ const dummyCheckIfLollipopIsEnabled = jest.spyOn(
 dummyCheckIfLollipopIsEnabled.mockReturnValue(TE.of(false));
 
 const anId: string = "string-id";
+const aValidMessageId = "01C3GDA0GB7GAFX6CCZ3FK3Z5Q" as Ulid;
 
 const proxyMessagesResponse = {
   items: [
@@ -193,8 +195,8 @@ describe("MessagesController#getMessagesByUser", () => {
 
     const pageSize = 2;
     const enrichResultData = false;
-    const maximumId = "AAAA";
-    const minimumId = "BBBB";
+    const maximumId = aValidMessageId;
+    const minimumId = aValidMessageId;
 
     // query params should be strings
     req.query = {
@@ -269,7 +271,7 @@ describe("MessagesController#getMessage", () => {
     );
 
     req.user = mockedUser;
-    req.params = { id: anId };
+    req.params = { id: aValidMessageId };
     req.query = { public_message: "true" };
 
     const controller = new MessagesController(
@@ -282,7 +284,7 @@ describe("MessagesController#getMessage", () => {
     const response = await controller.getMessage(req);
 
     expect(mockFnAppGetMessage).toHaveBeenCalledWith(mockedUser, {
-      id: anId,
+      id: aValidMessageId,
       public_message: true,
     });
     expect(response).toEqual({
@@ -300,7 +302,7 @@ describe("MessagesController#getMessage", () => {
     );
 
     req.user = mockedUser;
-    req.params = { id: anId };
+    req.params = { id: aValidMessageId };
 
     const controller = new MessagesController(
       newMessageService,
@@ -312,7 +314,7 @@ describe("MessagesController#getMessage", () => {
     const response = await controller.getMessage(req);
 
     expect(mockFnAppGetMessage).toHaveBeenCalledWith(mockedUser, {
-      id: anId,
+      id: aValidMessageId,
     });
     expect(response).toEqual({
       apply: expect.any(Function),
@@ -369,7 +371,7 @@ describe("MessagesController#getThirdPartyAttachment", () => {
 
     req.user = mockedUser;
     req.params = {
-      id: anId,
+      id: aValidMessageId,
       attachment_url: anAttachmentUrl,
     };
 
@@ -443,7 +445,7 @@ describe("MessagesController#getThirdPartyMessagePrecondition", () => {
     req.user = mockedUser;
     req.headers = lollipopRequiredHeaders;
     req.params = {
-      id: anId,
+      id: aValidMessageId,
     };
 
     const controller = new MessagesController(
@@ -487,7 +489,7 @@ describe("MessagesController#getThirdPartyMessagePrecondition", () => {
     req.user = mockedUser;
     req.headers = lollipopRequiredHeaders;
     req.params = {
-      id: anId,
+      id: aValidMessageId,
     };
 
     const controller = new MessagesController(
@@ -539,7 +541,7 @@ describe("MessagesController#upsertMessageStatus", () => {
     );
 
     req.user = mockedUser;
-    req.params = { id: anId };
+    req.params = { id: aValidMessageId };
     req.body = aMessageStatusChange;
 
     const controller = new MessagesController(
@@ -551,11 +553,9 @@ describe("MessagesController#upsertMessageStatus", () => {
 
     const response = await controller.upsertMessageStatus(req);
 
-    console.log(response);
-
     expect(mockFnAppUpsertMessageStatus).toHaveBeenCalledWith(
       mockedUser.fiscal_code,
-      anId,
+      aValidMessageId,
       aMessageStatusChange
     );
     expect(response).toEqual({

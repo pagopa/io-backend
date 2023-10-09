@@ -18,7 +18,11 @@ import {
   IResponseSuccessNoContent,
 } from "@pagopa/ts-commons/lib/responses";
 import { AppMessagesAPIClient } from "src/clients/app-messages.client";
-import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import {
+  FiscalCode,
+  NonEmptyString,
+  Ulid,
+} from "@pagopa/ts-commons/lib/strings";
 import { pipe, flow } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
@@ -175,7 +179,7 @@ export default class NewMessagesService {
    */
   public readonly upsertMessageStatus = (
     fiscalCode: FiscalCode,
-    messageId: NonEmptyString,
+    messageId: Ulid,
     messageStatusChange: MessageStatusChange
   ): Promise<
     | IResponseErrorInternal
@@ -306,7 +310,7 @@ export default class NewMessagesService {
 
   public readonly getThirdPartyMessageFnApp = (
     fiscalCode: FiscalCode,
-    messageId: string
+    messageId: Ulid
   ): TE.TaskEither<
     | IResponseErrorInternal
     | IResponseErrorValidation
