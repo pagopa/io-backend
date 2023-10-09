@@ -160,8 +160,12 @@ paths:
             $ref: "#/definitions/SessionState"
           examples:
             application/json:
-              "ttl": 2500
-              "type": "LV"
+              "access_enabled": true
+              "session_info": {
+                "active": true,
+                "expiration_date": "2011-10-05T14:48:00.000Z",
+                "type": "LV"
+              }
         "400":
           description: Bad request
         "401":
