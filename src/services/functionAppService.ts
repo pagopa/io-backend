@@ -22,7 +22,6 @@ import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { APIClient } from "src/clients/api";
 import { PromiseType } from "@pagopa/ts-commons/lib/types";
 import { UpsertServicePreference } from "generated/backend/UpsertServicePreference";
-import { ServiceId } from "@pagopa/io-functions-app-sdk/ServiceId";
 import { PaginatedServiceTupleCollection } from "../../generated/backend/PaginatedServiceTupleCollection";
 import { ServicePublic } from "../../generated/backend/ServicePublic";
 import { ServicePreference } from "../../generated/backend/ServicePreference";
@@ -34,6 +33,7 @@ import {
   withCatchAsInternalError,
   withValidatedOrInternalError,
 } from "../utils/responses";
+import { PathTraversalSafePathParam } from "../../generated/backend/PathTraversalSafePathParam";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
 type RightOf<T extends E.Either<unknown, unknown>> = T extends E.Right<infer R>
@@ -108,7 +108,7 @@ export default class FunctionsAppService {
    */
   public readonly getServicePreferences = (
     fiscalCode: FiscalCode,
-    serviceId: ServiceId
+    serviceId: PathTraversalSafePathParam
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorNotFound
@@ -136,7 +136,7 @@ export default class FunctionsAppService {
    */
   public readonly upsertServicePreferences = (
     fiscalCode: FiscalCode,
-    serviceId: ServiceId,
+    serviceId: PathTraversalSafePathParam,
     servicePreferences: UpsertServicePreference
   ): Promise<
     | IResponseErrorInternal

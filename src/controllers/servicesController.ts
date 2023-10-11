@@ -12,7 +12,7 @@ import {
   IResponseSuccessJson,
   IResponseErrorConflict,
 } from "@pagopa/ts-commons/lib/responses";
-import { ServiceId } from "@pagopa/io-functions-app-sdk/ServiceId";
+import { PathTraversalSafePathParam } from "../../generated/backend/PathTraversalSafePathParam";
 import { withUserFromRequest } from "../../src/types/user";
 import { withValidatedOrValidationError } from "../../src/utils/responses";
 
@@ -55,7 +55,7 @@ export default class ServicesController {
   > =>
     withUserFromRequest(req, async (user) =>
       withValidatedOrValidationError(
-        ServiceId.decode(req.params.id),
+        PathTraversalSafePathParam.decode(req.params.id),
         (serviceId) =>
           this.fnAppService.getServicePreferences(user.fiscal_code, serviceId)
       )
@@ -76,7 +76,7 @@ export default class ServicesController {
   > =>
     withUserFromRequest(req, async (user) =>
       withValidatedOrValidationError(
-        ServiceId.decode(req.params.id),
+        PathTraversalSafePathParam.decode(req.params.id),
         (serviceId) =>
           withValidatedOrValidationError(
             UpsertServicePreference.decode(req.body),

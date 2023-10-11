@@ -63,4 +63,4 @@ definitions:
     x-import: '@pagopa/ts-commons/lib/strings'
     example: "xxxxxxxx"
   Ulid:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v28.5.0/openapi/definitions.yaml#/Ulid"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v28.6.0/openapi/definitions.yaml#/Ulid"
