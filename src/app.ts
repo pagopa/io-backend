@@ -803,7 +803,7 @@ export async function newApp({
       );
       _.app.on("server:stop", () => {
         clearInterval(startIdpMetadataRefreshTimer);
-        // Graceful redis connection shoutdown.
+        // Graceful redis connection shutdown.
         for (const client of REDIS_CLIENT.select(RedisClientSelectorEnum.ALL)) {
           log.info(`Graceful closing redis connection`);
           pipe(
