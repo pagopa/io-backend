@@ -37,9 +37,19 @@ import {
 } from "../../__mocks__/user_mock";
 import { Second } from "@pagopa/ts-commons/lib/units";
 import { anAssertionRef } from "../../__mocks__/lollipop";
-import { RedisClientType } from "redis";
 import { LoginTypeEnum } from "../../utils/fastLogin";
 import { NullableBackendAssertionRefFromString } from "../../types/assertionRef";
+import {
+  mockDel,
+  mockExists,
+  mockGet,
+  mockRedisClientSelector,
+  mockSadd,
+  mockSetEx,
+  mockSmembers,
+  mockSrem,
+  mockTtl,
+} from "../../__mocks__/redis";
 
 const aTokenDurationSecs = 3600;
 const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
@@ -81,42 +91,15 @@ jest.mock("../../services/tokenService", () => {
     })),
   };
 });
-
-const mockSet = jest.fn();
-const mockSetEx = jest
-  .fn()
-  .mockImplementation((_, __, ___) => Promise.resolve("OK"));
-const mockGet = jest
-  .fn()
-  .mockImplementation((_) => Promise.resolve(JSON.stringify(aValidUser)));
-const mockMget = jest.fn();
-const mockDel = jest.fn().mockImplementation((_) => Promise.resolve(1));
-
-const mockSadd = jest.fn().mockImplementation((_, __) => Promise.resolve(1));
-const mockSrem = jest.fn().mockImplementation((_, __) => Promise.resolve(1));
-const mockSmembers = jest
-  .fn()
-  .mockImplementation((_) => Promise.resolve([mockSessionToken]));
-const mockExists = jest.fn();
-const mockSismember = jest.fn();
-const mockTtl = jest.fn();
-
-const mockRedisClient = {
-  set: mockSet,
-  setEx: mockSetEx,
-  get: mockGet,
-  mGet: mockMget,
-  del: mockDel,
-  sAdd: mockSadd,
-  sRem: mockSrem,
-  sMembers: mockSmembers,
-  exists: mockExists,
-  sIsMember: mockSismember,
-  ttl: mockTtl,
-} as unknown as RedisClientType;
+mockSetEx.mockImplementation((_, __, ___) => Promise.resolve("OK"));
+mockGet.mockImplementation((_) => Promise.resolve(JSON.stringify(aValidUser)));
+mockDel.mockImplementation((_) => Promise.resolve(1));
+mockSadd.mockImplementation((_, __) => Promise.resolve(1));
+mockSrem.mockImplementation((_, __) => Promise.resolve(1));
+mockSmembers.mockImplementation((_) => Promise.resolve([mockSessionToken]));
 
 const sessionStorage = new RedisSessionStorage(
-  mockRedisClient,
+  mockRedisClientSelector,
   aTokenDurationSecs,
   aDefaultLollipopAssertionRefDurationSec
 );

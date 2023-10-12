@@ -20,8 +20,8 @@ import {
   mockWalletToken,
 } from "../../__mocks__/user_mock";
 import { MessageSubject } from "../../../generated/notifications/MessageSubject";
-import * as redis from "redis";
 import { Second } from "@pagopa/ts-commons/lib/units";
+import { mockRedisClientSelector } from "../../__mocks__/redis";
 
 const aTimestamp = 1518010929530;
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
@@ -108,12 +108,10 @@ const badRequestErrorResponse = {
 jest.mock("../../services/notificationService");
 jest.mock("../../services/redisSessionStorage");
 
-const redisClient = {} as redis.RedisClientType;
-
 const tokenDurationSecs = 0;
 const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
 const redisSessionStorage = new RedisSessionStorage(
-  redisClient,
+  mockRedisClientSelector,
   tokenDurationSecs,
   aDefaultLollipopAssertionRefDurationSec
 );
