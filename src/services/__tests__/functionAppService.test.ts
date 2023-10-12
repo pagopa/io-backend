@@ -14,6 +14,7 @@ import mockRes from "../../__mocks__/response";
 import { ProblemJson } from "@pagopa/io-functions-app-sdk/ProblemJson";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { UpsertServicePreference } from "@pagopa/io-functions-app-sdk/UpsertServicePreference";
+import { PathTraversalSafePathParam } from "../../../generated/backend/PathTraversalSafePathParam";
 
 const aValidDepartmentName = "Department name";
 const aValidOrganizationName = "Organization name";
@@ -154,7 +155,7 @@ describe("FunctionsAppService#getServicePreferences", () => {
     const service = new FunctionsAppService(api);
     const res = await service.getServicePreferences(
       mockedUser.fiscal_code,
-      aValidServiceID as ServiceId
+      aValidServiceID as PathTraversalSafePathParam
     );
 
     expect(res).toMatchObject({
@@ -196,7 +197,7 @@ describe("FunctionsAppService#getServicePreferences", () => {
       const service = new FunctionsAppService(api);
       const res = await service.getServicePreferences(
         mockedUser.fiscal_code,
-        aValidServiceID as ServiceId
+        aValidServiceID as PathTraversalSafePathParam
       );
 
       // Check status code
@@ -235,7 +236,7 @@ describe("FunctionsAppService#upsertServicePreferences", () => {
     const service = new FunctionsAppService(api);
     const res = await service.upsertServicePreferences(
       mockedUser.fiscal_code,
-      aValidServiceID as ServiceId,
+      aValidServiceID as PathTraversalSafePathParam,
       aServicePreferences
     );
 
@@ -279,7 +280,7 @@ describe("FunctionsAppService#upsertServicePreferences", () => {
       const service = new FunctionsAppService(api);
       const res = await service.upsertServicePreferences(
         mockedUser.fiscal_code,
-        aValidServiceID as ServiceId,
+        aValidServiceID as PathTraversalSafePathParam,
         aServicePreferences
       );
 

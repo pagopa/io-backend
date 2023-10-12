@@ -1001,10 +1001,10 @@
     fp-ts "^2.10.5"
     io-ts "^2.2.16"
 
-"@pagopa/io-functions-commons@^28.5.0":
-  version "28.5.0"
-  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-commons/-/io-functions-commons-28.5.0.tgz#81b66881920dc08ddbd7dd3ba76bd32cce71aa62"
-  integrity sha512-pUzfm2qb1nKHH0/SJn88uH6NFyGUT7QRNrviFSoyRLAZbzoxBuIxRb/VQcuIRTscrv6JgrLwK9bwHYAtA8Y0ow==
+"@pagopa/io-functions-commons@^28.6.0":
+  version "28.6.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-commons/-/io-functions-commons-28.6.0.tgz#dd23ef16b93f1dce7be9b1f04aa1229b71f61a86"
+  integrity sha512-gGC4pCnmuFF9SnsSvT/vXTcWloHdQ2VvMNN8unpjqfVhmmEqR6tW6hx/UE8BrL6R/NqiE1hC4I4t9A7klHn6fA==
   dependencies:
     "@azure/cosmos" "^3.17.1"
     "@pagopa/ts-commons" "^11.0.0"
