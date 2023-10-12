@@ -11,18 +11,19 @@ export const mockTtl = jest.fn();
 export const mockExists = jest.fn();
 export const mockDel = jest.fn();
 export const mockSadd = jest.fn();
+export const mockSelectOne = jest.fn().mockImplementation(() => ({
+  set: mockSet,
+  setEx: mockSetEx,
+  get: mockGet,
+  mGet: mockMget,
+  del: mockDel,
+  sAdd: mockSadd,
+  sRem: mockSrem,
+  sMembers: mockSmembers,
+  sIsMember: mockSismember,
+  ttl: mockTtl,
+  exists: mockExists,
+}));
 export const mockRedisClientSelector = {
-  selectOne: () => ({
-    set: mockSet,
-    setEx: mockSetEx,
-    get: mockGet,
-    mGet: mockMget,
-    del: mockDel,
-    sAdd: mockSadd,
-    sRem: mockSrem,
-    sMembers: mockSmembers,
-    sIsMember: mockSismember,
-    ttl: mockTtl,
-    exists: mockExists,
-  }),
+  selectOne: mockSelectOne,
 } as unknown as RedisClientSelectorType;

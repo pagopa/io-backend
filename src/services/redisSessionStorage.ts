@@ -40,10 +40,7 @@ import { User, UserV1, UserV2, UserV3, UserV4, UserV5 } from "../types/user";
 import { multipleErrorsFormatter } from "../utils/errorsFormatter";
 import { log } from "../utils/logger";
 import { ActiveSessionInfo, LoginTypeEnum } from "../utils/fastLogin";
-import {
-  RedisClientSelectorEnum,
-  RedisClientSelectorType,
-} from "../utils/redis";
+import { RedisClientMode, RedisClientSelectorType } from "../utils/redis";
 import { ISessionStorage } from "./ISessionStorage";
 import RedisStorageUtils from "./redisStorageUtils";
 
@@ -100,7 +97,7 @@ export default class RedisSessionStorage
           // Set key to hold the string value. If key already holds a value, it is overwritten, regardless of its type.
           // @see https://redis.io/commands/set
           this.redisClient
-            .selectOne(RedisClientSelectorEnum.FAST)
+            .selectOne(RedisClientMode.FAST)
             .setEx(
               `${sessionKeyPrefix}${user.session_token}`,
               expireSec,
@@ -116,7 +113,7 @@ export default class RedisSessionStorage
       TE.tryCatch(
         () =>
           this.redisClient
-            .selectOne(RedisClientSelectorEnum.FAST)
+            .selectOne(RedisClientMode.FAST)
             .setEx(
               `${walletKeyPrefix}${user.wallet_token}`,
               expireSec,
@@ -132,7 +129,7 @@ export default class RedisSessionStorage
       TE.tryCatch(
         () =>
           this.redisClient
-            .selectOne(RedisClientSelectorEnum.FAST)
+            .selectOne(RedisClientMode.FAST)
             .setEx(
               `${myPortalTokenPrefix}${user.myportal_token}`,
               expireSec,
@@ -148,7 +145,7 @@ export default class RedisSessionStorage
       TE.tryCatch(
         () =>
           this.redisClient
-            .selectOne(RedisClientSelectorEnum.FAST)
+            .selectOne(RedisClientMode.FAST)
             .setEx(
               `${bpdTokenPrefix}${user.bpd_token}`,
               expireSec,
@@ -164,7 +161,7 @@ export default class RedisSessionStorage
       TE.tryCatch(
         () =>
           this.redisClient
-            .selectOne(RedisClientSelectorEnum.FAST)
+            .selectOne(RedisClientMode.FAST)
             .setEx(
               `${zendeskTokenPrefix}${user.zendesk_token}`,
               expireSec,
@@ -180,7 +177,7 @@ export default class RedisSessionStorage
       TE.tryCatch(
         () =>
           this.redisClient
-            .selectOne(RedisClientSelectorEnum.FAST)
+            .selectOne(RedisClientMode.FAST)
             .setEx(
               `${fimsTokenPrefix}${user.fims_token}`,
               expireSec,
@@ -382,9 +379,7 @@ export default class RedisSessionStorage
       ROA.map((singleToken) =>
         TE.tryCatch(
           () =>
-            this.redisClient
-              .selectOne(RedisClientSelectorEnum.FAST)
-              .del(singleToken),
+            this.redisClient.selectOne(RedisClientMode.FAST).del(singleToken),
           E.toError
         )
       ),
@@ -411,7 +406,7 @@ export default class RedisSessionStorage
       TE.tryCatch(
         () =>
           this.redisClient
-            .selectOne(RedisClientSelectorEnum.FAST)
+            .selectOne(RedisClientMode.FAST)
             .sRem(
               `${userSessionsSetKeyPrefix}${user.fiscal_code}`,
               `${sessionInfoKeyPrefix}${user.session_token}`
@@ -460,7 +455,7 @@ export default class RedisSessionStorage
       TE.tryCatch(
         () =>
           this.redisClient
-            .selectOne(RedisClientSelectorEnum.FAST)
+            .selectOne(RedisClientMode.FAST)
             .sMembers(userSessionSetKey),
         E.toError
       ),
@@ -476,10 +471,7 @@ export default class RedisSessionStorage
       keysV2.map((key) =>
         pipe(
           TE.tryCatch(
-            () =>
-              this.redisClient
-                .selectOne(RedisClientSelectorEnum.FAST)
-                .exists(key),
+            () => this.redisClient.selectOne(RedisClientMode.FAST).exists(key),
             E.toError
           ),
           TE.chainW(TE.fromPredicate((response) => !!response, identity)),
@@ -497,7 +489,7 @@ export default class RedisSessionStorage
           .filter(E.isLeft)
           .map((key) =>
             this.redisClient
-              .selectOne(RedisClientSelectorEnum.FAST)
+              .selectOne(RedisClientMode.FAST)
               .sRem(userSessionSetKey, key.left)
           ),
         (keysRemPromises) =>
@@ -601,7 +593,7 @@ export default class RedisSessionStorage
       TE.tryCatch(() => {
         log.info(`Adding ${fiscalCode} to ${blockedUserSetKey} set`);
         return this.redisClient
-          .selectOne(RedisClientSelectorEnum.FAST)
+          .selectOne(RedisClientMode.FAST)
           .sAdd(blockedUserSetKey, fiscalCode);
       }, E.toError),
       TE.map<number, true>((_) => true)
@@ -622,7 +614,7 @@ export default class RedisSessionStorage
       TE.tryCatch(() => {
         log.info(`Removing ${fiscalCode} from ${blockedUserSetKey} set`);
         return this.redisClient
-          .selectOne(RedisClientSelectorEnum.FAST)
+          .selectOne(RedisClientMode.FAST)
           .sRem(blockedUserSetKey, fiscalCode);
       }, E.toError),
       this.integerReplyAsync(1),
@@ -778,7 +770,7 @@ export default class RedisSessionStorage
       TE.tryCatch(
         () =>
           this.redisClient
-            .selectOne(RedisClientSelectorEnum.FAST)
+            .selectOne(RedisClientMode.FAST)
             .setEx(
               `${noticeEmailPrefix}${user.session_token}`,
               sessionTtl,
@@ -799,7 +791,7 @@ export default class RedisSessionStorage
       TE.tryCatch(
         () =>
           this.redisClient
-            .selectOne(RedisClientSelectorEnum.FAST)
+            .selectOne(RedisClientMode.FAST)
             .del(`${noticeEmailPrefix}${user.session_token}`),
         E.toError
       ),
@@ -817,7 +809,7 @@ export default class RedisSessionStorage
       TE.tryCatch(
         () =>
           this.redisClient
-            .selectOne(RedisClientSelectorEnum.FAST)
+            .selectOne(RedisClientMode.FAST)
             .get(`${noticeEmailPrefix}${user.session_token}`),
         E.toError
       ),
@@ -864,7 +856,7 @@ export default class RedisSessionStorage
       TE.tryCatch(
         () =>
           this.redisClient
-            .selectOne(RedisClientSelectorEnum.SAFE)
+            .selectOne(RedisClientMode.SAFE)
             .get(`${lollipopDataPrefix}${fiscalCode}`),
         E.toError
       ),
@@ -908,7 +900,7 @@ export default class RedisSessionStorage
         // with the session validity it will invalidate this implementation.
         () =>
           this.redisClient
-            .selectOne(RedisClientSelectorEnum.SAFE)
+            .selectOne(RedisClientMode.SAFE)
             .ttl(`${lollipopDataPrefix}${fiscalCode}`),
         E.toError
       ),
@@ -954,7 +946,7 @@ export default class RedisSessionStorage
       TE.tryCatch(
         () =>
           this.redisClient
-            .selectOne(RedisClientSelectorEnum.FAST)
+            .selectOne(RedisClientMode.FAST)
             .setEx(
               `${lollipopDataPrefix}${user.fiscal_code}`,
               expireAssertionRefSec,
@@ -980,7 +972,7 @@ export default class RedisSessionStorage
       TE.tryCatch(
         () =>
           this.redisClient
-            .selectOne(RedisClientSelectorEnum.FAST)
+            .selectOne(RedisClientMode.FAST)
             .setEx(
               `${lollipopDataPrefix}${user.fiscal_code}`,
               expireAssertionRefSec,
@@ -1001,7 +993,7 @@ export default class RedisSessionStorage
       TE.tryCatch(
         () =>
           this.redisClient
-            .selectOne(RedisClientSelectorEnum.FAST)
+            .selectOne(RedisClientMode.FAST)
             .del(`${lollipopDataPrefix}${fiscalCode}`),
         E.toError
       ),
@@ -1020,9 +1012,7 @@ export default class RedisSessionStorage
       keys,
       A.map((singleKey) =>
         TE.tryCatch(() => {
-          const redis_client = this.redisClient.selectOne(
-            RedisClientSelectorEnum.FAST
-          );
+          const redis_client = this.redisClient.selectOne(RedisClientMode.FAST);
           return redis_client.get.bind(redis_client)(singleKey);
         }, E.toError)
       ),
@@ -1031,16 +1021,12 @@ export default class RedisSessionStorage
   }
 
   private sIsMember(key: string, member: string) {
-    const redis_client = this.redisClient.selectOne(
-      RedisClientSelectorEnum.FAST
-    );
+    const redis_client = this.redisClient.selectOne(RedisClientMode.FAST);
     return redis_client.sIsMember.bind(redis_client)(key, member);
   }
 
   private ttl(key: string) {
-    const redis_client = this.redisClient.selectOne(
-      RedisClientSelectorEnum.FAST
-    );
+    const redis_client = this.redisClient.selectOne(RedisClientMode.FAST);
     return redis_client.ttl.bind(redis_client)(key);
   }
 
@@ -1092,7 +1078,7 @@ export default class RedisSessionStorage
           `Deleting sessions set ${userSessionsSetKeyPrefix}${fiscalCode}`
         );
         return this.redisClient
-          .selectOne(RedisClientSelectorEnum.FAST)
+          .selectOne(RedisClientMode.FAST)
           .del(`${userSessionsSetKeyPrefix}${fiscalCode}`);
       }, E.toError),
       TE.map<number, true>((_) => true)
@@ -1114,7 +1100,7 @@ export default class RedisSessionStorage
       TE.tryCatch(
         () =>
           this.redisClient
-            .selectOne(RedisClientSelectorEnum.FAST)
+            .selectOne(RedisClientMode.FAST)
             .setEx(sessionInfoKey, expireSec, JSON.stringify(sessionInfo)),
         E.toError
       ),
@@ -1127,7 +1113,7 @@ export default class RedisSessionStorage
           TE.tryCatch(
             () =>
               this.redisClient
-                .selectOne(RedisClientSelectorEnum.FAST)
+                .selectOne(RedisClientMode.FAST)
                 .sAdd(
                   `${userSessionsSetKeyPrefix}${fiscalCode}`,
                   sessionInfoKey
@@ -1153,7 +1139,7 @@ export default class RedisSessionStorage
       TE.tryCatch(
         () =>
           this.redisClient
-            .selectOne(RedisClientSelectorEnum.FAST)
+            .selectOne(RedisClientMode.FAST)
             .get(`${sessionKeyPrefix}${token}`),
         E.toError
       ),
@@ -1179,7 +1165,7 @@ export default class RedisSessionStorage
       TE.tryCatch(
         () =>
           this.redisClient
-            .selectOne(RedisClientSelectorEnum.FAST)
+            .selectOne(RedisClientMode.FAST)
             .get(`${prefix}${token}`),
         E.toError
       ),
@@ -1228,8 +1214,7 @@ export default class RedisSessionStorage
         oldSessionInfoKeys,
         ROA.map((key) =>
           TE.tryCatch(
-            () =>
-              this.redisClient.selectOne(RedisClientSelectorEnum.FAST).get(key),
+            () => this.redisClient.selectOne(RedisClientMode.FAST).get(key),
             E.toError
           )
         ),
@@ -1300,7 +1285,7 @@ export default class RedisSessionStorage
                 TE.tryCatch(
                   () =>
                     this.redisClient
-                      .selectOne(RedisClientSelectorEnum.FAST)
+                      .selectOne(RedisClientMode.FAST)
                       .del(singleKey),
                   E.toError
                 )
@@ -1326,7 +1311,7 @@ export default class RedisSessionStorage
       TE.tryCatch(
         () =>
           this.redisClient
-            .selectOne(RedisClientSelectorEnum.FAST)
+            .selectOne(RedisClientMode.FAST)
             .sMembers(`${userSessionsSetKeyPrefix}${fiscalCode}`),
         E.toError
       ),

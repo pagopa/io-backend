@@ -45,11 +45,13 @@ import {
   mockGet,
   mockRedisClientSelector,
   mockSadd,
+  mockSelectOne,
   mockSetEx,
   mockSmembers,
   mockSrem,
   mockTtl,
 } from "../../__mocks__/redis";
+import { RedisClientMode } from "../../utils/redis";
 
 const aTokenDurationSecs = 3600;
 const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
@@ -1388,6 +1390,8 @@ describe("RedisSessionStorage#userHasActiveSessionsOrLV", () => {
   const expectedRedisError = new Error("Generic Redis Error");
 
   const expectOnlyLollipopDataIsRetrieved = (cf: FiscalCode) => {
+    expect(mockSelectOne).toHaveBeenNthCalledWith(1, RedisClientMode.SAFE);
+    expect(mockSelectOne).toHaveBeenCalledTimes(1);
     expect(mockGet).toHaveBeenNthCalledWith(1, `KEYS-${cf}`);
     expect(mockSmembers).not.toHaveBeenCalled();
     expect(mockGet).toHaveBeenCalledTimes(1);
@@ -1397,6 +1401,7 @@ describe("RedisSessionStorage#userHasActiveSessionsOrLV", () => {
     cf: FiscalCode,
     sessionToken: string
   ) => {
+    expect(mockSelectOne).toHaveBeenNthCalledWith(1, RedisClientMode.SAFE);
     expect(mockGet).toHaveBeenNthCalledWith(1, `KEYS-${cf}`);
     expect(mockSmembers).toHaveBeenCalledWith(`USERSESSIONS-${cf}`);
     expect(mockGet).toHaveBeenNthCalledWith(2, `SESSIONINFO-${sessionToken}`);
@@ -1439,6 +1444,7 @@ describe("RedisSessionStorage#userHasActiveSessionsOrLV", () => {
       aValidUser.fiscal_code,
       aValidUser.session_token
     );
+    expect(mockSelectOne).toHaveBeenCalledTimes(4);
   });
 
   it("should return false if no LollipopData was found", async () => {
@@ -1471,6 +1477,7 @@ describe("RedisSessionStorage#userHasActiveSessionsOrLV", () => {
       aValidUser.fiscal_code,
       aValidUser.session_token
     );
+    expect(mockSelectOne).toHaveBeenCalledTimes(3);
   });
 
   it("should return false if login type is LEGACY and user has no active sessions", async () => {
@@ -1484,6 +1491,7 @@ describe("RedisSessionStorage#userHasActiveSessionsOrLV", () => {
     );
     expect(result).toEqual(E.right(false));
 
+    expect(mockSelectOne).toHaveBeenNthCalledWith(1, RedisClientMode.SAFE);
     expect(mockGet).toHaveBeenNthCalledWith(
       1,
       `KEYS-${aValidUser.fiscal_code}`
@@ -1492,6 +1500,7 @@ describe("RedisSessionStorage#userHasActiveSessionsOrLV", () => {
       `USERSESSIONS-${aValidUser.fiscal_code}`
     );
     expect(mockGet).toHaveBeenCalledTimes(1);
+    expect(mockSelectOne).toHaveBeenCalledTimes(2);
   });
 
   it("should return a left value if a redis call fail in getLollipopDataForUser", async () => {
@@ -1502,6 +1511,8 @@ describe("RedisSessionStorage#userHasActiveSessionsOrLV", () => {
     const result = await sessionStorage.userHasActiveSessionsOrLV(
       aValidUser.fiscal_code
     );
+    expect(mockSelectOne).toHaveBeenNthCalledWith(1, RedisClientMode.SAFE);
+    expect(mockSelectOne).toHaveBeenCalledTimes(1);
     expect(result).toEqual(E.left(expectedRedisError));
   });
 
@@ -1517,6 +1528,8 @@ describe("RedisSessionStorage#userHasActiveSessionsOrLV", () => {
     const result = await sessionStorage.userHasActiveSessionsOrLV(
       aValidUser.fiscal_code
     );
+    expect(mockSelectOne).toHaveBeenNthCalledWith(1, RedisClientMode.SAFE);
+    expect(mockSelectOne).toHaveBeenCalledTimes(3);
     expect(result).toEqual(E.left(expectedRedisError));
   });
 });

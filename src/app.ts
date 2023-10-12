@@ -157,7 +157,7 @@ import {
   getCurrentBackendVersion,
   getObjectFromPackageJson,
 } from "./utils/package";
-import { RedisClientSelector, RedisClientSelectorEnum } from "./utils/redis";
+import { RedisClientSelector, RedisClientMode } from "./utils/redis";
 import { ResponseErrorDismissed } from "./utils/responses";
 import { makeSpidLogCallback } from "./utils/spid";
 import { TimeTracer } from "./utils/timer";
@@ -583,7 +583,7 @@ export async function newApp({
         const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT);
         // Register the user metadata storage service.
         const USER_METADATA_STORAGE = new RedisUserMetadataStorage(
-          REDIS_CLIENT.selectOne(RedisClientSelectorEnum.FAST)
+          REDIS_CLIENT.selectOne(RedisClientMode.FAST)
         );
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         registerAPIRoutes(
@@ -772,7 +772,7 @@ export async function newApp({
                   appInsightsClient
                 )
               ),
-              redisClient: REDIS_CLIENT.selectOne(RedisClientSelectorEnum.FAST),
+              redisClient: REDIS_CLIENT.selectOne(RedisClientMode.FAST),
               samlConfig,
               serviceProviderConfig,
             })(),
@@ -804,7 +804,7 @@ export async function newApp({
       _.app.on("server:stop", () => {
         clearInterval(startIdpMetadataRefreshTimer);
         // Graceful redis connection shutdown.
-        for (const client of REDIS_CLIENT.select(RedisClientSelectorEnum.ALL)) {
+        for (const client of REDIS_CLIENT.select(RedisClientMode.ALL)) {
           log.info(`Graceful closing redis connection`);
           pipe(
             O.fromNullable(client.quit),

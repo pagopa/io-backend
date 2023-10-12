@@ -106,11 +106,11 @@ export type Selector<T, S> = {
 };
 
 export type RedisClientSelectorType = Selector<
-  RedisClientSelectorEnum,
+  RedisClientMode,
   redis.RedisClusterType
 >;
 
-export enum RedisClientSelectorEnum {
+export enum RedisClientMode {
   "ALL" = "ALL",
   "SAFE" = "SAFE",
   "FAST" = "FAST",
@@ -132,15 +132,15 @@ export const RedisClientSelector =
       appInsightsClient,
       false
     )(redisUrl, password, port);
-    const select = (t: RedisClientSelectorEnum) => {
+    const select = (t: RedisClientMode) => {
       switch (t) {
-        case RedisClientSelectorEnum.ALL: {
+        case RedisClientMode.ALL: {
           return [SAFE_REDIS_CLIENT, FAST_REDIS_CLIENT];
         }
-        case RedisClientSelectorEnum.SAFE: {
+        case RedisClientMode.SAFE: {
           return [SAFE_REDIS_CLIENT];
         }
-        case RedisClientSelectorEnum.FAST: {
+        case RedisClientMode.FAST: {
           return [FAST_REDIS_CLIENT];
         }
         default: {
