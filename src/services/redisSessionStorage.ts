@@ -864,7 +864,7 @@ export default class RedisSessionStorage
       TE.tryCatch(
         () =>
           this.redisClient
-            .selectOne(RedisClientSelectorEnum.FAST)
+            .selectOne(RedisClientSelectorEnum.SAFE)
             .get(`${lollipopDataPrefix}${fiscalCode}`),
         E.toError
       ),
@@ -908,7 +908,7 @@ export default class RedisSessionStorage
         // with the session validity it will invalidate this implementation.
         () =>
           this.redisClient
-            .selectOne(RedisClientSelectorEnum.FAST)
+            .selectOne(RedisClientSelectorEnum.SAFE)
             .ttl(`${lollipopDataPrefix}${fiscalCode}`),
         E.toError
       ),
