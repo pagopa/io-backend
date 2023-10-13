@@ -647,6 +647,12 @@ describe("SessionLockController#unlockUserAuthentication", () => {
     const response = await controller.unlockUserAuthentication(req);
     response.apply(res);
 
+    expect(response).toEqual(
+      expect.objectContaining({
+        detail: "Internal server error: Invalid unlock code",
+      })
+    );
+
     expect(res.status).toHaveBeenCalledWith(500);
 
     expect(getUserAuthenticationLockDataMock).toHaveBeenCalledWith(aFiscalCode);

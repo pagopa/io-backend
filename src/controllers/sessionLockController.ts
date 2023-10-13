@@ -44,6 +44,7 @@ import { TypeEnum as LoginTypeEnum } from "../../generated/session/SessionInfo";
 const ERROR_CHECK_USER_AUTH_LOCK =
   "Something went wrong while checking the user authentication lock";
 const ERROR_NO_USER_AUTH_LOCK = "No user authentication lock has been found";
+const ERROR_INVALID_UNLOCK_CODE = "Invalid unlock code";
 
 export const withUnlockCodeParams = async <T>(
   req: express.Request,
@@ -281,7 +282,7 @@ export default class SessionLockController {
             ({ maybeUnlockCode, authLockData }) =>
               O.isNone(maybeUnlockCode) ||
               maybeUnlockCode.value === authLockData.value.rowKey,
-            () => ResponseErrorInternal(ERROR_NO_USER_AUTH_LOCK)
+            () => ResponseErrorInternal(ERROR_INVALID_UNLOCK_CODE)
           ),
           TE.chainW(({ authLockData }) =>
             pipe(
