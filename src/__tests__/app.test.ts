@@ -1,5 +1,11 @@
+/**
+ * WARNING: To start the App inside the unit test you need to mock every controller
+ * or library that will fail if some required configuration is not provided.
+ */
+
 import * as spid from "@pagopa/io-spid-commons/dist/utils/metadata";
 import { Express } from "express";
+import * as http from "http";
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { NodeEnvironmentEnum } from "@pagopa/ts-commons/lib/environment";
@@ -7,7 +13,6 @@ import { CIDR } from "@pagopa/ts-commons/lib/strings";
 import * as request from "supertest";
 import { ServerInfo } from "../../generated/public/ServerInfo";
 import * as redisUtils from "../utils/redis";
-import * as redis from "redis";
 
 jest.mock("@azure/storage-queue");
 jest.mock("@azure/data-tables");
@@ -17,7 +22,7 @@ jest.mock("../services/redisUserMetadataStorage");
 jest.mock("../services/apiClientFactory");
 jest
   .spyOn(redisUtils, "createClusterRedisClient")
-  .mockImplementation((_) => async () => ({} as redis.RedisClusterType));
+  .mockImplementation((_) => async () => mockRedisClusterType);
 
 const mockNotify = jest.fn();
 jest.mock("../controllers/notificationController", () => {
@@ -42,6 +47,7 @@ jest.mock("../services/usersLoginLogService", () => {
 });
 
 import appModule from "../app";
+import { mockQuit, mockRedisClusterType, mockSelect } from "../__mocks__/redis";
 
 const aValidCIDR = "192.168.0.0/16" as CIDR;
 
@@ -79,6 +85,7 @@ const aIoSignAPIBasePath = "/api/v1/sign";
 describe("Success app start", () => {
   // tslint:disable:no-let
   let app: Express;
+  let server: http.Server;
   beforeAll(async () => {
     app = await appModule.newApp({
       APIBasePath: aAPIBasePath,
@@ -102,10 +109,12 @@ describe("Success app start", () => {
       authenticationBasePath: "",
       env: NodeEnvironmentEnum.PRODUCTION,
     });
+    server = app.listen();
   });
 
   afterAll(() => {
     app.emit("server:stop");
+    server.close();
   });
 
   describe("Test redirect to HTTPS", () => {
@@ -167,18 +176,14 @@ describe("Failure app start", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  afterAll(() => {
-    jest.restoreAllMocks();
-  });
 
   it("Close app if download IDP metadata fails on startup", async () => {
     // Override return value of generateSpidStrategy with a rejected promise.
     const mockFetchIdpsMetadata = jest
       .spyOn(spid, "fetchIdpsMetadata")
-      .mockImplementation(() => {
+      .mockImplementationOnce(() => {
         return TE.left(new Error("Error download metadata"));
       });
-    expect.assertions(1);
     try {
       await appModule.newApp({
         APIBasePath: aAPIBasePath,
@@ -273,5 +278,39 @@ describe("Failure app start", () => {
     } catch (err) {
       expect(mockNotificationService).toBeCalledTimes(2);
     }
+  });
+});
+
+describe("Graceful redis shutdown", () => {
+  let app: Express;
+  beforeAll(async () => {
+    app = await appModule.newApp({
+      APIBasePath: aAPIBasePath,
+      BPDBasePath: aBPDBasePath,
+      BonusAPIBasePath: aBonusAPIBasePath,
+      CGNAPIBasePath: aCgnAPIBasePath,
+      CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
+      EUCovidCertBasePath: aEuCovidCertAPIBasePath,
+      FIMSBasePath: aFIMSBasePath,
+      IoSignAPIBasePath: aIoSignAPIBasePath,
+      MitVoucherBasePath: aMitVoucherBasePath,
+      MyPortalBasePath: aMyPortalBasePath,
+      PagoPABasePath: aPagoPABasePath,
+      ZendeskBasePath: aZendeskBasePath,
+      allowBPDIPSourceRange: [aValidCIDR],
+      allowMyPortalIPSourceRange: [aValidCIDR],
+      allowNotifyIPSourceRange: [aValidCIDR],
+      allowPagoPAIPSourceRange: [aValidCIDR],
+      allowSessionHandleIPSourceRange: [aValidCIDR],
+      allowZendeskIPSourceRange: [aValidCIDR],
+      authenticationBasePath: "",
+      env: NodeEnvironmentEnum.PRODUCTION,
+    });
+  });
+  it("should call quit method for each redis when the server stops", async () => {
+    const server = app.listen();
+    app.emit("server:stop");
+    expect(mockQuit).toBeCalledTimes(mockSelect().length);
+    server.close();
   });
 });

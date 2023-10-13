@@ -1,4 +1,5 @@
 import { RedisClientSelectorType } from "../utils/redis";
+import * as redis from "redis";
 
 export const mockGet = jest.fn();
 export const mockSet = jest.fn();
@@ -11,7 +12,8 @@ export const mockTtl = jest.fn();
 export const mockExists = jest.fn();
 export const mockDel = jest.fn();
 export const mockSadd = jest.fn();
-export const mockSelectOne = jest.fn().mockImplementation(() => ({
+export const mockQuit = jest.fn().mockResolvedValue(void 0);
+export const mockRedisClusterType = {
   set: mockSet,
   setEx: mockSetEx,
   get: mockGet,
@@ -23,7 +25,15 @@ export const mockSelectOne = jest.fn().mockImplementation(() => ({
   sIsMember: mockSismember,
   ttl: mockTtl,
   exists: mockExists,
-}));
+  quit: mockQuit,
+} as unknown as redis.RedisClusterType;
+export const mockSelect = jest
+  .fn()
+  .mockImplementation(() => [mockRedisClusterType, mockRedisClusterType]);
+export const mockSelectOne = jest
+  .fn()
+  .mockImplementation(() => mockRedisClusterType);
 export const mockRedisClientSelector = {
+  select: mockSelect,
   selectOne: mockSelectOne,
 } as unknown as RedisClientSelectorType;

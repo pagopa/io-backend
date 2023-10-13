@@ -161,8 +161,6 @@ newApp({
       });
     }
     server.on("close", () => {
-      app.emit("server:stop");
-
       // If an AppInsights Client is initialized, flush all pending data and reset the configuration.
       pipe(
         maybeAppInsightsClient,
