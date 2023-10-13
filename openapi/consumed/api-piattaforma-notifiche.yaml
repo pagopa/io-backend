@@ -555,6 +555,9 @@ components:
         url:
           minLength: 1
           type: string
+        category:
+          type: string
+          default: DOCUMENT
     IOReceivedNotification:
       required:
       - iun

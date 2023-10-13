@@ -360,6 +360,9 @@ components:
         url:
           minLength: 1
           type: string
+        category:
+          type: string
+          default: DOCUMENT
     ProblemJson:
       type: object
       properties:
