@@ -34,8 +34,16 @@ import { withFiscalCodeFromRequestParams } from "../types/fiscalCode";
 import RedisSessionStorage from "../services/redisSessionStorage";
 import RedisUserMetadataStorage from "../services/redisUserMetadataStorage";
 import AuthenticationLockService from "../services/authenticationLockService";
+
 import { UserSessionInfo } from "../../generated/session/UserSessionInfo";
 import { AuthLockBody } from "../../generated/session/AuthLockBody";
+import { AuthUnlockBody } from "../../generated/session/AuthUnlockBody";
+import { SessionState } from "../../generated/session/SessionState";
+import { TypeEnum as LoginTypeEnum } from "../../generated/session/SessionInfo";
+
+const ERROR_CHECK_USER_AUTH_LOCK =
+  "Something went wrong while checking the user authentication lock";
+const ERROR_NO_USER_AUTH_LOCK = "No user authentication lock has been found";
 
 export const withUnlockCodeParams = async <T>(
   req: express.Request,
@@ -44,8 +52,16 @@ export const withUnlockCodeParams = async <T>(
   withValidatedOrValidationError(AuthLockBody.decode(req.body), (unlockCode) =>
     f(unlockCode)
   );
-import { SessionState } from "../../generated/session/SessionState";
-import { TypeEnum as LoginTypeEnum } from "../../generated/session/SessionInfo";
+
+// TODO: change Decoder
+export const withAuthUnlockBodyParams = async <T>(
+  req: express.Request,
+  f: (authLockBody: AuthUnlockBody) => Promise<T>
+) =>
+  withValidatedOrValidationError(
+    AuthUnlockBody.decode(req.body),
+    (unlockCode) => f(unlockCode)
+  );
 
 export default class SessionLockController {
   constructor(
@@ -211,11 +227,7 @@ export default class SessionLockController {
         pipe(
           // lock the authentication
           this.authenticationLockService.isUserAuthenticationLocked(fiscalCode),
-          TE.mapLeft((_) =>
-            ResponseErrorInternal(
-              "Something went wrong while checking the user authentication lock"
-            )
-          ),
+          TE.mapLeft((_) => ResponseErrorInternal(ERROR_CHECK_USER_AUTH_LOCK)),
           TE.filterOrElseW(
             (isUserAuthenticationLocked) => !isUserAuthenticationLocked,
             () =>
@@ -237,6 +249,54 @@ export default class SessionLockController {
               TE.mapLeft((err) => ResponseErrorInternal(err.message))
             )
           ),
+          TE.map((_) => ResponseNoContent()),
+          TE.toUnion
+        )()
+      )
+    );
+
+  /**
+   * Lock a user authentication and clear all its session data
+   *
+   * @param req expects fiscal_code as a path param
+   *
+   * @returns a promise with the encoded response object
+   */
+  public readonly unlockUserAuthentication = (
+    req: express.Request
+  ): Promise<
+    IResponseErrorInternal | IResponseErrorValidation | IResponseNoContent
+  > =>
+    withFiscalCodeFromRequestParams(req, (fiscalCode) =>
+      withAuthUnlockBodyParams(req, (authUnlockBody) =>
+        pipe(
+          authUnlockBody.unlock_code,
+          O.fromNullable,
+          TE.of,
+          TE.bindTo("maybeUnlockCode"),
+          TE.bind("authLockData", () =>
+            this.getAuthLockDataOrError(fiscalCode)
+          ),
+          TE.filterOrElse(
+            ({ maybeUnlockCode, authLockData }) =>
+              O.isNone(maybeUnlockCode) ||
+              maybeUnlockCode.value === authLockData.value.rowKey,
+            () => ResponseErrorInternal(ERROR_NO_USER_AUTH_LOCK)
+          ),
+          TE.chainW(({ authLockData }) =>
+            pipe(
+              this.authenticationLockService.unlockUserAuthentication(
+                fiscalCode,
+                authLockData.value.rowKey
+              ),
+              TE.mapLeft(() =>
+                ResponseErrorInternal(
+                  "Error releasing user authentication lock"
+                )
+              )
+            )
+          ),
+
           TE.map((_) => ResponseNoContent()),
           TE.toUnion
         )()
@@ -347,4 +407,17 @@ export default class SessionLockController {
         TE.chain(TE.fromEither)
       ),
     ] as const;
+
+  /**
+   * Retrieve user authentication lock data, or return an error
+   */
+  private getAuthLockDataOrError(fiscalCode: FiscalCode) {
+    return pipe(
+      this.authenticationLockService.getUserAuthenticationLockData(fiscalCode),
+      TE.mapLeft((_) => ResponseErrorInternal(ERROR_CHECK_USER_AUTH_LOCK)),
+      TE.filterOrElseW(O.isSome, () =>
+        ResponseErrorInternal(ERROR_NO_USER_AUTH_LOCK)
+      )
+    );
+  }
 }
