@@ -189,7 +189,7 @@
       "**/__tests__/*.ts"
     ],
     "coverageDirectory": "./coverage/",
-    "collectCoverage": false,
+    "collectCoverage": true,
     "collectCoverageFrom": [
       "src/**/*.ts",
       "!src/clients/api/*.ts",
