@@ -3,6 +3,7 @@ import * as O from "fp-ts/Option";
 import { aFiscalCode } from "../../__mocks__/user_mock";
 import AuthenticationLockService from "../authenticationLockService";
 import {
+  anUnlockCode,
   brokeEntityProfileLockedRecordIterator,
   createEntityMock,
   errorProfileLockedRecordIterator,
@@ -80,7 +81,10 @@ describe("AuthenticationLockService#getUserAuthenticationLockData", () => {
   it("should return O.none if query returns no records from table storage", async () => {
     const service = new AuthenticationLockService(lockedProfileTableClient);
 
-    const result = await service.getUserAuthenticationLockData(aFiscalCode)();
+    const result = await service.getUserAuthenticationLockData(
+      aFiscalCode,
+      O.none
+    )();
 
     expect(result).toEqual(E.right(O.none));
     expect(listLockedProfileEntitiesMock).toHaveBeenCalledWith({
@@ -90,17 +94,46 @@ describe("AuthenticationLockService#getUserAuthenticationLockData", () => {
     });
   });
 
-  it("should return O.some with the first record, if one or more not Released records are found it table storage", async () => {
+  it("should return O.none if query results' unlock code (rowKey) do not match with input", async () => {
     listLockedProfileEntitiesMock.mockImplementationOnce(
       profileLockedRecordIterator
     );
-
     const service = new AuthenticationLockService(lockedProfileTableClient);
 
-    const result = await service.getUserAuthenticationLockData(aFiscalCode)();
+    const result = await service.getUserAuthenticationLockData(
+      aFiscalCode,
+      O.some("987654321" as UnlockCode)
+    )();
 
-    expect(result).toEqual(E.right(O.some(aNotReleasedData)));
+    expect(result).toEqual(E.right(O.none));
+    expect(listLockedProfileEntitiesMock).toHaveBeenCalledWith({
+      queryOptions: {
+        filter: `PartitionKey eq '${aFiscalCode}' and not Released`,
+      },
+    });
   });
+
+  it.each`
+    title                                          | inputUnlockCode
+    ${"when no unlock code input is passed"}       | ${O.none}
+    ${"when matching unlock code input is passed"} | ${O.some(anUnlockCode)}
+  `(
+    "should return O.some with the first record, if one or more not Released records are found it table storage $title",
+    async ({ inputUnlockCode }) => {
+      listLockedProfileEntitiesMock.mockImplementationOnce(
+        profileLockedRecordIterator
+      );
+
+      const service = new AuthenticationLockService(lockedProfileTableClient);
+
+      const result = await service.getUserAuthenticationLockData(
+        aFiscalCode,
+        inputUnlockCode
+      )();
+
+      expect(result).toEqual(E.right(O.some(aNotReleasedData)));
+    }
+  );
 
   it("should return an error if something went wrong retrieving the records", async () => {
     listLockedProfileEntitiesMock.mockImplementationOnce(
@@ -109,7 +142,10 @@ describe("AuthenticationLockService#getUserAuthenticationLockData", () => {
 
     const service = new AuthenticationLockService(lockedProfileTableClient);
 
-    const result = await service.getUserAuthenticationLockData(aFiscalCode)();
+    const result = await service.getUserAuthenticationLockData(
+      aFiscalCode,
+      O.none
+    )();
 
     expect(result).toEqual(E.left(Error("an Error")));
   });
@@ -121,7 +157,10 @@ describe("AuthenticationLockService#getUserAuthenticationLockData", () => {
 
     const service = new AuthenticationLockService(lockedProfileTableClient);
 
-    const result = await service.getUserAuthenticationLockData(aFiscalCode)();
+    const result = await service.getUserAuthenticationLockData(
+      aFiscalCode,
+      O.none
+    )();
 
     expect(result).toEqual(
       E.left(

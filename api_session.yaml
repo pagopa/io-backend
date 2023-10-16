@@ -163,6 +163,8 @@ paths:
       responses:
         "204":
           description: Lock successfully released.
+        "403":
+          description: Operation forbidden.
         "400":
           description: Bad request
           schema:

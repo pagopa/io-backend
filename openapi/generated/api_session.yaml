@@ -173,6 +173,8 @@ paths:
           description: Token null or invalid.
           schema:
             $ref: '#/definitions/ProblemJson'
+        '403':
+          description: Operation forbidden.
         '500':
           description: There was an error
           schema:

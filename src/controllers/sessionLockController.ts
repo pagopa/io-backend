@@ -5,10 +5,12 @@
 import * as express from "express";
 import {
   IResponseErrorConflict,
+  IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
   IResponseErrorValidation,
   IResponseSuccessJson,
   ResponseErrorConflict,
+  ResponseErrorForbiddenNotAuthorized,
   ResponseErrorInternal,
   ResponseErrorValidation,
   ResponseSuccessJson,
@@ -40,11 +42,10 @@ import { AuthLockBody } from "../../generated/session/AuthLockBody";
 import { AuthUnlockBody } from "../../generated/session/AuthUnlockBody";
 import { SessionState } from "../../generated/session/SessionState";
 import { TypeEnum as LoginTypeEnum } from "../../generated/session/SessionInfo";
+import { UnlockCode } from "../../generated/session/UnlockCode";
 
 const ERROR_CHECK_USER_AUTH_LOCK =
   "Something went wrong while checking the user authentication lock";
-const ERROR_NO_USER_AUTH_LOCK = "No user authentication lock has been found";
-const ERROR_INVALID_UNLOCK_CODE = "Invalid unlock code";
 
 export const withUnlockCodeParams = async <T>(
   req: express.Request,
@@ -266,7 +267,10 @@ export default class SessionLockController {
   public readonly unlockUserAuthentication = (
     req: express.Request
   ): Promise<
-    IResponseErrorInternal | IResponseErrorValidation | IResponseNoContent
+    | IResponseErrorInternal
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorValidation
+    | IResponseNoContent
   > =>
     withFiscalCodeFromRequestParams(req, (fiscalCode) =>
       withAuthUnlockBodyParams(req, (authUnlockBody) =>
@@ -274,17 +278,11 @@ export default class SessionLockController {
           authUnlockBody.unlock_code,
           O.fromNullable,
           TE.of,
-          TE.bindTo("maybeUnlockCode"),
-          TE.bind("authLockData", () =>
-            this.getAuthLockDataOrError(fiscalCode)
+          TE.chain((maybeUnlockCode) =>
+            this.getAuthLockDataOrError(fiscalCode, maybeUnlockCode)
           ),
-          TE.filterOrElse(
-            ({ maybeUnlockCode, authLockData }) =>
-              O.isNone(maybeUnlockCode) ||
-              maybeUnlockCode.value === authLockData.value.rowKey,
-            () => ResponseErrorInternal(ERROR_INVALID_UNLOCK_CODE)
-          ),
-          TE.chainW(({ authLockData }) =>
+          TE.filterOrElseW(O.isSome, () => ResponseErrorForbiddenNotAuthorized),
+          TE.chainW((authLockData) =>
             pipe(
               this.authenticationLockService.unlockUserAuthentication(
                 fiscalCode,
@@ -412,13 +410,16 @@ export default class SessionLockController {
   /**
    * Retrieve user authentication lock data, or return an error
    */
-  private getAuthLockDataOrError(fiscalCode: FiscalCode) {
+  private getAuthLockDataOrError(
+    fiscalCode: FiscalCode,
+    unlockCode: O.Option<UnlockCode>
+  ) {
     return pipe(
-      this.authenticationLockService.getUserAuthenticationLockData(fiscalCode),
-      TE.mapLeft((_) => ResponseErrorInternal(ERROR_CHECK_USER_AUTH_LOCK)),
-      TE.filterOrElseW(O.isSome, () =>
-        ResponseErrorInternal(ERROR_NO_USER_AUTH_LOCK)
-      )
+      this.authenticationLockService.getUserAuthenticationLockData(
+        fiscalCode,
+        unlockCode
+      ),
+      TE.mapLeft((_) => ResponseErrorInternal(ERROR_CHECK_USER_AUTH_LOCK))
     );
   }
 }

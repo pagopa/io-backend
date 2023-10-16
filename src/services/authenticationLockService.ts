@@ -7,10 +7,11 @@ import { TableClient, odata } from "@azure/data-tables";
 
 import * as t from "io-ts";
 
-import { flow, pipe } from "fp-ts/lib/function";
+import { flow, identity, pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/Option";
+import * as ROA from "fp-ts/ReadonlyArray";
 
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { DateFromString } from "@pagopa/ts-commons/lib/dates";
@@ -40,11 +41,10 @@ export default class AuthenticationLockService {
    * @param fiscalCode the user fiscal code
    * @returns true if user authentication is locked, false otherwise
    */
-  public readonly isUserAuthenticationLocked = (fiscalCode: FiscalCode) =>
-    pipe(
-      this.getUserAuthenticationLocks(fiscalCode),
-      TE.map((entities) => entities.length > 0)
-    );
+  public readonly isUserAuthenticationLocked = (
+    fiscalCode: FiscalCode
+  ): TE.TaskEither<Error, boolean> =>
+    pipe(this.getUserAuthenticationLocks(fiscalCode), TE.map(ROA.isNonEmpty));
 
   /**
    * Retrieve the user authentication lock data with unlockCode
@@ -52,11 +52,18 @@ export default class AuthenticationLockService {
    * @param fiscalCode the user fiscal code
    * @returns the user authentication lock data, if exists
    */
-  public readonly getUserAuthenticationLockData = (fiscalCode: FiscalCode) =>
+  public readonly getUserAuthenticationLockData = (
+    fiscalCode: FiscalCode,
+    unlockCode: O.Option<UnlockCode>
+  ): TE.TaskEither<Error, O.Option<NotReleasedAuthenticationLockData>> =>
     pipe(
       this.getUserAuthenticationLocks(fiscalCode),
-      TE.map((entities) => entities.at(0)),
-      TE.map(O.fromNullable)
+      TE.map(
+        O.isSome(unlockCode)
+          ? ROA.filter((e) => e.rowKey === unlockCode.value)
+          : identity
+      ),
+      TE.map(ROA.head)
     );
 
   /**
