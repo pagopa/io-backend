@@ -5,7 +5,6 @@
 
 import * as spid from "@pagopa/io-spid-commons/dist/utils/metadata";
 import { Express } from "express";
-import * as http from "http";
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { NodeEnvironmentEnum } from "@pagopa/ts-commons/lib/environment";
@@ -85,7 +84,6 @@ const aIoSignAPIBasePath = "/api/v1/sign";
 describe("Success app start", () => {
   // tslint:disable:no-let
   let app: Express;
-  let server: http.Server;
   beforeAll(async () => {
     app = await appModule.newApp({
       APIBasePath: aAPIBasePath,
@@ -109,12 +107,10 @@ describe("Success app start", () => {
       authenticationBasePath: "",
       env: NodeEnvironmentEnum.PRODUCTION,
     });
-    server = app.listen();
   });
 
   afterAll(() => {
     app.emit("server:stop");
-    server.close();
   });
 
   describe("Test redirect to HTTPS", () => {
@@ -137,8 +133,8 @@ describe("Success app start", () => {
     });
   });
 
-  describe("Test the checkIP middleware", () => {
-    /*  it("should allow in-range IP", () => {
+  /* describe("Test the checkIP middleware", () => {
+    it("should allow in-range IP", () => {
       mockNotify.mockReturnValue(
         Promise.resolve(ResponseSuccessJson({ message: "ok" }))
       );
@@ -150,16 +146,16 @@ describe("Success app start", () => {
         .set("X-Client-Ip", "1.1.1.1")
         .set("X-Forwarded-For", "192.168.1.2")
         .expect(200);
-    }); */
-    /* it("should block not in-range IP", () => {
+    });
+    it("should block not in-range IP", () => {
       return request(app)
         .post("/api/v1/notify")
         .send(aValidNotification)
         .set(X_FORWARDED_PROTO_HEADER, "https")
         .set("X-Client-Ip", "192.0.0.0")
         .expect(401);
-    }); */
-  });
+    });
+  });*/
 
   describe("GET /info", () => {
     it("Get info and verify ServerInfo format", async () => {
@@ -168,6 +164,13 @@ describe("Success app start", () => {
         .set(X_FORWARDED_PROTO_HEADER, "https")
         .expect(200);
       expect(E.isRight(ServerInfo.decode(response.body)));
+    });
+  });
+
+  describe("Graceful redis shutdown", () => {
+    it("should call quit method for each redis when the server stops", async () => {
+      app.emit("server:stop");
+      expect(mockQuit).toBeCalledTimes(mockSelect().length);
     });
   });
 });
@@ -181,9 +184,10 @@ describe("Failure app start", () => {
     // Override return value of generateSpidStrategy with a rejected promise.
     const mockFetchIdpsMetadata = jest
       .spyOn(spid, "fetchIdpsMetadata")
-      .mockImplementationOnce(() => {
+      .mockImplementation(() => {
         return TE.left(new Error("Error download metadata"));
       });
+    expect.assertions(1);
     try {
       await appModule.newApp({
         APIBasePath: aAPIBasePath,
@@ -278,39 +282,5 @@ describe("Failure app start", () => {
     } catch (err) {
       expect(mockNotificationService).toBeCalledTimes(2);
     }
-  });
-});
-
-describe("Graceful redis shutdown", () => {
-  let app: Express;
-  beforeAll(async () => {
-    app = await appModule.newApp({
-      APIBasePath: aAPIBasePath,
-      BPDBasePath: aBPDBasePath,
-      BonusAPIBasePath: aBonusAPIBasePath,
-      CGNAPIBasePath: aCgnAPIBasePath,
-      CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
-      EUCovidCertBasePath: aEuCovidCertAPIBasePath,
-      FIMSBasePath: aFIMSBasePath,
-      IoSignAPIBasePath: aIoSignAPIBasePath,
-      MitVoucherBasePath: aMitVoucherBasePath,
-      MyPortalBasePath: aMyPortalBasePath,
-      PagoPABasePath: aPagoPABasePath,
-      ZendeskBasePath: aZendeskBasePath,
-      allowBPDIPSourceRange: [aValidCIDR],
-      allowMyPortalIPSourceRange: [aValidCIDR],
-      allowNotifyIPSourceRange: [aValidCIDR],
-      allowPagoPAIPSourceRange: [aValidCIDR],
-      allowSessionHandleIPSourceRange: [aValidCIDR],
-      allowZendeskIPSourceRange: [aValidCIDR],
-      authenticationBasePath: "",
-      env: NodeEnvironmentEnum.PRODUCTION,
-    });
-  });
-  it("should call quit method for each redis when the server stops", async () => {
-    const server = app.listen();
-    app.emit("server:stop");
-    expect(mockQuit).toBeCalledTimes(mockSelect().length);
-    server.close();
   });
 });
