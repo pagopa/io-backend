@@ -151,7 +151,7 @@ paths:
       operationId: releaseAuthLock
       description: |-
         Release the user authentication lock for the IO app.
-        This is intended to use with ioweb-profile lock functionality.
+        This is intended to use with ioweb-profile unlock functionality.
       parameters:
         - $ref: "#/parameters/FiscalCode"
         - $ref: "#/parameters/Token"
@@ -162,7 +162,7 @@ paths:
             $ref: "#/definitions/AuthUnlockBody"
       responses:
         "204":
-          description: Lock created.
+          description: Lock successfully released.
         "400":
           description: Bad request
           schema:

@@ -209,7 +209,7 @@ export default class SessionLockController {
     )();
 
   /**
-   * Lock a user authentication and clear all its session data
+   * Release a lock previously set by the user
    *
    * @param req expects fiscal_code as a path param
    *
