@@ -131,7 +131,7 @@ export default class AuthenticationLockService {
       }),
       AI.fromAsyncIterable,
       AI.foldTaskEither(E.toError),
-      TE.chainEitherKW(
+      TE.chainEitherK(
         flow(
           t.array(NotReleasedAuthenticationLockData).decode,
           E.mapLeft(errorsToError)
