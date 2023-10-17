@@ -22,31 +22,21 @@ import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import * as crypto from "crypto";
 import { Second } from "@pagopa/ts-commons/lib/units";
 import { anAssertionRef } from "../../__mocks__/lollipop";
-import { RedisClientType } from "redis";
+import {
+  mockExists,
+  mockGet,
+  mockRedisClientSelector,
+  mockSet,
+  mockSmembers,
+  mockSrem,
+  mockTtl,
+} from "../../__mocks__/redis";
 
 const aTokenDurationSecs = 3600;
 const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
-const mockGet = jest.fn();
-const mockSet = jest.fn();
-const mockMget = jest.fn();
-const mockSmembers = jest.fn();
-const mockSismember = jest.fn();
-const mockSrem = jest.fn();
-const mockTtl = jest.fn();
-const mockExists = jest.fn();
-const mockRedisClient = {
-  get: mockGet,
-  mGet: mockMget,
-  sMembers: mockSmembers.mockImplementation((_) =>
-    Promise.resolve([`SESSIONINFO-${mockedUser.session_token}`])
-  ),
-  sIsMember: mockSismember,
-  ttl: mockTtl,
-  set: mockSet,
-  sRem: mockSrem,
-  setEx: mockSet,
-  exists: mockExists,
-} as unknown as RedisClientType;
+mockSmembers.mockImplementation((_) =>
+  Promise.resolve([`SESSIONINFO-${mockedUser.session_token}`])
+);
 
 const mockGetProfile = jest.fn();
 jest.mock("../../services/profileService", () => {
@@ -74,7 +64,7 @@ const mockGetNewToken = jest.spyOn(tokenService, "getNewToken");
 
 const controller = new SessionController(
   new RedisSessionStorage(
-    mockRedisClient,
+    mockRedisClientSelector,
     aTokenDurationSecs,
     aDefaultLollipopAssertionRefDurationSec
   ),
