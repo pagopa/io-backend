@@ -33,6 +33,96 @@ tags:
 - name: AppIO-PN-LegalFacts
   description: Notification Legal Facts
 paths:
+  ext-registry-private/io/v1/notification-disclaimer/{iun}:
+    get:
+      tags:
+      - AppIO-PN-Notification
+      summary: Returns the AppIo user activation status
+      description: Returns the AppIo user activation status
+      parameters:
+      - name: iun
+        in: path
+        description: Identificativo Univoco Notifica
+        required: true
+        schema:
+          type: string
+      - name: x-pagopa-cx-taxid
+        in: header
+        description: "Customer taxId, used in B2B AppIO."
+        required: true
+        schema:
+          maxLength: 16
+          minLength: 16
+          pattern: "^[A-Z]{6}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{3}[A-Z]{1}"
+          type: string
+      - name: x-pagopa-lollipop-original-method
+        in: header
+        description: The method of the endpoint called by IO app
+        schema:
+          $ref: "#/components/schemas/LollipopMethod"
+      - name: x-pagopa-lollipop-original-url
+        in: header
+        description: The url of the endpoint called by IO app
+        schema:
+          $ref: "#/components/schemas/LollipopOriginalURL"
+      - name: signature-input
+        in: header
+        description: The signature input, needed to verify the `signature` header
+        schema:
+          $ref: "#/components/schemas/LollipopSignatureInput"
+      - name: signature
+        in: header
+        description: The signature of the HTTP request, signed by the client with its private key.
+        schema:
+          $ref: "#/components/schemas/LollipopSignature"
+      - name: x-pagopa-lollipop-assertion-ref
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopAssertionRef"
+      - name: x-pagopa-lollipop-assertion-type
+        in: header
+        schema:
+          $ref: "#/components/schemas/AssertionType"
+      - name: x-pagopa-lollipop-auth-jwt
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopJWTAuthorization"
+      - name: x-pagopa-lollipop-public-key
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopPublicKey"
+      - name: x-pagopa-lollipop-user-id
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopUserId"
+
+
+      operationId: getReceivedNotificationPrecondition
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PreconditionContent"
+        "400":
+          description: Bad request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "500":
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
   delivery/notifications/received/{iun}:
     get:
       tags:
@@ -201,44 +291,41 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  delivery-push/{iun}/legal-facts/{legalFactType}/{legalFactId}:
+  delivery/notifications/received/{iun}/attachments/payment/{attachmentName}:
     get:
       tags:
-      - AppIO-PN-LegalFacts
-      summary: Download atto opponibile a terzi
-      description: Permette di scaricare un atto opponibile a terzi
-      operationId: getLegalFact
+      - AppIO-PN-Payments
+      summary: Download allegato per pagamento
+      operationId: getReceivedNotificationAttachment
       parameters:
       - name: iun
         in: path
         description: Identificativo Univoco Notifica
         required: true
         schema:
+          maxLength: 25
+          minLength: 25
+          pattern: "^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$"
           type: string
-      - name: legalFactType
+      - name: attachmentName
         in: path
-        description: Categoria dell'atto opponibile a terzi
         required: true
         style: simple
         explode: false
         schema:
-          title: Tipi di atti opponibili a terzi
+          maxLength: 6
+          minLength: 3
+          pattern: PAGOPA|F24
           type: string
-          description: |-
-            Tipi di atti opponibili a terzi che Piattaforam Notiiche mette a disposizione dei suoi utenti.
-              - SENDER_ACK: atto di "presa in carico" di una notifica
-              - DIGITAL_DELIVERY: atto di consegna digitale
-              - ANALOG_DELIVERY: atto di consegna cartacea
-              - RECIPIENT_ACCESS: atto di consegna per avvenuto accesso alla piattaforma
-              - PEC_RECEIPT: ricevuta PEC
-      - name: legalFactId
-        in: path
-        description: Identificativo dell'atto opponibile a terzi
-        required: true
-        style: simple
-        explode: false
+      - name: attachmentIdx
+        in: query
+        description: indice del documento di pagamento partendo da 0
+        required: false
+        style: form
+        explode: true
         schema:
-          type: string
+          type: integer
+          format: int32
       - name: x-pagopa-cx-taxid
         in: header
         description: "Customer taxId, used in B2B AppIO."
@@ -288,111 +375,25 @@ paths:
         in: header
         schema:
           $ref: "#/components/schemas/LollipopUserId"
-
-
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LegalFactDownloadMetadataResponse'
+                $ref: '#/components/schemas/NotificationAttachmentDownloadMetadataResponse'
         "400":
           description: Bad request
           content:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  ext-registry-private/io/v1/notification-disclaimer/{iun}:
-    get:
-      tags:
-      - AppIO-PN-Notification
-      summary: Returns the AppIo user activation status
-      description: Returns the AppIo user activation status
-      parameters:
-      - name: iun
-        in: path
-        description: Identificativo Univoco Notifica
-        required: true
-        schema:
-          type: string
-      - name: x-pagopa-cx-taxid
-        in: header
-        description: "Customer taxId, used in B2B AppIO."
-        required: true
-        schema:
-          maxLength: 16
-          minLength: 16
-          pattern: "^[A-Z]{6}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{3}[A-Z]{1}"
-          type: string
-      - name: x-pagopa-lollipop-original-method
-        in: header
-        description: The method of the endpoint called by IO app
-        schema:
-          $ref: "#/components/schemas/LollipopMethod"
-      - name: x-pagopa-lollipop-original-url
-        in: header
-        description: The url of the endpoint called by IO app
-        schema:
-          $ref: "#/components/schemas/LollipopOriginalURL"
-      - name: signature-input
-        in: header
-        description: The signature input, needed to verify the `signature` header
-        schema:
-          $ref: "#/components/schemas/LollipopSignatureInput"
-      - name: signature
-        in: header
-        description: The signature of the HTTP request, signed by the client with its private key.
-        schema:
-          $ref: "#/components/schemas/LollipopSignature"
-      - name: x-pagopa-lollipop-assertion-ref
-        in: header
-        schema:
-          $ref: "#/components/schemas/LollipopAssertionRef"
-      - name: x-pagopa-lollipop-assertion-type
-        in: header
-        schema:
-          $ref: "#/components/schemas/AssertionType"
-      - name: x-pagopa-lollipop-auth-jwt
-        in: header
-        schema:
-          $ref: "#/components/schemas/LollipopJWTAuthorization"
-      - name: x-pagopa-lollipop-public-key
-        in: header
-        schema:
-          $ref: "#/components/schemas/LollipopPublicKey"
-      - name: x-pagopa-lollipop-user-id
-        in: header
-        schema:
-          $ref: "#/components/schemas/LollipopUserId"
-
-
-      operationId: getReceivedNotificationPrecondition
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PreconditionContent"
-        "400":
-          description: Bad request
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/Problem"
         "404":
           description: Not Found
           content:
             application/problem+json:
               schema:
-                $ref: "#/components/schemas/Problem"
-        "500":
-          description: Internal Server Error
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/Problem"
+                $ref: '#/components/schemas/Problem'
 components:
   schemas:
     PreconditionContent:
@@ -506,7 +507,7 @@ components:
           example: application/pdf
         contentLength:
           type: integer
-          description: "dmensione, in byte, del contenuto."
+          description: "dimensione, in byte, del contenuto."
           format: int32
           example: 54092
         sha256:

@@ -48,7 +48,8 @@ export const pathParamsFromUrl = (
               `Should not be here: input is a valid decodeTemplate but its execution failed!`
             )
           )
-        )
+        ),
+        E.map((a) => a.slice(1)) // remove the first element because it is the path itself and just return params
       ),
     encodeTemplate
   );

@@ -2,7 +2,7 @@ import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
 import * as T from "fp-ts/Task";
 import { createClient } from "../../../generated/third-party-service/client";
-import { errorResponse, pnFetch } from "../pnFetch";
+import { errorResponse, PnDocumentUrl, pnFetch, PnPaymentUrl } from "../pnFetch";
 import nodeFetch from "node-fetch";
 import { aFiscalCode } from "../../__mocks__/user_mock";
 import * as pnclient from "../../../src/clients/pn-clients";
@@ -75,6 +75,88 @@ describe("errorResponse", () => {
       status: 500,
       title: "Error fetching PN data",
     });
+  });
+});
+
+describe("types", () => {
+  it("GIVEN a pn document url WHEN it is good THEN decoder should go right", () => {
+    const aIun = "a-good-document-iun";
+    const aDocIdx = "a-doc-idx";
+    const thePNDocumentUrl = `/delivery/notifications/received/${aIun}/attachments/documents/${aDocIdx}`;
+
+    const decodedUrlOrError = PnDocumentUrl.decode(thePNDocumentUrl);
+
+    expect(E.isRight(decodedUrlOrError)).toBe(true);
+    if (E.isRight(decodedUrlOrError)) {
+      expect(decodedUrlOrError.right[0]).toBe(aIun);
+      expect(decodedUrlOrError.right[1]).toBe(aDocIdx);
+    }
+  });
+
+  it("GIVEN a pn document url WHEN it is not good THEN decoder should go left", () => {
+    const aWrongPNDocumentUrl = `/delivery/notifications/anythingelse`;
+
+    const decodedUrlOrError = PnDocumentUrl.decode(aWrongPNDocumentUrl);
+
+    expect(E.isRight(decodedUrlOrError)).toBe(false);
+  });
+
+  it("GIVEN a pn document url WHEN it is correctly decoded THEN encoder should return the same url", () => {
+    const aIun = "a-good-document-iun";
+    const aDocIdx = "a-doc-idx";
+    const thePNDocumentUrl = `/delivery/notifications/received/${aIun}/attachments/documents/${aDocIdx}`;
+
+    const decodedUrlOrError = PnDocumentUrl.decode(thePNDocumentUrl);
+
+    expect(E.isRight(decodedUrlOrError)).toBe(true);
+    if (E.isRight(decodedUrlOrError)) {
+      expect(PnDocumentUrl.encode(decodedUrlOrError.right)).toBe(
+        thePNDocumentUrl
+      );
+    }
+  });
+
+  it("GIVEN a pn payment url WHEN it is good THEN decoder should go right", () => {
+    const aIun = "a-good-document-iun";
+    const aDocName = "a-doc-name";
+    const aDocIdx = "a-doc-idx";
+    const thePNPaymentUrl = `/delivery/notifications/received/${aIun}/attachments/payment/${aDocName}/?attachmentIdx=${aDocIdx}`;
+
+
+    const decodedUrlOrError = PnPaymentUrl.decode(thePNPaymentUrl);
+
+    expect(E.isRight(decodedUrlOrError)).toBe(true);
+    if (E.isRight(decodedUrlOrError)) {
+      expect(decodedUrlOrError.right[0]).toBe(aIun);
+      expect(decodedUrlOrError.right[1]).toBe(aDocName);
+      expect(decodedUrlOrError.right[2]).toBe(aDocIdx);
+    }
+  });
+
+  it("GIVEN a pn payment url WHEN it is not good THEN decoder should go left", () => {
+    const aWrongPNPaymentUrl = `/delivery/notifications/anythingelse`;
+
+    const decodedUrlOrError = PnPaymentUrl.decode(aWrongPNPaymentUrl);
+
+    expect(E.isRight(decodedUrlOrError)).toBe(false);
+  });
+
+  it("GIVEN a pn payment url WHEN it is correctly decoded THEN encoder should return the same url", () => {
+    const aIun = "a-good-document-iun";
+    const aDocName = "a-doc-name";
+    const aDocIdx = "a-doc-idx";
+    const thePNPaymentUrl = `/delivery/notifications/received/${aIun}/attachments/payment/${aDocName}/?attachmentIdx=${aDocIdx}`;
+
+
+    const decodedUrlOrError = PnPaymentUrl.decode(thePNPaymentUrl);
+
+
+    expect(E.isRight(decodedUrlOrError)).toBe(true);
+    if (E.isRight(decodedUrlOrError)) {
+      expect(PnPaymentUrl.encode(decodedUrlOrError.right)).toBe(
+        thePNPaymentUrl
+      );
+    }
   });
 });
 
@@ -195,7 +277,8 @@ describe("getThirdPartyMessageDetails", () => {
           value: expect.objectContaining({
             details: expect.objectContaining({
               abstract: notificationDetailResponseExampleAsObject.abstract,
-              isCancelled: notificationDetailResponseExampleAsObject.isCancelled
+              isCancelled:
+                notificationDetailResponseExampleAsObject.isCancelled,
             }),
           }),
         })
