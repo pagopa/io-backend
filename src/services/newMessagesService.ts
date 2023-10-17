@@ -62,7 +62,8 @@ import { FileType, getIsFileTypeForTypes } from "../utils/file-type";
 const ALLOWED_TYPES: ReadonlySet<FileType> = new Set(["pdf"]);
 
 const ERROR_MESSAGE_500 = "Third Party Service failed with code 500";
-const ERROR_MESSAGE_503 = "Third Party Service unavailable with code 503, please retry later";
+const ERROR_MESSAGE_503 =
+  "Third Party Service unavailable with code 503, please retry later";
 const ERROR_MESSAGE_400 = "Bad request";
 
 export const MessageWithThirdPartyData = t.intersection([

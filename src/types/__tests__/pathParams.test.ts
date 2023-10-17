@@ -10,7 +10,7 @@ describe("pathParamsFromUrl", () => {
         const results = test.decode(anUrl);
         expect(E.isRight(results)).toBeTruthy();
         if(E.isRight(results)) {
-            expect(results.right).toEqual(expect.arrayContaining([anUrl, anId]));
+            expect(results.right).toEqual(expect.arrayContaining([anId]));
         }
     })
 

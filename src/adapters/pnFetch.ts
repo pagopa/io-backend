@@ -157,7 +157,7 @@ export const errorResponse = (error: Error): Response =>
       }) as unknown as Response // cast required: the same cast is used in clients code generation
   );
 
-export const retryResponse = (retryAfter: Number): Response =>
+export const retryResponse = (retryAfter: number): Response =>
   pipe(
     {
       detail: "Data is not ready yet",
@@ -167,9 +167,9 @@ export const retryResponse = (retryAfter: Number): Response =>
     ProblemJson.encode,
     (problem) =>
       new NodeResponse(JSON.stringify(problem), {
+        headers: { "Retry-After": `${retryAfter}` },
         status: problem.status,
         statusText: problem.title,
-        headers: { "Retry-After": `${retryAfter}` },
       }) as unknown as Response // cast required: the same cast is used in clients code generation
   );
 
@@ -443,9 +443,9 @@ export const redirectAttachment =
             pipe(
               attachment.url,
               NonEmptyString.decode,
-              E.map((url) =>
+              E.map((u) =>
                 pipe(
-                  TE.tryCatch(() => origFetch(url), E.toError),
+                  TE.tryCatch(() => origFetch(u), E.toError),
                   TE.chain(
                     TE.fromPredicate(
                       (r) => r.status === 200,
@@ -463,7 +463,7 @@ export const redirectAttachment =
                   t.number.decode,
                   E.mapLeft(errorsToError),
                   TE.fromEither,
-                  TE.map((retryAfter) => retryResponse(retryAfter))
+                  TE.map((r) => retryResponse(r))
                 )
               )
             )
