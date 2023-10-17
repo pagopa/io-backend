@@ -1,7 +1,6 @@
 import RedisSessionStorage from "../../services/redisSessionStorage";
 import * as E from "fp-ts/lib/Either";
 import * as RNEA from "fp-ts/lib/ReadonlyNonEmptyArray";
-import * as redis from "redis";
 import { aFiscalCode } from "../../__mocks__/user_mock";
 import TokenService from "../../services/tokenService";
 import { AssertionTypeEnum } from "../../../generated/lollipop-api/AssertionType";
@@ -35,6 +34,7 @@ import * as spidUtils from "../../utils/spid";
 import { pipe } from "fp-ts/lib/function";
 import { UserWithoutTokens } from "../../types/user";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
+import { mockRedisClientSelector } from "../../__mocks__/redis";
 
 const mockSet = jest.fn();
 const mockDel = jest.fn();
@@ -59,15 +59,13 @@ jest.mock("../../services/tokenService", () => {
   };
 });
 
-const redisClient = {} as redis.RedisClientType;
-
 const tokenService = new TokenService();
 const sessionTTL = 60 * 15;
 
 const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
 
 const redisSessionStorage = new RedisSessionStorage(
-  redisClient,
+  mockRedisClientSelector,
   sessionTTL,
   aDefaultLollipopAssertionRefDurationSec
 );

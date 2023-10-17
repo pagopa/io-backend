@@ -2,10 +2,9 @@ import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {
   ResponseErrorNotFound,
   ResponseSuccessAccepted,
-  ResponseSuccessJson
+  ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import * as E from "fp-ts/lib/Either";
-import * as redis from "redis";
 import { mockedUser } from "../../__mocks__/user_mock";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { ExtendedProfile } from "../../../generated/backend/ExtendedProfile";
@@ -14,7 +13,7 @@ import { IsInboxEnabled } from "../../../generated/backend/IsInboxEnabled";
 import { IsWebhookEnabled } from "../../../generated/backend/IsWebhookEnabled";
 import {
   PreferredLanguage,
-  PreferredLanguageEnum
+  PreferredLanguageEnum,
 } from "../../../generated/backend/PreferredLanguage";
 import { Profile } from "../../../generated/backend/Profile";
 import mockReq from "../../__mocks__/request";
@@ -30,6 +29,7 @@ import { AppVersion } from "../../../generated/backend/AppVersion";
 import { PushNotificationsContentTypeEnum } from "../../../generated/backend/PushNotificationsContentType";
 import { ReminderStatusEnum } from "../../../generated/backend/ReminderStatus";
 import { Second } from "@pagopa/ts-commons/lib/units";
+import { mockRedisClientSelector } from "../../__mocks__/redis";
 
 const aTimestamp = 1518010929530;
 
@@ -40,10 +40,10 @@ const aValidFamilyname = "Garibaldi";
 const anIsInboxEnabled = true as IsInboxEnabled;
 const anIsWebookEnabled = true as IsWebhookEnabled;
 const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
-  PreferredLanguageEnum.it_IT
+  PreferredLanguageEnum.it_IT,
 ];
 const aServicePreferencesSettings: ServicePreferencesSettings = {
-  mode: ServicesPreferencesModeEnum.AUTO
+  mode: ServicesPreferencesModeEnum.AUTO,
 };
 
 const proxyUserResponse = {
@@ -58,7 +58,7 @@ const proxyUserResponse = {
   preferredLanguages: aPreferredLanguages,
   spid_email: anEmailAddress,
   token: "123hexToken",
-  version: 1 as NonNegativeInteger
+  version: 1 as NonNegativeInteger,
 };
 
 const apiUserProfileResponse = {
@@ -67,7 +67,7 @@ const apiUserProfileResponse = {
   is_inbox_enabled: true,
   is_webhook_enabled: true,
   preferred_languages: ["it_IT"],
-  version: 42
+  version: 42,
 };
 
 // mock for upsert user (Extended Profile)
@@ -79,14 +79,14 @@ const mockedUpsertProfile: ExtendedProfile = {
   is_webhook_enabled: anIsWebookEnabled,
   preferred_languages: aPreferredLanguages,
   service_preferences_settings: aServicePreferencesSettings,
-  version: 1 as NonNegativeInteger
+  version: 1 as NonNegativeInteger,
 };
 
 const badRequestErrorResponse = {
   detail: expect.any(String),
   status: 400,
   title: expect.any(String),
-  type: undefined
+  type: undefined,
 };
 
 const mockGetProfile = jest.fn();
@@ -99,29 +99,27 @@ jest.mock("../../services/profileService", () => {
       emailValidationProcess: mockEmailValidationProcess,
       getApiProfile: mockGetApiProfile,
       getProfile: mockGetProfile,
-      updateProfile: mockUpdateProfile
-    }))
+      updateProfile: mockUpdateProfile,
+    })),
   };
 });
 
 const mockDelPagoPaNoticeEmail = jest
   .fn()
-  .mockImplementation(_ => Promise.resolve(E.right(true)));
+  .mockImplementation((_) => Promise.resolve(E.right(true)));
 
 jest.mock("../../services/redisSessionStorage", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
-      delPagoPaNoticeEmail: mockDelPagoPaNoticeEmail
-    }))
+      delPagoPaNoticeEmail: mockDelPagoPaNoticeEmail,
+    })),
   };
 });
-
-const redisClient = {} as redis.RedisClientType;
 
 const tokenDurationSecs = 0;
 const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
 const redisSessionStorage = new RedisSessionStorage(
-  redisClient,
+  mockRedisClientSelector,
   tokenDurationSecs,
   aDefaultLollipopAssertionRefDurationSec
 );
@@ -153,7 +151,7 @@ describe("ProfileController#getProfile", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: proxyUserResponse
+      value: proxyUserResponse,
     });
   });
 
@@ -173,7 +171,7 @@ describe("ProfileController#getProfile", () => {
         Promise.resolve(
           ResponseSuccessJson({
             ...proxyUserResponse,
-            [additionalProperty]: value
+            [additionalProperty]: value,
           })
         )
       );
@@ -195,8 +193,8 @@ describe("ProfileController#getProfile", () => {
         kind: "IResponseSuccessJson",
         value: {
           ...proxyUserResponse,
-          [additionalProperty]: value
-        }
+          [additionalProperty]: value,
+        },
       });
     }
   );
@@ -249,7 +247,7 @@ describe("ProfileController#getProfile", () => {
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
     expect(response).toEqual({
       ...profileMissingErrorResponse,
-      apply: expect.any(Function)
+      apply: expect.any(Function),
     });
   });
 });
@@ -280,7 +278,7 @@ describe("ProfileController#getApiProfile", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: apiUserProfileResponse
+      value: apiUserProfileResponse,
     });
   });
 
@@ -300,7 +298,7 @@ describe("ProfileController#getApiProfile", () => {
         Promise.resolve(
           ResponseSuccessJson({
             ...apiUserProfileResponse,
-            [additionalProperty]: value
+            [additionalProperty]: value,
           })
         )
       );
@@ -321,8 +319,8 @@ describe("ProfileController#getApiProfile", () => {
         kind: "IResponseSuccessJson",
         value: {
           ...apiUserProfileResponse,
-          [additionalProperty]: value
-        }
+          [additionalProperty]: value,
+        },
       });
     }
   );
@@ -348,7 +346,7 @@ describe("ProfileController#getApiProfile", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: apiUserProfileResponse
+      value: apiUserProfileResponse,
     });
   });
 
@@ -414,7 +412,7 @@ describe("ProfileController#upsertProfile", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: proxyUserResponse
+      value: proxyUserResponse,
     });
   });
 
@@ -434,7 +432,7 @@ describe("ProfileController#upsertProfile", () => {
         Promise.resolve(
           ResponseSuccessJson({
             ...proxyUserResponse,
-            [additionalProperty]: value
+            [additionalProperty]: value,
           })
         )
       );
@@ -442,7 +440,7 @@ describe("ProfileController#upsertProfile", () => {
       req.user = mockedUser;
       req.body = {
         ...mockedUpsertProfile,
-        [additionalProperty]: value
+        [additionalProperty]: value,
       };
 
       const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
@@ -468,8 +466,8 @@ describe("ProfileController#upsertProfile", () => {
         kind: "IResponseSuccessJson",
         value: {
           ...proxyUserResponse,
-          [additionalProperty]: value
-        }
+          [additionalProperty]: value,
+        },
       });
     }
   );
@@ -551,7 +549,7 @@ describe("ProfileController#startEmailValidationProcess", () => {
     expect(mockEmailValidationProcess).toHaveBeenCalledWith(mockedUser);
     expect(response).toEqual({
       apply: expect.any(Function),
-      kind: "IResponseSuccessAccepted"
+      kind: "IResponseSuccessAccepted",
     });
   });
 });

@@ -1,5 +1,3 @@
-import * as redis from "redis";
-
 import { PagoPAUser } from "../../../generated/pagopa/PagoPAUser";
 
 import mockReq from "../../__mocks__/request";
@@ -14,16 +12,17 @@ import PagoPAController from "../pagoPAController";
 import {
   aCustomEmailAddress,
   mockedInitializedProfile,
-  mockedUser
+  mockedUser,
 } from "../../__mocks__/user_mock";
 import { Second } from "@pagopa/ts-commons/lib/units";
+import { mockRedisClientSelector } from "../../__mocks__/redis";
 
 const proxyUserResponse: PagoPAUser = {
   family_name: mockedUser.family_name,
   fiscal_code: mockedUser.fiscal_code,
   name: mockedUser.name,
   notice_email: aCustomEmailAddress,
-  spid_email: mockedUser.spid_email
+  spid_email: mockedUser.spid_email,
 };
 
 const mockGetPagoPaNoticeEmail = jest
@@ -34,14 +33,14 @@ const mockGetPagoPaNoticeEmail = jest
 
 const mockSetPagoPaNoticeEmail = jest
   .fn()
-  .mockImplementation(_ => Promise.resolve(E.right(true)));
+  .mockImplementation((_) => Promise.resolve(E.right(true)));
 
 jest.mock("../../services/redisSessionStorage", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
       getPagoPaNoticeEmail: mockGetPagoPaNoticeEmail,
-      setPagoPaNoticeEmail: mockSetPagoPaNoticeEmail
-    }))
+      setPagoPaNoticeEmail: mockSetPagoPaNoticeEmail,
+    })),
   };
 });
 
@@ -49,17 +48,15 @@ const mockGetProfile = jest.fn();
 jest.mock("../../services/profileService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
-      getProfile: mockGetProfile
-    }))
+      getProfile: mockGetProfile,
+    })),
   };
 });
-
-const redisClient = {} as redis.RedisClientType;
 
 const tokenDurationSecs = 0;
 const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
 const redisSessionStorage = new RedisSessionStorage(
-  redisClient,
+  mockRedisClientSelector,
   tokenDurationSecs,
   aDefaultLollipopAssertionRefDurationSec
 );
@@ -97,7 +94,7 @@ describe("PagoPaController#getUser", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: proxyUserResponse
+      value: proxyUserResponse,
     });
   });
 
@@ -129,7 +126,7 @@ describe("PagoPaController#getUser", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: proxyUserResponse
+      value: proxyUserResponse,
     });
   });
 
@@ -157,7 +154,7 @@ describe("PagoPaController#getUser", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: proxyUserResponse
+      value: proxyUserResponse,
     });
   });
 
@@ -169,7 +166,7 @@ describe("PagoPaController#getUser", () => {
         // Return an InitializedProfile with non validated email
         ResponseSuccessJson({
           ...mockedInitializedProfile,
-          is_email_validated: false
+          is_email_validated: false,
         })
       )
     );
@@ -193,8 +190,8 @@ describe("PagoPaController#getUser", () => {
       // Custom Email is not provided becouse not yet validated
       value: {
         ...proxyUserResponse,
-        notice_email: mockedUser.spid_email
-      }
+        notice_email: mockedUser.spid_email,
+      },
     });
   });
 
@@ -206,7 +203,7 @@ describe("PagoPaController#getUser", () => {
         // Return an InitializedProfile with non validated email
         ResponseSuccessJson({
           ...mockedInitializedProfile,
-          is_email_validated: false
+          is_email_validated: false,
         })
       )
     );
@@ -214,7 +211,7 @@ describe("PagoPaController#getUser", () => {
     // A session user info without spid email available
     const notSpidUserSessionUser: User = {
       ...mockedUser,
-      spid_email: undefined
+      spid_email: undefined,
     };
     // tslint:disable-next-line: no-object-mutation
     req.user = notSpidUserSessionUser;
@@ -232,7 +229,7 @@ describe("PagoPaController#getUser", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       detail: "Validation Error: Invalid User Data",
-      kind: "IResponseErrorValidation"
+      kind: "IResponseErrorValidation",
     });
   });
 });

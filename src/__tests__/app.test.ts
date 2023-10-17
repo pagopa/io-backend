@@ -1,3 +1,8 @@
+/**
+ * WARNING: To start the App inside the unit test you need to mock every controller
+ * or library that will fail if some required configuration is not provided.
+ */
+
 import * as spid from "@pagopa/io-spid-commons/dist/utils/metadata";
 import { Express } from "express";
 import * as E from "fp-ts/lib/Either";
@@ -7,7 +12,6 @@ import { CIDR } from "@pagopa/ts-commons/lib/strings";
 import * as request from "supertest";
 import { ServerInfo } from "../../generated/public/ServerInfo";
 import * as redisUtils from "../utils/redis";
-import * as redis from "redis";
 
 jest.mock("@azure/storage-queue");
 jest.mock("@azure/data-tables");
@@ -17,7 +21,7 @@ jest.mock("../services/redisUserMetadataStorage");
 jest.mock("../services/apiClientFactory");
 jest
   .spyOn(redisUtils, "createClusterRedisClient")
-  .mockImplementation((_) => async () => ({} as redis.RedisClusterType));
+  .mockImplementation((_) => async () => mockRedisClusterType);
 
 const mockNotify = jest.fn();
 jest.mock("../controllers/notificationController", () => {
@@ -42,6 +46,7 @@ jest.mock("../services/usersLoginLogService", () => {
 });
 
 import appModule from "../app";
+import { mockQuit, mockRedisClusterType, mockSelect } from "../__mocks__/redis";
 
 const aValidCIDR = "192.168.0.0/16" as CIDR;
 
@@ -128,8 +133,8 @@ describe("Success app start", () => {
     });
   });
 
-  describe("Test the checkIP middleware", () => {
-    /*  it("should allow in-range IP", () => {
+  /* describe("Test the checkIP middleware", () => {
+    it("should allow in-range IP", () => {
       mockNotify.mockReturnValue(
         Promise.resolve(ResponseSuccessJson({ message: "ok" }))
       );
@@ -141,16 +146,16 @@ describe("Success app start", () => {
         .set("X-Client-Ip", "1.1.1.1")
         .set("X-Forwarded-For", "192.168.1.2")
         .expect(200);
-    }); */
-    /* it("should block not in-range IP", () => {
+    });
+    it("should block not in-range IP", () => {
       return request(app)
         .post("/api/v1/notify")
         .send(aValidNotification)
         .set(X_FORWARDED_PROTO_HEADER, "https")
         .set("X-Client-Ip", "192.0.0.0")
         .expect(401);
-    }); */
-  });
+    });
+  });*/
 
   describe("GET /info", () => {
     it("Get info and verify ServerInfo format", async () => {
@@ -161,14 +166,18 @@ describe("Success app start", () => {
       expect(E.isRight(ServerInfo.decode(response.body)));
     });
   });
+
+  describe("Graceful redis shutdown", () => {
+    it("should call quit method for each redis when the server stops", async () => {
+      app.emit("server:stop");
+      expect(mockQuit).toBeCalledTimes(mockSelect().length);
+    });
+  });
 });
 
 describe("Failure app start", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-  afterAll(() => {
-    jest.restoreAllMocks();
   });
 
   it("Close app if download IDP metadata fails on startup", async () => {
