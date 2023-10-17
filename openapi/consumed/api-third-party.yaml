@@ -362,6 +362,9 @@ components:
           type: string
         category:
           type: string
+          minLength: 2
+          maxLenght: 30
+          pattern: '[A-Za-z0-9_]+'
           default: DOCUMENT
     ProblemJson:
       type: object
