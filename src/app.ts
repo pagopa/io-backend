@@ -245,7 +245,7 @@ export async function newApp({
   ZendeskBasePath,
 }: IAppFactoryParameters): Promise<Express> {
   const isDevEnvironment = ENV === NodeEnvironmentEnum.DEVELOPMENT;
-  const REDIS_CLIENT = await RedisClientSelector(
+  const REDIS_CLIENT_SELECTOR = await RedisClientSelector(
     !isDevEnvironment,
     appInsightsClient
   )(
@@ -256,7 +256,7 @@ export async function newApp({
 
   // Create the Session Storage service
   const SESSION_STORAGE = new RedisSessionStorage(
-    REDIS_CLIENT,
+    REDIS_CLIENT_SELECTOR,
     tokenDurationSecs,
     DEFAULT_LOLLIPOP_ASSERTION_REF_DURATION
   );
@@ -583,7 +583,7 @@ export async function newApp({
         const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT);
         // Register the user metadata storage service.
         const USER_METADATA_STORAGE = new RedisUserMetadataStorage(
-          REDIS_CLIENT.selectOne(RedisClientMode.FAST)
+          REDIS_CLIENT_SELECTOR.selectOne(RedisClientMode.FAST)
         );
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         registerAPIRoutes(
@@ -772,7 +772,9 @@ export async function newApp({
                   appInsightsClient
                 )
               ),
-              redisClient: REDIS_CLIENT.selectOne(RedisClientMode.FAST),
+              redisClient: REDIS_CLIENT_SELECTOR.selectOne(
+                RedisClientMode.FAST
+              ),
               samlConfig,
               serviceProviderConfig,
             })(),
@@ -804,7 +806,9 @@ export async function newApp({
       _.app.on("server:stop", () => {
         clearInterval(startIdpMetadataRefreshTimer);
         // Graceful redis connection shutdown.
-        for (const client of REDIS_CLIENT.select(RedisClientMode.ALL)) {
+        for (const client of REDIS_CLIENT_SELECTOR.select(
+          RedisClientMode.ALL
+        )) {
           log.info(`Graceful closing redis connection`);
           pipe(
             O.fromNullable(client.quit),
