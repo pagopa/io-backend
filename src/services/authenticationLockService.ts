@@ -12,7 +12,7 @@ import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/lib/Either";
 import * as ROA from "fp-ts/ReadonlyArray";
 
-import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { DateFromString } from "@pagopa/ts-commons/lib/dates";
 
 import { errorsToError } from "../utils/errorsFormatter";
@@ -75,7 +75,7 @@ export default class AuthenticationLockService {
             rowKey: unlockCode,
 
             // eslint-disable-next-line sort-keys
-            CreatedAt: new Date(Date.now()),
+            CreatedAt: new Date(),
           }),
         (_) => new Error("Something went wrong creating the record")
       ),
@@ -109,10 +109,7 @@ export default class AuthenticationLockService {
       ),
       (actions) =>
         TE.tryCatch(
-          () =>
-            // submitTransaction requires an Array
-            // eslint-disable-next-line functional/prefer-readonly-type
-            this.tableClient.submitTransaction(actions as TransactionAction[]),
+          () => this.tableClient.submitTransaction(Array.from(actions)),
           identity
         ),
       TE.filterOrElseW(
@@ -127,12 +124,12 @@ export default class AuthenticationLockService {
   // Private Methods
   // -----------------------------------
 
-  private readonly getUserAuthenticationLocks = (fiscalCode: FiscalCode) => {
-    const queryFilter =
-      odata`PartitionKey eq ${fiscalCode} and not Released` as NonEmptyString;
-    return pipe(
+  private readonly getUserAuthenticationLocks = (fiscalCode: FiscalCode) =>
+    pipe(
       this.tableClient.listEntities({
-        queryOptions: { filter: queryFilter },
+        queryOptions: {
+          filter: odata`PartitionKey eq ${fiscalCode} and not Released`,
+        },
       }),
       AI.fromAsyncIterable,
       AI.foldTaskEither(E.toError),
@@ -143,5 +140,4 @@ export default class AuthenticationLockService {
         )
       )
     );
-  };
 }
