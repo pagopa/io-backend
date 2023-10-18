@@ -57,7 +57,7 @@ paths:
       operationId: login
       summary: Login SPID/CIE
       description: Login with SPID or CIE for IO APP
-      parameters: 
+      parameters:
         - $ref: "#/parameters/EntityId"
         - $ref: "#/parameters/AuthLevel"
         - $ref: "#/parameters/JwkPubKeyToken"
@@ -140,7 +140,7 @@ parameters:
     name: entityID
     in: query
     type: string
-    enum: 
+    enum:
       - lepidaid
       - infocertid
       - sielteid
@@ -152,6 +152,7 @@ parameters:
       - teamsystemid
       - ehtid
       - infocamereid
+      - intesiid
       - xx_servizicie_coll
       - xx_servizicie
       - xx_servizicie_test
