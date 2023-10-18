@@ -28,6 +28,7 @@ import {
   lockUserAuthenticationMockLazy,
   unlockUserAuthenticationMock,
 } from "../../__mocks__/services.mock";
+import { anothernUnlockCode } from "../../__mocks__/lockedProfileTableClient";
 
 const aFiscalCode = pipe(
   "AAABBB80A01C123D",
@@ -594,7 +595,10 @@ describe("SessionLockController#unlockUserAuthentication", () => {
       const res = mockRes();
 
       getUserAuthenticationLockDataMock.mockReturnValueOnce(
-        TE.of(O.some(aNotReleasedData))
+        TE.of([
+          aNotReleasedData,
+          { ...aNotReleasedData, rowKey: anothernUnlockCode },
+        ])
       );
 
       const response = await controller.unlockUserAuthentication(req);
@@ -603,12 +607,13 @@ describe("SessionLockController#unlockUserAuthentication", () => {
       expect(res.status).toHaveBeenCalledWith(204);
 
       expect(getUserAuthenticationLockDataMock).toHaveBeenCalledWith(
-        aFiscalCode,
-        "unlock_code" in request.body ? O.some(anUnlockCode) : O.none
+        aFiscalCode
       );
       expect(unlockUserAuthenticationMock).toHaveBeenCalledWith(
         aFiscalCode,
-        anUnlockCode
+        "unlock_code" in request.body
+          ? [request.body.unlock_code]
+          : [anUnlockCode, anothernUnlockCode]
       );
     }
   );
@@ -618,7 +623,7 @@ describe("SessionLockController#unlockUserAuthentication", () => {
     ${"request contains unlock code"}          | ${aValidRequest}
     ${"request does NOT contains unlock code"} | ${aValidRequestWithoutUnlockCode}
   `(
-    "should return Forbidden releasing CF-unlockcode when $title and query returns no records",
+    "should succeed releasing CF-unlockcode when $title and query returns no records",
     // This can occur in cases where there is either no user authentication lock or when an invalid unlock code has been provided.
     async ({ request }) => {
       const req = mockReq(request);
@@ -627,12 +632,30 @@ describe("SessionLockController#unlockUserAuthentication", () => {
       const response = await controller.unlockUserAuthentication(req);
       response.apply(res);
 
-      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.status).toHaveBeenCalledWith(204);
 
       expect(getUserAuthenticationLockDataMock).toHaveBeenCalled();
       expect(unlockUserAuthenticationMock).not.toHaveBeenCalled();
     }
   );
+
+  it("should return Forbidden releasing CF-unlockcode when unlock code does not match", async () => {
+    // This can occur in cases where there is either no user authentication lock or when an invalid unlock code has been provided.
+    const req = mockReq(aValidRequest);
+    const res = mockRes();
+
+    getUserAuthenticationLockDataMock.mockReturnValueOnce(
+      TE.of([{ ...aNotReleasedData, rowKey: anothernUnlockCode }])
+    );
+
+    const response = await controller.unlockUserAuthentication(req);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(403);
+
+    expect(getUserAuthenticationLockDataMock).toHaveBeenCalled();
+    expect(unlockUserAuthenticationMock).not.toHaveBeenCalled();
+  });
 
   it("should return InternalServerError when an error occurred retrieving user authentication lock data", async () => {
     const req = mockReq(aValidRequest);
@@ -655,7 +678,7 @@ describe("SessionLockController#unlockUserAuthentication", () => {
     const res = mockRes();
 
     getUserAuthenticationLockDataMock.mockReturnValueOnce(
-      TE.of(O.some(aNotReleasedData))
+      TE.of([aNotReleasedData])
     );
 
     unlockUserAuthenticationMock.mockReturnValueOnce(() =>

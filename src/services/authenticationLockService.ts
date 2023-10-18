@@ -3,14 +3,13 @@
  * an API client.
  */
 
-import { TableClient, odata } from "@azure/data-tables";
+import { TableClient, TransactionAction, odata } from "@azure/data-tables";
 
 import * as t from "io-ts";
 
 import { flow, identity, pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/lib/Either";
-import * as O from "fp-ts/Option";
 import * as ROA from "fp-ts/ReadonlyArray";
 
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -47,24 +46,15 @@ export default class AuthenticationLockService {
     pipe(this.getUserAuthenticationLocks(fiscalCode), TE.map(ROA.isNonEmpty));
 
   /**
-   * Retrieve the user authentication lock data with unlockCode
+   * Retrieve all the user authentication lock data records
    *
    * @param fiscalCode the user fiscal code
-   * @returns the user authentication lock data, if exists
+   * @returns a list of all the user authentication lock data, if exists
    */
   public readonly getUserAuthenticationLockData = (
-    fiscalCode: FiscalCode,
-    unlockCode: O.Option<UnlockCode>
-  ): TE.TaskEither<Error, O.Option<NotReleasedAuthenticationLockData>> =>
-    pipe(
-      this.getUserAuthenticationLocks(fiscalCode),
-      TE.map(
-        O.isSome(unlockCode)
-          ? ROA.filter((e) => e.rowKey === unlockCode.value)
-          : identity
-      ),
-      TE.map(ROA.head)
-    );
+    fiscalCode: FiscalCode
+  ): TE.TaskEither<Error, ReadonlyArray<NotReleasedAuthenticationLockData>> =>
+    this.getUserAuthenticationLocks(fiscalCode);
 
   /**
    * Lock the user authentication
@@ -93,29 +83,44 @@ export default class AuthenticationLockService {
     );
 
   /**
-   * Unock the user authentication
+   * Unlock the user authentication
    *
    * @param fiscalCode the CF of the user
-   * @param unlockCode the Unlock Code to verify
+   * @param unlockCodes the Unlock Code list to update
    * @returns
    */
   public readonly unlockUserAuthentication = (
     fiscalCode: FiscalCode,
-    unlockCode: UnlockCode
+    unlockCodes: ReadonlyArray<UnlockCode>
   ): TE.TaskEither<Error, true> =>
     pipe(
-      TE.tryCatch(
-        () =>
-          this.tableClient.updateEntity({
-            partitionKey: fiscalCode,
-            rowKey: unlockCode,
-
-            // eslint-disable-next-line sort-keys
-            Released: true,
-          }),
-        (_) => new Error("Something went wrong updating the record")
+      unlockCodes,
+      ROA.map(
+        (unlockCode) =>
+          [
+            "update",
+            {
+              partitionKey: fiscalCode,
+              rowKey: unlockCode,
+              // eslint-disable-next-line sort-keys
+              Released: true,
+            },
+          ] as TransactionAction
       ),
-      TE.map((_) => true as const)
+      (actions) =>
+        TE.tryCatch(
+          () =>
+            // submitTransaction requires an Array
+            // eslint-disable-next-line functional/prefer-readonly-type
+            this.tableClient.submitTransaction(actions as TransactionAction[]),
+          identity
+        ),
+      TE.filterOrElseW(
+        (response) => response.status === 202,
+        () => void 0
+      ),
+      TE.mapLeft(() => new Error("Something went wrong updating the record")),
+      TE.map(() => true as const)
     );
 
   // -----------------------------------

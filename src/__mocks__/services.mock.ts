@@ -1,6 +1,5 @@
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
-import * as O from "fp-ts/Option";
 
 import AuthenticationLockService, {
   NotReleasedAuthenticationLockData,
@@ -21,7 +20,7 @@ export const isUserAuthenticationLockedMock = jest.fn(() =>
 );
 
 export const getUserAuthenticationLockDataMock = jest.fn(() =>
-  TE.of<Error, O.Option<NotReleasedAuthenticationLockData>>(O.none)
+  TE.of<Error, ReadonlyArray<NotReleasedAuthenticationLockData>>([])
 );
 
 export const lockUserAuthenticationMockLazy = jest.fn(async (_cf, _code) =>
@@ -31,7 +30,7 @@ export const lockUserAuthenticationMock = jest.fn(
   (cf, code) => () => lockUserAuthenticationMockLazy(cf, code)
 );
 export const unlockUserAuthenticationMock = jest.fn(
-  (_cf, _code) => () => E.of<Error, boolean>(true)
+  (_cf, _codes) => () => E.of<Error, boolean>(true)
 );
 
 export const AuthenticationLockServiceMock = {

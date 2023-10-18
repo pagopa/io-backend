@@ -1,7 +1,7 @@
 import {
   TableClient,
   TableInsertEntityHeaders,
-  TableUpdateEntityHeaders,
+  TableTransactionResponse,
 } from "@azure/data-tables";
 
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
@@ -14,6 +14,7 @@ import { UnlockCode } from "../../generated/session/UnlockCode";
 // --------------------------------
 
 export const anUnlockCode = "123456789" as UnlockCode;
+export const anothernUnlockCode = "987654321" as UnlockCode;
 
 export const aNotReleasedData = {
   partitionKey: aFiscalCode,
@@ -27,6 +28,9 @@ export const aNotReleasedData = {
 
 export async function* profileLockedRecordIterator() {
   yield aNotReleasedData;
+}
+export async function* getProfileLockedRecordIterator(values: any[]) {
+  for (const value of values) yield value;
 }
 export async function* noProfileLockedRecordIterator(): ReturnType<
   typeof profileLockedRecordIterator
@@ -55,12 +59,12 @@ export const listLockedProfileEntitiesMock = jest.fn(
 export const createEntityMock = jest.fn(
   async () => ({} as TableInsertEntityHeaders)
 );
-export const updateEntityMock = jest.fn(
-  async () => ({} as TableUpdateEntityHeaders)
+export const submitTransactionMock = jest.fn(
+  async () => ({ status: 202 } as TableTransactionResponse)
 );
 
 export const lockedProfileTableClient: TableClient = {
   createEntity: createEntityMock,
   listEntities: listLockedProfileEntitiesMock,
-  updateEntity: updateEntityMock,
+  submitTransaction: submitTransactionMock,
 } as unknown as TableClient;

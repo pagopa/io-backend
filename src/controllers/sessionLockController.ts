@@ -20,9 +20,11 @@ import * as AP from "fp-ts/lib/Apply";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as O from "fp-ts/lib/Option";
 import * as ROA from "fp-ts/lib/ReadonlyArray";
+
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { pipe, flow, constVoid } from "fp-ts/lib/function";
+import { ReadonlyNonEmptyArray } from "fp-ts/lib/ReadonlyNonEmptyArray";
 import { OutputOf } from "io-ts";
 import { addSeconds } from "date-fns";
 import {
@@ -35,7 +37,9 @@ import LollipopService from "../services/lollipopService";
 import { withFiscalCodeFromRequestParams } from "../types/fiscalCode";
 import RedisSessionStorage from "../services/redisSessionStorage";
 import RedisUserMetadataStorage from "../services/redisUserMetadataStorage";
-import AuthenticationLockService from "../services/authenticationLockService";
+import AuthenticationLockService, {
+  NotReleasedAuthenticationLockData,
+} from "../services/authenticationLockService";
 
 import { UserSessionInfo } from "../../generated/session/UserSessionInfo";
 import { AuthLockBody } from "../../generated/session/AuthLockBody";
@@ -278,24 +282,28 @@ export default class SessionLockController {
           authUnlockBody.unlock_code,
           O.fromNullable,
           TE.of,
-          TE.chain((maybeUnlockCode) =>
-            this.getAuthLockDataOrError(fiscalCode, maybeUnlockCode)
-          ),
-          TE.filterOrElseW(O.isSome, () => ResponseErrorForbiddenNotAuthorized),
-          TE.chainW((authLockData) =>
+          TE.bindTo("maybeUnlockCode"),
+          TE.bind("authLockData", () =>
             pipe(
-              this.authenticationLockService.unlockUserAuthentication(
-                fiscalCode,
-                authLockData.value.rowKey
+              this.authenticationLockService.getUserAuthenticationLockData(
+                fiscalCode
               ),
-              TE.mapLeft(() =>
-                ResponseErrorInternal(
-                  "Error releasing user authentication lock"
-                )
+              TE.mapLeft((_) =>
+                ResponseErrorInternal(ERROR_CHECK_USER_AUTH_LOCK)
               )
             )
           ),
-
+          TE.chainW(({ authLockData, maybeUnlockCode }) =>
+            ROA.isNonEmpty(authLockData)
+              ? // User auth is locked
+                this.unlockuserAuthenticationLockData(
+                  fiscalCode,
+                  maybeUnlockCode,
+                  authLockData
+                )
+              : // User auth is NOT locked
+                TE.of(true)
+          ),
           TE.map((_) => ResponseNoContent()),
           TE.toUnion
         )()
@@ -407,19 +415,37 @@ export default class SessionLockController {
       ),
     ] as const;
 
-  /**
-   * Retrieve user authentication lock data, or return an error
-   */
-  private getAuthLockDataOrError(
+  private readonly unlockuserAuthenticationLockData = (
     fiscalCode: FiscalCode,
-    unlockCode: O.Option<UnlockCode>
-  ) {
-    return pipe(
-      this.authenticationLockService.getUserAuthenticationLockData(
-        fiscalCode,
-        unlockCode
+    maybeUnlockCode: O.Option<UnlockCode>,
+    authLockData: ReadonlyNonEmptyArray<NotReleasedAuthenticationLockData>
+  ): TE.TaskEither<
+    IResponseErrorInternal | IResponseErrorForbiddenNotAuthorized,
+    true
+  > =>
+    pipe(
+      {},
+      TE.fromPredicate(
+        () =>
+          O.isNone(maybeUnlockCode) ||
+          authLockData.some((data) => data.rowKey === maybeUnlockCode.value),
+        () => ResponseErrorForbiddenNotAuthorized
       ),
-      TE.mapLeft((_) => ResponseErrorInternal(ERROR_CHECK_USER_AUTH_LOCK))
+      TE.map(() =>
+        O.isSome(maybeUnlockCode)
+          ? [maybeUnlockCode.value]
+          : authLockData.map((data) => data.rowKey)
+      ),
+      TE.chainW((codesToUnlock) =>
+        pipe(
+          this.authenticationLockService.unlockUserAuthentication(
+            fiscalCode,
+            codesToUnlock
+          ),
+          TE.mapLeft(() =>
+            ResponseErrorInternal("Error releasing user authentication lock")
+          )
+        )
+      )
     );
-  }
 }
