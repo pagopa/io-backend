@@ -1326,6 +1326,15 @@ function registerSessionAPIRoutes(
       )
     );
 
+    app.post(
+      `${basePath}/auth/:fiscal_code/release-lock`,
+      urlTokenAuth,
+      toExpressHandler(
+        sessionLockController.unlockUserAuthentication,
+        sessionLockController
+      )
+    );
+
     app.get(
       `${basePath}/sessions/:fiscal_code/state`,
       urlTokenAuth,
