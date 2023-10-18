@@ -59,7 +59,6 @@ export const withUnlockCodeParams = async <T>(
     f(unlockCode)
   );
 
-// TODO: change Decoder
 export const withAuthUnlockBodyParams = async <T>(
   req: express.Request,
   f: (authLockBody: AuthUnlockBody) => Promise<T>
