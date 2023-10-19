@@ -146,6 +146,37 @@ paths:
           description: There was an error
           schema:
             $ref: "#/definitions/ProblemJson"
+  "/auth/{fiscalcode}/release-lock":
+    post:
+      operationId: releaseAuthLock
+      description: |-
+        Release the user authentication lock for the IO app.
+        This is intended to use with ioweb-profile unlock functionality.
+      parameters:
+        - $ref: "#/parameters/FiscalCode"
+        - $ref: "#/parameters/Token"
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/AuthUnlockBody"
+      responses:
+        "204":
+          description: Lock successfully released.
+        "403":
+          description: Operation forbidden.
+        "400":
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "401":
+          description: Token null or invalid.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "500":
+          description: There was an error
+          schema:
+            $ref: "#/definitions/ProblemJson"
   "/sessions/{fiscalcode}/state":
     get:
       operationId: getUserSessionState
@@ -161,11 +192,12 @@ paths:
           examples:
             application/json:
               "access_enabled": true
-              "session_info": {
-                "active": true,
-                "expiration_date": "2011-10-05T14:48:00.000Z",
-                "type": "LV"
-              }
+              "session_info":
+                {
+                  "active": true,
+                  "expiration_date": "2011-10-05T14:48:00.000Z",
+                  "type": "LV",
+                }
         "400":
           description: Bad request
         "401":
@@ -205,6 +237,11 @@ definitions:
         $ref: "#/definitions/UnlockCode"
     required:
       - unlock_code
+  AuthUnlockBody:
+    type: object
+    properties:
+      unlock_code:
+        $ref: "#/definitions/UnlockCode"
   SuccessResponse:
     type: object
     properties:
@@ -256,7 +293,7 @@ definitions:
       access_enabled:
         type: boolean
       session_info:
-        $ref: '#/definitions/SessionInfo'
+        $ref: "#/definitions/SessionInfo"
     required:
       - access_enabled
       - session_info

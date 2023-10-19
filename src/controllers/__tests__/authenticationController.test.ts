@@ -3,7 +3,6 @@ import * as TE from "fp-ts/lib/TaskEither";
 import * as O from "fp-ts/lib/Option";
 import { UrlFromString, ValidUrl } from "@pagopa/ts-commons/lib/url";
 import * as lolex from "lolex";
-import * as redis from "redis";
 import { NewProfile } from "@pagopa/io-functions-app-sdk/NewProfile";
 import {
   ResponseErrorInternal,
@@ -79,6 +78,7 @@ import {
   AuthenticationLockServiceMock,
   isUserAuthenticationLockedMock,
 } from "../../__mocks__/services.mock";
+import { mockRedisClientSelector } from "../../__mocks__/redis";
 
 const req = mockReq();
 req.ip = "127.0.0.2";
@@ -256,8 +256,6 @@ const mockTelemetryClient = {
   trackEvent: jest.fn(),
 } as unknown as appInsights.TelemetryClient;
 
-const redisClient = {} as redis.RedisClientType;
-
 const tokenService = new TokenService();
 
 const tokenDurationSecs = 3600 * 24 * 30;
@@ -266,7 +264,7 @@ const lvLongSessionDurationSecs = 3600 * 24 * 365;
 
 const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
 const redisSessionStorage = new RedisSessionStorage(
-  redisClient,
+  mockRedisClientSelector,
   tokenDurationSecs,
   aDefaultLollipopAssertionRefDurationSec
 );

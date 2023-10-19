@@ -157,7 +157,7 @@ import {
   getCurrentBackendVersion,
   getObjectFromPackageJson,
 } from "./utils/package";
-import { createClusterRedisClient } from "./utils/redis";
+import { RedisClientSelector, RedisClientMode } from "./utils/redis";
 import { ResponseErrorDismissed } from "./utils/responses";
 import { makeSpidLogCallback } from "./utils/spid";
 import { TimeTracer } from "./utils/timer";
@@ -245,7 +245,7 @@ export async function newApp({
   ZendeskBasePath,
 }: IAppFactoryParameters): Promise<Express> {
   const isDevEnvironment = ENV === NodeEnvironmentEnum.DEVELOPMENT;
-  const REDIS_CLIENT = await createClusterRedisClient(
+  const REDIS_CLIENT_SELECTOR = await RedisClientSelector(
     !isDevEnvironment,
     appInsightsClient
   )(
@@ -253,9 +253,10 @@ export async function newApp({
     process.env.REDIS_PASSWORD,
     process.env.REDIS_PORT
   );
+
   // Create the Session Storage service
   const SESSION_STORAGE = new RedisSessionStorage(
-    REDIS_CLIENT,
+    REDIS_CLIENT_SELECTOR,
     tokenDurationSecs,
     DEFAULT_LOLLIPOP_ASSERTION_REF_DURATION
   );
@@ -582,7 +583,7 @@ export async function newApp({
         const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT);
         // Register the user metadata storage service.
         const USER_METADATA_STORAGE = new RedisUserMetadataStorage(
-          REDIS_CLIENT
+          REDIS_CLIENT_SELECTOR.selectOne(RedisClientMode.FAST)
         );
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         registerAPIRoutes(
@@ -771,7 +772,9 @@ export async function newApp({
                   appInsightsClient
                 )
               ),
-              redisClient: REDIS_CLIENT,
+              redisClient: REDIS_CLIENT_SELECTOR.selectOne(
+                RedisClientMode.FAST
+              ),
               samlConfig,
               serviceProviderConfig,
             })(),
@@ -800,9 +803,27 @@ export async function newApp({
           }),
         IDP_METADATA_REFRESH_INTERVAL_SECONDS * 1000
       );
-      _.app.on("server:stop", () =>
-        clearInterval(startIdpMetadataRefreshTimer)
-      );
+      _.app.on("server:stop", () => {
+        clearInterval(startIdpMetadataRefreshTimer);
+        // Graceful redis connection shutdown.
+        for (const client of REDIS_CLIENT_SELECTOR.select(
+          RedisClientMode.ALL
+        )) {
+          log.info(`Graceful closing redis connection`);
+          pipe(
+            O.fromNullable(client.quit),
+            O.map((redisQuitFn) =>
+              redisQuitFn().catch((err) =>
+                log.error(
+                  `An Error occurred closing the redis connection: [${
+                    E.toError(err).message
+                  }]`
+                )
+              )
+            )
+          );
+        }
+      });
       return _.app;
     }),
     TE.chain((_) => {
@@ -1301,6 +1322,15 @@ function registerSessionAPIRoutes(
       urlTokenAuth,
       toExpressHandler(
         sessionLockController.lockUserAuthentication,
+        sessionLockController
+      )
+    );
+
+    app.post(
+      `${basePath}/auth/:fiscal_code/release-lock`,
+      urlTokenAuth,
+      toExpressHandler(
+        sessionLockController.unlockUserAuthentication,
         sessionLockController
       )
     );

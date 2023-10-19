@@ -17,6 +17,7 @@ import {
   aPnNotificationId,
   aPNServiceId,
   aPNThirdPartyNotification,
+  aPNThirdPartyNotificationWithInvalidCategory,
   aPnUrl,
   aThirdPartyAttachmentForPnRelativeUrl,
   documentBody,
@@ -275,6 +276,9 @@ describe("getThirdPartyMessageDetails", () => {
         expect.objectContaining({
           status: 200,
           value: expect.objectContaining({
+            attachments: expect.arrayContaining([
+              expect.objectContaining({category: "DOCUMENT"})
+            ]),
             details: expect.objectContaining({
               abstract: notificationDetailResponseExampleAsObject.abstract,
               isCancelled:
@@ -284,6 +288,37 @@ describe("getThirdPartyMessageDetails", () => {
         })
       );
     }
+  });
+
+  it("GIVEN a PN endpoint returning a response with an invalid category WHEN a Third-Party get message is called THEN an error is returned", async () => {
+    dummyGetReceivedNotification.mockImplementation(() =>
+      TE.of({
+        status: 200,
+        value: aPNThirdPartyNotificationWithInvalidCategory,
+        headers: {},
+      })()
+    );
+
+    const aFetch = pnFetch(
+      nodeFetch as any as typeof fetch,
+      aPNServiceId,
+      aPnUrl,
+      aPnKey,
+      lollipopParams
+    );
+
+    const client = createClient({
+      baseUrl: "https://localhost",
+      fetchApi: aFetch,
+    });
+
+    const result = await client.getThirdPartyMessageDetails({
+      fiscal_code: aFiscalCode,
+      id: aPnNotificationId,
+      ...lollipopParams,
+    });
+
+    expect(E.isLeft(result)).toBeTruthy();
   });
 
   it("GIVEN a not working PN get message endpoint WHEN a Third-Party get message is called THEN the get is properly orchestrated on PN endpoints returning an error", async () => {

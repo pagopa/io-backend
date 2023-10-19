@@ -372,6 +372,12 @@ components:
         url:
           minLength: 1
           type: string
+        category:
+          type: string
+          minLength: 2
+          maxLenght: 30
+          pattern: '[A-Z0-9_]+'
+          default: DOCUMENT
     ProblemJson:
       type: object
       properties:
