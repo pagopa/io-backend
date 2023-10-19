@@ -193,6 +193,9 @@ describe("getThirdPartyMessageDetails", () => {
         expect.objectContaining({
           status: 200,
           value: expect.objectContaining({
+            attachments: expect.arrayContaining([
+              expect.objectContaining({category: "DOCUMENT"})
+            ]),
             details: expect.objectContaining({
               abstract: notificationDetailResponseExampleAsObject.abstract,
               isCancelled: notificationDetailResponseExampleAsObject.isCancelled
