@@ -52,13 +52,28 @@ export const aPNThirdPartyNotification = {
       content_type: "application/pdf",
       name: "Atto",
       url: `/delivery/notifications/received/${aPnNotificationId}/attachments/documents/0`,
+      category: "DOCUMENT",
     },
     {
       id: "JGQG-YPJT-AUQZ-202301-R-1_DOC1",
       content_type: "application/pdf",
       name: "Lettera di accompagnamento",
       url: `/delivery/notifications/received/${aPnNotificationId}/attachments/documents/1`,
+      category: "DOCUMENT",
     },
+  ],
+  details: aPnNotificationDetails,
+};
+
+export const aPNThirdPartyNotificationWithInvalidCategory = {
+  attachments: [
+    {
+      id: "JGQG-YPJT-AUQZ-202301-R-1_DOC0",
+      content_type: "application/pdf",
+      name: "Atto",
+      url: `/delivery/notifications/received/${aPnNotificationId}/attachments/documents/0`,
+      category: "an-invalid-category",
+    }
   ],
   details: aPnNotificationDetails,
 };
