@@ -1037,10 +1037,10 @@
     fp-ts "^2.10.5"
     io-ts "^2.2.16"
 
-"@pagopa/io-spid-commons@^13.2.1":
-  version "13.2.1"
-  resolved "https://registry.yarnpkg.com/@pagopa/io-spid-commons/-/io-spid-commons-13.2.1.tgz#75d1bbc722627bf546050f330d004295ca41b79f"
-  integrity sha512-MAzR9eOGWiJgMMqj9k2JX59kE2LjjxkPoJzvTGb2aQkB7/IaeucpTM5jLm8uAh0R59Tj2ZuCo+dudkKSBPfaZQ==
+"@pagopa/io-spid-commons@^13.2.2":
+  version "13.2.2"
+  resolved "https://registry.yarnpkg.com/@pagopa/io-spid-commons/-/io-spid-commons-13.2.2.tgz#55c233abd70d3d49ea6d3e58864211803df7afcb"
+  integrity sha512-IzcIy5KBFB58aBh7yd+Qyoek0IG+YVNpZycpU1KeIZ53EgW6YPB9yIFGXziNtJY3z38V+3J0XL/b2Yn6bMTrDQ==
   dependencies:
     "@pagopa/ts-commons" "^12.0.0"
     "@xmldom/xmldom" "^0.8.7"
