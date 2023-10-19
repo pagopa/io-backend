@@ -1123,6 +1123,24 @@
     semver "^7.3.7"
     validator "^13.7.0"
 
+"@pagopa/ts-commons@^12.3.0":
+  version "12.3.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-12.3.0.tgz#54e661b71ef3b80e9a8474ba90088ffafb2c06c0"
+  integrity sha512-7fwd2EEhac6bmmfGdWYr5EGRjF1AwzaH3DHyg/jLcoKnQcHPWbt7tsvO0zSD/mxAbHZBrZ24zut0IK3eD3qNag==
+  dependencies:
+    abort-controller "^3.0.0"
+    agentkeepalive "^4.1.4"
+    applicationinsights "^1.8.10"
+    fp-ts "2.14.0"
+    io-ts "2.2.20"
+    jose "^4.11.2"
+    json-set-map "^1.1.2"
+    jsonwebtoken "^9.0.1"
+    node-fetch "^2.6.0"
+    semver "^7.3.7"
+    ulid "^2.3.0"
+    validator "^13.7.0"
+
 "@pagopa/winston-ts@^2.2.0":
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/@pagopa/winston-ts/-/winston-ts-2.2.0.tgz#d930dfd478397d395fd778bb0f77c75f3e0db346"
@@ -5028,6 +5046,22 @@ jsonwebtoken@^8.5.1:
     ms "^2.1.1"
     semver "^5.6.0"
 
+jsonwebtoken@^9.0.1:
+  version "9.0.2"
+  resolved "https://registry.yarnpkg.com/jsonwebtoken/-/jsonwebtoken-9.0.2.tgz#65ff91f4abef1784697d40952bb1998c504caaf3"
+  integrity sha512-PRp66vJ865SSqOlgqS8hujT5U4AOgMfhrwYIuIhfKaoSCZcirrmASQr8CX7cUg+RMih+hgznrjp99o+W4pJLHQ==
+  dependencies:
+    jws "^3.2.2"
+    lodash.includes "^4.3.0"
+    lodash.isboolean "^3.0.3"
+    lodash.isinteger "^4.0.4"
+    lodash.isnumber "^3.0.3"
+    lodash.isplainobject "^4.0.6"
+    lodash.isstring "^4.0.1"
+    lodash.once "^4.0.0"
+    ms "^2.1.1"
+    semver "^7.5.4"
+
 jsprim@^1.2.2:
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/jsprim/-/jsprim-1.4.1.tgz#313e66bc1e5cc06e438bc1b7499c2e5c56acb6a2"
@@ -6561,6 +6595,13 @@ semver@^7.3.7:
   version "7.3.8"
   resolved "https://registry.yarnpkg.com/semver/-/semver-7.3.8.tgz#07a78feafb3f7b32347d725e33de7e2a2df67798"
   integrity sha512-NB1ctGL5rlHrPJtFDVIVzTyQylMLu9N9VICA6HSFJo8MCGVTMW6gfpicwKmmK/dAjTOrqu5l63JJOpDSrAis3A==
+  dependencies:
+    lru-cache "^6.0.0"
+
+semver@^7.5.4:
+  version "7.5.4"
+  resolved "https://registry.yarnpkg.com/semver/-/semver-7.5.4.tgz#483986ec4ed38e1c6c48c34894a9182dbff68a6e"
+  integrity sha512-1bCSESV6Pv+i21Hvpxp3Dx+pSD8lIPt8uVjRrxAUt/nbswYc+tK6Y2btiULjd4+fnq15PX+nqQDC7Oft7WkwcA==
   dependencies:
     lru-cache "^6.0.0"
 

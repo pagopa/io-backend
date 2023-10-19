@@ -5,6 +5,7 @@ import * as t from "io-ts";
 import {
   IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
+  IResponseErrorServiceUnavailable,
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
   IResponseErrorValidation,
@@ -15,7 +16,7 @@ import {
   ResponseErrorForbiddenNotAuthorized,
   ResponseErrorInternal,
   ResponseErrorValidation,
-  ResponseErrorServiceUnavailable,
+  ResponseErrorServiceTemporarilyUnavailable,
   IResponseSuccessNoContent,
 } from "@pagopa/ts-commons/lib/responses";
 import { AppMessagesAPIClient } from "src/clients/app-messages.client";
@@ -287,6 +288,7 @@ export default class NewMessagesService {
     lollipopLocals?: LollipopLocalsType
   ): Promise<
     | IResponseErrorInternal
+    | IResponseErrorServiceUnavailable
     | IResponseErrorValidation
     | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorNotFound
@@ -552,6 +554,7 @@ export default class NewMessagesService {
     lollipopLocals?: LollipopLocalsType
   ): TE.TaskEither<
     | IResponseErrorInternal
+    | IResponseErrorServiceUnavailable
     | IResponseErrorValidation
     | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorNotFound
@@ -618,7 +621,8 @@ export default class NewMessagesService {
                 case 500:
                   return ResponseErrorInternal(ERROR_MESSAGE_500);
                 case 503:
-                  return ResponseErrorServiceUnavailable(ERROR_MESSAGE_503);
+                  const retryAfter = response.headers["Retry-After"] ?? "5";
+                  return ResponseErrorServiceTemporarilyUnavailable(ERROR_MESSAGE_503, retryAfter);
                 default:
                   return ResponseErrorStatusNotDefinedInSpec(response);
               }
