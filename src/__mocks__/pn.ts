@@ -65,6 +65,19 @@ export const aPNThirdPartyNotification = {
   details: aPnNotificationDetails,
 };
 
+export const aPNThirdPartyNotificationWithInvalidCategory = {
+  attachments: [
+    {
+      id: "JGQG-YPJT-AUQZ-202301-R-1_DOC0",
+      content_type: "application/pdf",
+      name: "Atto",
+      url: `/delivery/notifications/received/${aPnNotificationId}/attachments/documents/0`,
+      category: "an-invalid-category",
+    }
+  ],
+  details: aPnNotificationDetails,
+};
+
 export const aPnThirdPartyMessage: PNThirdParthyMessage = pipe(
   aPNThirdPartyNotification,
   PNThirdParthyMessage.decode,
