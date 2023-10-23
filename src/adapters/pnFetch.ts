@@ -22,10 +22,10 @@ import { PN_SERVICE_ID } from "../config";
 
 const getPath = (input: RequestInfo | URL): string =>
   input instanceof URL
-    ? input.pathname
+    ? input.pathname + input.searchParams
     : typeof input === "string"
-    ? new URL(input).pathname
-    : new URL(input.url).pathname;
+    ? new URL(input).pathname + new URL(input).searchParams
+    : new URL(input.url).pathname + new URL(input.url).searchParams;
 
 export const ThirdPartyMessagesUrl = pathParamsFromUrl(
   RegExp("^[/]+messages[/]+([^/]+)$"),
@@ -52,7 +52,7 @@ export const PnDocumentUrl = pathParamsFromUrl(
     `/delivery/notifications/received/${iun}/attachments/documents/${docIdx}`
 );
 
-// payment path /delivery/notifications/received/DARD-QGTR-LKZG-202310-M-1/attachments/payment/F24/?attachmentIdx=3
+// payment path
 const attachmentPnPayment =
   "[/]?attachments[/]?payment[/]?([^/?]+)?.+attachmentIdx=([^&]+).*$";
 export const PnPaymentUrl = pathParamsFromUrl(

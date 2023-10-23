@@ -18,6 +18,8 @@ export const aPnUrl = "https://pn-url";
 export const aPnKey = "a-pn-key";
 export const aPnAttachmentUrl = `https://a.s3.pn.attachment/attachments/an-attachments-id`;
 export const aPnNotificationId = "a-notification-id";
+export const aPnF24DocumentName = "F24";
+export const aPnF24AttachmentIndex = "2";
 export const aDocIdx = "1";
 export const aPnNotificationRecipient = {
   recipientType: "PF",
@@ -61,6 +63,13 @@ export const aPNThirdPartyNotification = {
       url: `/delivery/notifications/received/${aPnNotificationId}/attachments/documents/1`,
       category: "DOCUMENT",
     },
+    {
+      id: "JGQG-YPJT-AUQZ-202301-R-1_DOC1",
+      content_type: "application/pdf",
+      name: "Lettera di accompagnamento",
+      url: `/delivery/notifications/received/${aPnNotificationId}/attachments/payment/${aPnF24DocumentName}/?attachmentIdx=${aPnF24AttachmentIndex}`,
+      category: "F24",
+    },
   ],
   details: aPnNotificationDetails,
 };
@@ -73,7 +82,7 @@ export const aPNThirdPartyNotificationWithInvalidCategory = {
       name: "Atto",
       url: `/delivery/notifications/received/${aPnNotificationId}/attachments/documents/0`,
       category: "an-invalid-category",
-    }
+    },
   ],
   details: aPnNotificationDetails,
 };
@@ -93,9 +102,20 @@ export const aPnNotificationDocument: NotificationAttachmentDownloadMetadataResp
     sha256: "a-digest",
     url: aPnAttachmentUrl,
   };
+export const anUnavailablePnNotificationDocument: NotificationAttachmentDownloadMetadataResponse =
+  {
+    contentLength: 100,
+    contentType: "application/pdf",
+    filename: "a-file-name",
+    sha256: "a-digest",
+    retryAfter: 10,
+  };
 export const documentBody = new util.TextEncoder().encode("a-document-body");
 export const aThirdPartyAttachmentForPnRelativeUrl =
   aPNThirdPartyNotification.attachments[1].url;
+
+export const aThirdPartyAttachmentForPnF24RelativeUrl =
+  aPNThirdPartyNotification.attachments[2].url;
 
 export const base64File = VALID_PDF;
 

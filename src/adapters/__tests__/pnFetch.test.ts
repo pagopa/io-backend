@@ -2,7 +2,12 @@ import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
 import * as T from "fp-ts/Task";
 import { createClient } from "../../../generated/third-party-service/client";
-import { errorResponse, PnDocumentUrl, pnFetch, PnPaymentUrl } from "../pnFetch";
+import {
+  errorResponse,
+  PnDocumentUrl,
+  pnFetch,
+  PnPaymentUrl,
+} from "../pnFetch";
 import nodeFetch from "node-fetch";
 import { aFiscalCode } from "../../__mocks__/user_mock";
 import * as pnclient from "../../../src/clients/pn-clients";
@@ -11,7 +16,10 @@ import { Response as NodeResponse } from "node-fetch";
 
 import {
   aDocIdx,
+  anUnavailablePnNotificationDocument,
   aPnAttachmentUrl,
+  aPnF24AttachmentIndex,
+  aPnF24DocumentName,
   aPnKey,
   aPnNotificationDocument,
   aPnNotificationId,
@@ -19,6 +27,7 @@ import {
   aPNThirdPartyNotification,
   aPNThirdPartyNotificationWithInvalidCategory,
   aPnUrl,
+  aThirdPartyAttachmentForPnF24RelativeUrl,
   aThirdPartyAttachmentForPnRelativeUrl,
   documentBody,
   lollipopPNHeaders,
@@ -32,6 +41,7 @@ import { aThirdPartyPrecondition } from "../../__mocks__/third-party";
 
 const dummyGetReceivedNotification = jest.fn();
 const dummyGetSentNotificationDocument = jest.fn();
+const dummyGetReceivedNotificationAttachment = jest.fn();
 const dummyGetReceivedNotificationPrecondition = jest.fn();
 dummyGetReceivedNotification.mockImplementation(() =>
   TE.of({
@@ -41,6 +51,13 @@ dummyGetReceivedNotification.mockImplementation(() =>
   })()
 );
 dummyGetSentNotificationDocument.mockImplementation(() =>
+  TE.of({
+    status: 200,
+    value: aPnNotificationDocument,
+    headers: {},
+  })()
+);
+dummyGetReceivedNotificationAttachment.mockImplementation(() =>
   TE.of({
     status: 200,
     value: aPnNotificationDocument,
@@ -62,6 +79,7 @@ dummyPnAPIClient.mockImplementation(
       getReceivedNotificationPrecondition:
         dummyGetReceivedNotificationPrecondition,
       getSentNotificationDocument: dummyGetSentNotificationDocument,
+      getReceivedNotificationAttachment: dummyGetReceivedNotificationAttachment,
     } as unknown as PnClient)
 );
 
@@ -123,7 +141,6 @@ describe("types", () => {
     const aDocIdx = "a-doc-idx";
     const thePNPaymentUrl = `/delivery/notifications/received/${aIun}/attachments/payment/${aDocName}/?attachmentIdx=${aDocIdx}`;
 
-
     const decodedUrlOrError = PnPaymentUrl.decode(thePNPaymentUrl);
 
     expect(E.isRight(decodedUrlOrError)).toBe(true);
@@ -148,9 +165,7 @@ describe("types", () => {
     const aDocIdx = "a-doc-idx";
     const thePNPaymentUrl = `/delivery/notifications/received/${aIun}/attachments/payment/${aDocName}/?attachmentIdx=${aDocIdx}`;
 
-
     const decodedUrlOrError = PnPaymentUrl.decode(thePNPaymentUrl);
-
 
     expect(E.isRight(decodedUrlOrError)).toBe(true);
     if (E.isRight(decodedUrlOrError)) {
@@ -277,7 +292,7 @@ describe("getThirdPartyMessageDetails", () => {
           status: 200,
           value: expect.objectContaining({
             attachments: expect.arrayContaining([
-              expect.objectContaining({category: "DOCUMENT"})
+              expect.objectContaining({ category: "DOCUMENT" }),
             ]),
             details: expect.objectContaining({
               abstract: notificationDetailResponseExampleAsObject.abstract,
@@ -448,7 +463,104 @@ describe("getThirdPartyAttachments", () => {
     expect(E.isRight(result)).toBeTruthy();
   });
 
-  it("GIVEN a working PN GetSentNotificationDocument endpoint WHEN a Third-Party get attachments is called THEN the get is properly forwarded to PN endpoint returning an error", async () => {
+  it("GIVEN an available PN GetReceivedNotificationAttachment endpoint WHEN a Third-Party get attachments is called THEN the get is properly forwarded to PN endpoint returning an attachment", async () => {
+    const dummyFetch = jest.fn((_input: RequestInfo, _init?: RequestInit) =>
+      T.of(
+        new NodeResponse(documentBody, {
+          status: 200,
+          statusText: "OK",
+        }) as unknown as Response
+      )()
+    );
+
+    const aFetch = pnFetch(
+      dummyFetch as any as typeof fetch,
+      aPNServiceId,
+      aPnUrl,
+      aPnKey,
+      lollipopParams
+    );
+
+    const client = createClient({
+      baseUrl: "https://localhost",
+      fetchApi: aFetch,
+    });
+
+    const result = await client.getThirdPartyMessageAttachment({
+      fiscal_code: aFiscalCode,
+      id: aPnNotificationId,
+      attachment_url: aThirdPartyAttachmentForPnF24RelativeUrl,
+      ...lollipopParams,
+    });
+
+    expect(dummyGetReceivedNotificationAttachment).toHaveBeenCalledTimes(1);
+    expect(dummyGetReceivedNotificationAttachment).toHaveBeenCalledWith({
+      ...lollipopPNHeaders,
+      attachmentName: aPnF24DocumentName,
+      attachmentIdx: Number(aPnF24AttachmentIndex),
+      iun: aPnNotificationId,
+    });
+    expect(dummyFetch).toHaveBeenCalledTimes(1);
+    expect(dummyFetch).toHaveBeenCalledWith(aPnAttachmentUrl);
+
+    expect(E.isRight(result)).toBeTruthy();
+  });
+
+  it("GIVEN an unavailable PN GetReceivedNotificationAttachment endpoint WHEN a Third-Party get attachments is called THEN the get is properly forwarded to PN endpoint returning an unavailable response with retry after header", async () => {
+    dummyGetReceivedNotificationAttachment.mockImplementationOnce(() =>
+      TE.of({ status: 200, value: anUnavailablePnNotificationDocument })()
+    );
+
+    const dummyFetch = jest.fn((_input: RequestInfo, _init?: RequestInit) =>
+      T.of(
+        new NodeResponse(documentBody, {
+          status: 400,
+          statusText: "KO",
+        }) as unknown as Response
+      )()
+    );
+
+    const aFetch = pnFetch(
+      dummyFetch as any as typeof fetch,
+      aPNServiceId,
+      aPnUrl,
+      aPnKey,
+      lollipopParams
+    );
+
+    const client = createClient({
+      baseUrl: "https://localhost",
+      fetchApi: aFetch,
+    });
+
+    const result = await client.getThirdPartyMessageAttachment({
+      fiscal_code: aFiscalCode,
+      id: aPnNotificationId,
+      attachment_url: aThirdPartyAttachmentForPnF24RelativeUrl,
+      ...lollipopParams,
+    });
+
+    expect(dummyGetReceivedNotificationAttachment).toHaveBeenCalledTimes(1);
+    expect(dummyGetReceivedNotificationAttachment).toHaveBeenCalledWith({
+      ...lollipopPNHeaders,
+      attachmentName: aPnF24DocumentName,
+      attachmentIdx: Number(aPnF24AttachmentIndex),
+      iun: aPnNotificationId,
+    });
+    expect(dummyFetch).toHaveBeenCalledTimes(0);
+
+    expect(E.isRight(result)).toBeTruthy();
+    if (E.isRight(result)) {
+      const response = result.right;
+      expect(response.status).toEqual(503);
+
+      const headers = response.headers;
+      // @ts-ignore to avoid "never" union side
+      expect(headers.get("Retry-After")).toEqual("10");
+    }
+  });
+
+  it("GIVEN a not working PN GetSentNotificationDocument endpoint WHEN a Third-Party get attachments is called THEN the get is properly forwarded to PN endpoint returning an error", async () => {
     dummyGetSentNotificationDocument.mockImplementationOnce(() =>
       TE.of({ status: 400, value: {} })()
     );
