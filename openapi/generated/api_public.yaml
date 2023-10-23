@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 13.18.0
+  version: 13.18.1
   title: Public API
   description: Mobile and web proxy API gateway.
 host: localhost
@@ -52,6 +52,34 @@ paths:
           description: Unavailable service
           schema:
             $ref: '#/definitions/ProblemJson'
+  /login:
+    get:
+      operationId: login
+      summary: Login SPID/CIE
+      description: Login with SPID or CIE for IO APP
+      parameters:
+        - $ref: '#/parameters/EntityId'
+        - $ref: '#/parameters/AuthLevel'
+        - $ref: '#/parameters/JwkPubKeyToken'
+        - $ref: '#/parameters/JwkPubKeyHashAlgorithm'
+        - $ref: '#/parameters/LoginType'
+      responses:
+        '302':
+          description: Redirect to IDP
+          headers:
+            Location:
+              type: string
+              description: Redirect endpoint with SAML AuthNRequest query parameters
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '503':
+          description: Service unavailable
 definitions:
   FiscalCode:
     type: string
@@ -154,3 +182,64 @@ consumes:
   - application/json
 produces:
   - application/json
+parameters:
+  EntityId:
+    name: entityID
+    in: query
+    type: string
+    enum:
+      - lepidaid
+      - infocertid
+      - sielteid
+      - namirialid
+      - timid
+      - arubaid
+      - posteid
+      - spiditalia
+      - teamsystemid
+      - ehtid
+      - infocamereid
+      - intesiid
+      - xx_servizicie_coll
+      - xx_servizicie
+      - xx_servizicie_test
+    description: An ID that refers to a specific IDP
+    required: true
+  AuthLevel:
+    name: authLevel
+    in: query
+    type: string
+    enum:
+      - SpidL2
+      - SpidL3
+    description: SPID AuthLevel
+    required: true
+    x-example: SpidL2
+  LoginType:
+    name: loginType
+    in: header
+    type: string
+    enum:
+      - LV
+      - LEGACY
+    required: false
+    x-example: LEGACY
+  JwkPubKeyToken:
+    in: header
+    name: x-pagopa-lollipop-pub-key
+    type: string
+    description: represents a Base64url encode of a JWK Public Key
+    format: JwkPublicKeyFromToken
+    x-import: '@pagopa/ts-commons/lib/jwk'
+    x-example: >-
+      eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6IjRmMzB6dUdNcm9kRXl3cEoxelZKbWFRLVYtZlM4OVZBTW8yZnN6dWxOTmsiLCJ5IjoibG5NdmExengxaFJncVY5enVEU3dkV0dyUlhTREl4UXQ1YVJVeG1EVW44NCJ9
+  JwkPubKeyHashAlgorithm:
+    in: header
+    name: x-pagopa-lollipop-pub-key-hash-algo
+    type: string
+    enum:
+      - sha256
+      - sha384
+      - sha512
+    description: Represents the selected hashing algorithm for jwk thumbprint
+    x-example: sha256
