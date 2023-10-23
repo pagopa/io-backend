@@ -459,6 +459,8 @@ paths:
               is_email_set: true
               is_inbox_enabled: true
               is_webhook_enabled: true
+              is_email_validated: true
+              is_email_already_taken: false
               name: "Mario"
               spid_email: "preferred@example.com"
               version: 0
@@ -474,6 +476,10 @@ paths:
             $ref: "#/definitions/ProblemJson"
         "409":
           description: Conflict.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "412":
+          description: Precondition Failed
           schema:
             $ref: "#/definitions/ProblemJson"
         "429":
@@ -939,6 +945,8 @@ definitions:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/IsInboxEnabled"
   IsEmailValidated:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/IsEmailValidated"
+  IsEmailAlreadyTaken:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/IsEmailAlreadyTaken"
   ReminderStatus:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ReminderStatus"
   PushNotificationsContentType:
@@ -1214,6 +1222,8 @@ definitions:
         $ref: "#/definitions/IsInboxEnabled"
       is_email_validated:
         $ref: "#/definitions/IsEmailValidated"
+      is_email_already_taken:
+        $ref: "#/definitions/IsEmailAlreadyTaken"
       is_email_enabled:
         $ref: "#/definitions/IsEmailEnabled"
       reminder_status:
@@ -1247,6 +1257,7 @@ definitions:
       - has_profile
       - is_inbox_enabled
       - is_email_enabled
+      - is_email_already_taken
       - is_webhook_enabled
       - name
       - service_preferences_settings

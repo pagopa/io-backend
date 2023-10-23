@@ -478,6 +478,8 @@ paths:
               is_email_set: true
               is_inbox_enabled: true
               is_webhook_enabled: true
+              is_email_validated: true
+              is_email_already_taken: false
               name: Mario
               spid_email: preferred@example.com
               version: 0
@@ -493,6 +495,10 @@ paths:
             $ref: '#/definitions/ProblemJson'
         '409':
           description: Conflict.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '412':
+          description: Precondition Failed
           schema:
             $ref: '#/definitions/ProblemJson'
         '429':
@@ -1057,6 +1063,8 @@ definitions:
         $ref: '#/definitions/IsEmailEnabled'
       is_email_validated:
         $ref: '#/definitions/IsEmailValidated'
+      is_email_already_taken:
+        $ref: '#/definitions/IsEmailAlreadyTaken'
       reminder_status:
         $ref: '#/definitions/ReminderStatus'
       is_test_profile:
@@ -1070,6 +1078,7 @@ definitions:
     required:
       - is_email_enabled
       - is_email_validated
+      - is_email_already_taken
       - is_inbox_enabled
       - is_webhook_enabled
       - service_preferences_settings
@@ -1093,6 +1102,11 @@ definitions:
   IsEmailValidated:
     type: boolean
     description: True if the user email has been validated.
+  IsEmailAlreadyTaken:
+    type: boolean
+    description: |-
+      True if the user email has been validated by another user.
+      If so, the user must provide a new email.
   ReminderStatus:
     type: string
     x-extensible-enum:
@@ -2675,6 +2689,8 @@ definitions:
         $ref: '#/definitions/IsInboxEnabled'
       is_email_validated:
         $ref: '#/definitions/IsEmailValidated'
+      is_email_already_taken:
+        $ref: '#/definitions/IsEmailAlreadyTaken'
       is_email_enabled:
         $ref: '#/definitions/IsEmailEnabled'
       reminder_status:
@@ -2708,6 +2724,7 @@ definitions:
       - has_profile
       - is_inbox_enabled
       - is_email_enabled
+      - is_email_already_taken
       - is_webhook_enabled
       - name
       - service_preferences_settings
