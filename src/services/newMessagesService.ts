@@ -622,7 +622,10 @@ export default class NewMessagesService {
                   return ResponseErrorInternal(ERROR_MESSAGE_500);
                 case 503:
                   const retryAfter = response.headers["Retry-After"] ?? "10";
-                  return ResponseErrorServiceTemporarilyUnavailable(ERROR_MESSAGE_503, retryAfter);
+                  return ResponseErrorServiceTemporarilyUnavailable(
+                    ERROR_MESSAGE_503,
+                    retryAfter
+                  );
                 default:
                   return ResponseErrorStatusNotDefinedInSpec(response);
               }

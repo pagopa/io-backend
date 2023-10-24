@@ -22,10 +22,10 @@ import { PN_SERVICE_ID } from "../config";
 
 const getPath = (input: RequestInfo | URL): string =>
   input instanceof URL
-    ? input.pathname + input.searchParams
+    ? `${input.pathname}${input.searchParams}`
     : typeof input === "string"
-    ? new URL(input).pathname + new URL(input).searchParams
-    : new URL(input.url).pathname + new URL(input.url).searchParams;
+    ? `${new URL(input).pathname}${new URL(input).searchParams}`
+    : `${new URL(input.url).pathname}${new URL(input.url).searchParams}`;
 
 export const ThirdPartyMessagesUrl = pathParamsFromUrl(
   RegExp("^[/]+messages[/]+([^/]+)$"),
