@@ -58,6 +58,23 @@ paths:
           description: Bad gateway.
         "504":
           description: Gateway timeout.
+  /fast-login/generate:
+    post:
+      operationId: lvGenerateNonce
+      summary: Generate a Nonce for a session refresh flow
+      responses:
+        "200":
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenerateNonceResponse"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
 components:
   schemas:
     LollipopMethod:
@@ -72,3 +89,15 @@ components:
       $ref: "./generated/api_public.yaml#/definitions/AccessToken"
     ProblemJson:
       $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v28.6.0/openapi/definitions.yaml#/ProblemJson"
+    Nonce:
+      type: string
+      pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$
+      description: UUID v4 formatted nonce as per RFC 4122
+      example: 870c6d89-a3c4-48b1-a796-cdacddaf94b4
+    GenerateNonceResponse:
+      type: object
+      properties:
+        nonce:
+          $ref: "#/components/schemas/Nonce"
+      required:
+        - nonce
