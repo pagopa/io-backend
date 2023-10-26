@@ -23,7 +23,9 @@ import { ResLocals } from "../utils/express";
 import { getFastLoginLollipopConsumerClient } from "../clients/fastLoginLollipopConsumerClient";
 import TokenService from "../services/tokenService";
 import { ISessionStorage } from "../services/ISessionStorage";
+import { GenerateNonceResponse } from "../../generated/fast-login-api/GenerateNonceResponse";
 import { FastLoginResponse as LCFastLoginResponse } from "../../generated/fast-login-api/FastLoginResponse";
+import { readableProblem } from "../utils/errorsFormatter";
 import { makeProxyUserFromSAMLResponse } from "../utils/spid";
 import { UserV5 } from "../types/user";
 import {
@@ -36,7 +38,9 @@ import {
 } from "../types/token";
 import {
   IResponseErrorUnauthorized,
+  ResponseErrorStatusNotDefinedInSpec,
   ResponseErrorUnauthorized,
+  ResponseErrorUnexpectedAuthProblem,
 } from "../utils/responses";
 import {
   isUserElegibleForFastLogin,
@@ -149,6 +153,51 @@ const createSessionForUser = (
 // it MUST BE implemented afterwards
 const callLcSetSession = (): TE.TaskEither<IResponseErrorInternal, true> =>
   TE.of(true);
+
+// ----------------------------------
+// Endpoints
+// ----------------------------------
+
+export const generateNonceEndpoint =
+  (client: ReturnType<getFastLoginLollipopConsumerClient>) =>
+  async (
+    _req: express.Request
+  ): Promise<
+    | IResponseErrorUnauthorized
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorInternal
+    | IResponseSuccessJson<GenerateNonceResponse>
+  > =>
+    pipe(
+      TE.tryCatch(
+        () => client.generateNonce({}),
+        (_) => ResponseErrorInternal("Error while calling fast-login service")
+      ),
+      TE.chainEitherKW(
+        E.mapLeft(
+          flow(readableReportSimplified, (message) =>
+            ResponseErrorInternal(
+              `Unexpected response from fast-login service: ${message}`
+            )
+          )
+        )
+      ),
+      TE.chainW((response) => {
+        switch (response.status) {
+          case 200:
+            return TE.right(ResponseSuccessJson(response.value));
+          case 401:
+            return TE.left(ResponseErrorUnexpectedAuthProblem());
+          case 500:
+            return TE.left(
+              ResponseErrorInternal(readableProblem(response.value))
+            );
+          default:
+            return TE.left(ResponseErrorStatusNotDefinedInSpec(response));
+        }
+      }),
+      TE.toUnion
+    )();
 
 export const fastLoginEndpoint =
   (
