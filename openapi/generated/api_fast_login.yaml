@@ -59,7 +59,7 @@ paths:
           description: Bad gateway.
         '504':
           description: Gateway timeout.
-  /fast-login/generate:
+  /fast-login/nonce/generate:
     post:
       operationId: lvGenerateNonce
       summary: Generate a Nonce for a session refresh flow
