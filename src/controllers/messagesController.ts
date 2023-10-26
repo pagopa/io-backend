@@ -7,6 +7,7 @@ import * as express from "express";
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
+  IResponseErrorServiceUnavailable,
   IResponseErrorTooManyRequests,
   IResponseErrorValidation,
   IResponseSuccessJson,
@@ -280,6 +281,7 @@ export default class MessagesController {
     req: express.Request
   ): Promise<
     | IResponseErrorInternal
+    | IResponseErrorServiceUnavailable
     | IResponseErrorValidation
     | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorNotFound

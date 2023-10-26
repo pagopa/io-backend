@@ -216,6 +216,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
+        503:
+          description: Service Unavailable, check the Retry-After header to retry
+          headers: 
+            Retry-After:
+              description: The value in seconds after which you can retry 
+              schema: 
+                type: string
+                example: 120
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
   /messages/{id}/precondition:
     get:
       summary: Retrieve the precondition of a Third Party message

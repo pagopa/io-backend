@@ -5,6 +5,7 @@ import * as t from "io-ts";
 import {
   IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
+  IResponseErrorServiceUnavailable,
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
   IResponseErrorValidation,
@@ -15,6 +16,7 @@ import {
   ResponseErrorForbiddenNotAuthorized,
   ResponseErrorInternal,
   ResponseErrorValidation,
+  ResponseErrorServiceTemporarilyUnavailable,
   IResponseSuccessNoContent,
 } from "@pagopa/ts-commons/lib/responses";
 import { AppMessagesAPIClient } from "src/clients/app-messages.client";
@@ -61,6 +63,8 @@ import { FileType, getIsFileTypeForTypes } from "../utils/file-type";
 const ALLOWED_TYPES: ReadonlySet<FileType> = new Set(["pdf"]);
 
 const ERROR_MESSAGE_500 = "Third Party Service failed with code 500";
+const ERROR_MESSAGE_503 =
+  "Third Party Service unavailable with code 503, please retry later";
 const ERROR_MESSAGE_400 = "Bad request";
 
 export const MessageWithThirdPartyData = t.intersection([
@@ -284,6 +288,7 @@ export default class NewMessagesService {
     lollipopLocals?: LollipopLocalsType
   ): Promise<
     | IResponseErrorInternal
+    | IResponseErrorServiceUnavailable
     | IResponseErrorValidation
     | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorNotFound
@@ -549,6 +554,7 @@ export default class NewMessagesService {
     lollipopLocals?: LollipopLocalsType
   ): TE.TaskEither<
     | IResponseErrorInternal
+    | IResponseErrorServiceUnavailable
     | IResponseErrorValidation
     | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorNotFound
@@ -614,6 +620,12 @@ export default class NewMessagesService {
                   return ResponseErrorTooManyRequests();
                 case 500:
                   return ResponseErrorInternal(ERROR_MESSAGE_500);
+                case 503:
+                  const retryAfter = response.headers["Retry-After"] ?? "10";
+                  return ResponseErrorServiceTemporarilyUnavailable(
+                    ERROR_MESSAGE_503,
+                    retryAfter
+                  );
                 default:
                   return ResponseErrorStatusNotDefinedInSpec(response);
               }
