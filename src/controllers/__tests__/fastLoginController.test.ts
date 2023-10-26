@@ -4,7 +4,10 @@ import * as RNEA from "fp-ts/lib/ReadonlyNonEmptyArray";
 import { aFiscalCode } from "../../__mocks__/user_mock";
 import TokenService from "../../services/tokenService";
 import { AssertionTypeEnum } from "../../../generated/lollipop-api/AssertionType";
-import { fastLoginEndpoint } from "../fastLoginController";
+import {
+  fastLoginEndpoint,
+  generateNonceEndpoint,
+} from "../fastLoginController";
 import { Second } from "@pagopa/ts-commons/lib/units";
 import { getFastLoginLollipopConsumerClient } from "../../clients/fastLoginLollipopConsumerClient";
 import {
@@ -35,6 +38,16 @@ import { pipe } from "fp-ts/lib/function";
 import { UserWithoutTokens } from "../../types/user";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { mockRedisClientSelector } from "../../__mocks__/redis";
+import {
+  IResponse,
+  ResponseErrorInternal,
+  ResponseSuccessJson,
+} from "@pagopa/ts-commons/lib/responses";
+import {
+  ResponseErrorStatusNotDefinedInSpec,
+  ResponseErrorUnexpectedAuthProblem,
+} from "../../utils/responses";
+import { readableProblem } from "../../utils/errorsFormatter";
 
 const mockSet = jest.fn();
 const mockDel = jest.fn();
@@ -77,11 +90,22 @@ const validFastLoginLCResponse = {
   saml_response: aSAMLResponse,
 } as LCFastLoginResponse;
 
+const aValidGenerateNonceResponse = {
+  nonce: "870c6d89-a3c4-48b1-a796-cdacddaf94b4",
+};
+
 const mockLCFastLogin = jest
   .fn()
   .mockResolvedValue(E.right({ status: 200, value: validFastLoginLCResponse }));
+const mockGenerateNonce = jest
+  .fn()
+  .mockResolvedValue(
+    E.right({ status: 200, value: aValidGenerateNonceResponse })
+  );
+
 const fastLoginLCClient = {
   fastLogin: mockLCFastLogin,
+  generateNonce: mockGenerateNonce,
 } as unknown as ReturnType<getFastLoginLollipopConsumerClient>;
 
 const aBearerToken = "token" as LollipopJWTAuthorization;
@@ -104,14 +128,14 @@ const fastLoginLollipopLocals: LollipopLocalsType = {
   ["x-pagopa-lollipop-user-id"]: aFiscalCode,
 };
 
-const controller = fastLoginEndpoint(
+const fastLoginController = fastLoginEndpoint(
   fastLoginLCClient,
   redisSessionStorage,
   tokenService,
   sessionTTL
 );
 
-describe("fastLoginController", () => {
+describe("fastLoginController#fastLogin", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -138,7 +162,7 @@ describe("fastLoginController", () => {
     mockSet.mockResolvedValueOnce(E.right(true));
     const expectedClientIp = "10.0.0.2";
 
-    const response = await controller(
+    const response = await fastLoginController(
       mockReq({ ip: expectedClientIp }),
       fastLoginLollipopLocals
     );
@@ -164,7 +188,7 @@ describe("fastLoginController", () => {
   });
 
   it("should fail when lollipop locals are invalid", async () => {
-    const response = await controller(mockReq(), {
+    const response = await fastLoginController(mockReq(), {
       ...fastLoginLollipopLocals,
       "x-pagopa-lollipop-user-id": "NOTAFISCALCODE",
     });
@@ -182,7 +206,10 @@ describe("fastLoginController", () => {
 
   it("should fail when the lollipop consumer can't be contacted", async () => {
     mockLCFastLogin.mockRejectedValueOnce(null);
-    const response = await controller(mockReq(), fastLoginLollipopLocals);
+    const response = await fastLoginController(
+      mockReq(),
+      fastLoginLollipopLocals
+    );
     const res = mockRes();
     response.apply(res);
 
@@ -198,7 +225,10 @@ describe("fastLoginController", () => {
 
   it("should fail when the lollipop consumer gives a decoding error", async () => {
     mockLCFastLogin.mockResolvedValueOnce(BadRequest.decode({}));
-    const response = await controller(mockReq(), fastLoginLollipopLocals);
+    const response = await fastLoginController(
+      mockReq(),
+      fastLoginLollipopLocals
+    );
     const res = mockRes();
     response.apply(res);
 
@@ -216,7 +246,10 @@ describe("fastLoginController", () => {
 
   it("should return 401 when the lollipop consumer gives a 401 Unauthorized", async () => {
     mockLCFastLogin.mockResolvedValueOnce(E.right({ status: 401 }));
-    const response = await controller(mockReq(), fastLoginLollipopLocals);
+    const response = await fastLoginController(
+      mockReq(),
+      fastLoginLollipopLocals
+    );
     const res = mockRes();
     response.apply(res);
 
@@ -240,7 +273,10 @@ describe("fastLoginController", () => {
       mockLCFastLogin.mockResolvedValueOnce(
         E.right({ status: status, value: { detail: "error", title: "error" } })
       );
-      const response = await controller(mockReq(), fastLoginLollipopLocals);
+      const response = await fastLoginController(
+        mockReq(),
+        fastLoginLollipopLocals
+      );
       const res = mockRes();
       response.apply(res);
 
@@ -259,7 +295,10 @@ describe("fastLoginController", () => {
     mockLCFastLogin.mockResolvedValueOnce(
       E.right({ status: 200, value: { saml_response: "" } })
     );
-    const response = await controller(mockReq(), fastLoginLollipopLocals);
+    const response = await fastLoginController(
+      mockReq(),
+      fastLoginLollipopLocals
+    );
     const res = mockRes();
     response.apply(res);
 
@@ -275,7 +314,10 @@ describe("fastLoginController", () => {
 
   it("should return 403 when the user is blocked", async () => {
     mockIsBlockedUser.mockResolvedValueOnce(E.right(true));
-    const response = await controller(mockReq(), fastLoginLollipopLocals);
+    const response = await fastLoginController(
+      mockReq(),
+      fastLoginLollipopLocals
+    );
     const res = mockRes();
     response.apply(res);
 
@@ -292,7 +334,10 @@ describe("fastLoginController", () => {
 
   it("should return 500 when the session storage could not determine if the user is blocked", async () => {
     mockIsBlockedUser.mockResolvedValueOnce(E.left(new Error("error")));
-    const response = await controller(mockReq(), fastLoginLollipopLocals);
+    const response = await fastLoginController(
+      mockReq(),
+      fastLoginLollipopLocals
+    );
     const res = mockRes();
     response.apply(res);
 
@@ -316,7 +361,10 @@ describe("fastLoginController", () => {
     mockIsBlockedUser.mockResolvedValueOnce(E.right(false));
     makeProxyUser.mockReturnValueOnce(UserWithoutTokens.decode({}));
 
-    const response = await controller(mockReq(), fastLoginLollipopLocals);
+    const response = await fastLoginController(
+      mockReq(),
+      fastLoginLollipopLocals
+    );
     const res = mockRes();
     response.apply(res);
 
@@ -336,7 +384,10 @@ describe("fastLoginController", () => {
     mockIsBlockedUser.mockResolvedValueOnce(E.right(false));
     mockSet.mockReturnValueOnce(E.left(new Error("error")));
 
-    const response = await controller(mockReq(), fastLoginLollipopLocals);
+    const response = await fastLoginController(
+      mockReq(),
+      fastLoginLollipopLocals
+    );
     const res = mockRes();
     response.apply(res);
 
@@ -360,7 +411,10 @@ describe("fastLoginController", () => {
       RNEA.map(() => mockGetNewToken.mockResolvedValueOnce(""))
     );
 
-    const response = await controller(mockReq(), fastLoginLollipopLocals);
+    const response = await fastLoginController(
+      mockReq(),
+      fastLoginLollipopLocals
+    );
     const res = mockRes();
     response.apply(res);
 
@@ -378,7 +432,7 @@ describe("fastLoginController", () => {
   });
 
   it("should return 500 when the user IP has an unexpected value", async () => {
-    const response = await controller(
+    const response = await fastLoginController(
       mockReq({ ip: "unexpected" }),
       fastLoginLollipopLocals
     );
@@ -395,3 +449,49 @@ describe("fastLoginController", () => {
     );
   });
 });
+
+describe("fastLoginController#generateNonce", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const res = mockRes();
+
+  const generateNonceController = generateNonceEndpoint(fastLoginLCClient);
+
+  it("should return the nonce, when the the downstream component returns it", async () => {
+    const result = await generateNonceController(res);
+
+    expectToMatchResult(
+      result,
+      ResponseSuccessJson(aValidGenerateNonceResponse)
+    );
+  });
+
+  it.each`
+    title                                                                                           | clientResponse                                            | expectedResult
+    ${"should return InternalServerError when the client return 401"}                               | ${E.right({ status: 401 })}                               | ${ResponseErrorUnexpectedAuthProblem()}
+    ${"should return InternalServerError when the client return 500"}                               | ${E.right({ status: 500, value: { title: "an Error" } })} | ${ResponseErrorInternal(readableProblem({ title: "an Error" }))}
+    ${"should return InternalServerError when the client return a status code not defied in specs"} | ${E.right({ status: 418 })}                               | ${ResponseErrorStatusNotDefinedInSpec({ status: 418 } as never)}
+  `("$title", async ({ clientResponse, expectedResult }) => {
+    mockGenerateNonce.mockResolvedValue(clientResponse);
+
+    const result = await generateNonceController(res);
+
+    expectToMatchResult(result, expectedResult);
+  });
+});
+
+// ------------------------
+// utilities
+// ------------------------
+
+function expectToMatchResult(
+  result: IResponse<any>,
+  expectedResult: IResponse<any>
+) {
+  expect(result).toMatchObject({
+    ...expectedResult,
+    apply: expect.any(Function),
+  });
+}
