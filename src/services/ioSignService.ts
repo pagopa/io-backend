@@ -3,6 +3,7 @@
  */
 
 import {
+  HttpStatusCodeEnum,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
@@ -17,7 +18,9 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 
 import * as O from "fp-ts/lib/Option";
-import { pipe } from "fp-ts/lib/function";
+import { flow, pipe } from "fp-ts/lib/function";
+
+import * as t from "io-ts";
 
 import {
   EmailString,
@@ -25,6 +28,7 @@ import {
   NonEmptyString,
 } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/Either";
+import { lookup } from "fp-ts/lib/ReadonlyRecord";
 import { CreateSignatureBody as CreateSignatureBodyApiModel } from "../../generated/io-sign-api/CreateSignatureBody";
 import { IssuerEnvironment } from "../../generated/io-sign/IssuerEnvironment";
 import { SignerDetailView } from "../../generated/io-sign-api/SignerDetailView";
@@ -51,6 +55,13 @@ const invalidRequest = "Invalid request";
 const resourcesNotFound = "Resources not found";
 const userNotFound =
   "The user associated with this profile could not be found.";
+
+export const getEnvironmentFromHeaders = flow(
+  lookup("x-io-sign-environment"),
+  O.chainEitherK(t.keyof({ prod: true, test: true }).decode),
+  O.getOrElse(() => "prod")
+);
+
 export default class IoSignService {
   constructor(private readonly ioSignApiClient: ReturnType<IoSignAPIClient>) {}
 
@@ -253,7 +264,18 @@ export default class IoSignService {
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
           case 200:
-            return ResponseSuccessJson(response.value);
+            return {
+              apply: (res) =>
+                res
+                  .status(HttpStatusCodeEnum.HTTP_STATUS_200)
+                  .header(
+                    "x-io-sign-environment",
+                    getEnvironmentFromHeaders(response.headers)
+                  )
+                  .json(response.value),
+              kind: "IResponseSuccessJson",
+              value: response.value,
+            };
           case 404:
             return ResponseErrorNotFound(
               resourcesNotFound,

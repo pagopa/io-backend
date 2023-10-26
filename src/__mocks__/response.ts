@@ -26,7 +26,8 @@ export default function mockRes(): any {
     set: jest.fn(),
     status: jest.fn(),
     type: jest.fn(),
-    vary: jest.fn()
+    vary: jest.fn(),
+    header: jest.fn(),
   };
 
   response.append.mockImplementation(() => response);
@@ -51,6 +52,7 @@ export default function mockRes(): any {
   response.status.mockImplementation(() => response);
   response.type.mockImplementation(() => response);
   response.vary.mockImplementation(() => response);
+  response.header.mockImplementation(() => response);
 
   return response;
 }
@@ -81,4 +83,5 @@ function resetMock(this: any): any {
   this.status.mockClear();
   this.type.mockClear();
   this.vary.mockClear();
+  this.header.mockClear();
 }
