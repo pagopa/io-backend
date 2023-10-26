@@ -1697,7 +1697,7 @@ function registerFastLoginRoutes(
   tokenService: TokenService
 ): void {
   app.post(
-    `${basePath}/fast-login/generate-nonce`,
+    `${basePath}/fast-login/nonce/generate`,
     toExpressHandler(generateNonceEndpoint(fastLoginLollipopConsumerClient))
   );
 
