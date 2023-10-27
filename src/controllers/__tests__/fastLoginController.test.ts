@@ -472,6 +472,8 @@ describe("fastLoginController#generateNonce", () => {
     title                                                                                           | clientResponse                                            | expectedResult
     ${"should return InternalServerError when the client return 401"}                               | ${E.right({ status: 401 })}                               | ${ResponseErrorUnexpectedAuthProblem()}
     ${"should return InternalServerError when the client return 500"}                               | ${E.right({ status: 500, value: { title: "an Error" } })} | ${ResponseErrorInternal(readableProblem({ title: "an Error" }))}
+    ${"should return InternalServerError when the client return 502"}                               | ${E.right({ status: 502 })}                               | ${ResponseErrorInternal("An error occurred on upstream service")}
+    ${"should return InternalServerError when the client return 504"}                               | ${E.right({ status: 504 })}                               | ${ResponseErrorInternal("An error occurred on upstream service")}
     ${"should return InternalServerError when the client return a status code not defied in specs"} | ${E.right({ status: 418 })}                               | ${ResponseErrorStatusNotDefinedInSpec({ status: 418 } as never)}
   `("$title", async ({ clientResponse, expectedResult }) => {
     mockGenerateNonce.mockResolvedValue(clientResponse);

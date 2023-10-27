@@ -192,6 +192,11 @@ export const generateNonceEndpoint =
             return TE.left(
               ResponseErrorInternal(readableProblem(response.value))
             );
+          case 502:
+          case 504:
+            return TE.left(
+              ResponseErrorInternal("An error occurred on upstream service")
+            );
           default:
             return TE.left(ResponseErrorStatusNotDefinedInSpec(response));
         }
