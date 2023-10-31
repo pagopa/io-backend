@@ -186,7 +186,10 @@ import { LollipopApiClient } from "./clients/lollipop";
 import { ISessionStorage } from "./services/ISessionStorage";
 import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
 import { AdditionalLoginProps, acsRequestMapper } from "./utils/fastLogin";
-import { fastLoginEndpoint } from "./controllers/fastLoginController";
+import {
+  fastLoginEndpoint,
+  generateNonceEndpoint,
+} from "./controllers/fastLoginController";
 import { getFastLoginLollipopConsumerClient } from "./clients/fastLoginLollipopConsumerClient";
 import { FeatureFlagEnum } from "./utils/featureFlag";
 import AuthenticationLockService from "./services/authenticationLockService";
@@ -1693,6 +1696,11 @@ function registerFastLoginRoutes(
   fastLoginLollipopConsumerClient: ReturnType<getFastLoginLollipopConsumerClient>,
   tokenService: TokenService
 ): void {
+  app.post(
+    `${basePath}/fast-login/nonce/generate`,
+    toExpressHandler(generateNonceEndpoint(fastLoginLollipopConsumerClient))
+  );
+
   app.post(
     `${basePath}/fast-login`,
     expressLollipopMiddleware(lollipopClient, sessionStorage),
