@@ -1012,6 +1012,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IOPID-1045/openapi/definitions.yaml#/IsEmailValidated"
   IsEmailAlreadyTaken:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IOPID-1045/openapi/definitions.yaml#/IsEmailAlreadyTaken"
+  UpdateProfile412ErrorTypes:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IOPID-1045/openapi/problemJson_definitions.yaml#/UpdateProfile412ErrorTypes"
   ReminderStatus:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IOPID-1045/openapi/definitions.yaml#/ReminderStatus"
   PushNotificationsContentType:

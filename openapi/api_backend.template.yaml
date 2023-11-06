@@ -947,6 +947,8 @@ definitions:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/IsEmailValidated"
   IsEmailAlreadyTaken:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/IsEmailAlreadyTaken"
+  UpdateProfile412ErrorTypes:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/problemJson_definitions.yaml#/UpdateProfile412ErrorTypes"
   ReminderStatus:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ReminderStatus"
   PushNotificationsContentType:
