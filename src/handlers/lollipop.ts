@@ -4,15 +4,19 @@ import {
   LOLLIPOP_PUB_KEY_HASHING_ALGO_HEADER_NAME,
   LOLLIPOP_PUB_KEY_HEADER_NAME,
 } from "@pagopa/io-spid-commons/dist/types/lollipop";
-import { JwkPublicKeyFromToken } from "@pagopa/ts-commons/lib/jwk";
+import {
+  JwkPublicKey,
+  JwkPublicKeyFromToken,
+} from "@pagopa/ts-commons/lib/jwk";
 import * as express from "express";
 import * as appInsights from "applicationinsights";
-import { constUndefined, pipe } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import * as E from "fp-ts/lib/Either";
 import * as A from "fp-ts/lib/Apply";
 import * as B from "fp-ts/lib/boolean";
 import * as TE from "fp-ts/lib/TaskEither";
+import * as t from "io-ts";
 import {
   IResponseErrorConflict,
   IResponseErrorInternal,
@@ -43,6 +47,12 @@ const isReservePubKeyResponseSuccess = (
   res: IResponseType<number, unknown>
 ): res is IResponseType<201, NewPubKey> => res.status === 201;
 
+export const LollipopLoginParams = t.type({
+  algo: LollipopHashAlgorithm,
+  jwk: JwkPublicKey,
+});
+export type LollipopLoginParams = t.TypeOf<typeof LollipopLoginParams>;
+
 export const lollipopLoginHandler =
   (
     isLollipopEnabled: boolean,
@@ -55,6 +65,7 @@ export const lollipopLoginHandler =
     | IResponseErrorValidation
     | IResponseErrorInternal
     | IResponseErrorConflict
+    | LollipopLoginParams
     | undefined
   > =>
     withValidatedOrValidationError(
@@ -138,7 +149,7 @@ export const lollipopLoginHandler =
                           ? ResponseErrorConflict("PubKey is already reserved")
                           : ResponseErrorInternal("Cannot reserve pubKey")
                     ),
-                    TE.map(constUndefined),
+                    TE.map(() => lollipopParams),
                     TE.toUnion
                   )()
                 )
@@ -147,3 +158,23 @@ export const lollipopLoginHandler =
           O.toUndefined
         )
     );
+
+export const lollipopLoginMiddleware =
+  (
+    isLollipopEnabled: boolean,
+    lollipopApiClient: ReturnType<LollipopApiClient>,
+    appInsightsTelemetryClient?: appInsights.TelemetryClient
+  ) =>
+  (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorValidation
+    | IResponseErrorInternal
+    | IResponseErrorConflict
+    | undefined
+  > =>
+    lollipopLoginHandler(
+      isLollipopEnabled,
+      lollipopApiClient,
+      appInsightsTelemetryClient
+    )(req).then((_) => (LollipopLoginParams.is(_) ? undefined : _));

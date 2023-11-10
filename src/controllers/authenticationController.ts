@@ -53,6 +53,7 @@ import { getRequestIDFromResponse } from "../utils/spid";
 import {
   AdditionalLoginPropsT,
   LoginTypeEnum,
+  acsRequestMapper,
   getIsUserElegibleForfastLogin,
 } from "../utils/fastLogin";
 import { isOlderThan } from "../utils/date";
@@ -716,7 +717,29 @@ export default class AuthenticationController {
     | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessJson<AccessToken>
   > {
-    const acsResponse = await this.acs(userPayload, {});
+    //
+    // decode the SPID assertion into a SPID user
+    //
+    const errorOrSpidUser = validateSpidUser(userPayload);
+
+    if (E.isLeft(errorOrSpidUser)) {
+      log.error(
+        "acs: error validating the SPID user [%O] [%s]",
+        userPayload,
+        errorOrSpidUser.left
+      );
+      return ResponseErrorValidation("Bad request", errorOrSpidUser.left);
+    }
+
+    const spidUser = errorOrSpidUser.right;
+
+    const acsResponse = await this.acs(
+      userPayload,
+      pipe(
+        acsRequestMapper(spidUser.getAcsOriginalRequest()),
+        E.getOrElseW(() => ({}))
+      )
+    );
     // When the login succeeded with a ResponsePermanentRedirect (301)
     // the token was extract from the response and returned into the body
     // of a ResponseSuccessJson (200)

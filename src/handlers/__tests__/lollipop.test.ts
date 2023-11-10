@@ -10,29 +10,29 @@ import { lollipopLoginHandler } from "../lollipop";
 import mockReq from "../../__mocks__/request";
 import {
   LOLLIPOP_PUB_KEY_HASHING_ALGO_HEADER_NAME,
-  LOLLIPOP_PUB_KEY_HEADER_NAME
+  LOLLIPOP_PUB_KEY_HEADER_NAME,
 } from "@pagopa/io-spid-commons/dist/types/lollipop";
 import { JwkPubKeyHashAlgorithmEnum } from "../../../generated/lollipop-api/JwkPubKeyHashAlgorithm";
 import { IResponseType } from "@pagopa/ts-commons/lib/requests";
 import { anEncodedJwkPubKey } from "../../__mocks__/lollipop";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
-const mockTelemetryClient = ({
-  trackEvent: jest.fn()
-} as unknown) as appInsights.TelemetryClient;
+const mockTelemetryClient = {
+  trackEvent: jest.fn(),
+} as unknown as appInsights.TelemetryClient;
 
 const aJwkPubKey: JwkPubKey = {
   alg: "alg",
   e: "e",
   kty: "RSA",
-  n: "n"
+  n: "n",
 };
 const aNewPubKey: NewPubKey = {
   assertion_ref: "sha256-123ac" as AssertionRef,
   pub_key: anEncodedJwkPubKey,
   status: PubKeyStatusEnum.PENDING,
   ttl: 2 as NonNegativeInteger,
-  version: 0 as NonNegativeInteger
+  version: 0 as NonNegativeInteger,
 };
 
 const tokenizeJwk = (jwk: JwkPubKey) =>
@@ -42,13 +42,13 @@ const buildResponse = <T>(statusCode: number, value: T) =>
   ({
     headers: {},
     status: statusCode,
-    value
+    value,
   } as IResponseType<number, T, never>);
 const reservePubKeyMock = jest
   .fn()
   .mockImplementation(async () => t.success(buildResponse(201, aNewPubKey)));
 const lollipopApiClientMock = {
-  reservePubKey: reservePubKeyMock
+  reservePubKey: reservePubKeyMock,
 } as any;
 
 describe("lollipopLoginHandler", () => {
@@ -80,10 +80,13 @@ describe("lollipopLoginHandler", () => {
     expect(reservePubKeyMock).toHaveBeenCalledWith({
       body: {
         algo: JwkPubKeyHashAlgorithmEnum.sha512,
-        pub_key: aJwkPubKey
-      }
+        pub_key: aJwkPubKey,
+      },
     });
-    expect(result).toBeUndefined();
+    expect(result).toEqual({
+      algo: JwkPubKeyHashAlgorithmEnum.sha512,
+      jwk: aJwkPubKey,
+    });
   });
 
   it("should perform lollipop validation and pubkey reservation successfully if Lollipop pub key is present with fallback on default hashing algorithm", async () => {
@@ -98,10 +101,13 @@ describe("lollipopLoginHandler", () => {
     expect(reservePubKeyMock).toHaveBeenCalledWith({
       body: {
         algo: JwkPubKeyHashAlgorithmEnum.sha256,
-        pub_key: aJwkPubKey
-      }
+        pub_key: aJwkPubKey,
+      },
     });
-    expect(result).toBeUndefined();
+    expect(result).toEqual({
+      algo: JwkPubKeyHashAlgorithmEnum.sha256,
+      jwk: aJwkPubKey,
+    });
   });
 
   it("should not perform lollipop validation and pubkey reservation if no lollipop headers are present", async () => {
@@ -132,22 +138,22 @@ describe("lollipopLoginHandler", () => {
       name: "lollipop.error.get-login",
       properties: expect.objectContaining({
         message:
-          'Error calling reservePubKey endpoint: value [""] at [root] is not a valid [non empty string]'
-      })
+          'Error calling reservePubKey endpoint: value [""] at [root] is not a valid [non empty string]',
+      }),
     });
 
     expect(reservePubKeyMock).toHaveBeenCalledTimes(1);
     expect(reservePubKeyMock).toHaveBeenCalledWith({
       body: {
         algo: JwkPubKeyHashAlgorithmEnum.sha256,
-        pub_key: aJwkPubKey
-      }
+        pub_key: aJwkPubKey,
+      },
     });
 
     expect(result).toEqual(
       expect.objectContaining({
         kind: "IResponseErrorInternal",
-        detail: "Internal server error: Cannot parse reserve response"
+        detail: "Internal server error: Cannot parse reserve response",
       })
     );
   });
@@ -171,14 +177,14 @@ describe("lollipopLoginHandler", () => {
     expect(reservePubKeyMock).toHaveBeenCalledWith({
       body: {
         algo: JwkPubKeyHashAlgorithmEnum.sha256,
-        pub_key: aJwkPubKey
-      }
+        pub_key: aJwkPubKey,
+      },
     });
 
     expect(result).toEqual(
       expect.objectContaining({
         kind: "IResponseErrorConflict",
-        detail: "Conflict: PubKey is already reserved"
+        detail: "Conflict: PubKey is already reserved",
       })
     );
   });
@@ -201,14 +207,14 @@ describe("lollipopLoginHandler", () => {
     expect(reservePubKeyMock).toHaveBeenCalledWith({
       body: {
         algo: JwkPubKeyHashAlgorithmEnum.sha256,
-        pub_key: aJwkPubKey
-      }
+        pub_key: aJwkPubKey,
+      },
     });
 
     expect(result).toEqual(
       expect.objectContaining({
         kind: "IResponseErrorInternal",
-        detail: "Internal server error: Cannot reserve pubKey"
+        detail: "Internal server error: Cannot reserve pubKey",
       })
     );
   });
@@ -227,22 +233,22 @@ describe("lollipopLoginHandler", () => {
     expect(mockTelemetryClient.trackEvent).toHaveBeenCalledWith({
       name: "lollipop.error.get-login",
       properties: expect.objectContaining({
-        message: "Error calling reservePubKey endpoint: Network Error"
-      })
+        message: "Error calling reservePubKey endpoint: Network Error",
+      }),
     });
 
     expect(reservePubKeyMock).toHaveBeenCalledTimes(1);
     expect(reservePubKeyMock).toHaveBeenCalledWith({
       body: {
         algo: JwkPubKeyHashAlgorithmEnum.sha256,
-        pub_key: aJwkPubKey
-      }
+        pub_key: aJwkPubKey,
+      },
     });
 
     expect(result).toEqual(
       expect.objectContaining({
         kind: "IResponseErrorInternal",
-        detail: "Internal server error: Error while calling reservePubKey API"
+        detail: "Internal server error: Error while calling reservePubKey API",
       })
     );
   });
@@ -260,7 +266,7 @@ describe("lollipopLoginHandler", () => {
 
     expect(result).toEqual(
       expect.objectContaining({
-        kind: "IResponseErrorValidation"
+        kind: "IResponseErrorValidation",
       })
     );
   });
