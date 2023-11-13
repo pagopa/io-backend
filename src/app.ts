@@ -175,7 +175,7 @@ import {
   getNotificationServiceFactory,
   NotificationServiceFactory,
 } from "./services/notificationServiceFactory";
-import { lollipopLoginHandler } from "./handlers/lollipop";
+import { lollipopLoginMiddleware } from "./handlers/lollipop";
 import LollipopService from "./services/lollipopService";
 import { firstLollipopSign } from "./controllers/firstLollipopConsumerController";
 import {
@@ -555,6 +555,8 @@ export async function newApp({
           app,
           authenticationBasePath,
           acsController,
+          FF_LOLLIPOP_ENABLED,
+          LOLLIPOP_API_CLIENT,
           authMiddlewares.bearerSession,
           authMiddlewares.local
         );
@@ -769,7 +771,7 @@ export async function newApp({
               doneCb: spidLogCallback,
               logout: _.acsController.slo.bind(_.acsController),
               lollipopMiddleware: toExpressMiddleware(
-                lollipopLoginHandler(
+                lollipopLoginMiddleware(
                   FF_LOLLIPOP_ENABLED,
                   LOLLIPOP_API_CLIENT,
                   appInsightsClient
@@ -1565,10 +1567,13 @@ function registerBonusAPIRoutes(
   );
 }
 
+// eslint-disable-next-line max-params
 function registerAuthenticationRoutes(
   app: Express,
   authBasePath: string,
   acsController: AuthenticationController,
+  isLollipopEnabled: boolean,
+  lollipopAPIClient: ReturnType<typeof LollipopApiClient>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bearerSessionTokenAuth: any,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1579,7 +1584,12 @@ function registerAuthenticationRoutes(
     E.map((testLoginPassword) => {
       passport.use(
         "local",
-        localStrategy(TEST_LOGIN_FISCAL_CODES, testLoginPassword)
+        localStrategy(
+          TEST_LOGIN_FISCAL_CODES,
+          testLoginPassword,
+          isLollipopEnabled,
+          lollipopAPIClient
+        )
       );
       app.post(
         `${authBasePath}/test-login`,
