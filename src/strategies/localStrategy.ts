@@ -6,7 +6,7 @@ import {
   Issuer,
   SPID_IDP_IDENTIFIERS,
 } from "@pagopa/io-spid-commons/dist/config";
-import { flow, identity, pipe } from "fp-ts/lib/function";
+import { flow, pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
 import * as jose from "jose";
@@ -58,24 +58,21 @@ export const localStrategy = (
             (_): _ is undefined | LollipopLoginParams =>
               LollipopLoginParams.is(_) || _ === undefined,
             () => new Error("Invalid lollipop parameters")
-          )
-        )
-      ),
-      TE.chainW(
-        flow(
-          TE.fromPredicate(LollipopLoginParams.is, identity),
+          ),
           TE.chainW((_) =>
             pipe(
               TE.tryCatch(
-                () => jose.calculateJwkThumbprint(_.jwk, _.algo),
+                async () =>
+                  (_ === undefined
+                    ? "_aTestValueRequestId"
+                    : `${_.algo}-${await jose.calculateJwkThumbprint(
+                        _.jwk,
+                        _.algo
+                      )}`) as NonEmptyString,
                 E.toError
-              ),
-              TE.map(
-                (thumbprint) => `${_.algo}-${thumbprint}` as NonEmptyString
               )
             )
-          ),
-          TE.orElse((_) => TE.of("_aTestValueRequestId" as NonEmptyString))
+          )
         )
       ),
       TE.map((inResponseTo) => {
