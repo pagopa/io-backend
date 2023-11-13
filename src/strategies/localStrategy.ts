@@ -6,7 +6,7 @@ import {
   Issuer,
   SPID_IDP_IDENTIFIERS,
 } from "@pagopa/io-spid-commons/dist/config";
-import { flow, pipe } from "fp-ts/lib/function";
+import { flow, identity, pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
 import * as jose from "jose";
@@ -61,33 +61,46 @@ export const localStrategy = (
           )
         )
       ),
-      TE.map((_) => {
-        const inResponseTo: NonEmptyString = _
-          ? (`${_.algo}-${jose.calculateJwkThumbprint(
-              _.jwk,
-              _.algo
-            )}` as NonEmptyString)
-          : ("_aTestValueRequestId" as NonEmptyString);
-        return {
-          authnContextClassRef: SpidLevelEnum["https://www.spid.gov.it/SpidL2"],
-          dateOfBirth: "2000-06-02",
-          familyName: "Rossi",
-          fiscalNumber: username as FiscalCode, // Verified in line 31
-          getAcsOriginalRequest: () => req,
-          getAssertionXml: () =>
-            getASAMLAssertion_saml2Namespace(
-              username as FiscalCode,
-              inResponseTo
-            ),
-          getSamlResponseXml: () =>
-            getASAMLResponse_saml2Namespace(
-              username as FiscalCode,
-              inResponseTo
-            ),
-          issuer: Object.keys(SPID_IDP_IDENTIFIERS)[0] as Issuer,
-          name: "Mario",
-        } as SpidUser;
-      }),
+      TE.chainW(
+        flow(
+          TE.fromPredicate(LollipopLoginParams.is, identity),
+          TE.chainW((_) =>
+            pipe(
+              TE.tryCatch(
+                () => jose.calculateJwkThumbprint(_.jwk, _.algo),
+                E.toError
+              ),
+              TE.map(
+                (thumbprint) => `${_.algo}-${thumbprint}` as NonEmptyString
+              )
+            )
+          ),
+          TE.orElse((_) => TE.of("_aTestValueRequestId" as NonEmptyString))
+        )
+      ),
+      TE.map(
+        (inResponseTo) =>
+          ({
+            authnContextClassRef:
+              SpidLevelEnum["https://www.spid.gov.it/SpidL2"],
+            dateOfBirth: "2000-06-02",
+            familyName: "Rossi",
+            fiscalNumber: username as FiscalCode, // Verified in line 31
+            getAcsOriginalRequest: () => req,
+            getAssertionXml: () =>
+              getASAMLAssertion_saml2Namespace(
+                username as FiscalCode,
+                inResponseTo
+              ),
+            getSamlResponseXml: () =>
+              getASAMLResponse_saml2Namespace(
+                username as FiscalCode,
+                inResponseTo
+              ),
+            issuer: Object.keys(SPID_IDP_IDENTIFIERS)[0] as Issuer,
+            name: "Mario",
+          } as SpidUser)
+      ),
       TE.bimap(
         () => done(null, false),
         (user) => done(null, user)
