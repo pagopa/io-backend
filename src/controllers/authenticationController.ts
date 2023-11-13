@@ -717,26 +717,13 @@ export default class AuthenticationController {
     | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessJson<AccessToken>
   > {
-    //
-    // decode the SPID assertion into a SPID user
-    //
-    const errorOrSpidUser = validateSpidUser(userPayload);
-
-    if (E.isLeft(errorOrSpidUser)) {
-      log.error(
-        "acs: error validating the SPID user [%O] [%s]",
-        userPayload,
-        errorOrSpidUser.left
-      );
-      return ResponseErrorValidation("Bad request", errorOrSpidUser.left);
-    }
-
-    const spidUser = errorOrSpidUser.right;
-
     const acsResponse = await this.acs(
       userPayload,
       pipe(
-        acsRequestMapper(spidUser.getAcsOriginalRequest()),
+        validateSpidUser(userPayload),
+        E.chainW((spidUser) =>
+          acsRequestMapper(spidUser.getAcsOriginalRequest())
+        ),
         E.getOrElseW(() => ({}))
       )
     );
