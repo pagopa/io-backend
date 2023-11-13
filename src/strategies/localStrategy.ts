@@ -78,29 +78,38 @@ export const localStrategy = (
           TE.orElse((_) => TE.of("_aTestValueRequestId" as NonEmptyString))
         )
       ),
-      TE.map(
-        (inResponseTo) =>
-          ({
-            authnContextClassRef:
-              SpidLevelEnum["https://www.spid.gov.it/SpidL2"],
-            dateOfBirth: "2000-06-02",
-            familyName: "Rossi",
-            fiscalNumber: username as FiscalCode, // Verified in line 31
-            getAcsOriginalRequest: () => req,
-            getAssertionXml: () =>
-              getASAMLAssertion_saml2Namespace(
-                username as FiscalCode,
-                inResponseTo
-              ),
-            getSamlResponseXml: () =>
-              getASAMLResponse_saml2Namespace(
-                username as FiscalCode,
-                inResponseTo
-              ),
-            issuer: Object.keys(SPID_IDP_IDENTIFIERS)[0] as Issuer,
-            name: "Mario",
-          } as SpidUser)
-      ),
+      TE.map((inResponseTo) => {
+        const spidUserData = {
+          authnContextClassRef: SpidLevelEnum["https://www.spid.gov.it/SpidL2"],
+          dateOfBirth: "2000-06-02",
+          familyName: "Rossi",
+          fiscalNumber: username as FiscalCode, // Verified in line 31
+          issuer: Object.keys(SPID_IDP_IDENTIFIERS)[0] as Issuer,
+          name: "Mario",
+        };
+        return {
+          ...spidUserData,
+          getAcsOriginalRequest: () => req,
+          getAssertionXml: () =>
+            getASAMLAssertion_saml2Namespace(
+              username as FiscalCode,
+              inResponseTo,
+              spidUserData.authnContextClassRef,
+              spidUserData.name,
+              spidUserData.familyName,
+              spidUserData.dateOfBirth
+            ),
+          getSamlResponseXml: () =>
+            getASAMLResponse_saml2Namespace(
+              username as FiscalCode,
+              inResponseTo,
+              spidUserData.authnContextClassRef,
+              spidUserData.name,
+              spidUserData.familyName,
+              spidUserData.dateOfBirth
+            ),
+        } as SpidUser;
+      }),
       TE.bimap(
         () => done(null, false),
         (user) => done(null, user)

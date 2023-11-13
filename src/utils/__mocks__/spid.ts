@@ -146,7 +146,10 @@ export const getASAMLResponse = (
 export const getASAMLAssertion_saml2Namespace = (
   fiscalCode: FiscalCode,
   inResponseTo: NonEmptyString,
-  spidLevel: SpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"]
+  spidLevel: SpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"],
+  name?: string,
+  familyName?: string,
+  dateOfBirth?: string
 ) => `<saml2:Assertion
     ID="_43568006-96d4-4dcc-84da-d98e01ea3a28"
     IssueInstant="2020-02-26T07:32:05Z"
@@ -234,7 +237,7 @@ export const getASAMLAssertion_saml2Namespace = (
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:type="xs:string"
         >
-          SpidValidator
+          ${name || "SpidValidator"}
         </saml2:AttributeValue>
       </saml2:Attribute>
       <saml2:Attribute
@@ -246,7 +249,7 @@ export const getASAMLAssertion_saml2Namespace = (
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:type="xs:string"
         >
-          AgID
+          ${familyName || "AgID"}
         </saml2:AttributeValue>
       </saml2:Attribute>
       <saml2:Attribute
@@ -262,42 +265,6 @@ export const getASAMLAssertion_saml2Namespace = (
         </saml2:AttributeValue>
       </saml2:Attribute>
       <saml2:Attribute
-        Name="mobilePhone"
-        NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"
-      >
-        <saml2:AttributeValue
-          xmlns:xs="http://www.w3.org/2001/XMLSchema"
-          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:type="xs:string"
-        >
-          +393331234567
-        </saml2:AttributeValue>
-      </saml2:Attribute>
-      <saml2:Attribute
-        Name="email"
-        NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"
-      >
-        <saml2:AttributeValue
-          xmlns:xs="http://www.w3.org/2001/XMLSchema"
-          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:type="xs:string"
-        >
-          spid.tech@agid.gov.it
-        </saml2:AttributeValue>
-      </saml2:Attribute>
-      <saml2:Attribute
-        Name="address"
-        NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"
-      >
-        <saml2:AttributeValue
-          xmlns:xs="http://www.w3.org/2001/XMLSchema"
-          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:type="xs:string"
-        >
-          Via Listz 21 00144 Roma
-        </saml2:AttributeValue>
-      </saml2:Attribute>
-      <saml2:Attribute
         Name="dateOfBirth"
         NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"
       >
@@ -306,7 +273,7 @@ export const getASAMLAssertion_saml2Namespace = (
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:type="xs:date"
         >
-          1970-01-01
+          ${dateOfBirth || "1970-01-01"}
         </saml2:AttributeValue>
       </saml2:Attribute>
     </saml2:AttributeStatement>
@@ -315,7 +282,10 @@ export const getASAMLAssertion_saml2Namespace = (
 export const getASAMLResponse_saml2Namespace = (
   fiscalCode: FiscalCode,
   inResponseTo: NonEmptyString,
-  spidLevel: SpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"]
+  spidLevel: SpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"],
+  name?: string,
+  familyName?: string,
+  dateOfBirth?: string
 ) => `<saml2p:Response
   Destination="https://app-backend.dev.io.italia.it/assertionConsumerService"
   ID="_7080f453-78cb-4f57-9692-62dc8a5c23e8"
@@ -363,7 +333,14 @@ export const getASAMLResponse_saml2Namespace = (
   <saml2p:Status>
     <saml2p:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success" />
   </saml2p:Status>
-  ${getASAMLAssertion_saml2Namespace(fiscalCode, inResponseTo, spidLevel)}
+  ${getASAMLAssertion_saml2Namespace(
+    fiscalCode,
+    inResponseTo,
+    spidLevel,
+    name,
+    familyName,
+    dateOfBirth
+  )}
 </saml2p:Response>
 `;
 
