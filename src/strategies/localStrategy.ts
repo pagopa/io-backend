@@ -9,6 +9,7 @@ import {
 import { flow, pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
+import * as jose from "jose";
 import { SpidLevelEnum } from "../../generated/backend/SpidLevel";
 import {
   LollipopLoginParams,
@@ -62,7 +63,10 @@ export const localStrategy = (
       ),
       TE.map((_) => {
         const inResponseTo: NonEmptyString = _
-          ? (_.algo as NonEmptyString) // TODO: Build algo-thumbprint
+          ? (`${_.algo}-${jose.calculateJwkThumbprint(
+              _.jwk,
+              _.algo
+            )}` as NonEmptyString)
           : ("_aTestValueRequestId" as NonEmptyString);
         return {
           authnContextClassRef: SpidLevelEnum["https://www.spid.gov.it/SpidL2"],
