@@ -41,6 +41,9 @@ paths:
             application/json:
               username: AAABBB01C02D345Z
               password: secret
+        - $ref: '#/parameters/JwkPubKeyToken'
+        - $ref: '#/parameters/JwkPubKeyHashAlgorithm'
+        - $ref: '#/parameters/LoginType'
       responses:
         '200':
           description: Access token
