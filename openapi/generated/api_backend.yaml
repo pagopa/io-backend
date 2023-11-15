@@ -2737,7 +2737,6 @@ definitions:
       - has_profile
       - is_inbox_enabled
       - is_email_enabled
-      - is_email_already_taken
       - is_webhook_enabled
       - name
       - service_preferences_settings
