@@ -542,8 +542,8 @@ export default class AuthenticationController {
         user.fiscal_code,
         spidUser.email
       )({
-        testLoginFiscalCodes: TEST_LOGIN_FISCAL_CODES,
         FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED,
+        testLoginFiscalCodes: TEST_LOGIN_FISCAL_CODES,
       });
 
       const createProfileResponse = await this.profileService.createProfile(

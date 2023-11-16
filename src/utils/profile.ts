@@ -4,12 +4,11 @@ import * as t from "io-ts";
 import { IResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { pipe } from "fp-ts/lib/function";
 import { EmailAddress } from "@pagopa/io-functions-app-sdk/EmailAddress";
+import { NewProfile } from "@pagopa/io-functions-app-sdk/NewProfile";
+import { EmailString, FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { User } from "../../src/types/user";
 import ProfileService from "../../src/services/profileService";
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
-import { NewProfile } from "@pagopa/io-functions-app-sdk/NewProfile";
-
-import { EmailString, FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
 // define a type that represents a Profile with a non optional email address
 const ProfileWithEmail = t.intersection([
@@ -71,14 +70,17 @@ export const profileWithEmailValidatedOrError = (
     )
   );
 
-type CreateNewProfileDependencies = {
-  testLoginFiscalCodes: ReadonlyArray<FiscalCode>;
-  FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED: (fiscalCode: FiscalCode) => boolean;
-};
+interface CreateNewProfileDependencies {
+  readonly testLoginFiscalCodes: ReadonlyArray<FiscalCode>;
+  readonly FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED: (
+    fiscalCode: FiscalCode
+  ) => boolean;
+}
 
 export const createNewProfile =
   (fiscalCode: FiscalCode, spidEmail?: EmailString) =>
   (r: CreateNewProfileDependencies): NewProfile => {
+    // eslint-disable-next-line functional/no-let
     let isEmailValidated = false;
     // --------------------
     // If the specified user is NOT eligible for the unique email enforcement
