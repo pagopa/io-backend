@@ -45,7 +45,7 @@ import { addSeconds } from "date-fns";
 import { Second } from "@pagopa/ts-commons/lib/units";
 import { UserLoginParams } from "@pagopa/io-functions-app-sdk/UserLoginParams";
 import { IDP_NAMES, Issuer } from "@pagopa/io-spid-commons/dist/config";
-import AuthenticationLockService from "src/services/authenticationLockService";
+import AuthenticationLockService from "../services/authenticationLockService";
 import { NotificationServiceFactory } from "../services/notificationServiceFactory";
 import UsersLoginLogService from "../services/usersLoginLogService";
 import { LollipopParams } from "../types/lollipop";
@@ -69,6 +69,8 @@ import {
   IOLOGIN_CANARY_USERS_SHA_REGEX,
   IOLOGIN_USERS_LIST,
   LV_TEST_USERS,
+  TEST_LOGIN_FISCAL_CODES,
+  FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED,
 } from "../config";
 import { ISessionStorage } from "../services/ISessionStorage";
 import ProfileService from "../services/profileService";
@@ -99,6 +101,8 @@ import {
   getIsUserElegibleForCIETestEnv,
   isCIETestEnvLogin,
 } from "../utils/cie";
+
+import { createNewProfile } from "../utils/profile";
 
 // how many random bytes to generate for each session token
 export const SESSION_TOKEN_LENGTH_BYTES = 48;
@@ -143,7 +147,6 @@ export default class AuthenticationController {
     private readonly notificationServiceFactory: NotificationServiceFactory,
     private readonly usersLoginLogService: UsersLoginLogService,
     private readonly onUserLogin: OnUserLogin,
-    private readonly testLoginFiscalCodes: ReadonlyArray<FiscalCode>,
     private readonly hasUserAgeLimitEnabled: boolean,
     private readonly lollipopParams: LollipopParams,
     private readonly standardTokenDurationSecs: Second,
@@ -533,25 +536,19 @@ export default class AuthenticationController {
     let userEmail: EmailString | undefined;
 
     if (getProfileResponse.kind === "IResponseErrorNotFound") {
-      // a profile for the user does not yet exist, we attempt to create a new
-      // one
-      const isTestProfile = this.testLoginFiscalCodes.includes(
-        user.fiscal_code
-      );
-      const newProfile: NewProfile = {
-        email: spidUser.email,
-        is_email_validated: pipe(
-          spidUser.email,
-          O.fromNullable,
-          O.map((_) => true),
-          O.getOrElseW(() => false)
-        ),
-        is_test_profile: isTestProfile,
-      };
+      const newProfile: NewProfile = createNewProfile(
+        user.fiscal_code,
+        spidUser.email
+      )({
+        testLoginFiscalCodes: TEST_LOGIN_FISCAL_CODES,
+        FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED,
+      });
+
       const createProfileResponse = await this.profileService.createProfile(
         user,
         newProfile
       );
+
       if (createProfileResponse.kind !== "IResponseSuccessJson") {
         log.error(
           "Error creating new user's profile: %s",

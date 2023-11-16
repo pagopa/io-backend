@@ -524,7 +524,6 @@ export async function newApp({
             notificationServiceFactory,
             USERS_LOGIN_LOG_SERVICE,
             onUserLogin(API_CLIENT),
-            TEST_LOGIN_FISCAL_CODES,
             FF_USER_AGE_LIMIT_ENABLED,
             {
               isLollipopEnabled: FF_LOLLIPOP_ENABLED,

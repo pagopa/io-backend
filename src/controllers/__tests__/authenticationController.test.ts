@@ -302,7 +302,6 @@ const controller = new AuthenticationController(
   notificationServiceFactory,
   usersLoginLogService,
   mockOnUserLogin,
-  [],
   true,
   {
     isLollipopEnabled: false,
@@ -325,7 +324,6 @@ const lollipopActivatedController = new AuthenticationController(
   notificationServiceFactory,
   usersLoginLogService,
   mockOnUserLogin,
-  [],
   true,
   {
     isLollipopEnabled: true,
