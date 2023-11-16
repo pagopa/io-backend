@@ -536,6 +536,8 @@ export default class AuthenticationController {
     let userEmail: EmailString | undefined;
 
     if (getProfileResponse.kind === "IResponseErrorNotFound") {
+      // a profile for the user does not yet exist, we attempt to create a new
+      // one
       const newProfile: NewProfile = createNewProfile(
         user.fiscal_code,
         spidUser.email
