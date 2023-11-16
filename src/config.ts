@@ -59,7 +59,11 @@ import { AppMessagesAPIClient } from "./clients/app-messages.client";
 import { ThirdPartyConfigListFromString } from "./utils/thirdPartyConfig";
 import { PNClientFactory } from "./clients/pn-clients";
 import { IoSignAPIClient } from "./clients/io-sign";
-import { FeatureFlag, FeatureFlagEnum } from "./utils/featureFlag";
+import {
+  FeatureFlag,
+  FeatureFlagEnum,
+  getIsUserEligibleForNewFeature,
+} from "./utils/featureFlag";
 import { CommaSeparatedListOf } from "./utils/separated-list";
 import { LollipopApiClient } from "./clients/lollipop";
 import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
@@ -770,7 +774,7 @@ export const BARCODE_ALGORITHM = pipe(
 export const DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE = 5;
 
 // Password login params
-export const TEST_LOGIN_FISCAL_CODES = pipe(
+export const TEST_LOGIN_FISCAL_CODES: ReadonlyArray<FiscalCode> = pipe(
   process.env.TEST_LOGIN_FISCAL_CODES,
   NonEmptyString.decode,
   E.map((_) => _.split(",")),
@@ -1072,3 +1076,29 @@ export const ALLOWED_CIE_TEST_FISCAL_CODES = pipe(
     return [] as ReadonlyArray<FiscalCode>;
   })
 );
+
+// UNIQUE EMAIL ENFORCEMENT variables
+
+export const FF_UNIQUE_EMAIL_ENFORCEMENT = pipe(
+  process.env.FF_IOLOGIN,
+  FeatureFlag.decode,
+  E.getOrElseW(() => FeatureFlagEnum.NONE)
+);
+
+export const UNIQUE_EMAIL_ENFORCEMENT_USERS = pipe(
+  process.env.UNIQUE_EMAIL_ENFORCEMENT_USERS,
+  // TODO: produce a ReadonlySet instead of ReadonlyArray
+  CommaSeparatedListOf(FiscalCode).decode,
+  E.getOrElseW((err) => {
+    throw new Error(
+      `Invalid UNIQUE_EMAIL_ENFORCEMENT_USERS value: ${readableReport(err)}`
+    );
+  })
+);
+
+export const FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED =
+  getIsUserEligibleForNewFeature(
+    (fiscalCode) => UNIQUE_EMAIL_ENFORCEMENT_USERS.includes(fiscalCode),
+    () => false,
+    FF_UNIQUE_EMAIL_ENFORCEMENT
+  );
