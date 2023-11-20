@@ -75,6 +75,7 @@ const mockedUpsertProfile: ExtendedProfile = {
   email: anEmailAddress,
   is_email_enabled: true,
   is_email_validated: true,
+  is_email_already_taken: true,
   is_inbox_enabled: anIsInboxEnabled,
   is_webhook_enabled: anIsWebookEnabled,
   preferred_languages: aPreferredLanguages,

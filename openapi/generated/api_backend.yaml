@@ -427,6 +427,8 @@ paths:
               is_email_set: true
               is_inbox_enabled: true
               is_webhook_enabled: true
+              is_email_validated: true
+              is_email_already_taken: false
               name: Mario
               spid_email: preferred@example.com
               service_preferences_settings:
@@ -478,6 +480,8 @@ paths:
               is_email_set: true
               is_inbox_enabled: true
               is_webhook_enabled: true
+              is_email_validated: true
+              is_email_already_taken: false
               name: Mario
               spid_email: preferred@example.com
               version: 0
@@ -493,6 +497,10 @@ paths:
             $ref: '#/definitions/ProblemJson'
         '409':
           description: Conflict.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '412':
+          description: Precondition Failed
           schema:
             $ref: '#/definitions/ProblemJson'
         '429':
@@ -523,6 +531,8 @@ paths:
               accepted_tos_version: 1
               is_webhook_enabled: true
               is_email_enabled: true
+              is_email_validated: true
+              is_email_already_taken: false
               version: 1
               sender_allowed: true
         '400':
@@ -1057,6 +1067,8 @@ definitions:
         $ref: '#/definitions/IsEmailEnabled'
       is_email_validated:
         $ref: '#/definitions/IsEmailValidated'
+      is_email_already_taken:
+        $ref: '#/definitions/IsEmailAlreadyTaken'
       reminder_status:
         $ref: '#/definitions/ReminderStatus'
       is_test_profile:
@@ -1070,6 +1082,7 @@ definitions:
     required:
       - is_email_enabled
       - is_email_validated
+      - is_email_already_taken
       - is_inbox_enabled
       - is_webhook_enabled
       - service_preferences_settings
@@ -1093,6 +1106,20 @@ definitions:
   IsEmailValidated:
     type: boolean
     description: True if the user email has been validated.
+  IsEmailAlreadyTaken:
+    type: boolean
+    default: false
+    description: |-
+      True if the user email has been validated by another user.
+      If so, the user must provide a new email.
+  UpdateProfile412ErrorTypes:
+    type: string
+    description: >-
+      List of error types returned by the updateProfile endpoint when the HTTP
+      status code is 412
+    x-extensible-enum:
+      - https://ioapp.it/problems/email-already-taken
+    example: https://ioapp.it/problems/email-already-taken
   ReminderStatus:
     type: string
     x-extensible-enum:
@@ -2675,6 +2702,8 @@ definitions:
         $ref: '#/definitions/IsInboxEnabled'
       is_email_validated:
         $ref: '#/definitions/IsEmailValidated'
+      is_email_already_taken:
+        $ref: '#/definitions/IsEmailAlreadyTaken'
       is_email_enabled:
         $ref: '#/definitions/IsEmailEnabled'
       reminder_status:
