@@ -28,6 +28,7 @@ import { NonEmptyString, Ulid } from "@pagopa/ts-commons/lib/strings";
 import NewMessagesService from "src/services/newMessagesService";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { ThirdPartyConfigList } from "src/utils/thirdPartyConfig";
+import QueryString = require("qs");
 import { User, withUserFromRequest } from "../types/user";
 
 import { MessageStatusChange } from "../../generated/io-messages-api/MessageStatusChange";
@@ -48,7 +49,6 @@ import { LollipopApiClient } from "../clients/lollipop";
 import { ISessionStorage } from "../services/ISessionStorage";
 import { extractLollipopLocalsFromLollipopHeadersLegacy } from "../utils/lollipop";
 import { checkIfLollipopIsEnabled } from "../utils/lollipop";
-import QueryString = require("qs");
 
 export const withGetThirdPartyAttachmentParams = async <T>(
   req: express.Request,
