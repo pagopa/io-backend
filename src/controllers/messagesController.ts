@@ -28,7 +28,7 @@ import { NonEmptyString, Ulid } from "@pagopa/ts-commons/lib/strings";
 import NewMessagesService from "src/services/newMessagesService";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { ThirdPartyConfigList } from "src/utils/thirdPartyConfig";
-import QueryString = require("qs");
+import * as QueryString from "qs";
 import { User, withUserFromRequest } from "../types/user";
 
 import { MessageStatusChange } from "../../generated/io-messages-api/MessageStatusChange";
