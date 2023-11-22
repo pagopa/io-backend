@@ -22,10 +22,10 @@ import { PN_SERVICE_ID } from "../config";
 
 const getPath = (input: RequestInfo | URL): string =>
   input instanceof URL
-    ? `${input.pathname}${input.searchParams}`
+    ? `${input.pathname}${input.search}`
     : typeof input === "string"
-    ? `${new URL(input).pathname}${new URL(input).searchParams}`
-    : `${new URL(input.url).pathname}${new URL(input.url).searchParams}`;
+    ? `${new URL(input).pathname}${new URL(input).search}`
+    : `${new URL(input.url).pathname}${new URL(input.url).search}`;
 
 export const ThirdPartyMessagesUrl = pathParamsFromUrl(
   RegExp("^[/]+messages[/]+([^/]+)$"),
@@ -434,7 +434,7 @@ export const redirectAttachment =
               .otherwise((au) =>
                 TE.left(
                   new Error(
-                    `Can not find a Piattaforma Notifiche get attachment implementation for ${au}`
+                    `Can not distinguish a PnDocumentUrl from a PnPaymentUrl with the url ${au}`
                   )
                 )
               )
@@ -534,7 +534,7 @@ export const pnFetch =
             pipe(
               TE.left(
                 new Error(
-                  `Can not find a Piattaforma Notifiche implementation for ${url}`
+                  `[pnFetch] Can not find a Piattaforma Notifiche implementation for ${url}`
                 )
               ),
               TE.mapLeft(errorResponse),
