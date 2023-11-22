@@ -434,7 +434,7 @@ export const redirectAttachment =
               .otherwise((au) =>
                 TE.left(
                   new Error(
-                    `Can not distinguisce a PnDocumentUrl from a PnPaymentUrl with the url ${au}`
+                    `Can not distinguish a PnDocumentUrl from a PnPaymentUrl with the url ${au}`
                   )
                 )
               )
