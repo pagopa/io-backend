@@ -48,6 +48,7 @@ import { LollipopApiClient } from "../clients/lollipop";
 import { ISessionStorage } from "../services/ISessionStorage";
 import { extractLollipopLocalsFromLollipopHeadersLegacy } from "../utils/lollipop";
 import { checkIfLollipopIsEnabled } from "../utils/lollipop";
+import QueryString = require("qs");
 
 export const withGetThirdPartyAttachmentParams = async <T>(
   req: express.Request,
@@ -55,7 +56,11 @@ export const withGetThirdPartyAttachmentParams = async <T>(
 ) =>
   withValidatedOrValidationError(Ulid.decode(req.params.id), (id) =>
     withValidatedOrValidationError(
-      NonEmptyString.decode(req.params.attachment_url),
+      pipe(
+        QueryString.stringify(req.query, { addQueryPrefix: true }),
+        (queryString) => `${req.params.attachment_url}${queryString}`,
+        NonEmptyString.decode
+      ),
       (attachment_url) => f(id, attachment_url)
     )
   );
