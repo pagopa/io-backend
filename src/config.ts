@@ -235,10 +235,18 @@ const SPID_LEVEL_WHITELIST = pipe(
   })
 );
 
+const hasClockSkewLoggingEvent = pipe(
+  process.env.HAS_CLOCK_SKEW_LOG_EVENT,
+  O.fromNullable,
+  O.map((_) => _.toLowerCase() === "true"),
+  O.getOrElse(() => false)
+);
+
 export const appConfig: IApplicationConfig = {
   assertionConsumerServicePath: "/assertionConsumerService",
   clientErrorRedirectionUrl: CLIENT_ERROR_REDIRECTION_URL,
   clientLoginRedirectionUrl: CLIENT_REDIRECTION_URL,
+  hasClockSkewLoggingEvent,
   loginPath: "/login",
   metadataPath: "/metadata",
   sloPath: "/slo",
