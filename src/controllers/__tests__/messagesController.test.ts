@@ -354,11 +354,13 @@ describe("MessagesController#getThirdPartyAttachment", () => {
     jest.clearAllMocks();
   });
 
-  const anAttachmentUrl = "an/Attachment/url";
+  const anAttachmentUrl = "an/Attachment/url/";
+
+  const anAttachmentIdx = 0;
 
   const buffer = Buffer.from(base64File);
 
-  it("should call the getThirdPartyAttachment on the messagesController with valid values", async () => {
+  it("should call the getThirdPartyAttachment on the messagesController with valid values with no query params", async () => {
     const req = mockReq();
 
     mockGetThirdPartyMessageFnApp.mockReturnValue(
@@ -387,6 +389,48 @@ describe("MessagesController#getThirdPartyAttachment", () => {
     expect(mockGetThirdPartyAttachment).toHaveBeenCalledWith(
       proxyThirdPartyMessageResponse,
       req.params.attachment_url,
+      undefined // we expect lollipopLocals to be undefined because lollipop is disabled here
+    );
+
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessOctet",
+      value: buffer,
+    });
+  });
+
+  it("should call the getThirdPartyAttachment on the messagesController with valid values and transfer query params", async () => {
+    const req = mockReq();
+
+    mockGetThirdPartyMessageFnApp.mockReturnValue(
+      TE.of(proxyThirdPartyMessageResponse)
+    );
+
+    mockGetThirdPartyAttachment.mockReturnValue(
+      Promise.resolve(ResponseSuccessOctet(buffer))
+    );
+
+    req.user = mockedUser;
+    req.params = {
+      id: aValidMessageId,
+      attachment_url: anAttachmentUrl,
+    };
+    req.query = {
+      attachmentIdx: anAttachmentIdx,
+    };
+
+    const controller = new MessagesController(
+      newMessageService,
+      mockLollipopApiClient,
+      mockSessionStorage,
+      [] as ThirdPartyConfigList
+    );
+
+    const response = await controller.getThirdPartyMessageAttachment(req);
+
+    expect(mockGetThirdPartyAttachment).toHaveBeenCalledWith(
+      proxyThirdPartyMessageResponse,
+      `${req.params.attachment_url}?attachmentIdx=${anAttachmentIdx}`,
       undefined // we expect lollipopLocals to be undefined because lollipop is disabled here
     );
 

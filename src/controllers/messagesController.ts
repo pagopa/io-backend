@@ -28,6 +28,7 @@ import { NonEmptyString, Ulid } from "@pagopa/ts-commons/lib/strings";
 import NewMessagesService from "src/services/newMessagesService";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { ThirdPartyConfigList } from "src/utils/thirdPartyConfig";
+import * as QueryString from "qs";
 import { User, withUserFromRequest } from "../types/user";
 
 import { MessageStatusChange } from "../../generated/io-messages-api/MessageStatusChange";
@@ -55,7 +56,11 @@ export const withGetThirdPartyAttachmentParams = async <T>(
 ) =>
   withValidatedOrValidationError(Ulid.decode(req.params.id), (id) =>
     withValidatedOrValidationError(
-      NonEmptyString.decode(req.params.attachment_url),
+      pipe(
+        QueryString.stringify(req.query, { addQueryPrefix: true }),
+        (queryString) => `${req.params.attachment_url}${queryString}`,
+        NonEmptyString.decode
+      ),
       (attachment_url) => f(id, attachment_url)
     )
   );

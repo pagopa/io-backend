@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 13.21.0
+  version: 13.22.3
   title: Public API
   description: Mobile and web proxy API gateway.
 host: localhost
@@ -41,6 +41,9 @@ paths:
             application/json:
               username: AAABBB01C02D345Z
               password: secret
+        - $ref: '#/parameters/JwkPubKeyToken'
+        - $ref: '#/parameters/JwkPubKeyHashAlgorithm'
+        - $ref: '#/parameters/LoginType'
       responses:
         '200':
           description: Access token

@@ -138,7 +138,7 @@ IDP is reachable at [https://spid-testenv2:8088]() \
 Those are all Environment variables needed by the application:
 
 | Variable name                             | Description                                                                                          | type   |
-|----------------------------------------   |-----------------------------------------------------------------------------------                   |--------|
+|----------------------------------------   |------------------------------------------------------------------------------------------------------|--------|
 | API_KEY                                   | The key used to authenticate to the io-functions-app API                                             | string |
 | API_URL                                   | The io-functions-app URL                                                                             | string |
 | API_BASE_PATH                             | The root path for the backend api endpoints                                                          | string |
@@ -229,8 +229,10 @@ Those are all Environment variables needed by the application:
 | FAST_LOGIN_API_URL                        | The io-functions-fast-login API production URL                                                       | string  |
 | LOCKED_PROFILES_STORAGE_CONNECTION_STRING | Connection string to Azure queue storage for locked profiles table                                   | string |
 | LOCKED_PROFILES_TABLE_NAME                | The locked profiles table name                                                                       | string |
+| HAS_CLOCK_SKEW_LOG_EVENT                  | (Optional) Enable the log event with clock skew parameters for each SAMLResponse                     | boolean |
 | FF_UNIQUE_EMAIL_ENFORCEMENT               | (Optional) Enable the unique email enforcement policy. Default: NONE                                 | string (enum: NONE, BETA, ALL) |
 | UNIQUE_EMAIL_TEST_USERS                   | (Optional) Comma separated list of UNIQUE_EMAIL_ENFORCEMENT beta testers. Default: empty array       | string |
+
 
 Notes:
  * `FETCH_KEEPALIVE_ENABLED` should be enabled when deploying on Azure App Service to avoid [SNAT Exhaustion](https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-outbound-connections)
