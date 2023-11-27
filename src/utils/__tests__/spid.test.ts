@@ -14,6 +14,7 @@ import {
   getSpidLevelFromSAMLResponse,
   makeSpidLogCallback,
 } from "../spid";
+import { LoginTypeEnum } from "../fastLogin";
 
 const aDOMSamlRequest = new DOMParser().parseFromString(
   aSAMLRequest,
@@ -70,17 +71,35 @@ describe("SPID logs", () => {
     expect(spidEmail).toEqual(some("spid.tech@agid.gov.it"));
   });
 
-  it("should enqueue valid payload on SPID response", () => {
-    const mockQueueClient = {
-      sendMessage: jest.fn().mockImplementation(() => Promise.resolve()),
-    };
-    makeSpidLogCallback(mockQueueClient as unknown as QueueClient)(
-      "1.1.1.1",
-      aSAMLRequest,
-      aSAMLResponse
-    );
-    expect(mockQueueClient.sendMessage).toHaveBeenCalled();
-  });
+  it.each`
+    loginType
+    ${undefined}
+    ${LoginTypeEnum.LEGACY}
+    ${LoginTypeEnum.LV}
+  `(
+    "should enqueue valid payload on SPID response when login type is $loginType",
+    ({ loginType }) => {
+      const mockQueueClient = {
+        sendMessage: jest.fn().mockImplementation(() => Promise.resolve()),
+      };
+      makeSpidLogCallback(mockQueueClient as unknown as QueueClient)(
+        "1.1.1.1",
+        aSAMLRequest,
+        aSAMLResponse,
+        { loginType }
+      );
+      expect(mockQueueClient.sendMessage).toHaveBeenCalled();
+
+      const b64 = mockQueueClient.sendMessage.mock.calls[0][0];
+      const val = JSON.parse(Buffer.from(b64, "base64").toString("binary"));
+
+      expect(val).toMatchObject(
+        expect.objectContaining({
+          loginType: loginType ?? LoginTypeEnum.LEGACY,
+        })
+      );
+    }
+  );
 
   it("should NOT enqueue invalid IP on SPID response", () => {
     const mockQueueClient = {
