@@ -351,7 +351,6 @@ components:
             $ref: '#/components/schemas/RemoteContentAttachment'
         details:
           type: object
-          # $ref: "../../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/RemoteContentDetails"
           $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v28.8.0/openapi/definitions.yaml#/RemoteContentDetails"
           additionalProperties: true
     RemoteContentAttachment:
