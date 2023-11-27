@@ -1156,6 +1156,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v28.7.1/openapi/definitions.yaml#/ThirdPartyAttachment"
   ThirdPartyMessagePrecondition:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v28.7.1/openapi/definitions.yaml#/ThirdPartyMessagePrecondition"
+  RemoteContentDetails:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v28.8.0/openapi/definitions.yaml#/RemoteContentDetails"
   LegalMessageEml:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v28.7.1/openapi/definitions.yaml#/LegalMessageEml"
   LegalMessageCertData:
