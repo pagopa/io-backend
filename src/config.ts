@@ -1088,7 +1088,7 @@ export const ALLOWED_CIE_TEST_FISCAL_CODES = pipe(
 // UNIQUE EMAIL ENFORCEMENT variables
 
 export const FF_UNIQUE_EMAIL_ENFORCEMENT = pipe(
-  process.env.FF_IOLOGIN,
+  process.env.FF_UNIQUE_EMAIL_ENFORCEMENT,
   FeatureFlag.decode,
   E.getOrElseW(() => FeatureFlagEnum.NONE)
 );
