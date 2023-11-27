@@ -1105,7 +1105,7 @@ export const UNIQUE_EMAIL_ENFORCEMENT_USERS = pipe(
 );
 
 export const FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED =
-  getIsUserEligibleForNewFeature(
+  getIsUserEligibleForNewFeature<FiscalCode>(
     (fiscalCode) => UNIQUE_EMAIL_ENFORCEMENT_USERS.includes(fiscalCode),
     () => false,
     FF_UNIQUE_EMAIL_ENFORCEMENT
