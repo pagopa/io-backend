@@ -77,7 +77,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RemoteContentDetails'
+                $ref: '#/components/schemas/RemoteContentDetailsResponse'
             text/json:
               example: "attachments: [], \ncustom_property: \"a custom property\"\
                 \ \ncustom_property_2: 42 \n"
@@ -342,7 +342,7 @@ components:
         markdown:
           type: string
           description: The markdown content to be rendered in App
-    RemoteContentDetails:
+    RemoteContentDetailsResponse:
       type: object
       properties:
         attachments:
@@ -351,7 +351,36 @@ components:
             $ref: '#/components/schemas/RemoteContentAttachment'
         details:
           type: object
-          $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v28.8.0/openapi/definitions.yaml#/RemoteContentDetails"
+          $ref: "#/components/schemas/RemoteContentDetails"
+    RemoteContentDetails:
+      type: object
+      properties:
+        markdown:
+          $ref: "#/components/schemas/MessageBodyMarkdown"
+        subject:
+          $ref: "#/components/schemas/MessageSubject"
+      required:
+        - markdown
+        - subject
+    MessageBodyMarkdown:
+      type: string
+      description: |-
+        The full version of the message, in plain text or Markdown format.
+      minLength: 80
+      maxLength: 10000
+      example: |-
+        # This is a markdown header
+        to show how easily markdown can be converted to **HTML**
+        Remember: this has to be a long text.
+    MessageSubject:
+      type: string
+      description: |-
+        The (optional) subject of the message - note that only some notification
+        channels support the display of a subject. When a subject is not provided,
+        one gets generated from the client attributes.
+      minLength: 10
+      maxLength: 120
+      example: Welcome new user !
     RemoteContentAttachment:
       required:
       - id
