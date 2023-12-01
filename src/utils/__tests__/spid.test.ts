@@ -72,7 +72,7 @@ describe("SPID logs", () => {
   });
 });
 describe("SPID logs|>makeSpidLogCallback", () => {
-  const anIP = "1.1.1.1";
+  const anIP = "127.0.0.0";
 
   const getLoginTypeMock = jest.fn().mockReturnValue(LoginTypeEnum.LEGACY);
 
