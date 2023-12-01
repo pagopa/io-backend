@@ -41,3 +41,14 @@ export const getIsUserElegibleForfastLogin = (
     (_fiscalCode) => false,
     FF_FastLogin
   );
+
+export const getLoginType = (
+  loginType: LoginTypeEnum | undefined,
+  isUserEligibleForFastLogin: boolean,
+  isLollipopEnabled: boolean
+): LoginTypeEnum =>
+  isLollipopEnabled &&
+  loginType === LoginTypeEnum.LV &&
+  isUserEligibleForFastLogin
+    ? LoginTypeEnum.LV
+    : LoginTypeEnum.LEGACY;
