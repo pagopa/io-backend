@@ -72,6 +72,8 @@ describe("SPID logs", () => {
   });
 });
 describe("SPID logs|>makeSpidLogCallback", () => {
+  const anIP = "1.1.1.1";
+
   const getLoginTypeMock = jest.fn().mockReturnValue(LoginTypeEnum.LEGACY);
 
   it.each`
@@ -90,7 +92,7 @@ describe("SPID logs|>makeSpidLogCallback", () => {
       makeSpidLogCallback(
         mockQueueClient as unknown as QueueClient,
         getLoginTypeMock
-      )("1.1.1.1", aSAMLRequest, aSAMLResponse, {
+      )(anIP, aSAMLRequest, aSAMLResponse, {
         // NOTE: this is relevant for this test, only getLoginType result will be considered
         loginType: LoginTypeEnum.LEGACY,
       });
@@ -126,7 +128,7 @@ describe("SPID logs|>makeSpidLogCallback", () => {
       mockQueueClient as unknown as QueueClient,
       getLoginTypeMock
     )(
-      "1.1.1.1",
+      anIP,
       // tslint:disable-next-line: no-any
       undefined as any,
       aSAMLResponse
@@ -142,7 +144,7 @@ describe("SPID logs|>makeSpidLogCallback", () => {
       mockQueueClient as unknown as QueueClient,
       getLoginTypeMock
     )(
-      "1.1.1.1",
+      anIP,
       aSAMLRequest,
       // tslint:disable-next-line: no-any
       undefined as any
@@ -157,7 +159,7 @@ describe("SPID logs|>makeSpidLogCallback", () => {
     makeSpidLogCallback(
       mockQueueClient as unknown as QueueClient,
       getLoginTypeMock
-    )("1.1.1.1", aSAMLRequest, "RESPONSE");
+    )(anIP, aSAMLRequest, "RESPONSE");
     expect(mockQueueClient.sendMessage).not.toHaveBeenCalled();
   });
 });
