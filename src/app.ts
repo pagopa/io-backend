@@ -753,15 +753,12 @@ export async function newApp({
       );
       const spidLogCallback = makeSpidLogCallback(
         spidQueueClient,
-        (fiscalCode: FiscalCode, loginType?: LoginTypeEnum) => {
-          const isUserEligibleForFastLoginResult =
-            isUserElegibleForFastLogin(fiscalCode);
-          return getLoginType(
+        (fiscalCode: FiscalCode, loginType?: LoginTypeEnum) =>
+          getLoginType(
             loginType,
-            isUserEligibleForFastLoginResult,
+            isUserElegibleForFastLogin(fiscalCode),
             FF_LOLLIPOP_ENABLED
-          );
-        }
+          )
       );
       const timer = TimeTracer();
       return pipe(
