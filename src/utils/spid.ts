@@ -172,7 +172,13 @@ const SpidMsg = t.interface({
 type SpidMsg = t.TypeOf<typeof SpidMsg>;
 
 export const makeSpidLogCallback =
-  (queueClient: QueueClient) =>
+  (
+    queueClient: QueueClient,
+    getLoginType: (
+      fiscalCode: FiscalCode,
+      loginType?: LoginTypeEnum
+    ) => LoginTypeEnum
+  ) =>
   (
     sourceIp: string | null,
     requestPayload: string,
@@ -212,7 +218,7 @@ export const makeSpidLogCallback =
           createdAtDay: dateFnsFormat(new Date(), "YYYY-MM-DD"),
           fiscalCode,
           ip: sourceIp as IPString,
-          loginType: additionalProps?.loginType,
+          loginType: getLoginType(fiscalCode, additionalProps?.loginType),
           requestPayload,
           responsePayload,
           spidRequestId: requestId,
