@@ -15,12 +15,14 @@ import {
 } from "@pagopa/ts-commons/lib/strings";
 import { DOMParser } from "xmldom";
 import { flow, pipe } from "fp-ts/lib/function";
+import { withDefault } from "@pagopa/ts-commons/lib/types";
 import { SpidLevel, SpidLevelEnum } from "../../generated/backend/SpidLevel";
 import { UserWithoutTokens } from "../types/user";
 import { EmailAddress } from "../../generated/backend/EmailAddress";
 import { base64EncodeObject } from "./messages";
 import { log } from "./logger";
 import { formatDate } from "./date";
+import { AdditionalLoginPropsT, LoginType, LoginTypeEnum } from "./fastLogin";
 
 const SAML_NAMESPACE = {
   ASSERTION: "urn:oasis:names:tc:SAML:2.0:assertion",
@@ -154,6 +156,9 @@ const SpidMsg = t.interface({
   // IP of the client that made a SPID login action
   ip: IPString,
 
+  // Type of login
+  loginType: withDefault(LoginType, LoginTypeEnum.LEGACY),
+
   // XML payload of the SPID Request
   requestPayload: t.string,
 
@@ -167,11 +172,18 @@ const SpidMsg = t.interface({
 type SpidMsg = t.TypeOf<typeof SpidMsg>;
 
 export const makeSpidLogCallback =
-  (queueClient: QueueClient) =>
+  (
+    queueClient: QueueClient,
+    getLoginType: (
+      fiscalCode: FiscalCode,
+      loginType?: LoginTypeEnum
+    ) => LoginTypeEnum
+  ) =>
   (
     sourceIp: string | null,
     requestPayload: string,
-    responsePayload: string
+    responsePayload: string,
+    additionalProps?: AdditionalLoginPropsT
   ): void => {
     const logPrefix = `SpidLogCallback`;
     E.tryCatch(
@@ -206,6 +218,7 @@ export const makeSpidLogCallback =
           createdAtDay: dateFnsFormat(new Date(), "YYYY-MM-DD"),
           fiscalCode,
           ip: sourceIp as IPString,
+          loginType: getLoginType(fiscalCode, additionalProps?.loginType),
           requestPayload,
           responsePayload,
           spidRequestId: requestId,
