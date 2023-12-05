@@ -14,6 +14,7 @@ import {
   getSpidLevelFromSAMLResponse,
   makeSpidLogCallback,
 } from "../spid";
+import { LoginTypeEnum } from "../fastLogin";
 
 const aDOMSamlRequest = new DOMParser().parseFromString(
   aSAMLRequest,
@@ -69,28 +70,53 @@ describe("SPID logs", () => {
     const spidEmail = getSpidEmailFromAssertion(aDOMSamlResponse);
     expect(spidEmail).toEqual(some("spid.tech@agid.gov.it"));
   });
+});
+describe("SPID logs|>makeSpidLogCallback", () => {
+  const anIP = "127.0.0.0";
 
-  it("should enqueue valid payload on SPID response", () => {
-    const mockQueueClient = {
-      sendMessage: jest.fn().mockImplementation(() => Promise.resolve()),
-    };
-    makeSpidLogCallback(mockQueueClient as unknown as QueueClient)(
-      "1.1.1.1",
-      aSAMLRequest,
-      aSAMLResponse
-    );
-    expect(mockQueueClient.sendMessage).toHaveBeenCalled();
-  });
+  const getLoginTypeMock = jest.fn().mockReturnValue(LoginTypeEnum.LEGACY);
+
+  it.each`
+    finalLoginType
+    ${LoginTypeEnum.LEGACY}
+    ${LoginTypeEnum.LV}
+  `(
+    "should enqueue valid payload on SPID response when final login type is $finalLoginType",
+    ({ finalLoginType }) => {
+      const mockQueueClient = {
+        sendMessage: jest.fn().mockImplementation(() => Promise.resolve()),
+      };
+
+      getLoginTypeMock.mockReturnValueOnce(finalLoginType);
+
+      makeSpidLogCallback(
+        mockQueueClient as unknown as QueueClient,
+        getLoginTypeMock
+      )(anIP, aSAMLRequest, aSAMLResponse, {
+        // NOTE: this is relevant for this test, only getLoginType result will be considered
+        loginType: LoginTypeEnum.LEGACY,
+      });
+      expect(mockQueueClient.sendMessage).toHaveBeenCalled();
+
+      const b64 = mockQueueClient.sendMessage.mock.calls[0][0];
+      const val = JSON.parse(Buffer.from(b64, "base64").toString("binary"));
+
+      expect(val).toMatchObject(
+        expect.objectContaining({
+          loginType: finalLoginType,
+        })
+      );
+    }
+  );
 
   it("should NOT enqueue invalid IP on SPID response", () => {
     const mockQueueClient = {
       sendMessage: jest.fn().mockImplementation(() => Promise.resolve()),
     };
-    makeSpidLogCallback(mockQueueClient as unknown as QueueClient)(
-      "X",
-      aSAMLRequest,
-      aSAMLResponse
-    );
+    makeSpidLogCallback(
+      mockQueueClient as unknown as QueueClient,
+      getLoginTypeMock
+    )("X", aSAMLRequest, aSAMLResponse);
     expect(mockQueueClient.sendMessage).not.toHaveBeenCalled();
   });
 
@@ -98,8 +124,11 @@ describe("SPID logs", () => {
     const mockQueueClient = {
       sendMessage: jest.fn().mockImplementation(() => Promise.resolve()),
     };
-    makeSpidLogCallback(mockQueueClient as unknown as QueueClient)(
-      "1.1.1.1",
+    makeSpidLogCallback(
+      mockQueueClient as unknown as QueueClient,
+      getLoginTypeMock
+    )(
+      anIP,
       // tslint:disable-next-line: no-any
       undefined as any,
       aSAMLResponse
@@ -111,8 +140,11 @@ describe("SPID logs", () => {
     const mockQueueClient = {
       sendMessage: jest.fn().mockImplementation(() => Promise.resolve()),
     };
-    makeSpidLogCallback(mockQueueClient as unknown as QueueClient)(
-      "1.1.1.1",
+    makeSpidLogCallback(
+      mockQueueClient as unknown as QueueClient,
+      getLoginTypeMock
+    )(
+      anIP,
       aSAMLRequest,
       // tslint:disable-next-line: no-any
       undefined as any
@@ -124,11 +156,10 @@ describe("SPID logs", () => {
     const mockQueueClient = {
       sendMessage: jest.fn().mockImplementation(() => Promise.resolve()),
     };
-    makeSpidLogCallback(mockQueueClient as unknown as QueueClient)(
-      "1.1.1.1",
-      aSAMLRequest,
-      "RESPONSE"
-    );
+    makeSpidLogCallback(
+      mockQueueClient as unknown as QueueClient,
+      getLoginTypeMock
+    )(anIP, aSAMLRequest, "RESPONSE");
     expect(mockQueueClient.sendMessage).not.toHaveBeenCalled();
   });
 });

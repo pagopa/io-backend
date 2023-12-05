@@ -64,6 +64,7 @@ import {
   lollipopData,
 } from "../../__mocks__/lollipop";
 import * as authCtrl from "../authenticationController";
+import * as config from "../../config";
 import { withoutUndefinedValues } from "@pagopa/ts-commons/lib/types";
 import { LoginTypeEnum } from "../../utils/fastLogin";
 import {
@@ -209,7 +210,7 @@ jest.mock("../../services/usersLoginLogService", () => {
 });
 
 jest
-  .spyOn(authCtrl, "isUserElegibleForFastLogin")
+  .spyOn(config, "isUserElegibleForFastLogin")
   .mockImplementation((_) => false);
 
 const anActivatedPubKey = {
@@ -1065,7 +1066,7 @@ describe("AuthenticationController|>LV|>acs", () => {
       const res = mockRes();
 
       jest
-        .spyOn(authCtrl, "isUserElegibleForFastLogin")
+        .spyOn(config, "isUserElegibleForFastLogin")
         .mockImplementationOnce((_) => isUserElegible);
 
       mockGetLollipop.mockResolvedValueOnce(
@@ -1162,7 +1163,7 @@ describe("AuthenticationController|>LV|>acs", () => {
     const res = mockRes();
 
     jest
-      .spyOn(authCtrl, "isUserElegibleForFastLogin")
+      .spyOn(config, "isUserElegibleForFastLogin")
       .mockImplementationOnce((_) => true);
 
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
@@ -1201,7 +1202,7 @@ describe("AuthenticationController|>LV|>acs", () => {
     isUserAuthenticationLockedMock.mockReturnValueOnce(TE.of(true));
 
     jest
-      .spyOn(authCtrl, "isUserElegibleForFastLogin")
+      .spyOn(config, "isUserElegibleForFastLogin")
       .mockImplementationOnce((_) => false);
 
     mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anotherAssertionRef)));
@@ -1235,7 +1236,7 @@ describe("AuthenticationController|>LV|>acs", () => {
     const res = mockRes();
 
     jest
-      .spyOn(authCtrl, "isUserElegibleForFastLogin")
+      .spyOn(config, "isUserElegibleForFastLogin")
       .mockImplementationOnce((_) => true);
 
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
@@ -1255,9 +1256,7 @@ describe("AuthenticationController|>LV|>acs", () => {
 
 describe("AuthenticationController|>LV|>acs|>notify user login", () => {
   const setupLollipopScenario = () => {
-    jest
-      .spyOn(authCtrl, "isUserElegibleForFastLogin")
-      .mockReturnValueOnce(true);
+    jest.spyOn(config, "isUserElegibleForFastLogin").mockReturnValueOnce(true);
 
     mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anotherAssertionRef)));
     mockDelLollipop.mockResolvedValueOnce(E.right(true));

@@ -1,6 +1,6 @@
 {
   "name": "@pagopa/io-backend",
-  "version": "13.23.0",
+  "version": "13.24.0",
   "min_app_version": {
     "ios": "2.3.0",
     "android": "2.3.0"
@@ -89,7 +89,7 @@
     "@pagopa/io-functions-cgn-sdk": "x",
     "@pagopa/io-functions-commons": "28.9.0",
     "@pagopa/io-functions-eucovidcerts-sdk": "x",
-    "@pagopa/io-spid-commons": "^13.2.2",
+    "@pagopa/io-spid-commons": "^13.3.0",
     "@pagopa/ts-commons": "^12.3.0",
     "@pagopa/winston-ts": "^2.2.0",
     "applicationinsights": "^1.8.10",
