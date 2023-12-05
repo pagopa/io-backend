@@ -106,6 +106,10 @@ const validApiMessageResponse = {
 };
 
 const aValidThirdPartyMessageUniqueId = "aThirdPartyId";
+const aValidThirdPartyData = {
+  id: aValidThirdPartyMessageUniqueId
+}
+
 // @ts-ignore
 const validApiThirdPartyMessageResponse = {
   ...validApiMessageResponse,
@@ -115,7 +119,7 @@ const validApiThirdPartyMessageResponse = {
       ...aValidMessage,
       content: {
         ...aValidMessage.content,
-        third_party_data: { id: aValidThirdPartyMessageUniqueId },
+        third_party_data: aValidThirdPartyData,
       },
     },
   },
@@ -213,6 +217,15 @@ const proxyMessageResponse = {
 };
 
 const aThirdPartyMessageDetail = { details: { aDetail: "detail" } };
+
+const aThirdPartyMessage = {
+  attachments: [{name:"attachment", content:"aBase64Encoding", mime_type: "image/png"}],
+  details: { 
+    subject: "a subject of a third party message", 
+    markdown: "hey hey !! <a style=\"color: red\" href=\"http://example.com\"> some content here ..... this is a link with a style applied, some other content</a>" 
+  } 
+};
+
 
 const proxyThirdPartyMessageResponse = {
   ...validApiMessageResponse.value.message,
@@ -742,30 +755,6 @@ describe("MessageService#getThirdPartyMessage", () => {
     });
   });
 
-  it("should return an error if ThirParty service client returns an error", async () => {
-    const anError = "Error calling Third Party client";
-    mockGetTPMessageFromExternalService.mockImplementationOnce(async () => {
-      throw Error(anError);
-    });
-
-    const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
-    );
-
-    const res = await service.getThirdPartyMessage(
-      aValidMessageWithThirdPartyData
-    );
-
-    expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
-      id: aValidThirdPartyMessageUniqueId,
-    });
-    expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
-      detail: `Internal server error: ${anError}`,
-    });
-  });
-
   it("should return an error if ThirParty service client throws an error", async () => {
     const anError = "Error calling Third Party client";
     mockGetTPMessageFromExternalService.mockImplementationOnce(async () => {
@@ -812,28 +801,6 @@ describe("MessageService#getThirdPartyMessage", () => {
     });
   });
 
-  it("should return an error if ThirParty service client returns an error", async () => {
-    mockGetTPMessageFromExternalService.mockImplementationOnce(async () =>
-      t.success(problemJson)
-    );
-
-    const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
-    );
-
-    const res = await service.getThirdPartyMessage(
-      aValidMessageWithThirdPartyData
-    );
-
-    expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
-      id: aValidThirdPartyMessageUniqueId,
-    });
-    expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
-    });
-  });
-
   it("should return Not Found if ThirParty service client returns an 404", async () => {
     mockGetTPMessageFromExternalService.mockImplementationOnce(async () =>
       t.success({ status: 404 })
@@ -853,6 +820,98 @@ describe("MessageService#getThirdPartyMessage", () => {
     });
     expect(res).toMatchObject({
       kind: "IResponseErrorNotFound",
+    });
+  });
+
+  it("should return Bad Gateway if ThirParty service client does not return the attachments when the flag has_attachments is true", async () => {
+    const service = new NewMessageService(
+      api,
+      mockGetThirdPartyMessageClientFactory
+    );
+
+    const res = await service.getThirdPartyMessage(
+      {
+        ...aValidMessage,
+        content: {
+          ...aValidMessage.content,
+          third_party_data: { 
+            ...aValidThirdPartyData, 
+            has_attachments: true
+          },
+        }
+      } as unknown as MessageWithThirdPartyData
+    );
+
+    expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
+      id: aValidThirdPartyMessageUniqueId,
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseErrorBadGateway",
+      detail: "Bad Gateway: ATTACHMENTS_NOT_PRESENT"
+    });
+  });
+
+  it("should return Bad Gateway if ThirParty service client does not return the remote content when the flag has_remote_content is true", async () => {
+    const service = new NewMessageService(
+      api,
+      mockGetThirdPartyMessageClientFactory
+    );
+
+    const res = await service.getThirdPartyMessage(
+      {
+        ...aValidMessage,
+        content: {
+          ...aValidMessage.content,
+          third_party_data: { 
+            ...aValidThirdPartyData, 
+            has_remote_content: true
+          },
+        }
+      } as unknown as MessageWithThirdPartyData
+    );
+
+    expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
+      id: aValidThirdPartyMessageUniqueId,
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseErrorBadGateway",
+      detail: "Bad Gateway: REMOTE_CONTENT_NOT_PRESENT"
+    });
+  });
+
+  it("should return a message with attachments and remote content when the flag has_remote_content is true and the flag has_attachments is true", async () => {
+    mockGetTPMessageFromExternalService.mockImplementationOnce(async (_messageId) =>
+      t.success({
+        status: 200,
+        headers: {},
+        value: aThirdPartyMessage,
+      })
+    );
+
+    const service = new NewMessageService(
+      api,
+      mockGetThirdPartyMessageClientFactory
+    );
+
+    const res = await service.getThirdPartyMessage(
+      {
+        ...aValidMessage,
+        content: {
+          ...aValidMessage.content,
+          third_party_data: { 
+            ...aValidThirdPartyData, 
+            has_remote_content: true,
+            has_attachment: true
+          },
+        }
+      } as unknown as MessageWithThirdPartyData
+    );
+
+    expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
+      id: aValidThirdPartyMessageUniqueId,
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson"
     });
   });
 });

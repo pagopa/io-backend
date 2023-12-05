@@ -18,6 +18,8 @@ import {
   ResponseErrorValidation,
   ResponseErrorServiceTemporarilyUnavailable,
   IResponseSuccessNoContent,
+  ResponseErrorBadGateway,
+  IResponseErrorBadGateway,
 } from "@pagopa/ts-commons/lib/responses";
 import { AppMessagesAPIClient } from "src/clients/app-messages.client";
 import {
@@ -31,6 +33,9 @@ import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import * as T from "fp-ts/Task";
 import { LollipopLocalsType } from "src/types/lollipop";
+import { PN_SERVICE_ID } from "../config";
+import { MessageSubject } from "../../generated/backend/MessageSubject";
+import { InvalidThirdPartyMessageTypeEnum } from "../../generated/backend/InvalidThirdPartyMessageType";
 import { CreatedMessageWithContent } from "../../generated/io-messages-api/CreatedMessageWithContent";
 import { PaginatedPublicMessagesCollection } from "../../generated/io-messages-api/PaginatedPublicMessagesCollection";
 import { GetMessageParameters } from "../../generated/parameters/GetMessageParameters";
@@ -54,11 +59,15 @@ import {
 } from "../utils/responses";
 import { MessageStatusChange } from "../../generated/io-messages-api/MessageStatusChange";
 import { MessageStatusAttributes } from "../../generated/io-messages-api/MessageStatusAttributes";
-import { ThirdPartyMessage } from "../../generated/third-party-service/ThirdPartyMessage";
+import {
+  ThirdPartyMessage,
+  ThirdPartyMessageDetails,
+} from "../../generated/third-party-service/ThirdPartyMessage";
 import { ThirdPartyData } from "../../generated/backend/ThirdPartyData";
 import { ThirdPartyServiceClientFactory } from "../../src/clients/third-party-service-client";
 import { log } from "../utils/logger";
 import { FileType, getIsFileTypeForTypes } from "../utils/file-type";
+import { MessageBodyMarkdown } from "../../generated/backend/MessageBodyMarkdown";
 
 const ALLOWED_TYPES: ReadonlySet<FileType> = new Set(["pdf"]);
 
@@ -265,6 +274,7 @@ export default class NewMessagesService {
     | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorNotFound
     | IResponseErrorTooManyRequests
+    | IResponseErrorBadGateway
     | IResponseSuccessJson<ThirdPartyMessageWithContent>
   > =>
     pipe(
@@ -475,7 +485,8 @@ export default class NewMessagesService {
     | IResponseErrorValidation
     | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorNotFound
-    | IResponseErrorTooManyRequests,
+    | IResponseErrorTooManyRequests
+    | IResponseErrorBadGateway,
     ThirdPartyMessage
   > =>
     pipe(
@@ -541,10 +552,53 @@ export default class NewMessagesService {
                   return ResponseErrorStatusNotDefinedInSpec(response);
               }
             })
+          ),
+          TE.chainW((response) =>
+            this.validateThirdPartyMessageResponse(message, response)
           )
         )
       )
     );
+
+  private readonly validateThirdPartyMessageResponse = (
+    message: MessageWithThirdPartyData,
+    response: ThirdPartyMessageDetails
+  ): TE.TaskEither<IResponseErrorBadGateway, ThirdPartyMessage> => {
+    if (message.sender_service_id === PN_SERVICE_ID) {
+      return TE.of(response);
+    }
+    if (message.content.third_party_data.has_attachments) {
+      return response.attachments
+        ? TE.of(response)
+        : TE.left(
+            ResponseErrorBadGateway(
+              InvalidThirdPartyMessageTypeEnum.ATTACHMENTS_NOT_PRESENT
+            )
+          );
+    }
+    if (message.content.third_party_data.has_remote_content) {
+      return !response.details?.markdown || !response.details?.subject
+        ? TE.left(
+            ResponseErrorBadGateway(
+              InvalidThirdPartyMessageTypeEnum.REMOTE_CONTENT_NOT_PRESENT
+            )
+          )
+        : !MessageBodyMarkdown.is(response.details.markdown)
+        ? TE.left(
+            ResponseErrorBadGateway(
+              InvalidThirdPartyMessageTypeEnum.MARKDOWN_VALIDATION_ERROR
+            )
+          )
+        : !MessageSubject.is(response.details.subject)
+        ? TE.left(
+            ResponseErrorBadGateway(
+              InvalidThirdPartyMessageTypeEnum.SUBJECT_VALIDATION_ERROR
+            )
+          )
+        : TE.of(response);
+    }
+    return TE.of(response);
+  };
 
   // Retrieve a ThirdParty attachment from related service, if exists
   // return an error otherwise
