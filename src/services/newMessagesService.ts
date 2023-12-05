@@ -564,6 +564,7 @@ export default class NewMessagesService {
     message: MessageWithThirdPartyData,
     response: ThirdPartyMessageDetails
   ): TE.TaskEither<IResponseErrorBadGateway, ThirdPartyMessage> => {
+    // PN does not need this validation because it is managed completely in a different way with different specs
     if (message.sender_service_id === PN_SERVICE_ID) {
       return TE.of(response);
     }
