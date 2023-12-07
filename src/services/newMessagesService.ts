@@ -564,12 +564,15 @@ export default class NewMessagesService {
     message: MessageWithThirdPartyData,
     response: ThirdPartyMessageDetails
   ): TE.TaskEither<IResponseErrorBadGateway, ThirdPartyMessage> => {
-    // PN does not need this validation because it is managed completely in a different way with different specs
+    // PN does not need this validation because it is managed in a different way with different specs
     if (message.sender_service_id === PN_SERVICE_ID) {
       return TE.of(response);
     }
+    // if has_attachments is true and there are no attachments in the response than an error must be thrown
+    const shouldContainAttachments =
+      message.content.third_party_data.has_attachments;
     if (
-      message.content.third_party_data.has_attachments &&
+      shouldContainAttachments &&
       (!response.attachments || response.attachments.length === 0)
     ) {
       return TE.left(
@@ -578,30 +581,28 @@ export default class NewMessagesService {
         )
       );
     }
-    if (
-      message.content.third_party_data.has_remote_content &&
-      !response.details
-    ) {
+    // if has_remote_content is true and there is no remote content than an error must be thrown
+    const shouldContainRemoteContent =
+      message.content.third_party_data.has_remote_content;
+    if (shouldContainRemoteContent && !response.details) {
       return TE.left(
         ResponseErrorBadGateway(
           InvalidThirdPartyMessageTypeEnum.REMOTE_CONTENT_NOT_PRESENT
         )
       );
     }
-    if (
-      message.content.third_party_data.has_remote_content &&
-      !MessageBodyMarkdown.is(response.details.markdown)
-    ) {
+    // if has_remote_content is true and the remote markdown is not between 80 and 10000 characters than an error must be throw
+    const isMarkdownValid = MessageBodyMarkdown.is(response.details.markdown);
+    if (shouldContainRemoteContent && !isMarkdownValid) {
       return TE.left(
         ResponseErrorBadGateway(
           InvalidThirdPartyMessageTypeEnum.MARKDOWN_VALIDATION_ERROR
         )
       );
     }
-    if (
-      message.content.third_party_data.has_remote_content &&
-      !MessageSubject.is(response.details.subject)
-    ) {
+    // if has_remote_content is true and the remote subject is not between 10 and 121 characters than an error must be throw
+    const isSubjectValid = MessageSubject.is(response.details.subject);
+    if (shouldContainRemoteContent && !isSubjectValid) {
       return TE.left(
         ResponseErrorBadGateway(
           InvalidThirdPartyMessageTypeEnum.SUBJECT_VALIDATION_ERROR
@@ -613,10 +614,8 @@ export default class NewMessagesService {
     // if the flag has_remote_content is false than the third party is not allowed to send remote subject and markdown
     // and they will be replaced with the static one sent during the message creation
     return TE.of({
-      attachments: message.content.third_party_data.has_attachments
-        ? response.attachments
-        : [],
-      details: message.content.third_party_data.has_remote_content
+      attachments: shouldContainAttachments ? response.attachments : [],
+      details: shouldContainRemoteContent
         ? response.details
         : {
             ...response.details,

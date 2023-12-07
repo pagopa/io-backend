@@ -226,6 +226,11 @@ const aThirdPartyMessage = {
   } 
 };
 
+// a valid remote markdown must be between 80 and 10000 characters
+const anInvalidRemoteMarkdown = "invalid markdown"
+
+// a valid remote subject must be between 10 and 121 characters
+const anInvalidRemoteSubject = "invalid"
 
 const proxyThirdPartyMessageResponse = {
   ...validApiMessageResponse.value.message,
@@ -909,7 +914,7 @@ describe("MessageService#getThirdPartyMessage", () => {
           ...aThirdPartyMessage,
           details: {
             ...aThirdPartyMessage.details,
-            markdown: "invalid"
+            markdown: anInvalidRemoteMarkdown
           }
         },
       })
@@ -950,7 +955,7 @@ describe("MessageService#getThirdPartyMessage", () => {
           ...aThirdPartyMessage,
           details: {
             ...aThirdPartyMessage.details,
-            subject: "invalid"
+            subject: anInvalidRemoteSubject
           }
         },
       })
