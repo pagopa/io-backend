@@ -568,37 +568,62 @@ export default class NewMessagesService {
     if (message.sender_service_id === PN_SERVICE_ID) {
       return TE.of(response);
     }
-    if (message.content.third_party_data.has_attachments) {
-      return response.attachments
-        ? TE.of(response)
-        : TE.left(
-            ResponseErrorBadGateway(
-              InvalidThirdPartyMessageTypeEnum.ATTACHMENTS_NOT_PRESENT
-            )
-          );
+    if (
+      message.content.third_party_data.has_attachments &&
+      (!response.attachments || response.attachments.length === 0)
+    ) {
+      return TE.left(
+        ResponseErrorBadGateway(
+          InvalidThirdPartyMessageTypeEnum.ATTACHMENTS_NOT_PRESENT
+        )
+      );
     }
-    if (message.content.third_party_data.has_remote_content) {
-      return !response.details?.markdown || !response.details?.subject
-        ? TE.left(
-            ResponseErrorBadGateway(
-              InvalidThirdPartyMessageTypeEnum.REMOTE_CONTENT_NOT_PRESENT
-            )
-          )
-        : !MessageBodyMarkdown.is(response.details.markdown)
-        ? TE.left(
-            ResponseErrorBadGateway(
-              InvalidThirdPartyMessageTypeEnum.MARKDOWN_VALIDATION_ERROR
-            )
-          )
-        : !MessageSubject.is(response.details.subject)
-        ? TE.left(
-            ResponseErrorBadGateway(
-              InvalidThirdPartyMessageTypeEnum.SUBJECT_VALIDATION_ERROR
-            )
-          )
-        : TE.of(response);
+    if (
+      message.content.third_party_data.has_remote_content &&
+      !response.details
+    ) {
+      return TE.left(
+        ResponseErrorBadGateway(
+          InvalidThirdPartyMessageTypeEnum.REMOTE_CONTENT_NOT_PRESENT
+        )
+      );
     }
-    return TE.of(response);
+    if (
+      message.content.third_party_data.has_remote_content &&
+      !MessageBodyMarkdown.is(response.details.markdown)
+    ) {
+      return TE.left(
+        ResponseErrorBadGateway(
+          InvalidThirdPartyMessageTypeEnum.MARKDOWN_VALIDATION_ERROR
+        )
+      );
+    }
+    if (
+      message.content.third_party_data.has_remote_content &&
+      !MessageSubject.is(response.details.subject)
+    ) {
+      return TE.left(
+        ResponseErrorBadGateway(
+          InvalidThirdPartyMessageTypeEnum.SUBJECT_VALIDATION_ERROR
+        )
+      );
+    }
+    // return a validated response by checking the flags
+    // if the flag has_attachments is false than the third party is not allowed to send attachments so they will be removed if present
+    // if the flag has_remote_content is false than the third party is not allowed to send remote subject and markdown
+    // and they will be replaced with the static one sent during the message creation
+    return TE.of({
+      attachments: message.content.third_party_data.has_attachments
+        ? response.attachments
+        : [],
+      details: message.content.third_party_data.has_remote_content
+        ? response.details
+        : {
+            ...response.details,
+            markdown: message.content.markdown,
+            subject: message.content.subject,
+          },
+    });
   };
 
   // Retrieve a ThirdParty attachment from related service, if exists
