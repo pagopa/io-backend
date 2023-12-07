@@ -130,27 +130,13 @@ export default class BonusService {
    *
    */
   public readonly getAllBonusActivations = (
-    user: User
+    _: User
   ): Promise<
     | IResponseErrorInternal
     | IResponseSuccessJson<PaginatedBonusActivationsCollection>
   > =>
-    withCatchAsInternalError(async () => {
-      const validated = await this.bonusApiClient.getAllBonusActivations({
-        fiscalcode: user.fiscal_code,
-      });
-
-      return withValidatedOrInternalError(validated, (response) => {
-        switch (response.status) {
-          case 200:
-            return ResponseSuccessJson(response.value);
-          case 401:
-            return ResponseErrorUnexpectedAuthProblem();
-          case 500:
-            return ResponseErrorInternal(readableProblem(response.value));
-          default:
-            return ResponseErrorStatusNotDefinedInSpec(response);
-        }
-      });
-    });
+    // According to the removal of the vacation bonus from APP-IO, this API will always return an empty array
+    Promise.resolve(
+      ResponseSuccessJson({ items: [] } as PaginatedBonusActivationsCollection)
+    );
 }
