@@ -242,11 +242,13 @@ export default class SessionLockController {
                 "Another user authentication lock has already been applied"
               )
           ),
-          // clear session data
           TE.chainW((_) =>
             pipe(
               AP.sequenceT(TE.ApplicativeSeq)(
+                // clear session data
                 ...this.buildInvalidateUserSessionTask(fiscalCode),
+                // clear installation before locking the user account
+                // for allowing allow the FE to retry the call in case of failure.
                 this.clearInstallation(fiscalCode),
                 // if clean up went well, lock user session
                 this.authenticationLockService.lockUserAuthentication(
@@ -418,7 +420,6 @@ export default class SessionLockController {
     ] as const;
 
   private readonly clearInstallation = (fiscalCode: FiscalCode) =>
-    // async fire & forget
     pipe(
       TE.tryCatch(
         () =>
