@@ -29,6 +29,11 @@ import {
   unlockUserAuthenticationMock,
 } from "../../__mocks__/services.mock";
 import { anothernUnlockCode } from "../../__mocks__/lockedProfileTableClient";
+import {
+  ResponseErrorInternal,
+  ResponseSuccessJson,
+} from "@pagopa/ts-commons/lib/responses";
+import NotificationService from "../../services/notificationService";
 
 const aFiscalCode = pipe(
   "AAABBB80A01C123D",
@@ -113,11 +118,22 @@ const mockLollipopService = new LollipopService(
   ""
 );
 
+const mockDeleteInstallation = jest
+  .fn()
+  .mockResolvedValue(ResponseSuccessJson({ message: "ok" }));
+const mockNotificationService = {
+  deleteInstallation: mockDeleteInstallation,
+};
+
+const notificationServiceFactory = (_fiscalCode: FiscalCode) =>
+  mockNotificationService as any as NotificationService;
+
 const controller = new SessionLockController(
   mockRedisSessionStorage,
   mockRedisUserMetadataStorage,
   mockLollipopService,
-  AuthenticationLockServiceMock
+  AuthenticationLockServiceMock,
+  notificationServiceFactory
 );
 
 describe("SessionLockController#getUserSession", () => {
@@ -492,6 +508,8 @@ describe("SessionLockController#lockUserAuthentication", () => {
     expect(mockRevokePreviousAssertionRef).toHaveBeenCalled();
     expect(mockDelLollipop).toHaveBeenCalled();
     expect(mockDelUserAllSessions).toHaveBeenCalled();
+
+    expect(mockDeleteInstallation).toHaveBeenCalledWith(aFiscalCode);
   });
 
   it("should return 409 when request is valid and the user authentication is already locked", async () => {
@@ -538,6 +556,36 @@ describe("SessionLockController#lockUserAuthentication", () => {
     mockDelLollipop.mockImplementationOnce(async () => {
       throw "error";
     });
+
+    const req = mockReq(aValidRequest);
+    const res = mockRes();
+
+    const response = await controller.lockUserAuthentication(req);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(lockUserAuthenticationMockLazy).not.toHaveBeenCalled();
+  });
+
+  it("should return 500 when request is valid and something went wrong calling deleteInstallation", async () => {
+    mockDeleteInstallation.mockImplementationOnce(async () => {
+      throw "error";
+    });
+
+    const req = mockReq(aValidRequest);
+    const res = mockRes();
+
+    const response = await controller.lockUserAuthentication(req);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(lockUserAuthenticationMockLazy).not.toHaveBeenCalled();
+  });
+
+  it("should return 500 when request is valid and deleteInstallation returns an error", async () => {
+    mockDeleteInstallation.mockResolvedValueOnce(
+      ResponseErrorInternal("An error occurred")
+    );
 
     const req = mockReq(aValidRequest);
     const res = mockRes();
