@@ -430,7 +430,7 @@ export default class SessionLockController {
             `Cannot delete Notification Installation: ${JSON.stringify(err)}`
           )
       ),
-      TE.chainW(
+      TE.chain(
         flow(
           TE.fromPredicate(
             (response) => response.kind === "IResponseSuccessJson",
