@@ -40,6 +40,7 @@ import RedisUserMetadataStorage from "../services/redisUserMetadataStorage";
 import AuthenticationLockService, {
   NotReleasedAuthenticationLockData,
 } from "../services/authenticationLockService";
+import { NotificationServiceFactory } from "../services/notificationServiceFactory";
 
 import { UserSessionInfo } from "../../generated/session/UserSessionInfo";
 import { AuthLockBody } from "../../generated/session/AuthLockBody";
@@ -73,7 +74,8 @@ export default class SessionLockController {
     private readonly sessionStorage: RedisSessionStorage,
     private readonly metadataStorage: RedisUserMetadataStorage,
     private readonly lollipopService: LollipopService,
-    private readonly authenticationLockService: AuthenticationLockService
+    private readonly authenticationLockService: AuthenticationLockService,
+    private readonly notificationServiceFactory: NotificationServiceFactory
   ) {}
 
   /**
@@ -245,6 +247,7 @@ export default class SessionLockController {
             pipe(
               AP.sequenceT(TE.ApplicativeSeq)(
                 ...this.buildInvalidateUserSessionTask(fiscalCode),
+                this.clearInstallation(fiscalCode),
                 // if clean up went well, lock user session
                 this.authenticationLockService.lockUserAuthentication(
                   fiscalCode,
@@ -413,6 +416,35 @@ export default class SessionLockController {
         TE.chain(TE.fromEither)
       ),
     ] as const;
+
+  private readonly clearInstallation = (fiscalCode: FiscalCode) =>
+    // async fire & forget
+    pipe(
+      TE.tryCatch(
+        () =>
+          this.notificationServiceFactory(fiscalCode).deleteInstallation(
+            fiscalCode
+          ),
+        (err) =>
+          Error(
+            `Cannot delete Notification Installation: ${JSON.stringify(err)}`
+          )
+      ),
+      TE.chainW(
+        flow(
+          TE.fromPredicate(
+            (response) => response.kind === "IResponseSuccessJson",
+            (err) =>
+              Error(
+                `Cannot delete Notification Installation: ${
+                  err.detail ?? "Not Defined"
+                }`
+              )
+          ),
+          TE.map(() => true)
+        )
+      )
+    );
 
   private readonly unlockuserAuthenticationLockData = (
     fiscalCode: FiscalCode,
