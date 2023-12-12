@@ -40,6 +40,7 @@ import RedisUserMetadataStorage from "../services/redisUserMetadataStorage";
 import AuthenticationLockService, {
   NotReleasedAuthenticationLockData,
 } from "../services/authenticationLockService";
+import { NotificationServiceFactory } from "../services/notificationServiceFactory";
 
 import { UserSessionInfo } from "../../generated/session/UserSessionInfo";
 import { AuthLockBody } from "../../generated/session/AuthLockBody";
@@ -73,7 +74,8 @@ export default class SessionLockController {
     private readonly sessionStorage: RedisSessionStorage,
     private readonly metadataStorage: RedisUserMetadataStorage,
     private readonly lollipopService: LollipopService,
-    private readonly authenticationLockService: AuthenticationLockService
+    private readonly authenticationLockService: AuthenticationLockService,
+    private readonly notificationServiceFactory: NotificationServiceFactory
   ) {}
 
   /**
@@ -240,11 +242,14 @@ export default class SessionLockController {
                 "Another user authentication lock has already been applied"
               )
           ),
-          // clear session data
           TE.chainW((_) =>
             pipe(
               AP.sequenceT(TE.ApplicativeSeq)(
+                // clear session data
                 ...this.buildInvalidateUserSessionTask(fiscalCode),
+                // clear installation before locking the user account
+                // for allowing allow the FE to retry the call in case of failure.
+                this.clearInstallation(fiscalCode),
                 // if clean up went well, lock user session
                 this.authenticationLockService.lockUserAuthentication(
                   fiscalCode,
@@ -413,6 +418,34 @@ export default class SessionLockController {
         TE.chain(TE.fromEither)
       ),
     ] as const;
+
+  private readonly clearInstallation = (fiscalCode: FiscalCode) =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          this.notificationServiceFactory(fiscalCode).deleteInstallation(
+            fiscalCode
+          ),
+        (err) =>
+          Error(
+            `Cannot delete Notification Installation: ${JSON.stringify(err)}`
+          )
+      ),
+      TE.chain(
+        flow(
+          TE.fromPredicate(
+            (response) => response.kind === "IResponseSuccessJson",
+            (err) =>
+              Error(
+                `Cannot delete Notification Installation: ${
+                  err.detail ?? "Not Defined"
+                }`
+              )
+          ),
+          TE.map(() => true)
+        )
+      )
+    );
 
   private readonly unlockuserAuthenticationLockData = (
     fiscalCode: FiscalCode,

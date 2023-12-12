@@ -624,7 +624,8 @@ export async function newApp({
           SESSION_STORAGE,
           USER_METADATA_STORAGE,
           LOLLIPOP_SERVICE,
-          AUTHENTICATION_LOCK_SERVICE
+          AUTHENTICATION_LOCK_SERVICE,
+          notificationServiceFactory
         );
         if (FF_BONUS_ENABLED) {
           // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -1290,7 +1291,8 @@ function registerSessionAPIRoutes(
   sessionStorage: RedisSessionStorage,
   userMetadataStorage: RedisUserMetadataStorage,
   lollipopService: LollipopService,
-  authenticationLockService: AuthenticationLockService
+  authenticationLockService: AuthenticationLockService,
+  notificationServiceFactory: NotificationServiceFactory
 ): void {
   if (FF_ENABLE_SESSION_ENDPOINTS) {
     const sessionLockController: SessionLockController =
@@ -1298,7 +1300,8 @@ function registerSessionAPIRoutes(
         sessionStorage,
         userMetadataStorage,
         lollipopService,
-        authenticationLockService
+        authenticationLockService,
+        notificationServiceFactory
       );
 
     app.get(
