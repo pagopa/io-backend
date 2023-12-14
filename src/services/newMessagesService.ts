@@ -592,7 +592,7 @@ export default class NewMessagesService {
       );
     }
     // if has_remote_content is true and the remote markdown is not between 80 and 10000 characters than an error must be throw
-    const isMarkdownValid = MessageBodyMarkdown.is(response.details.markdown);
+    const isMarkdownValid = MessageBodyMarkdown.is(response.details?.markdown);
     if (shouldContainRemoteContent && !isMarkdownValid) {
       return TE.left(
         ResponseErrorBadGateway(
@@ -601,7 +601,7 @@ export default class NewMessagesService {
       );
     }
     // if has_remote_content is true and the remote subject is not between 10 and 121 characters than an error must be throw
-    const isSubjectValid = MessageSubject.is(response.details.subject);
+    const isSubjectValid = MessageSubject.is(response.details?.subject);
     if (shouldContainRemoteContent && !isSubjectValid) {
       return TE.left(
         ResponseErrorBadGateway(
