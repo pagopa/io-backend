@@ -1107,6 +1107,47 @@ describe("MessageService#getThirdPartyMessage", () => {
       }),
     });
   });
+
+  it("should return a success if the flag has_remote_content is false and the details is undefined", async () => {
+    mockGetTPMessageFromExternalService.mockImplementationOnce(
+      async (_messageId) =>
+        t.success({
+          status: 200,
+          headers: {},
+          value: {
+            ...aThirdPartyMessage,
+            // the sender of the message didn't send any remote content
+            details: undefined,
+          },
+        })
+    );
+    const service = new NewMessageService(
+      api,
+      mockGetThirdPartyMessageClientFactory
+    );
+
+    const aValidContent = {
+      ...aValidMessage.content,
+      third_party_data: {
+        ...aValidThirdPartyData,
+        has_remote_content: false,
+      },
+    };
+
+    const res = await service.getThirdPartyMessage({
+      ...aValidMessage,
+      content: aValidContent,
+    } as unknown as MessageWithThirdPartyData);
+
+    expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
+      id: aValidThirdPartyMessageUniqueId,
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      // we expect the static markdown and subject in this scenario
+      value: expect.objectContaining({ content: aValidContent }),
+    });
+  });
 });
 
 describe("MessageService#getThirdPartyMessagePrecondition", () => {
