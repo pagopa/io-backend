@@ -107,8 +107,8 @@ const validApiMessageResponse = {
 
 const aValidThirdPartyMessageUniqueId = "aThirdPartyId";
 const aValidThirdPartyData = {
-  id: aValidThirdPartyMessageUniqueId
-}
+  id: aValidThirdPartyMessageUniqueId,
+};
 
 // @ts-ignore
 const validApiThirdPartyMessageResponse = {
@@ -219,18 +219,21 @@ const proxyMessageResponse = {
 const aThirdPartyMessageDetail = { details: { aDetail: "detail" } };
 
 const aThirdPartyMessage = {
-  attachments: [{name:"attachment", content:"aBase64Encoding", mime_type: "image/png"}],
-  details: { 
-    subject: "a subject of a third party message", 
-    markdown: "hey hey !! <a style=\"color: red\" href=\"http://example.com\"> some content here ..... this is a link with a style applied, some other content</a>" 
-  } 
+  attachments: [
+    { name: "attachment", content: "aBase64Encoding", mime_type: "image/png" },
+  ],
+  details: {
+    subject: "a subject of a third party message",
+    markdown:
+      'hey hey !! <a style="color: red" href="http://example.com"> some content here ..... this is a link with a style applied, some other content</a>',
+  },
 };
 
 // a valid remote markdown must be between 80 and 10000 characters
-const anInvalidRemoteMarkdown = "invalid markdown"
+const anInvalidRemoteMarkdown = "invalid markdown";
 
 // a valid remote subject must be between 10 and 121 characters
-const anInvalidRemoteSubject = "invalid"
+const anInvalidRemoteSubject = "invalid";
 
 const proxyThirdPartyMessageResponse = {
   ...validApiMessageResponse.value.message,
@@ -829,15 +832,16 @@ describe("MessageService#getThirdPartyMessage", () => {
   });
 
   it("should return Bad Gateway if ThirParty service client does not return the attachments when the flag has_attachments is true", async () => {
-    mockGetTPMessageFromExternalService.mockImplementationOnce(async (_messageId) =>
-      t.success({
-        status: 200,
-        headers: {},
-        value: {
-          ...aThirdPartyMessage,
-          attachments: []
-        },
-      })
+    mockGetTPMessageFromExternalService.mockImplementationOnce(
+      async (_messageId) =>
+        t.success({
+          status: 200,
+          headers: {},
+          value: {
+            ...aThirdPartyMessage,
+            attachments: [],
+          },
+        })
     );
 
     const service = new NewMessageService(
@@ -845,155 +849,151 @@ describe("MessageService#getThirdPartyMessage", () => {
       mockGetThirdPartyMessageClientFactory
     );
 
-    const res = await service.getThirdPartyMessage(
-      {
-        ...aValidMessage,
-        content: {
-          ...aValidMessage.content,
-          third_party_data: { 
-            ...aValidThirdPartyData, 
-            has_attachments: true
-          },
-        }
-      } as unknown as MessageWithThirdPartyData
-    );
-    
+    const res = await service.getThirdPartyMessage({
+      ...aValidMessage,
+      content: {
+        ...aValidMessage.content,
+        third_party_data: {
+          ...aValidThirdPartyData,
+          has_attachments: true,
+        },
+      },
+    } as unknown as MessageWithThirdPartyData);
+
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
     });
     expect(res).toMatchObject({
       kind: "IResponseErrorBadGateway",
-      detail: "Bad Gateway: ATTACHMENTS_NOT_PRESENT"
+      detail: "Bad Gateway: ATTACHMENTS_NOT_PRESENT",
     });
   });
 
   it("should return error Bad Gateway REMOTE_CONTENT_NOT_PRESENT if ThirParty service client does not return the remote content when the flag has_remote_content is true", async () => {
-    mockGetTPMessageFromExternalService.mockImplementationOnce(async (_messageId) =>
-      t.success({
-        status: 200,
-        headers: {},
-        value: {
-          ...aThirdPartyMessage,
-          details: undefined
-        },
-      })
+    mockGetTPMessageFromExternalService.mockImplementationOnce(
+      async (_messageId) =>
+        t.success({
+          status: 200,
+          headers: {},
+          value: {
+            ...aThirdPartyMessage,
+            details: undefined,
+          },
+        })
     );
     const service = new NewMessageService(
       api,
       mockGetThirdPartyMessageClientFactory
     );
 
-    const res = await service.getThirdPartyMessage(
-      {
-        ...aValidMessage,
-        content: {
-          ...aValidMessage.content,
-          third_party_data: { 
-            ...aValidThirdPartyData, 
-            has_remote_content: true
-          },
-        }
-      } as unknown as MessageWithThirdPartyData
-    );
+    const res = await service.getThirdPartyMessage({
+      ...aValidMessage,
+      content: {
+        ...aValidMessage.content,
+        third_party_data: {
+          ...aValidThirdPartyData,
+          has_remote_content: true,
+        },
+      },
+    } as unknown as MessageWithThirdPartyData);
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
     });
     expect(res).toMatchObject({
       kind: "IResponseErrorBadGateway",
-      detail: "Bad Gateway: REMOTE_CONTENT_NOT_PRESENT"
+      detail: "Bad Gateway: REMOTE_CONTENT_NOT_PRESENT",
     });
   });
 
   it("should return error Bad Gateway MARKDOWN_VALIDATION_ERROR if ThirParty service client returns an invalid markdown when the flag has_remote_content is true", async () => {
-    mockGetTPMessageFromExternalService.mockImplementationOnce(async (_messageId) =>
-      t.success({
-        status: 200,
-        headers: {},
-        value: {
-          ...aThirdPartyMessage,
-          details: {
-            ...aThirdPartyMessage.details,
-            markdown: anInvalidRemoteMarkdown
-          }
-        },
-      })
+    mockGetTPMessageFromExternalService.mockImplementationOnce(
+      async (_messageId) =>
+        t.success({
+          status: 200,
+          headers: {},
+          value: {
+            ...aThirdPartyMessage,
+            details: {
+              ...aThirdPartyMessage.details,
+              markdown: anInvalidRemoteMarkdown,
+            },
+          },
+        })
     );
     const service = new NewMessageService(
       api,
       mockGetThirdPartyMessageClientFactory
     );
 
-    const res = await service.getThirdPartyMessage(
-      {
-        ...aValidMessage,
-        content: {
-          ...aValidMessage.content,
-          third_party_data: { 
-            ...aValidThirdPartyData, 
-            has_remote_content: true
-          },
-        }
-      } as unknown as MessageWithThirdPartyData
-    );
+    const res = await service.getThirdPartyMessage({
+      ...aValidMessage,
+      content: {
+        ...aValidMessage.content,
+        third_party_data: {
+          ...aValidThirdPartyData,
+          has_remote_content: true,
+        },
+      },
+    } as unknown as MessageWithThirdPartyData);
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
     });
     expect(res).toMatchObject({
       kind: "IResponseErrorBadGateway",
-      detail: "Bad Gateway: MARKDOWN_VALIDATION_ERROR"
+      detail: "Bad Gateway: MARKDOWN_VALIDATION_ERROR",
     });
   });
 
   it("should return error Bad Gateway SUBJECT_VALIDATION_ERROR if ThirParty service client returns an invalid subject when the flag has_remote_content is true", async () => {
-    mockGetTPMessageFromExternalService.mockImplementationOnce(async (_messageId) =>
-      t.success({
-        status: 200,
-        headers: {},
-        value: {
-          ...aThirdPartyMessage,
-          details: {
-            ...aThirdPartyMessage.details,
-            subject: anInvalidRemoteSubject
-          }
-        },
-      })
+    mockGetTPMessageFromExternalService.mockImplementationOnce(
+      async (_messageId) =>
+        t.success({
+          status: 200,
+          headers: {},
+          value: {
+            ...aThirdPartyMessage,
+            details: {
+              ...aThirdPartyMessage.details,
+              subject: anInvalidRemoteSubject,
+            },
+          },
+        })
     );
     const service = new NewMessageService(
       api,
       mockGetThirdPartyMessageClientFactory
     );
 
-    const res = await service.getThirdPartyMessage(
-      {
-        ...aValidMessage,
-        content: {
-          ...aValidMessage.content,
-          third_party_data: { 
-            ...aValidThirdPartyData, 
-            has_remote_content: true
-          },
-        }
-      } as unknown as MessageWithThirdPartyData
-    );
+    const res = await service.getThirdPartyMessage({
+      ...aValidMessage,
+      content: {
+        ...aValidMessage.content,
+        third_party_data: {
+          ...aValidThirdPartyData,
+          has_remote_content: true,
+        },
+      },
+    } as unknown as MessageWithThirdPartyData);
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
     });
     expect(res).toMatchObject({
       kind: "IResponseErrorBadGateway",
-      detail: "Bad Gateway: SUBJECT_VALIDATION_ERROR"
+      detail: "Bad Gateway: SUBJECT_VALIDATION_ERROR",
     });
   });
 
   it("should return a message with attachments and remote content when the flag has_remote_content is true and the flag has_attachments is true", async () => {
-    mockGetTPMessageFromExternalService.mockImplementationOnce(async (_messageId) =>
-      t.success({
-        status: 200,
-        headers: {},
-        value: aThirdPartyMessage,
-      })
+    mockGetTPMessageFromExternalService.mockImplementationOnce(
+      async (_messageId) =>
+        t.success({
+          status: 200,
+          headers: {},
+          value: aThirdPartyMessage,
+        })
     );
 
     const service = new NewMessageService(
@@ -1001,36 +1001,37 @@ describe("MessageService#getThirdPartyMessage", () => {
       mockGetThirdPartyMessageClientFactory
     );
 
-    const res = await service.getThirdPartyMessage(
-      {
-        ...aValidMessage,
-        content: {
-          ...aValidMessage.content,
-          third_party_data: { 
-            ...aValidThirdPartyData, 
-            has_remote_content: true,
-            has_attachments: true
-          },
-        }
-      } as unknown as MessageWithThirdPartyData
-    );
+    const res = await service.getThirdPartyMessage({
+      ...aValidMessage,
+      content: {
+        ...aValidMessage.content,
+        third_party_data: {
+          ...aValidThirdPartyData,
+          has_remote_content: true,
+          has_attachments: true,
+        },
+      },
+    } as unknown as MessageWithThirdPartyData);
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
-      value: expect.objectContaining({third_party_message: aThirdPartyMessage})
+      value: expect.objectContaining({
+        third_party_message: aThirdPartyMessage,
+      }),
     });
   });
 
   it("should return a third party message without attachments when the flag has_attachments is false even if the third party sent them", async () => {
-    mockGetTPMessageFromExternalService.mockImplementationOnce(async (_messageId) =>
-      t.success({
-        status: 200,
-        headers: {},
-        value: aThirdPartyMessage,
-      })
+    mockGetTPMessageFromExternalService.mockImplementationOnce(
+      async (_messageId) =>
+        t.success({
+          status: 200,
+          headers: {},
+          value: aThirdPartyMessage,
+        })
     );
 
     const service = new NewMessageService(
@@ -1038,37 +1039,41 @@ describe("MessageService#getThirdPartyMessage", () => {
       mockGetThirdPartyMessageClientFactory
     );
 
-    const res = await service.getThirdPartyMessage(
-      {
-        ...aValidMessage,
-        content: {
-          ...aValidMessage.content,
-          third_party_data: { 
-            ...aValidThirdPartyData, 
-            has_remote_content: true,
-            has_attachments: false
-          },
-        }
-      } as unknown as MessageWithThirdPartyData
-    );
+    const res = await service.getThirdPartyMessage({
+      ...aValidMessage,
+      content: {
+        ...aValidMessage.content,
+        third_party_data: {
+          ...aValidThirdPartyData,
+          has_remote_content: true,
+          has_attachments: false,
+        },
+      },
+    } as unknown as MessageWithThirdPartyData);
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
     });
-  
+
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
-      value: expect.objectContaining({third_party_message: expect.objectContaining({attachments: [], details: aThirdPartyMessage.details})})
+      value: expect.objectContaining({
+        third_party_message: expect.objectContaining({
+          attachments: [],
+          details: aThirdPartyMessage.details,
+        }),
+      }),
     });
   });
 
   it("should return a third party message with static subject and markdown when the flag has_remote_content is false even if the third party sent them", async () => {
-    mockGetTPMessageFromExternalService.mockImplementationOnce(async (_messageId) =>
-      t.success({
-        status: 200,
-        headers: {},
-        value: aThirdPartyMessage,
-      })
+    mockGetTPMessageFromExternalService.mockImplementationOnce(
+      async (_messageId) =>
+        t.success({
+          status: 200,
+          headers: {},
+          value: aThirdPartyMessage,
+        })
     );
 
     const service = new NewMessageService(
@@ -1076,31 +1081,30 @@ describe("MessageService#getThirdPartyMessage", () => {
       mockGetThirdPartyMessageClientFactory
     );
 
-    const res = await service.getThirdPartyMessage(
-      {
-        ...aValidMessage,
-        content: {
-          ...aValidMessage.content,
-          third_party_data: { 
-            ...aValidThirdPartyData, 
-            has_remote_content: false,
-            has_attachments: true
-          },
-        }
-      } as unknown as MessageWithThirdPartyData
-    );
+    const res = await service.getThirdPartyMessage({
+      ...aValidMessage,
+      content: {
+        ...aValidMessage.content,
+        third_party_data: {
+          ...aValidThirdPartyData,
+          has_remote_content: false,
+          has_attachments: true,
+        },
+      },
+    } as unknown as MessageWithThirdPartyData);
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
     });
-  
+
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
       value: expect.objectContaining({
-        third_party_message: expect.objectContaining(
-          {
-            attachments: aThirdPartyMessage.attachments,
-            details: {markdown: aValidMarkdown, subject: aValidSubject}})})
+        third_party_message: expect.objectContaining({
+          attachments: aThirdPartyMessage.attachments,
+          details: { markdown: aValidMarkdown, subject: aValidSubject },
+        }),
+      }),
     });
   });
 });
