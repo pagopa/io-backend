@@ -87,7 +87,7 @@
     "@azure/storage-queue": "^12.0.0",
     "@pagopa/io-functions-app-sdk": "x",
     "@pagopa/io-functions-cgn-sdk": "x",
-    "@pagopa/io-functions-commons": "^28.8.0",
+    "@pagopa/io-functions-commons": "28.9.0",
     "@pagopa/io-functions-eucovidcerts-sdk": "x",
     "@pagopa/io-spid-commons": "^13.3.0",
     "@pagopa/ts-commons": "^12.3.0",

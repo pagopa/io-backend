@@ -18,6 +18,8 @@ import {
   ResponseErrorValidation,
   ResponseErrorServiceTemporarilyUnavailable,
   IResponseSuccessNoContent,
+  ResponseErrorBadGateway,
+  IResponseErrorBadGateway,
 } from "@pagopa/ts-commons/lib/responses";
 import { AppMessagesAPIClient } from "src/clients/app-messages.client";
 import {
@@ -31,6 +33,9 @@ import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import * as T from "fp-ts/Task";
 import { LollipopLocalsType } from "src/types/lollipop";
+import { PN_SERVICE_ID } from "../config";
+import { MessageSubject } from "../../generated/backend/MessageSubject";
+import { InvalidThirdPartyMessageTypeEnum } from "../../generated/backend/InvalidThirdPartyMessageType";
 import { CreatedMessageWithContent } from "../../generated/io-messages-api/CreatedMessageWithContent";
 import { PaginatedPublicMessagesCollection } from "../../generated/io-messages-api/PaginatedPublicMessagesCollection";
 import { GetMessageParameters } from "../../generated/parameters/GetMessageParameters";
@@ -54,11 +59,15 @@ import {
 } from "../utils/responses";
 import { MessageStatusChange } from "../../generated/io-messages-api/MessageStatusChange";
 import { MessageStatusAttributes } from "../../generated/io-messages-api/MessageStatusAttributes";
-import { ThirdPartyMessage } from "../../generated/third-party-service/ThirdPartyMessage";
+import {
+  ThirdPartyMessage,
+  ThirdPartyMessageDetails,
+} from "../../generated/third-party-service/ThirdPartyMessage";
 import { ThirdPartyData } from "../../generated/backend/ThirdPartyData";
 import { ThirdPartyServiceClientFactory } from "../../src/clients/third-party-service-client";
 import { log } from "../utils/logger";
 import { FileType, getIsFileTypeForTypes } from "../utils/file-type";
+import { MessageBodyMarkdown } from "../../generated/backend/MessageBodyMarkdown";
 
 const ALLOWED_TYPES: ReadonlySet<FileType> = new Set(["pdf"]);
 
@@ -265,6 +274,7 @@ export default class NewMessagesService {
     | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorNotFound
     | IResponseErrorTooManyRequests
+    | IResponseErrorBadGateway
     | IResponseSuccessJson<ThirdPartyMessageWithContent>
   > =>
     pipe(
@@ -475,7 +485,8 @@ export default class NewMessagesService {
     | IResponseErrorValidation
     | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorNotFound
-    | IResponseErrorTooManyRequests,
+    | IResponseErrorTooManyRequests
+    | IResponseErrorBadGateway,
     ThirdPartyMessage
   > =>
     pipe(
@@ -541,10 +552,78 @@ export default class NewMessagesService {
                   return ResponseErrorStatusNotDefinedInSpec(response);
               }
             })
+          ),
+          TE.chainW((response) =>
+            this.validateThirdPartyMessageResponse(message, response)
           )
         )
       )
     );
+
+  private readonly validateThirdPartyMessageResponse = (
+    message: MessageWithThirdPartyData,
+    response: ThirdPartyMessageDetails
+  ): TE.TaskEither<IResponseErrorBadGateway, ThirdPartyMessage> => {
+    // PN does not need this validation because it is managed in a different way with different specs
+    if (message.sender_service_id === PN_SERVICE_ID) {
+      return TE.of(response);
+    }
+    // if has_attachments is true and there are no attachments in the response than an error must be thrown
+    const shouldContainAttachments =
+      message.content.third_party_data.has_attachments;
+    if (
+      shouldContainAttachments &&
+      (!response.attachments || response.attachments.length === 0)
+    ) {
+      return TE.left(
+        ResponseErrorBadGateway(
+          InvalidThirdPartyMessageTypeEnum.ATTACHMENTS_NOT_PRESENT
+        )
+      );
+    }
+    // if has_remote_content is true and there is no remote content than an error must be thrown
+    const shouldContainRemoteContent =
+      message.content.third_party_data.has_remote_content;
+    if (shouldContainRemoteContent && !response.details) {
+      return TE.left(
+        ResponseErrorBadGateway(
+          InvalidThirdPartyMessageTypeEnum.REMOTE_CONTENT_NOT_PRESENT
+        )
+      );
+    }
+    // if has_remote_content is true and the remote markdown is not between 80 and 10000 characters than an error must be throw
+    const isMarkdownValid = MessageBodyMarkdown.is(response.details?.markdown);
+    if (shouldContainRemoteContent && !isMarkdownValid) {
+      return TE.left(
+        ResponseErrorBadGateway(
+          InvalidThirdPartyMessageTypeEnum.MARKDOWN_VALIDATION_ERROR
+        )
+      );
+    }
+    // if has_remote_content is true and the remote subject is not between 10 and 121 characters than an error must be throw
+    const isSubjectValid = MessageSubject.is(response.details?.subject);
+    if (shouldContainRemoteContent && !isSubjectValid) {
+      return TE.left(
+        ResponseErrorBadGateway(
+          InvalidThirdPartyMessageTypeEnum.SUBJECT_VALIDATION_ERROR
+        )
+      );
+    }
+    // return a validated response by checking the flags
+    // if the flag has_attachments is false than the third party is not allowed to send attachments so they will be removed if present
+    // if the flag has_remote_content is false than the third party is not allowed to send remote subject and markdown
+    // and they will be replaced with the static one sent during the message creation
+    return TE.of({
+      attachments: shouldContainAttachments ? response.attachments : [],
+      details: shouldContainRemoteContent
+        ? response.details
+        : {
+            ...response.details,
+            markdown: message.content.markdown,
+            subject: message.content.subject,
+          },
+    });
+  };
 
   // Retrieve a ThirdParty attachment from related service, if exists
   // return an error otherwise

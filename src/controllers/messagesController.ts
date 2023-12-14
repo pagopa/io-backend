@@ -5,6 +5,7 @@
 
 import * as express from "express";
 import {
+  IResponseErrorBadGateway,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorServiceUnavailable,
@@ -255,6 +256,7 @@ export default class MessagesController {
     | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorNotFound
     | IResponseErrorTooManyRequests
+    | IResponseErrorBadGateway
     | IResponseSuccessJson<ThirdPartyMessageWithContent>
   > =>
     withUserFromRequest(req, async (user) =>
