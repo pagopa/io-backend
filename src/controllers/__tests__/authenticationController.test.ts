@@ -242,6 +242,7 @@ const expectedUserLoginData = {
   // TODO change
   ip_address: "127.0.0.2",
   name: mockedInitializedProfile.name,
+  is_email_validated: mockedInitializedProfile.is_email_validated,
 };
 
 jest.mock("../../services/lollipopService", () => {
@@ -1326,6 +1327,7 @@ describe("AuthenticationController|>LV|>acs|>notify user login", () => {
     expect(mockOnUserLogin).toHaveBeenCalledWith({
       ...expectedUserLoginData,
       email: validUserPayload.email,
+      is_email_validated: undefined,
     });
   });
 
