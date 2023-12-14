@@ -364,7 +364,7 @@ describe("AuthenticationController#acs", () => {
     const res = mockRes();
     const expectedNewProfile: NewProfile = {
       email: validUserPayload.email,
-      is_email_validated: true,
+      is_email_validated: false,
       is_test_profile: false,
     };
 
@@ -422,7 +422,7 @@ describe("AuthenticationController#acs", () => {
     const res = mockRes();
     const expectedNewProfile: NewProfile = {
       email: validUserPayload.email,
-      is_email_validated: true,
+      is_email_validated: false,
       is_test_profile: false,
     };
 
@@ -611,7 +611,7 @@ describe("AuthenticationController#acs", () => {
     const res = mockRes();
     const expectedNewProfile: NewProfile = {
       email: validUserPayload.email,
-      is_email_validated: true,
+      is_email_validated: false,
       is_test_profile: false,
     };
 
