@@ -42,8 +42,8 @@ import {
   ResponseErrorUnauthorized,
   ResponseErrorUnexpectedAuthProblem,
 } from "../utils/responses";
+import { isUserElegibleForFastLogin } from "../config";
 import {
-  isUserElegibleForFastLogin,
   SESSION_ID_LENGTH_BYTES,
   SESSION_TOKEN_LENGTH_BYTES,
 } from "./authenticationController";

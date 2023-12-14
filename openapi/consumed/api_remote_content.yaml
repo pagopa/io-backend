@@ -1,0 +1,518 @@
+openapi: 3.0.1
+info:
+  title: Remote Content - Server implementation
+  version: 1.0.0
+servers:
+- url: /
+paths:
+  /messages/{id}:
+    get:
+      summary: Retrieve a Remote Content message
+      description: |-
+        Returns the Remote Content message with the provided message ID.
+        User's fiscal code is required as header parameter.
+      operationId: getRemoteContentMessageDetails
+      parameters:
+      - name: fiscal_code
+        in: header
+        description: The fiscal code of the user, all upper case.
+        required: true
+        schema:
+          maxLength: 16
+          minLength: 16
+          pattern: '[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]'
+          type: string
+      - name: id
+        in: path
+        description: ID of the Remote Content message.
+        required: true
+        schema:
+          minLength: 1
+          type: string
+      - name: x-pagopa-lollipop-original-method
+        in: header
+        description: The method of the endpoint called by IO app
+        schema:
+          $ref: "#/components/schemas/LollipopMethod"
+      - name: x-pagopa-lollipop-original-url
+        in: header
+        description: The url of the endpoint called by IO app
+        schema:
+          $ref: "#/components/schemas/LollipopOriginalURL"
+      - name: signature-input
+        in: header
+        description: The signature input, needed to verify the `signature` header
+        schema:
+          $ref: "#/components/schemas/LollipopSignatureInput"
+      - name: signature
+        in: header
+        description: The signature of the HTTP request, signed by the client with its private key.
+        schema:
+          $ref: "#/components/schemas/LollipopSignature"
+      - name: x-pagopa-lollipop-assertion-ref
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopAssertionRef"
+      - name: x-pagopa-lollipop-assertion-type
+        in: header
+        schema:
+          $ref: "#/components/schemas/AssertionType"
+      - name: x-pagopa-lollipop-auth-jwt
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopJWTAuthorization"
+      - name: x-pagopa-lollipop-public-key
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopPublicKey"
+      - name: x-pagopa-lollipop-user-id
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopUserId"
+
+
+      responses:
+        200:
+          description: Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RemoteContentDetailsResponse'
+            text/json:
+              example: "attachments: [], \ncustom_property: \"a custom property\"\
+                \ \ncustom_property_2: 42 \n"
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: No message found for the provided ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        429:
+          description: Too Many Requests
+          content: {}
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+  /messages/{id}/{attachment_url}:
+    get:
+      summary: Retrieve an attachment of a Remote Content message
+      description: |-
+        Returns the Remote Content message with the provided message ID.
+        User's fiscal code is required as header parameter.
+      operationId: getRemoteContentMessageAttachment
+      parameters:
+      - name: fiscal_code
+        in: header
+        description: The fiscal code of the user, all upper case.
+        required: true
+        schema:
+          maxLength: 16
+          minLength: 16
+          pattern: '[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]'
+          type: string
+      - name: id
+        in: path
+        description: ID of the Remote Content message.
+        required: true
+        schema:
+          minLength: 1
+          type: string
+      - name: attachment_url
+        in: path
+        required: true
+        schema:
+          minLength: 1
+          type: string
+      - name: x-pagopa-lollipop-original-method
+        in: header
+        description: The method of the endpoint called by IO app
+        schema:
+          $ref: "#/components/schemas/LollipopMethod"
+      - name: x-pagopa-lollipop-original-url
+        in: header
+        description: The url of the endpoint called by IO app
+        schema:
+          $ref: "#/components/schemas/LollipopOriginalURL"
+      - name: signature-input
+        in: header
+        description: The signature input, needed to verify the `signature` header
+        schema:
+          $ref: "#/components/schemas/LollipopSignatureInput"
+      - name: signature
+        in: header
+        description: The signature of the HTTP request, signed by the client with its private key.
+        schema:
+          $ref: "#/components/schemas/LollipopSignature"
+      - name: x-pagopa-lollipop-assertion-ref
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopAssertionRef"
+      - name: x-pagopa-lollipop-assertion-type
+        in: header
+        schema:
+          $ref: "#/components/schemas/AssertionType"
+      - name: x-pagopa-lollipop-auth-jwt
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopJWTAuthorization"
+      - name: x-pagopa-lollipop-public-key
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopPublicKey"
+      - name: x-pagopa-lollipop-user-id
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopUserId"
+
+
+      responses:
+        200:
+          description: Success
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: No message found for the provided ID or no attachment found
+            at the provided url.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        429:
+          description: Too Many Requests
+          content: {}
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        503:
+          description: Service Unavailable, check the Retry-After header to retry
+          headers:
+            Retry-After:
+              description: The value in seconds after which you can retry
+              schema:
+                type: string
+                example: 120
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+  /messages/{id}/precondition:
+    get:
+      summary: Retrieve the precondition of a Remote Content message
+      description: |-
+        Returns the precondition associated to the Remote Content message with the provided message ID.
+        User's fiscal code is required as header parameter.
+      operationId: getRemoteContentMessagePrecondition
+      parameters:
+      - name: fiscal_code
+        in: header
+        description: The fiscal code of the user, all upper case.
+        required: true
+        schema:
+          maxLength: 16
+          minLength: 16
+          pattern: '[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]'
+          type: string
+      - name: id
+        in: path
+        description: ID of the Remote Content message.
+        required: true
+        schema:
+          minLength: 1
+          type: string
+      - name: x-pagopa-lollipop-original-method
+        in: header
+        description: The method of the endpoint called by IO app
+        schema:
+          $ref: "#/components/schemas/LollipopMethod"
+      - name: x-pagopa-lollipop-original-url
+        in: header
+        description: The url of the endpoint called by IO app
+        schema:
+          $ref: "#/components/schemas/LollipopOriginalURL"
+      - name: signature-input
+        in: header
+        description: The signature input, needed to verify the `signature` header
+        schema:
+          $ref: "#/components/schemas/LollipopSignatureInput"
+      - name: signature
+        in: header
+        description: The signature of the HTTP request, signed by the client with its private key.
+        schema:
+          $ref: "#/components/schemas/LollipopSignature"
+      - name: x-pagopa-lollipop-assertion-ref
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopAssertionRef"
+      - name: x-pagopa-lollipop-assertion-type
+        in: header
+        schema:
+          $ref: "#/components/schemas/AssertionType"
+      - name: x-pagopa-lollipop-auth-jwt
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopJWTAuthorization"
+      - name: x-pagopa-lollipop-public-key
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopPublicKey"
+      - name: x-pagopa-lollipop-user-id
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopUserId"
+
+
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PreconditionContent'
+        400:
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: No message or precondition found for the provided ID.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        429:
+          description: Too Many Requests
+          content: {}
+        500:
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+components:
+  schemas:
+    PreconditionContent:
+      required:
+      - markdown
+      - title
+      type: object
+      properties:
+        title:
+          type: string
+          description: The title to be rendered in App
+        markdown:
+          type: string
+          description: The markdown content to be rendered in App
+    RemoteContentDetailsResponse:
+      type: object
+      properties:
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/RemoteContentAttachment'
+        details:
+          type: object
+          $ref: "#/components/schemas/RemoteContentDetails"
+    RemoteContentDetails:
+      type: object
+      properties:
+        markdown:
+          $ref: "#/components/schemas/MessageBodyMarkdown"
+        subject:
+          $ref: "#/components/schemas/MessageSubject"
+      required:
+        - markdown
+        - subject
+    MessageBodyMarkdown:
+      type: string
+      description: |-
+        The full version of the message, in plain text or Markdown format.
+      minLength: 80
+      maxLength: 10000
+      example: |-
+        # This is a markdown header
+        to show how easily markdown can be converted to **HTML**
+        Remember: this has to be a long text.
+    MessageSubject:
+      type: string
+      description: |-
+        The (optional) subject of the message - note that only some notification
+        channels support the display of a subject. When a subject is not provided,
+        one gets generated from the client attributes.
+      minLength: 10
+      maxLength: 120
+      example: Welcome new user !
+    RemoteContentAttachment:
+      required:
+      - id
+      - url
+      type: object
+      properties:
+        id:
+          minLength: 1
+          type: string
+        content_type:
+          minLength: 1
+          type: string
+        name:
+          minLength: 1
+          type: string
+        url:
+          minLength: 1
+          type: string
+        category:
+          type: string
+          minLength: 2
+          maxLenght: 30
+          pattern: '[A-Z0-9_]+'
+          default: DOCUMENT
+    ProblemJson:
+      type: object
+      properties:
+        type:
+          type: string
+          description: |-
+            An absolute URI that identifies the problem type. When dereferenced,
+            it SHOULD provide human-readable documentation for the problem type
+            (e.g., using HTML).
+          format: uri
+          example: https://example.com/problem/constraint-violation
+          default: about:blank
+        title:
+          type: string
+          description: |-
+            A short, summary of the problem type. Written in english and readable
+            for engineers (usually not suited for non technical stakeholders and
+            not localized); example: Service Unavailable
+        status:
+          maximum: 6E+2
+          exclusiveMaximum: true
+          minimum: 1E+2
+          type: integer
+          description: |-
+            The HTTP status code generated by the origin server for this occurrence
+            of the problem.
+          format: int32
+          example: 200
+        detail:
+          type: string
+          description: |-
+            A human readable explanation specific to this occurrence of the
+            problem.
+          example: There was an error processing the request
+        instance:
+          type: string
+          description: |-
+            An absolute URI that identifies the specific occurrence of the problem.
+            It may or may not yield further information if dereferenced.
+          format: uri
+    LollipopMethod:
+      type: string
+      enum:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+    LollipopOriginalURL:
+      type: string
+      pattern: "^https:\/\/"
+    LollipopSignatureInput:
+      type: string
+      pattern: "^(((sig[0-9]+)=[^,]*?)(, ?)?)+$"
+    LollipopSignature:
+      type: string
+      pattern: "^((sig[0-9]+)=:[A-Za-z0-9+/=]*:(, ?)?)+$"
+    LollipopAssertionRef:
+      oneOf:
+        - $ref: "#/components/schemas/AssertionRefSha256"
+        - $ref: "#/components/schemas/AssertionRefSha384"
+        - $ref: "#/components/schemas/AssertionRefSha512"
+    LollipopUserId:
+      type: string
+      maxLength: 16
+      minLength: 16
+      description: The user's fiscal code, all upper case.
+      pattern: >-
+        ^[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]$
+    LollipopPublicKey:
+      type: string
+      minLength: 1
+      description: represents a Base64url encode of a JWK Public Key
+    LollipopJWTAuthorization:
+      type: string
+      minLength: 1
+    AssertionType:
+      type: string
+      enum:
+        - SAML
+        - OIDC
+    # AssertionRef possible inputs
+    AssertionRefSha256:
+      type: string
+      pattern: ^(sha256-[A-Za-z0-9-_=]{1,44})$
+    AssertionRefSha384:
+      type: string
+      pattern: ^(sha384-[A-Za-z0-9-_=]{1,66})$
+    AssertionRefSha512:
+      type: string
+      pattern: ^(sha512-[A-Za-z0-9-_=]{1,88})$
+
+  parameters:
+    FiscalCode:
+      name: fiscal_code
+      in: header
+      description: The fiscal code of the user, all upper case.
+      required: true
+      schema:
+        maxLength: 16
+        minLength: 16
+        pattern: '[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]'
+        type: string
+    RemoteContentMessageId:
+      name: id
+      in: path
+      description: ID of the Remote Content message.
+      required: true
+      schema:
+        minLength: 1
+        type: string

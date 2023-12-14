@@ -1001,10 +1001,10 @@
     fp-ts "^2.10.5"
     io-ts "^2.2.16"
 
-"@pagopa/io-functions-commons@^28.7.1":
-  version "28.7.1"
-  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-commons/-/io-functions-commons-28.7.1.tgz#09a5e703745c6c18c8eb804e4693670b55ccd0f0"
-  integrity sha512-nEVEA5KQzEtoQS3MK4G7nPfaceIrcVyp6zk9pMkyh2gI3xOtZO2dXKn/liIBRmgummgqpRoxDBLgGwipcfqtcg==
+"@pagopa/io-functions-commons@^28.8.0":
+  version "28.8.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-commons/-/io-functions-commons-28.8.0.tgz#6fb81f4121e835fb647bf1246d5c621589694e54"
+  integrity sha512-FVD7+LbGLhB8hHvA0m86tnePNetEbSFj+utjB5q1qirDUvPVaAYx/cvzFlId7rb+nl7aPa1zsMqSxEyXrVD/kw==
   dependencies:
     "@azure/cosmos" "^3.17.1"
     "@pagopa/ts-commons" "^11.0.0"
@@ -1037,10 +1037,10 @@
     fp-ts "^2.10.5"
     io-ts "^2.2.16"
 
-"@pagopa/io-spid-commons@^13.2.2":
-  version "13.2.2"
-  resolved "https://registry.yarnpkg.com/@pagopa/io-spid-commons/-/io-spid-commons-13.2.2.tgz#55c233abd70d3d49ea6d3e58864211803df7afcb"
-  integrity sha512-IzcIy5KBFB58aBh7yd+Qyoek0IG+YVNpZycpU1KeIZ53EgW6YPB9yIFGXziNtJY3z38V+3J0XL/b2Yn6bMTrDQ==
+"@pagopa/io-spid-commons@^13.3.0":
+  version "13.3.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/io-spid-commons/-/io-spid-commons-13.3.0.tgz#6047d16458dc737e01e3ffad846ffd1358a04ea3"
+  integrity sha512-MASVxDRlG1nUlOdjU9sSl8O2JHBEuD5fVoX8ubzgkwmhDeCzW5PlwkQHc4BHRm4Wro8uO+Joa+lyo3kvCLvigA==
   dependencies:
     "@pagopa/ts-commons" "^12.0.0"
     "@xmldom/xmldom" "^0.8.7"

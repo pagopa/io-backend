@@ -28,6 +28,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { Second } from "@pagopa/ts-commons/lib/units";
+import { FiscalCode } from "generated/io-bonus-api/FiscalCode";
 import { ServerInfo } from "../generated/public/ServerInfo";
 
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
@@ -91,6 +92,7 @@ import {
   ALLOWED_CIE_TEST_FISCAL_CODES,
   LOCKED_PROFILES_STORAGE_CONNECTION_STRING,
   LOCKED_PROFILES_TABLE_NAME,
+  isUserElegibleForFastLogin,
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -185,7 +187,12 @@ import {
 import { LollipopApiClient } from "./clients/lollipop";
 import { ISessionStorage } from "./services/ISessionStorage";
 import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
-import { AdditionalLoginProps, acsRequestMapper } from "./utils/fastLogin";
+import {
+  AdditionalLoginProps,
+  LoginTypeEnum,
+  acsRequestMapper,
+  getLoginType,
+} from "./utils/fastLogin";
 import {
   fastLoginEndpoint,
   generateNonceEndpoint,
@@ -616,7 +623,8 @@ export async function newApp({
           SESSION_STORAGE,
           USER_METADATA_STORAGE,
           LOLLIPOP_SERVICE,
-          AUTHENTICATION_LOCK_SERVICE
+          AUTHENTICATION_LOCK_SERVICE,
+          notificationServiceFactory
         );
         if (FF_BONUS_ENABLED) {
           // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -743,7 +751,15 @@ export async function newApp({
         SPID_LOG_STORAGE_CONNECTION_STRING,
         SPID_LOG_QUEUE_NAME
       );
-      const spidLogCallback = makeSpidLogCallback(spidQueueClient);
+      const spidLogCallback = makeSpidLogCallback(
+        spidQueueClient,
+        (fiscalCode: FiscalCode, loginType?: LoginTypeEnum) =>
+          getLoginType(
+            loginType,
+            isUserElegibleForFastLogin(fiscalCode),
+            FF_LOLLIPOP_ENABLED
+          )
+      );
       const timer = TimeTracer();
       return pipe(
         TE.tryCatch(
@@ -1274,7 +1290,8 @@ function registerSessionAPIRoutes(
   sessionStorage: RedisSessionStorage,
   userMetadataStorage: RedisUserMetadataStorage,
   lollipopService: LollipopService,
-  authenticationLockService: AuthenticationLockService
+  authenticationLockService: AuthenticationLockService,
+  notificationServiceFactory: NotificationServiceFactory
 ): void {
   if (FF_ENABLE_SESSION_ENDPOINTS) {
     const sessionLockController: SessionLockController =
@@ -1282,7 +1299,8 @@ function registerSessionAPIRoutes(
         sessionStorage,
         userMetadataStorage,
         lollipopService,
-        authenticationLockService
+        authenticationLockService,
+        notificationServiceFactory
       );
 
     app.get(

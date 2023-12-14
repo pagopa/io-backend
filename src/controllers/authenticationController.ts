@@ -54,7 +54,7 @@ import {
   AdditionalLoginPropsT,
   LoginTypeEnum,
   acsRequestMapper,
-  getIsUserElegibleForfastLogin,
+  getLoginType,
 } from "../utils/fastLogin";
 import { isOlderThan } from "../utils/date";
 import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
@@ -65,11 +65,9 @@ import {
   ClientErrorRedirectionUrlParams,
   clientProfileRedirectionUrl,
   FF_IOLOGIN,
-  FF_FAST_LOGIN,
   IOLOGIN_CANARY_USERS_SHA_REGEX,
   IOLOGIN_USERS_LIST,
-  LV_TEST_USERS,
-  TEST_LOGIN_FISCAL_CODES,
+  isUserElegibleForFastLogin,
   FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED,
 } from "../config";
 import { ISessionStorage } from "../services/ISessionStorage";
@@ -125,11 +123,6 @@ export const isUserElegibleForIoLoginUrlScheme =
     IOLOGIN_CANARY_USERS_SHA_REGEX,
     FF_IOLOGIN
   );
-
-export const isUserElegibleForFastLogin = getIsUserElegibleForfastLogin(
-  LV_TEST_USERS,
-  FF_FAST_LOGIN
-);
 
 export default class AuthenticationController {
   // eslint-disable-next-line max-params
@@ -236,25 +229,19 @@ export default class AuthenticationController {
     const isUserElegibleForFastLoginResult = isUserElegibleForFastLogin(
       spidUser.fiscalNumber
     );
-
     // LV functionality is enable only if Lollipop is enabled.
     // With FF set to BETA or CANARY, only whitelisted CF can use the LV functionality (the token TTL is reduced if login type is `LV`).
     // With FF set to ALL all the user can use the LV (the token TTL is reduced if login type is `LV`).
     // Otherwise LV is disabled.
-    const [sessionTTL, lollipopKeyTTL, loginType] =
-      this.lollipopParams.isLollipopEnabled &&
-      additionalProps?.loginType === LoginTypeEnum.LV &&
-      isUserElegibleForFastLoginResult
-        ? [
-            this.lvTokenDurationSecs,
-            this.lvLongSessionDurationSecs,
-            LoginTypeEnum.LV,
-          ]
-        : [
-            this.standardTokenDurationSecs,
-            this.standardTokenDurationSecs,
-            LoginTypeEnum.LEGACY,
-          ];
+    const loginType = getLoginType(
+      additionalProps?.loginType,
+      isUserElegibleForFastLoginResult,
+      this.lollipopParams.isLollipopEnabled
+    );
+    const [sessionTTL, lollipopKeyTTL] =
+      loginType === LoginTypeEnum.LV
+        ? [this.lvTokenDurationSecs, this.lvLongSessionDurationSecs]
+        : [this.standardTokenDurationSecs, this.standardTokenDurationSecs];
 
     // Retrieve user IP from request
     const errorOrUserIp = IPString.decode(spidUser.getAcsOriginalRequest()?.ip);

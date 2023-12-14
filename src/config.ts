@@ -68,6 +68,7 @@ import { CommaSeparatedListOf } from "./utils/separated-list";
 import { LollipopApiClient } from "./clients/lollipop";
 import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
 import { getFastLoginLollipopConsumerClient } from "./clients/fastLoginLollipopConsumerClient";
+import { getIsUserElegibleForfastLogin } from "./utils/fastLogin";
 
 // Without this, the environment variables loaded by dotenv aren't available in
 // this file.
@@ -842,6 +843,11 @@ export const LV_TEST_USERS = pipe(
   E.getOrElseW((err) => {
     throw new Error(`Invalid LV_TEST_USERS value: ${readableReport(err)}`);
   })
+);
+
+export const isUserElegibleForFastLogin = getIsUserElegibleForfastLogin(
+  LV_TEST_USERS,
+  FF_FAST_LOGIN
 );
 
 // Support Token
