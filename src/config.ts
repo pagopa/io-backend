@@ -1101,7 +1101,7 @@ export const FF_UNIQUE_EMAIL_ENFORCEMENT = pipe(
 
 export const UNIQUE_EMAIL_ENFORCEMENT_USERS = pipe(
   process.env.UNIQUE_EMAIL_ENFORCEMENT_USERS,
-  // TODO: produce a ReadonlySet instead of ReadonlyArray
+  // TODO(IOPID-1256): produce a ReadonlySet instead of ReadonlyArray
   CommaSeparatedListOf(FiscalCode).decode,
   E.getOrElseW((err) => {
     throw new Error(
