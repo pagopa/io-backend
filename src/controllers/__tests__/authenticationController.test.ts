@@ -303,7 +303,6 @@ const controller = new AuthenticationController(
   notificationServiceFactory,
   usersLoginLogService,
   mockOnUserLogin,
-  [],
   true,
   {
     isLollipopEnabled: false,
@@ -326,7 +325,6 @@ const lollipopActivatedController = new AuthenticationController(
   notificationServiceFactory,
   usersLoginLogService,
   mockOnUserLogin,
-  [],
   true,
   {
     isLollipopEnabled: true,
@@ -366,7 +364,7 @@ describe("AuthenticationController#acs", () => {
     const res = mockRes();
     const expectedNewProfile: NewProfile = {
       email: validUserPayload.email,
-      is_email_validated: true,
+      is_email_validated: false,
       is_test_profile: false,
     };
 
@@ -424,7 +422,7 @@ describe("AuthenticationController#acs", () => {
     const res = mockRes();
     const expectedNewProfile: NewProfile = {
       email: validUserPayload.email,
-      is_email_validated: true,
+      is_email_validated: false,
       is_test_profile: false,
     };
 
@@ -613,7 +611,7 @@ describe("AuthenticationController#acs", () => {
     const res = mockRes();
     const expectedNewProfile: NewProfile = {
       email: validUserPayload.email,
-      is_email_validated: true,
+      is_email_validated: false,
       is_test_profile: false,
     };
 

@@ -4,6 +4,8 @@ import * as t from "io-ts";
 import { IResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { pipe } from "fp-ts/lib/function";
 import { EmailAddress } from "@pagopa/io-functions-app-sdk/EmailAddress";
+import { NewProfile } from "@pagopa/io-functions-app-sdk/NewProfile";
+import { EmailString, FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { User } from "../../src/types/user";
 import ProfileService from "../../src/services/profileService";
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
@@ -67,3 +69,30 @@ export const profileWithEmailValidatedOrError = (
       )
     )
   );
+
+interface CreateNewProfileDependencies {
+  readonly testLoginFiscalCodes: ReadonlyArray<FiscalCode>;
+  readonly FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED: (
+    fiscalCode: FiscalCode
+  ) => boolean;
+}
+
+export const createNewProfile =
+  (fiscalCode: FiscalCode, spidEmail?: EmailString) =>
+  (r: CreateNewProfileDependencies): NewProfile => {
+    // eslint-disable-next-line functional/no-let
+    let isEmailValidated = false;
+    // --------------------
+    // If the specified user is NOT eligible for the unique email enforcement
+    // set isEmailValidated true if there is a SPID email, otherwhise set false.
+    if (r.FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED(fiscalCode) === false) {
+      isEmailValidated = spidEmail ? true : false;
+    }
+    // --------------------
+    const isTestProfile = r.testLoginFiscalCodes.includes(fiscalCode);
+    return {
+      email: spidEmail,
+      is_email_validated: isEmailValidated,
+      is_test_profile: isTestProfile,
+    };
+  };
