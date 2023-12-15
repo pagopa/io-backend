@@ -2,6 +2,7 @@ swagger: "2.0"
 info:
   version: 0.0.1
   title: EU Covid Certificate service for IO App
+host: localhost
 basePath: /api/v1/eucovidcert
 schemes:
   - https
@@ -41,7 +42,7 @@ paths:
             $ref: "#/definitions/ProblemJson"
         '504':
           description: Gateway Timeout
-          
+
 definitions:
   GetCertificateParams:
     type: object
@@ -69,7 +70,7 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/v1.22.0/openapi/index.yaml#/definitions/PreferredLanguages"
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.5.3/openapi/definitions.yaml#/ProblemJson"
- 
+
 consumes:
   - application/json
 produces:

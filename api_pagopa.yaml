@@ -59,6 +59,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v5.0.0/openapi/definitions.yaml#/FiscalCode"
   FederatedUser:
     $ref: "api_backend.yaml#/definitions/FederatedUser"
+  LimitedFederatedUser:
+    $ref: "api_backend.yaml#/definitions/LimitedFederatedUser"
   PagoPAUser:
     title: PagoPA user
     description: User data needed by PagaPA proxy.

@@ -49,6 +49,8 @@ paths:
 definitions:
   FederatedUser:
     $ref: "api_backend.yaml#/definitions/FederatedUser"
+  LimitedFederatedUser:
+    $ref: "api_backend.yaml#/definitions/LimitedFederatedUser"
   FIMSUser:
     allOf:
       - type: object
