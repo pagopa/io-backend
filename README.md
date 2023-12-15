@@ -231,7 +231,7 @@ Those are all Environment variables needed by the application:
 | LOCKED_PROFILES_TABLE_NAME                | The locked profiles table name                                                                       | string |
 | HAS_CLOCK_SKEW_LOG_EVENT                  | (Optional) Enable the log event with clock skew parameters for each SAMLResponse                     | boolean |
 | FF_UNIQUE_EMAIL_ENFORCEMENT               | (Optional) Enable the unique email enforcement policy. Default: NONE                                 | string (enum: NONE, BETA, ALL) |
-| UNIQUE_EMAIL_TEST_USERS                   | (Optional) Comma separated list of UNIQUE_EMAIL_ENFORCEMENT beta testers. Default: empty array       | string |
+| UNIQUE_EMAIL_ENFORCEMENT_USERS                   | (Optional) Comma separated list of UNIQUE_EMAIL_ENFORCEMENT beta testers. Default: empty array       | string |
 
 
 Notes:
