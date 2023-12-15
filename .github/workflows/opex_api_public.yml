@@ -10,17 +10,6 @@ on:
       - 'api_public.yaml'
       - '.github/workflows/opex_api_public.yml'
       - '.opex/api_public/**'
-  pull_request:
-    types:
-      - opened
-      - edited
-      - synchronize
-      - reopened
-    paths:
-      - 'api_public.yaml'
-      - '.github/workflows/opex_api_public.yml'
-      - '.opex/api_public/**'
-
 env:
   # opex-demo client_id
   # CLIENT_ID: 712582b4-1e38-4329-bfd2-5cd186e82529
