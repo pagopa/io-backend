@@ -74,18 +74,10 @@ jobs:
           terraform_version: 1.6.6
           terraform_wrapper: true
 
-      - name: Terraform Init
+      - name: Terraform Plan
         shell: bash
-        id: terraform_init
+        id: terraform_plan
         working-directory: ${{ env.TEMPLATE_DIR }}
         run: |
           ls
-          terraform init -reconfigure -backend-config="./prod/backend.tfvars"
-
-      # - name: Terraform Plan
-      #   shell: bash
-      #   id: terraform_plan
-      #   working-directory: ${{ env.TEMPLATE_DIR }}
-      #   run: |
-      #     ls
-      #     bash ./terraform.sh plan prod
+          bash ./terraform.sh plan prod
