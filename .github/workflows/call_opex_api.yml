@@ -12,7 +12,7 @@ jobs:
     environment: prod-cd
     env:
       API_NAME: ${{ inputs.api_name }}
-      DOCKER_IMAGE_TAG: sha256:e4245954566cd3470e1b5527d33bb58ca132ce7493eac01be9e808fd25a11c8d
+      DOCKER_IMAGE_TAG: sha256:04d8ead53c772d23b094c2a395292dc159e6f2905e1b13b5f828f31eac6eb27f
       TEMPLATE_DIR: azure-dashboard
       ARM_USE_OIDC: true
       ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID_CI }}
