@@ -7,12 +7,12 @@ on:
 
 jobs:
   plan:
-    name: Plan changes against Production
+    name: Terraform Plan
     runs-on: ubuntu-22.04
     environment: prod-ci
     env:
       API_NAME: ${{ inputs.api_name }}
-      DOCKER_IMAGE_TAG: sha256:e4245954566cd3470e1b5527d33bb58ca132ce7493eac01be9e808fd25a11c8d
+      DOCKER_IMAGE_TAG: sha256:5b26e3b170d97deb794639a039ef52ea84602b7543454fc06ac2a00f762a6a2c
       TEMPLATE_DIR: azure-dashboard
       ARM_USE_OIDC: true
       ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID_CI }}

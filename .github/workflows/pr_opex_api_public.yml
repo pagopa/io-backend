@@ -24,7 +24,7 @@ concurrency:
 jobs:
   plan:
     uses: ./.github/workflows/call_pr_opex_api.yml
-    name: Plan
+    name: Plan changes against Production
     secrets: inherit
     with:
       api_name: api_public
