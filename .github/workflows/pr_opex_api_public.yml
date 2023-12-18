@@ -53,6 +53,7 @@ jobs:
 
       - name: Run opex dashbaord
         shell: bash
+        id: opex_docker
         run: |
           docker run \
             --workdir /github/workspace --rm \
@@ -61,11 +62,13 @@ jobs:
 
       - name: Copy Environments
         shell: bash
+        id: opex_copy
         run: |
           cp -R .opex/${{ env.API_NAME }}/env ./${{ env.TEMPLATE_DIR }}
+          ls ./${{ env.TEMPLATE_DIR }}
 
       - name: Setup Terraform
-        id: setup_terraform
+        id: terraform_setup
         uses: hashicorp/setup-terraform@a1502cd9e758c50496cc9ac5308c4843bcd56d36
         with:
           terraform_version: 1.6.6
@@ -75,7 +78,9 @@ jobs:
         shell: bash
         id: terraform_init
         working-directory: ${{ env.TEMPLATE_DIR }}
-        run: terraform init -reconfigure -backend-config="./prod/backend.tfvars"
+        run: |
+          ls
+          terraform init -reconfigure -backend-config="./prod/backend.tfvars"
 
       # - name: Terraform Plan
       #   shell: bash
