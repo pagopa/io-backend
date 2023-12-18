@@ -53,7 +53,6 @@ jobs:
         id: opex_copy
         run: |
           cp -R .opex/${{ env.API_NAME }}/env ./${{ env.TEMPLATE_DIR }}
-          ls ./${{ env.TEMPLATE_DIR }}
 
       - name: Setup Terraform
         id: terraform_setup
