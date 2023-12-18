@@ -29,7 +29,7 @@ environment_ci_roles = {
   subscription = ["Reader"]
   resource_groups = {
     "terraform-state-rg" = [
-      "Storage Blob Data Reader"
+      "Reader and Data Access"
     ],
     "dashboards" = [
       "Reader"

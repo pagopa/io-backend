@@ -19,6 +19,7 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
 
 jobs:
   plan:
@@ -82,12 +83,13 @@ jobs:
         id: terraform_plan
         working-directory: ${{ env.TEMPLATE_DIR }}
         run: |
-          ls
           bash ./terraform.sh plan prod | tee plan_output.txt
           OUTPUT="$(cat plan_output.txt | grep -v "Refreshing state" | tail -c 60000)"
           echo "$OUTPUT" > plan_output_multiline.txt
 
-      - uses: actions/github-script@v6
+      - name: Post Plan on PR
+        id: terraform_plan_comment
+        uses: actions/github-script@v6
         if: github.event_name == 'pull_request'
         with:
           script: |
