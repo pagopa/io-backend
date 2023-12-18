@@ -108,6 +108,9 @@ describe("profile type", () => {
       mockedExtendedProfile.reminder_status
     );
     expect(userData.version).toBe(mockedExtendedProfile.version);
+    expect(userData.is_email_already_taken).toBe(
+      mockedExtendedProfile.is_email_already_taken
+    );
   });
 
   /*test case: Extracts a user profile from the body of a request.*/

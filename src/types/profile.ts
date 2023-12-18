@@ -34,6 +34,7 @@ export const toInitializedProfile = (
   family_name: user.family_name,
   fiscal_code: user.fiscal_code,
   has_profile: true,
+  is_email_already_taken: profile.is_email_already_taken,
   is_email_enabled: pipe(
     O.fromNullable(profile.is_email_enabled),
     O.getOrElseW(() => true)
