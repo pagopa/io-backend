@@ -30,6 +30,9 @@ jobs:
       DOCKER_IMAGE_TAG: sha256:e4245954566cd3470e1b5527d33bb58ca132ce7493eac01be9e808fd25a11c8d
       TEMPLATE_DIR: azure-dashboard
       ARM_USE_OIDC: true
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID_CI }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
     permissions:
       id-token: write
       pull-requests: write
@@ -80,4 +83,44 @@ jobs:
         working-directory: ${{ env.TEMPLATE_DIR }}
         run: |
           ls
-          bash ./terraform.sh plan prod
+          bash ./terraform.sh plan prod | tee plan_output.txt
+          OUTPUT="$(cat plan_output.txt | grep -v "Refreshing state" | tail -c 60000)"
+          echo "$OUTPUT" > plan_output_multiline.txt
+
+      - uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            const fs = require('fs');
+            const output = fs.readFileSync('${{ env.TEMPLATE_DIR }}/plan_output_multiline.txt', 'utf8');
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            })
+            const botComment = comments.find(comment => {
+              return comment.user.type === 'Bot' && comment.body.includes('Terraform Plan')
+            })
+            const commentBody = `#### Terraform Plan 📖
+            <details>
+            <summary>Terraform Plan</summary>
+            \`\`\`hcl
+            ${output}
+            \`\`\`
+            </details>
+            `;
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: commentBody,
+                comment_id: botComment.id
+              })
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: commentBody,
+                issue_number: context.issue.number
+              })
+            }
