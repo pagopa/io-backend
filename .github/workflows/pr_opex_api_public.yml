@@ -51,31 +51,31 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      # - name: Run opex dashbaord
-      #   shell: bash
-      #   run: |
-      #     docker run \
-      #       --workdir /github/workspace --rm \
-      #       -v $(pwd):"/github/workspace" \
-      #       ghcr.io/pagopa/opex-dashboard-azure-action@${{ env.DOCKER_IMAGE_TAG }} ${{ env.TEMPLATE_DIR }} .opex/${{ env.API_NAME }}/env/prod/config.yaml
+      - name: Run opex dashbaord
+        shell: bash
+        run: |
+          docker run \
+            --workdir /github/workspace --rm \
+            -v $(pwd):"/github/workspace" \
+            ghcr.io/pagopa/opex-dashboard-azure-action@${{ env.DOCKER_IMAGE_TAG }} ${{ env.TEMPLATE_DIR }} .opex/${{ env.API_NAME }}/env/prod/config.yaml
 
-      # - name: Copy Environments
-      #   shell: bash
-      #   run: |
-      #     cp -R .opex/${{ env.API_NAME }}/env ./${{ env.TEMPLATE_DIR }}
+      - name: Copy Environments
+        shell: bash
+        run: |
+          cp -R .opex/${{ env.API_NAME }}/env ./${{ env.TEMPLATE_DIR }}
 
-      # - name: Setup Terraform
-      #   id: setup_terraform
-      #   uses: hashicorp/setup-terraform@a1502cd9e758c50496cc9ac5308c4843bcd56d36
-      #   with:
-      #     terraform_version: 1.6.6
-      #     terraform_wrapper: true
+      - name: Setup Terraform
+        id: setup_terraform
+        uses: hashicorp/setup-terraform@a1502cd9e758c50496cc9ac5308c4843bcd56d36
+        with:
+          terraform_version: 1.6.6
+          terraform_wrapper: true
 
-      # - name: Terraform Init
-      #   shell: bash
-      #   id: terraform_init
-      #   working-directory: ${{ env.TEMPLATE_DIR }}
-      #   run: terraform init -reconfigure -backend-config="./prod/backend.tfvars"
+      - name: Terraform Init
+        shell: bash
+        id: terraform_init
+        working-directory: ${{ env.TEMPLATE_DIR }}
+        run: terraform init -reconfigure -backend-config="./prod/backend.tfvars"
 
       # - name: Terraform Plan
       #   shell: bash
