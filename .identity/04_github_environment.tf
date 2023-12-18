@@ -8,7 +8,7 @@ resource "github_repository_environment" "prod_cd" {
   repository  = local.github.repository
 }
 
-resource "github_actions_secret" "example_secret" {
+resource "github_actions_secret" "repo_secrets" {
   for_each        = local.env_secrets
   repository      = local.github.repository
   secret_name     = each.key
