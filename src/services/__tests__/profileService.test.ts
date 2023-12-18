@@ -3,7 +3,7 @@ import { IsInboxEnabled } from "../../../generated/backend/IsInboxEnabled";
 import { IsWebhookEnabled } from "../../../generated/backend/IsWebhookEnabled";
 import {
   PreferredLanguage,
-  PreferredLanguageEnum
+  PreferredLanguageEnum,
 } from "../../../generated/backend/PreferredLanguage";
 import { Profile } from "../../../generated/backend/Profile";
 import { PushNotificationsContentTypeEnum } from "../../../generated/backend/PushNotificationsContentType";
@@ -21,7 +21,7 @@ import {
   anEmailAddress,
   aSpidEmailAddress,
   aValidName,
-  aValidFamilyname
+  aValidFamilyname,
 } from "../../__mocks__/user_mock";
 import ApiClientFactory from "../apiClientFactory";
 import ProfileService from "../profileService";
@@ -31,46 +31,47 @@ const aValidSPIDEmail = aSpidEmailAddress;
 const anIsInboxEnabled = true as IsInboxEnabled;
 const anIsWebookEnabled = true as IsWebhookEnabled;
 const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
-  PreferredLanguageEnum.it_IT
+  PreferredLanguageEnum.it_IT,
 ];
 const aServicePreferencesSettings: ServicePreferencesSettings = {
-  mode: ServicesPreferencesModeEnum.AUTO
+  mode: ServicesPreferencesModeEnum.AUTO,
 };
 
 const validApiProfile: ExtendedProfileApi = {
   email: aValidAPIEmail,
   is_email_enabled: true,
   is_email_validated: true,
+  is_email_already_taken: false,
   is_inbox_enabled: true,
   is_webhook_enabled: true,
   preferred_languages: aPreferredLanguages,
   service_preferences_settings: aServicePreferencesSettings,
-  version: 42
+  version: 42,
 };
 
 const validApiProfileResponse = {
   status: 200,
-  value: validApiProfile
+  value: validApiProfile,
 };
 
 const lastAppVersion = "0.0.1" as AppVersion;
 
 const validApiProfileResponseWithLastAppVersion = {
   status: 200,
-  value: { ...validApiProfile, last_app_version: lastAppVersion }
+  value: { ...validApiProfile, last_app_version: lastAppVersion },
 };
 
 const validApiProfileResponseWithReminderStatus = {
   status: 200,
-  value: { ...validApiProfile, reminder_status: "DISABLED" }
+  value: { ...validApiProfile, reminder_status: "DISABLED" },
 };
 
 const validApiProfileResponseWithPushNotificationsContentType = {
   status: 200,
   value: {
     ...validApiProfile,
-    push_notifications_content_type: PushNotificationsContentTypeEnum.ANONYMOUS
-  }
+    push_notifications_content_type: PushNotificationsContentTypeEnum.ANONYMOUS,
+  },
 };
 
 const proxyInitializedProfileResponse = {
@@ -85,7 +86,7 @@ const proxyInitializedProfileResponse = {
   name: aValidName,
   preferred_languages: aPreferredLanguages,
   spid_email: aValidSPIDEmail,
-  version: 42
+  version: 42,
 };
 
 const updateProfileRequest: Profile = {
@@ -94,30 +95,30 @@ const updateProfileRequest: Profile = {
   is_inbox_enabled: anIsInboxEnabled,
   is_webhook_enabled: anIsWebookEnabled,
   preferred_languages: aPreferredLanguages,
-  version: 42
+  version: 42,
 };
 
 const createProfileRequest: NewProfile = {
   email: aValidAPIEmail,
-  is_email_validated: true
+  is_email_validated: true,
 };
 
 const acceptedApiResponse = {
-  status: 202
+  status: 202,
 };
 const notFoundApiResponse = {
-  status: 404
+  status: 404,
 };
 const APIError = {
-  status: 500
+  status: 500,
 };
 
 const tooManyReqApiMessagesResponse = {
-  status: 429
+  status: 429,
 };
 
 const conflictApiMessagesResponse = {
-  status: 409
+  status: 409,
 };
 
 const expectedApiError = new Error("Api error.");
@@ -132,13 +133,13 @@ const mockClient: Partial<ReturnType<APIClient>> = {
   createProfile: mockCreateProfile,
   startEmailValidationProcess: mockStartEmailValidationProcess,
   getProfile: mockGetProfile,
-  updateProfile: mockUpdateProfile
+  updateProfile: mockUpdateProfile,
 };
 jest.mock("../../services/apiClientFactory", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
-      getClient: () => mockClient
-    }))
+      getClient: () => mockClient,
+    })),
   };
 });
 
@@ -157,11 +158,11 @@ describe("ProfileService#getProfile", () => {
     const res = await service.getProfile(mockedUser);
 
     expect(mockGetProfile).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code
+      fiscal_code: mockedUser.fiscal_code,
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
-      value: proxyInitializedProfileResponse
+      value: proxyInitializedProfileResponse,
     });
   });
 
@@ -175,14 +176,14 @@ describe("ProfileService#getProfile", () => {
     const res = await service.getProfile(mockedUser);
 
     expect(mockGetProfile).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code
+      fiscal_code: mockedUser.fiscal_code,
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
       value: {
         ...proxyInitializedProfileResponse,
-        last_app_version: lastAppVersion
-      }
+        last_app_version: lastAppVersion,
+      },
     });
   });
 
@@ -196,14 +197,14 @@ describe("ProfileService#getProfile", () => {
     const res = await service.getProfile(mockedUser);
 
     expect(mockGetProfile).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code
+      fiscal_code: mockedUser.fiscal_code,
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
       value: {
         ...proxyInitializedProfileResponse,
-        reminder_status: "DISABLED"
-      }
+        reminder_status: "DISABLED",
+      },
     });
   });
 
@@ -217,15 +218,15 @@ describe("ProfileService#getProfile", () => {
     const res = await service.getProfile(mockedUser);
 
     expect(mockGetProfile).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code
+      fiscal_code: mockedUser.fiscal_code,
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
       value: {
         ...proxyInitializedProfileResponse,
         push_notifications_content_type:
-          PushNotificationsContentTypeEnum.ANONYMOUS
-      }
+          PushNotificationsContentTypeEnum.ANONYMOUS,
+      },
     });
   });
 
@@ -249,10 +250,10 @@ describe("ProfileService#getProfile", () => {
     const res = await service.getProfile(mockedUser);
 
     expect(mockGetProfile).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code
+      fiscal_code: mockedUser.fiscal_code,
     });
     expect(res).toMatchObject({
-      kind: "IResponseErrorNotFound"
+      kind: "IResponseErrorNotFound",
     });
   });
 
@@ -265,7 +266,7 @@ describe("ProfileService#getProfile", () => {
       await service.getProfile(mockedUser);
     } catch (e) {
       expect(mockGetProfile).toHaveBeenCalledWith({
-        fiscalCode: mockedUser.fiscal_code
+        fiscalCode: mockedUser.fiscal_code,
       });
       expect(e).toEqual(expectedApiError);
     }
@@ -285,11 +286,11 @@ describe("ProfileService#getApiProfile", () => {
     const res = await service.getApiProfile(mockedUser);
 
     expect(mockGetProfile).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code
+      fiscal_code: mockedUser.fiscal_code,
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
-      value: validApiProfileResponse.value
+      value: validApiProfileResponse.value,
     });
   });
 
@@ -303,14 +304,14 @@ describe("ProfileService#getApiProfile", () => {
     const res = await service.getApiProfile(mockedUser);
 
     expect(mockGetProfile).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code
+      fiscal_code: mockedUser.fiscal_code,
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
       value: {
         ...validApiProfileResponse.value,
-        last_app_version: lastAppVersion
-      }
+        last_app_version: lastAppVersion,
+      },
     });
   });
 
@@ -324,14 +325,14 @@ describe("ProfileService#getApiProfile", () => {
     const res = await service.getApiProfile(mockedUser);
 
     expect(mockGetProfile).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code
+      fiscal_code: mockedUser.fiscal_code,
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
       value: {
         ...validApiProfileResponse.value,
-        reminder_status: "DISABLED"
-      }
+        reminder_status: "DISABLED",
+      },
     });
   });
 
@@ -345,15 +346,15 @@ describe("ProfileService#getApiProfile", () => {
     const res = await service.getApiProfile(mockedUser);
 
     expect(mockGetProfile).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code
+      fiscal_code: mockedUser.fiscal_code,
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
       value: {
         ...validApiProfileResponse.value,
         push_notifications_content_type:
-          PushNotificationsContentTypeEnum.ANONYMOUS
-      }
+          PushNotificationsContentTypeEnum.ANONYMOUS,
+      },
     });
   });
 
@@ -377,11 +378,11 @@ describe("ProfileService#getApiProfile", () => {
     const res = await service.getApiProfile(mockedUser);
 
     expect(mockGetProfile).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code
+      fiscal_code: mockedUser.fiscal_code,
     });
     expect(res).toMatchObject({
       detail: "Not found: Profile not found.",
-      kind: "IResponseErrorNotFound"
+      kind: "IResponseErrorNotFound",
     });
   });
 
@@ -394,7 +395,7 @@ describe("ProfileService#getApiProfile", () => {
       await service.getApiProfile(mockedUser);
     } catch (e) {
       expect(mockGetProfile).toHaveBeenCalledWith({
-        fiscalCode: mockedUser.fiscal_code
+        fiscalCode: mockedUser.fiscal_code,
       });
       expect(e).toEqual(expectedApiError);
     }
@@ -417,12 +418,12 @@ describe("ProfileService#updateProfile", () => {
 
     expect(mockUpdateProfile).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
-      body: updateProfileRequest
+      body: updateProfileRequest,
     });
 
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
-      value: proxyInitializedProfileResponse
+      value: proxyInitializedProfileResponse,
     });
   });
 
@@ -435,22 +436,22 @@ describe("ProfileService#updateProfile", () => {
 
     const res = await service.updateProfile(mockedUser, {
       ...updateProfileRequest,
-      last_app_version: lastAppVersion
+      last_app_version: lastAppVersion,
     });
 
     expect(mockUpdateProfile).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
       body: {
         ...updateProfileRequest,
-        last_app_version: lastAppVersion
-      }
+        last_app_version: lastAppVersion,
+      },
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
       value: {
         ...proxyInitializedProfileResponse,
-        last_app_version: lastAppVersion
-      }
+        last_app_version: lastAppVersion,
+      },
     });
   });
 
@@ -463,22 +464,22 @@ describe("ProfileService#updateProfile", () => {
 
     const res = await service.updateProfile(mockedUser, {
       ...updateProfileRequest,
-      reminder_status: ReminderStatusEnum.DISABLED
+      reminder_status: ReminderStatusEnum.DISABLED,
     });
 
     expect(mockUpdateProfile).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
       body: {
         ...updateProfileRequest,
-        reminder_status: ReminderStatusEnum.DISABLED
-      }
+        reminder_status: ReminderStatusEnum.DISABLED,
+      },
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
       value: {
         ...proxyInitializedProfileResponse,
-        reminder_status: ReminderStatusEnum.DISABLED
-      }
+        reminder_status: ReminderStatusEnum.DISABLED,
+      },
     });
   });
 
@@ -492,7 +493,7 @@ describe("ProfileService#updateProfile", () => {
     const res = await service.updateProfile(mockedUser, {
       ...updateProfileRequest,
       push_notifications_content_type:
-        PushNotificationsContentTypeEnum.ANONYMOUS
+        PushNotificationsContentTypeEnum.ANONYMOUS,
     });
 
     expect(mockUpdateProfile).toHaveBeenCalledWith({
@@ -500,16 +501,16 @@ describe("ProfileService#updateProfile", () => {
       body: {
         ...updateProfileRequest,
         push_notifications_content_type:
-          PushNotificationsContentTypeEnum.ANONYMOUS
-      }
+          PushNotificationsContentTypeEnum.ANONYMOUS,
+      },
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
       value: {
         ...proxyInitializedProfileResponse,
         push_notifications_content_type:
-          PushNotificationsContentTypeEnum.ANONYMOUS
-      }
+          PushNotificationsContentTypeEnum.ANONYMOUS,
+      },
     });
   });
 
@@ -564,11 +565,11 @@ describe("ProfileService#createProfile", () => {
 
     expect(mockCreateProfile).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
-      body: createProfileRequest
+      body: createProfileRequest,
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
-      value: {}
+      value: {},
     });
   });
 
@@ -622,10 +623,10 @@ describe("ProfileService#emailValidationProcess", () => {
     const res = await service.emailValidationProcess(mockedUser);
 
     expect(mockStartEmailValidationProcess).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code
+      fiscal_code: mockedUser.fiscal_code,
     });
     expect(res).toMatchObject({
-      kind: "IResponseSuccessAccepted"
+      kind: "IResponseSuccessAccepted",
     });
   });
 
@@ -639,11 +640,11 @@ describe("ProfileService#emailValidationProcess", () => {
     const res = await service.emailValidationProcess(mockedUser);
 
     expect(mockStartEmailValidationProcess).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code
+      fiscal_code: mockedUser.fiscal_code,
     });
     expect(res).toMatchObject({
       detail: "Not found: User not found.",
-      kind: "IResponseErrorNotFound"
+      kind: "IResponseErrorNotFound",
     });
   });
 
@@ -664,7 +665,7 @@ describe("ProfileService#toInitializedProfile", () => {
   it("should format invalid date", async () => {
     const profile = toInitializedProfile(validApiProfile, {
       ...mockedUser,
-      date_of_birth: "1980-10-1"
+      date_of_birth: "1980-10-1",
     });
 
     expect(profile.date_of_birth).toEqual(new Date("1980-10-01T00:00:00.000Z"));
