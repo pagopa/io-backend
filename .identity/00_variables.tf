@@ -1,12 +1,5 @@
 variable "tags" {
   type = map(any)
-  default = {
-    CreatedBy   = "Terraform"
-    Environment = "Prod"
-    Owner       = "IO"
-    Source      = "https://github.com/pagopa/io-services-metadata"
-    CostCenter  = "TS310 - PAGAMENTI & SERVIZI"
-  }
 }
 
 variable "prefix" {
