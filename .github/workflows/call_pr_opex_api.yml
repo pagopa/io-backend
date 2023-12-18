@@ -67,7 +67,7 @@ jobs:
         id: terraform_plan
         working-directory: ${{ env.TEMPLATE_DIR }}
         run: |
-          bash ./terraform.sh plan prod | tee plan_output.txt
+          bash ./terraform.sh plan prod -no-color | tee plan_output.txt
           OUTPUT="$(cat plan_output.txt | grep -v "Refreshing state" | tail -c 60000)"
           echo "$OUTPUT" > plan_output_multiline.txt
 
@@ -90,6 +90,7 @@ jobs:
             const commentBody = `#### Terraform Plan 📖
             <details>
             <summary>Terraform Plan</summary>
+
             \`\`\`hcl
             ${output}
             \`\`\`

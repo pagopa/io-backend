@@ -41,7 +41,8 @@ environment_cd_roles = {
   subscription = ["Reader"]
   resource_groups = {
     "terraform-state-rg" = [
-      "Storage Blob Data Contributor"
+      "Storage Blob Data Contributor",
+      "Reader and Data Access"
     ],
     "dashboards" = [
       "Contributor"
