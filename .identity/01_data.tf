@@ -6,3 +6,7 @@ data "azurerm_storage_account" "tfstate_app" {
 data "azurerm_resource_group" "dashboards" {
   name = "dashboards"
 }
+
+data "azurerm_resource_group" "identity_rg" {
+  name = "${var.prefix}-${var.env_short}-identity-rg"
+}
