@@ -1,19 +1,19 @@
 name: PR - Opex Dashboard api_public
 
 on:
-  # pull_request:
-  #   types:
-  #     - opened
-  #     - edited
-  #     - synchronize
-  #     - reopened
-  #   branches:
-  #     - master
-  #   paths:
-  #     - 'api_public.yaml'
-  #     - '.github/workflows/pr_opex_api_public.yml'
-  #     - '.github/workflows/opex_api_public.yml'
-  #     - '.opex/api_public/**'
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+    branches:
+      - master
+    paths:
+      - 'api_public.yaml'
+      - '.github/workflows/pr_opex_api_public.yml'
+      - '.github/workflows/opex_api_public.yml'
+      - '.opex/api_public/**'
 
   workflow_dispatch:
 
@@ -43,13 +43,13 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      # - name: Azure Login
-      #   id: az_login
-      #   uses: azure/login@92a5484dfaf04ca78a94597f4f19fea633851fa2
-      #   with:
-      #     client-id: ${{ secrets.AZURE_CLIENT_ID_CI }}
-      #     tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-      #     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Azure Login
+        id: az_login
+        uses: azure/login@92a5484dfaf04ca78a94597f4f19fea633851fa2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID_CI }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       # - name: Run opex dashbaord
       #   shell: bash
