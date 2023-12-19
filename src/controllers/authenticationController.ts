@@ -522,6 +522,8 @@ export default class AuthenticationController {
 
     // eslint-disable-next-line functional/no-let
     let userEmail: EmailString | undefined;
+    // eslint-disable-next-line functional/no-let
+    let userHasEmailValidated: boolean | undefined;
 
     if (getProfileResponse.kind === "IResponseErrorNotFound") {
       // a profile for the user does not yet exist, we attempt to create a new
@@ -533,6 +535,8 @@ export default class AuthenticationController {
         FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED,
         testLoginFiscalCodes: TEST_LOGIN_FISCAL_CODES,
       });
+
+      userHasEmailValidated = newProfile.is_email_validated;
 
       const createProfileResponse = await this.profileService.createProfile(
         user,
@@ -568,9 +572,9 @@ export default class AuthenticationController {
       // in io-spid-commons does not support 429 errors
       return ResponseErrorInternal(getProfileResponse.kind);
     } else {
+      userHasEmailValidated = getProfileResponse.value.is_email_validated;
       userEmail =
-        getProfileResponse.value.is_email_validated &&
-        getProfileResponse.value.email
+        userHasEmailValidated && getProfileResponse.value.email
           ? getProfileResponse.value.email
           : user.spid_email;
     }
@@ -626,6 +630,7 @@ export default class AuthenticationController {
             // we've already checked errorOrUserIp, this will never happen
             E.getOrElse(() => "")
           ),
+          is_email_validated: userHasEmailValidated,
           name: user.name,
         },
         UserLoginParams.decode,
