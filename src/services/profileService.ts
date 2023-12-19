@@ -83,6 +83,12 @@ export default class ProfileService {
           return ResponseErrorTooManyRequests();
         }
 
+        if (response.status === 500) {
+          return ResponseErrorInternal(
+            `Error retrieving the profile [${response.value.detail}]`
+          );
+        }
+
         return unhandledResponseStatus(response.status);
       });
     });
@@ -121,6 +127,12 @@ export default class ProfileService {
         // The user has sent too many requests in a given amount of time ("rate limiting").
         if (response.status === 429) {
           return ResponseErrorTooManyRequests();
+        }
+
+        if (response.status === 500) {
+          return ResponseErrorInternal(
+            `Error retrieving the profile [${response.value.detail}]`
+          );
         }
 
         return unhandledResponseStatus(response.status);
