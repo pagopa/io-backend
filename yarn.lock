@@ -984,9 +984,9 @@
     prettier "^2.6.2"
 
 "@pagopa/io-functions-app-sdk@x":
-  version "5.6.0"
-  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-app-sdk/-/io-functions-app-sdk-5.6.0.tgz#fb32f1127bc1c52bce365a5c900cc38c5f665563"
-  integrity sha512-dXPvUp66aqF53XXBl30SnMgxgA/fdZAbC9oEHyQsWXaqjoCWgoGN2i5218zbXwfCFO/VB2NJddgqgioEtJVGOQ==
+  version "5.7.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-app-sdk/-/io-functions-app-sdk-5.7.0.tgz#3493b0730a1fa71ee75ffb95db71408fb626e481"
+  integrity sha512-KJ3OGiMP0+qUP/JIcxxb6fImtOJap3tIAncvp3Wh6Wn/ZRo0LPaDOq1ea4vbICcPZ6RjePlwL5Rovdy3mx26Tg==
   dependencies:
     "@pagopa/ts-commons" "^10.0.0"
     fp-ts "^2.10.5"
@@ -1123,10 +1123,10 @@
     semver "^7.3.7"
     validator "^13.7.0"
 
-"@pagopa/ts-commons@^12.3.0":
-  version "12.3.0"
-  resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-12.3.0.tgz#54e661b71ef3b80e9a8474ba90088ffafb2c06c0"
-  integrity sha512-7fwd2EEhac6bmmfGdWYr5EGRjF1AwzaH3DHyg/jLcoKnQcHPWbt7tsvO0zSD/mxAbHZBrZ24zut0IK3eD3qNag==
+"@pagopa/ts-commons@^12.4.0":
+  version "12.4.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-12.4.0.tgz#58b46bd485ff0be7649cf662d9ebf0be38d8a6ff"
+  integrity sha512-eFDjCHmwepYPAR1+Hnm0BbXploOquZ20mnu0kKAmwLGE9Grr6WAPbjmf/5bheNWPDeD5rGUTv8ENoB2KJWOGbw==
   dependencies:
     abort-controller "^3.0.0"
     agentkeepalive "^4.1.4"

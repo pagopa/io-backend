@@ -8,6 +8,7 @@ import {
   IResponseErrorConflict,
   IResponseErrorInternal,
   IResponseErrorNotFound,
+  IResponseErrorPreconditionFailed,
   IResponseErrorTooManyRequests,
   IResponseErrorValidation,
   IResponseSuccessAccepted,
@@ -76,6 +77,7 @@ export default class ProfileController {
     | IResponseErrorInternal
     | IResponseErrorConflict
     | IResponseErrorTooManyRequests
+    | IResponseErrorPreconditionFailed
     | IResponseSuccessJson<InitializedProfile>
   > =>
     withUserFromRequest(req, async (user) =>

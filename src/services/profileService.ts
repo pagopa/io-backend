@@ -7,12 +7,14 @@ import {
   IResponseErrorConflict,
   IResponseErrorInternal,
   IResponseErrorNotFound,
+  IResponseErrorPreconditionFailed,
   IResponseErrorTooManyRequests,
   IResponseSuccessAccepted,
   IResponseSuccessJson,
   ResponseErrorConflict,
   ResponseErrorInternal,
   ResponseErrorNotFound,
+  ResponseErrorPreconditionFailed,
   ResponseErrorTooManyRequests,
   ResponseSuccessAccepted,
   ResponseSuccessJson,
@@ -174,6 +176,7 @@ export default class ProfileService {
     | IResponseErrorNotFound
     | IResponseErrorConflict
     | IResponseErrorTooManyRequests
+    | IResponseErrorPreconditionFailed
     | IResponseSuccessJson<InitializedProfile>
   > => {
     const client = this.apiClient.getClient();
@@ -189,19 +192,28 @@ export default class ProfileService {
             fiscal_code: user.fiscal_code,
           });
 
-          return withValidatedOrInternalError(validated, (response) =>
-            response.status === 200
-              ? ResponseSuccessJson(toInitializedProfile(response.value, user))
-              : response.status === 404
-              ? ResponseErrorNotFound("Not found", "User not found")
-              : response.status === 409
-              ? ResponseErrorConflict(
+          return withValidatedOrInternalError(validated, (response) => {
+            switch (response.status) {
+              case 200:
+                return ResponseSuccessJson(
+                  toInitializedProfile(response.value, user)
+                );
+              case 404:
+                return ResponseErrorNotFound("Not found", "User not found");
+              case 409:
+                return ResponseErrorConflict(
                   response.value || "Cannot update profile with wrong version"
-                )
-              : response.status === 429
-              ? ResponseErrorTooManyRequests()
-              : unhandledResponseStatus(response.status)
-          );
+                );
+              case 412:
+                return ResponseErrorPreconditionFailed(
+                  "The provided e-mail address is not unique"
+                );
+              case 429:
+                return ResponseErrorTooManyRequests();
+              default:
+                return unhandledResponseStatus(response.status);
+            }
+          });
         })
     );
   };
