@@ -1297,6 +1297,9 @@ describe("AuthenticationController|>LV|>acs|>notify user login", () => {
 
     expect(mockOnUserLogin).toHaveBeenCalledWith({
       ...expectedUserLoginData,
+      // new profile created has always is_email_validated to false
+      // with email uniqueness feature
+      is_email_validated: false,
       email: validUserPayload.email,
     });
   });
