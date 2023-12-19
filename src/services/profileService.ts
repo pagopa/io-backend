@@ -206,7 +206,8 @@ export default class ProfileService {
                 );
               case 412:
                 return ResponseErrorPreconditionFailed(
-                  "The provided e-mail address is not unique"
+                  "The provided e-mail address is not unique",
+                  response.value.type
                 );
               case 429:
                 return ResponseErrorTooManyRequests();

@@ -90,7 +90,7 @@
     "@pagopa/io-functions-commons": "28.9.0",
     "@pagopa/io-functions-eucovidcerts-sdk": "x",
     "@pagopa/io-spid-commons": "^13.3.0",
-    "@pagopa/ts-commons": "^12.4.0",
+    "@pagopa/ts-commons": "^12.4.1",
     "@pagopa/winston-ts": "^2.2.0",
     "applicationinsights": "^1.8.10",
     "body-parser": "^1.19.2",
