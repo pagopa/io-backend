@@ -111,6 +111,9 @@ const notFoundApiResponse = {
 };
 const APIError = {
   status: 500,
+  value: {
+    detail: "a detail error",
+  },
 };
 
 const tooManyReqApiMessagesResponse = {
@@ -120,8 +123,6 @@ const tooManyReqApiMessagesResponse = {
 const conflictApiMessagesResponse = {
   status: 409,
 };
-
-const expectedApiError = new Error("Api error.");
 
 const mockGetProfile = jest.fn();
 const mockUpdateProfile = jest.fn();
@@ -257,19 +258,35 @@ describe("ProfileService#getProfile", () => {
     });
   });
 
-  it("returns an error if the API returns an error", async () => {
+  it("returns an error if the API returns an Internal Server Error", async () => {
     mockGetProfile.mockImplementation(() => t.success(APIError));
 
     const service = new ProfileService(api);
 
-    try {
-      await service.getProfile(mockedUser);
-    } catch (e) {
-      expect(mockGetProfile).toHaveBeenCalledWith({
-        fiscalCode: mockedUser.fiscal_code,
-      });
-      expect(e).toEqual(expectedApiError);
-    }
+    const response = await service.getProfile(mockedUser);
+    expect(mockGetProfile).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+    });
+    expect(response).toMatchObject({
+      detail: expect.stringContaining("Error retrieving the profile"),
+      kind: "IResponseErrorInternal",
+    });
+  });
+
+  it("returns an error if the API client throw an exception", async () => {
+    const exceptionError = new Error("HTTP Client Error");
+    mockGetProfile.mockRejectedValueOnce(exceptionError);
+
+    const service = new ProfileService(api);
+
+    const response = await service.getProfile(mockedUser);
+    expect(mockGetProfile).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+    });
+    expect(response).toMatchObject({
+      detail: expect.stringContaining(exceptionError.message),
+      kind: "IResponseErrorInternal",
+    });
   });
 });
 
@@ -386,19 +403,35 @@ describe("ProfileService#getApiProfile", () => {
     });
   });
 
-  it("returns an error if the API returns an error", async () => {
+  it("returns an error if the API returns an Internal Server Error", async () => {
     mockGetProfile.mockImplementation(() => t.success(APIError));
 
     const service = new ProfileService(api);
 
-    try {
-      await service.getApiProfile(mockedUser);
-    } catch (e) {
-      expect(mockGetProfile).toHaveBeenCalledWith({
-        fiscalCode: mockedUser.fiscal_code,
-      });
-      expect(e).toEqual(expectedApiError);
-    }
+    const response = await service.getApiProfile(mockedUser);
+    expect(mockGetProfile).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+    });
+    expect(response).toMatchObject({
+      detail: expect.stringContaining("Error retrieving the profile"),
+      kind: "IResponseErrorInternal",
+    });
+  });
+
+  it("returns an error if the API client throw an exception", async () => {
+    const exceptionError = new Error("HTTP Client Error");
+    mockGetProfile.mockRejectedValueOnce(exceptionError);
+
+    const service = new ProfileService(api);
+
+    const response = await service.getApiProfile(mockedUser);
+    expect(mockGetProfile).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+    });
+    expect(response).toMatchObject({
+      detail: expect.stringContaining(exceptionError.message),
+      kind: "IResponseErrorInternal",
+    });
   });
 });
 
