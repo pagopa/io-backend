@@ -39,4 +39,4 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID_CD }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          docker-version: sha256:e4245954566cd3470e1b5527d33bb58ca132ce7493eac01be9e808fd25a11c8d
+          docker-version: ${{ env.DOCKER_IMAGE_TAG }}
