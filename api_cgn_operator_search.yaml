@@ -126,9 +126,9 @@ paths:
           description: Login expired.
         "404":
           description: Bucket code Not Found
-        '403':
+        "403":
           description: Access data provided are invalid or CGN not valid
-        '410':
+        "410":
           description: Endpoint no longer available
         "500":
           description: Service unavailable.
