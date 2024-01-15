@@ -1,0 +1,112 @@
+on:
+  workflow_call:
+    inputs:
+      api_name:
+        type: string
+        required: true
+
+jobs:
+  plan:
+    name: Terraform Plan
+    runs-on: ubuntu-22.04
+    environment: prod-ci
+    env:
+      API_NAME: ${{ inputs.api_name }}
+      DOCKER_IMAGE_TAG: sha256:04d8ead53c772d23b094c2a395292dc159e6f2905e1b13b5f828f31eac6eb27f
+      TEMPLATE_DIR: azure-dashboard
+      ARM_USE_OIDC: true
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID_CI }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+    permissions:
+      id-token: write
+      pull-requests: write
+
+    steps:
+
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@1f9a0c22da41e6ebfa534300ef656657ea2c6707
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Azure Login
+        id: az_login
+        uses: azure/login@92a5484dfaf04ca78a94597f4f19fea633851fa2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID_CI }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Run opex dashbaord
+        shell: bash
+        id: opex_docker
+        run: |
+          docker run \
+            --workdir /github/workspace --rm \
+            -v $(pwd):"/github/workspace" \
+            ghcr.io/pagopa/opex-dashboard-azure-action@${{ env.DOCKER_IMAGE_TAG }} ${{ env.TEMPLATE_DIR }} .opex/${{ env.API_NAME }}/env/prod/config.yaml
+
+      - name: Copy Environments
+        shell: bash
+        id: opex_copy
+        run: |
+          cp -R .opex/${{ env.API_NAME }}/env ./${{ env.TEMPLATE_DIR }}
+
+      - name: Setup Terraform
+        id: terraform_setup
+        uses: hashicorp/setup-terraform@a1502cd9e758c50496cc9ac5308c4843bcd56d36
+        with:
+          terraform_version: 1.6.6
+          terraform_wrapper: true
+
+      - name: Terraform Plan
+        shell: bash
+        id: terraform_plan
+        working-directory: ${{ env.TEMPLATE_DIR }}
+        run: |
+          bash ./terraform.sh plan prod -no-color | tee plan_output.txt
+          OUTPUT="$(cat plan_output.txt | grep -v "Refreshing state" | tail -c 60000)"
+          echo "$OUTPUT" > plan_output_multiline.txt
+
+      - name: Post Plan on PR
+        id: terraform_plan_comment
+        uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            const fs = require('fs');
+            const output = fs.readFileSync('${{ env.TEMPLATE_DIR }}/plan_output_multiline.txt', 'utf8');
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            })
+            const botComment = comments.find(comment => {
+              return comment.user.type === 'Bot' && comment.body.includes('Terraform Plan')
+            })
+            const commentBody = `#### Terraform Plan 📖
+            <details>
+            <summary>Terraform Plan</summary>
+
+            \`\`\`hcl
+            ${output}
+            \`\`\`
+            </details>
+            `;
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: commentBody,
+                comment_id: botComment.id
+              })
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: commentBody,
+                issue_number: context.issue.number
+              })
+            }

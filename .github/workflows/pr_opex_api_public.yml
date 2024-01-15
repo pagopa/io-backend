@@ -1,86 +1,30 @@
 name: PR - Opex Dashboard api_public
 
 on:
-  # pull_request:
-  #   types:
-  #     - opened
-  #     - edited
-  #     - synchronize
-  #     - reopened
-  #   branches:
-  #     - master
-  #   paths:
-  #     - 'api_public.yaml'
-  #     - '.github/workflows/pr_opex_api_public.yml'
-  #     - '.github/workflows/opex_api_public.yml'
-  #     - '.opex/api_public/**'
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+    branches:
+      - master
+    paths:
+      - 'api_public.yaml'
+      - '.github/workflows/pr_opex_api_public.yml'
+      - '.github/workflows/opex_api_public.yml'
+      - '.opex/api_public/**'
 
   workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
 
 jobs:
   plan:
+    uses: ./.github/workflows/call_pr_opex_api.yml
     name: Plan changes against Production
-    runs-on: ubuntu-22.04
-    environment: prod-ci
-    env:
-      API_NAME: api_public
-      DOCKER_IMAGE_TAG: sha256:e4245954566cd3470e1b5527d33bb58ca132ce7493eac01be9e808fd25a11c8d
-      TEMPLATE_DIR: azure-dashboard
-      ARM_USE_OIDC: true
-    permissions:
-      id-token: write
-      pull-requests: write
-
-    steps:
-
-      - name: Checkout
-        id: checkout
-        uses: actions/checkout@1f9a0c22da41e6ebfa534300ef656657ea2c6707
-        with:
-          persist-credentials: false
-          fetch-depth: 0
-
-      # - name: Azure Login
-      #   id: az_login
-      #   uses: azure/login@92a5484dfaf04ca78a94597f4f19fea633851fa2
-      #   with:
-      #     client-id: ${{ secrets.AZURE_CLIENT_ID_CI }}
-      #     tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-      #     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      # - name: Run opex dashbaord
-      #   shell: bash
-      #   run: |
-      #     docker run \
-      #       --workdir /github/workspace --rm \
-      #       -v $(pwd):"/github/workspace" \
-      #       ghcr.io/pagopa/opex-dashboard-azure-action@${{ env.DOCKER_IMAGE_TAG }} ${{ env.TEMPLATE_DIR }} .opex/${{ env.API_NAME }}/env/prod/config.yaml
-
-      # - name: Copy Environments
-      #   shell: bash
-      #   run: |
-      #     cp -R .opex/${{ env.API_NAME }}/env ./${{ env.TEMPLATE_DIR }}
-
-      # - name: Setup Terraform
-      #   id: setup_terraform
-      #   uses: hashicorp/setup-terraform@a1502cd9e758c50496cc9ac5308c4843bcd56d36
-      #   with:
-      #     terraform_version: 1.6.6
-      #     terraform_wrapper: true
-
-      # - name: Terraform Init
-      #   shell: bash
-      #   id: terraform_init
-      #   working-directory: ${{ env.TEMPLATE_DIR }}
-      #   run: terraform init -reconfigure -backend-config="./prod/backend.tfvars"
-
-      # - name: Terraform Plan
-      #   shell: bash
-      #   id: terraform_plan
-      #   working-directory: ${{ env.TEMPLATE_DIR }}
-      #   run: |
-      #     ls
-      #     bash ./terraform.sh plan prod
+    secrets: inherit
+    with:
+      api_name: api_public
