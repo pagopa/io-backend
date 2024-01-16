@@ -28,7 +28,7 @@ import {
   NonEmptyString,
 } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/Either";
-import { lookup } from "fp-ts/lib/ReadonlyRecord";
+import { Headers as NodeFetchHeaders } from "node-fetch";
 import { CreateSignatureBody as CreateSignatureBodyApiModel } from "../../generated/io-sign-api/CreateSignatureBody";
 import { IssuerEnvironment } from "../../generated/io-sign/IssuerEnvironment";
 import { SignerDetailView } from "../../generated/io-sign-api/SignerDetailView";
@@ -57,7 +57,11 @@ const userNotFound =
   "The user associated with this profile could not be found.";
 
 export const getEnvironmentFromHeaders = flow(
-  lookup("x-io-sign-environment"),
+  O.fromPredicate(
+    (u: unknown): u is NodeFetchHeaders => u instanceof NodeFetchHeaders
+  ),
+  O.map((headers) => headers.get("x-io-sign-environment")),
+  O.chain(O.fromNullable),
   O.chainEitherK(t.keyof({ prod: true, test: true }).decode),
   O.getOrElse(() => "prod")
 );
