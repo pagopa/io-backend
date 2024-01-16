@@ -28,6 +28,8 @@ import { IssuerEnvironmentEnum } from "../../../generated/io-sign-api/IssuerEnvi
 import { SignatureRequestList } from "../../../generated/io-sign-api/SignatureRequestList";
 import mockRes from "../../__mocks__/response";
 
+import { Headers as NodeFetchHeaders } from "node-fetch";
+
 const mockCreateFilledDocument = jest.fn();
 const mockGetSignerByFiscalCode = jest.fn();
 const mockGetInfo = jest.fn();
@@ -687,23 +689,23 @@ describe("IoSignService#getSignatureRequest", () => {
   });
 
   it("should use prod as default environment if x-io-sign-environment is not defined", () => {
-    const headers = {};
+    const headers = new NodeFetchHeaders({});
     expect(getEnvironmentFromHeaders(headers)).toBe("prod");
   });
 
   it("should use prod as default environment if x-io-sign-environment is not valid", () => {
-    const headers = {
+    const headers = new NodeFetchHeaders({
       "x-io-sign-environment": "uat",
-    };
+    });
     expect(getEnvironmentFromHeaders(headers)).toBe("prod");
   });
 
   it.each(["test", "prod"])(
     "should use the valid value of x-io-sign-environment if it's defined",
     (environment) => {
-      const headers = {
+      const headers = new NodeFetchHeaders({
         "x-io-sign-environment": environment,
-      };
+      });
       expect(getEnvironmentFromHeaders(headers)).toBe(environment);
     }
   );
