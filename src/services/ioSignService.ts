@@ -57,8 +57,6 @@ const userNotFound =
 
 export const getEnvironmentFromHeaders = flow(
   O.fromPredicate(
-    (headers: unknown): headers is NodeFetchHeaders =>
-      headers instanceof NodeFetchHeaders
     (headers: {}): headers is Headers =>
       "get" in headers && typeof headers.get === "function"
   ),
