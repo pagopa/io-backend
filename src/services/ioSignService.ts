@@ -57,8 +57,8 @@ const userNotFound =
 
 export const getEnvironmentFromHeaders = flow(
   O.fromPredicate(
-    (headers: {}): headers is Headers =>
-      "get" in headers && typeof headers.get === "function"
+    (headers: object): headers is Headers =>
+      headers && "get" in headers && typeof headers.get === "function"
   ),
   O.map((headers) => headers.get("x-io-sign-environment")),
   O.chain(O.fromNullable),
