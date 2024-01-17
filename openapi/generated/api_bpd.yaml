@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 13.29.3
+  version: 13.29.4
   title: BPD API
   description: Bonus Pagamenti Digitali API for user authentication.
 host: localhost
