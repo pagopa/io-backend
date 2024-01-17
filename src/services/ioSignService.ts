@@ -28,7 +28,6 @@ import {
   NonEmptyString,
 } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/Either";
-import { Headers as NodeFetchHeaders } from "node-fetch";
 import { CreateSignatureBody as CreateSignatureBodyApiModel } from "../../generated/io-sign-api/CreateSignatureBody";
 import { IssuerEnvironment } from "../../generated/io-sign/IssuerEnvironment";
 import { SignerDetailView } from "../../generated/io-sign-api/SignerDetailView";
@@ -60,6 +59,8 @@ export const getEnvironmentFromHeaders = flow(
   O.fromPredicate(
     (headers: unknown): headers is NodeFetchHeaders =>
       headers instanceof NodeFetchHeaders
+    (headers: {}): headers is Headers =>
+      "get" in headers && typeof headers.get === "function"
   ),
   O.map((headers) => headers.get("x-io-sign-environment")),
   O.chain(O.fromNullable),
