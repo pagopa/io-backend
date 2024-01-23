@@ -13,6 +13,6 @@ overrides:
     - app-backend.io.italia.it
     - api-app.io.pagopa.it
   endpoints:
-    /profile:
+    /api/v1/profile:
       response_time_threshold: 8
       availability_threshold: 0.70
