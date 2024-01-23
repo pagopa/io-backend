@@ -14,9 +14,8 @@ paths:
     x-swagger-router-controller: ServicesController
     parameters:
       - in: path
+        type: string
         name: service_id
-        schema:
-          $ref: "#/definitions/PathTraversalSafePathParam"
         required: true
         description: The ID of an existing Service.
     get:
@@ -62,8 +61,7 @@ paths:
       parameters:
         - in: path
           name: service_id
-          schema:
-            $ref: "#/definitions/PathTraversalSafePathParam"
+          type: string
           required: true
           description: The ID of an existing Service.
         - in: body
