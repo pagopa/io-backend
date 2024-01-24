@@ -1116,3 +1116,11 @@ export const FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED =
     () => false,
     FF_UNIQUE_EMAIL_ENFORCEMENT
   );
+
+// SPID Email Persistence FF
+
+export const IS_SPID_EMAIL_PERSISTENCE_ENABLED = pipe(
+  O.fromNullable(process.env.IS_SPID_EMAIL_PERSISTENCE_ENABLED),
+  O.map((val) => val.toLowerCase() === "true"),
+  O.getOrElse(() => true)
+);
