@@ -36,7 +36,7 @@
       top: 0;
     }
 
-    .email {
+    .icon {
       height: 110px;
       padding-left: 25px;
       width: auto;
@@ -82,13 +82,14 @@
   <div>
     <div class="text-center">
       <div id="content" class="content-info">
-        <img class="email" src="/assets/email-checked-icon.svg" />
+        <img class="icon" src="" />
         <h1 id="title" class="title"></h1>
         <p id="message" class="message"></p>
       </div>
     </div>
   </div>
   <script>
+    const ERROR_TOKEN_EXPIRED = "TOKEN_EXPIRED"
     const url_string = window.location.href;
     const url = new URL(url_string);
     const status = url.searchParams.get("result");
@@ -96,11 +97,20 @@
       case "success":
         $("#title").append("Hai confermato la tua email!");
         $("#message").append("Torna su IO per continuare a navigare.")
+        $(".icon").attr("src", "/assets/email-checked-icon.svg")
         break;
       case "failure":
       default:
-        $("#title").append("Validazione fallita");
-        $("#message").append("Si è verificato un errore durante la procedura di validazione dell'email.")
+        const failure_reason = url.searchParams.get("error");
+        if (failure_reason === ERROR_TOKEN_EXPIRED) {
+          $("#title").append("Il link è scaduto");
+          $("#message").append("Torna su IO e richiedi l’invio di una nuova email per confermare il tuo indirizzo.")
+          $(".icon").attr("src", "/assets/error-timeout-icon.svg")
+        } else {
+          $("#title").append("Non siamo riusciti a confermare la tua email");
+          $("#message").append("Riprova, altrimenti torna su IO e chiedi una nuova conferma dell’indirizzo email.")
+          $(".icon").attr("src", "/assets/error-generic-icon.svg")
+        }
     }
   </script>
 </body>
