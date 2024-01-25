@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,28 +9,31 @@
   <meta http-equiv="Expires" content="0">
   <title>Validazione Email</title>
 
-  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+    integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
   <link href="https://fonts.googleapis.com/css?family=Titillium+Web:400,700&display=swap" rel="stylesheet">
   <script src="https://code.jquery.com/jquery-3.2.1.min.js"
-    integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
-    crossorigin="anonymous"></script>
+    integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
   <style>
+    html {
+      height: 100%;
+    }
 
     body {
       font-family: 'Titillium Web', sans-serif;
-    }
-
-    .subtitle {
-      color: #5C6F82;
-      font-size: 16px;
-      margin-bottom: 45px;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     .logo {
-      height: 60px;
+      height: 44px;
       width: auto;
-      margin: 20px 0 10px;
+      margin: 20px;
+      position: fixed;
+      left: 0;
+      top: 0;
     }
 
     .email {
@@ -54,19 +58,33 @@
     .content-info {
       padding: 0 20px;
     }
+
+    .cta {
+      background-color: #0073E6;
+      border-color: #0073E6;
+      color: #FFF;
+      width: 145px;
+      padding: 11px 20px 11px 20px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .cta:hover {
+      background-color: #0073E6;
+      border-color: #0073E6;
+      color: #FFF;
+    }
   </style>
 </head>
+
 <body>
-  <div class="container">
-    <div class="row">
-      <div class="col-xs-12 col-md-6 col-md-offset-3 text-center">
-        <div class="content-info">
-          <img class="logo" src="/assets/logo.png" />
-          <p class="subtitle">IO, l'app dei servizi pubblici</p>
-          <img class="email" src="/assets/email-checked-icon.svg" />
-          <h1 id="title" class="title"></h1>
-          <p id="message" class="message"></p>
-        </div>
+  <img class="logo" src="/assets/logo_app_io.png">
+  <div>
+    <div class="text-center">
+      <div id="content" class="content-info">
+        <img class="email" src="/assets/email-checked-icon.svg" />
+        <h1 id="title" class="title"></h1>
+        <p id="message" class="message"></p>
       </div>
     </div>
   </div>
@@ -74,10 +92,10 @@
     const url_string = window.location.href;
     const url = new URL(url_string);
     const status = url.searchParams.get("result");
-    switch(status) {
+    switch (status) {
       case "success":
-        $("#title").append("Email validata!");
-        $("#message").append("Grazie, ora puoi usare le funzionalità legate ai pagamenti, all'inoltro dei messaggi, etc.")
+        $("#title").append("Hai confermato la tua email!");
+        $("#message").append("Torna su IO per continuare a navigare.")
         break;
       case "failure":
       default:
@@ -86,4 +104,5 @@
     }
   </script>
 </body>
+
 </html>
