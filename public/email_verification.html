@@ -74,6 +74,7 @@
   </div>
   <script>
     const ERROR_TOKEN_EXPIRED = "TOKEN_EXPIRED"
+    const ERROR_EMAIL_ALREADY_TAKEN = "EMAIL_ALREADY_TAKEN"
     const url_string = window.location.href;
     const url = new URL(url_string);
     const status = url.searchParams.get("result");
@@ -90,6 +91,10 @@
           $("#title").append("Il link è scaduto");
           $("#message").append("Torna su IO e richiedi l’invio di una nuova email per confermare il tuo indirizzo.")
           $(".icon").attr("src", "/assets/error-timeout-icon.svg")
+        } else if (failure_reason === ERROR_EMAIL_ALREADY_TAKEN) {
+          $("#title").append("L’email è già confermata");
+          $("#message").append("Questo indirizzo email è già stato confermato. Torna su IO per continuare a navigare o per modificare la tua email.")
+          $(".icon").attr("src", "/assets/error-already-taken-icon.svg")
         } else {
           $("#title").append("Non siamo riusciti a confermare la tua email");
           $("#message").append("Riprova, altrimenti torna su IO e chiedi una nuova conferma dell’indirizzo email.")
