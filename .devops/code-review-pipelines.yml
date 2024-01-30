@@ -1,10 +1,10 @@
 # Azure DevOps pipeline to build, check source codes and run tests.
 #
-# To make Danger JS run on a pull request you need to add the following pipeline 
-# variable and set it with a GitHub access token (scope public_repo); otherwise 
-# set its value to 'skip' without marking it secret: 
+# To make Danger JS run on a pull request you need to add the following pipeline
+# variable and set it with a GitHub access token (scope public_repo); otherwise
+# set its value to 'skip' without marking it secret:
 # - DANGER_GITHUB_API_TOKEN
-# 
+#
 
 
 # Automatically triggered on PR
@@ -40,7 +40,7 @@ stages:
           - script: |
               yarn lint
             displayName: 'Lint'
-          # OpenAPI spec is a versione file, still is created with a generation process from a template
+          # OpenAPI spec is a versioned file, still is created with a generation process from a template
           # We need to check it either is out-of-sync with the template or it has been manually edited
           - script: |
               yarn openapi:bundle
@@ -63,6 +63,23 @@ stages:
               done
               [[ $valid = 1 ]] && exit 0 || exit 1
             displayName: 'Validate API specifications'
+          # This job needs to be removed together with root api_*.yaml specs.
+          # the transition started with #955 and will be continued with another dedicated PR
+      - job: validate_root_api_specification
+        steps:
+          - script: |
+              valid=1
+              for apispec in $(ls api_*.yaml); do
+                echo "validating $apispec"
+                npx swagger-cli validate  $apispec
+                result=$?
+                if [ ! $result = 0 ]; then
+                  valid=0
+                  echo "$apispec failed with code $result"
+                fi
+              done
+              [[ $valid = 1 ]] && exit 0 || exit 1
+            displayName: 'Validate root directory API specifications'
   # B) Run unit tests if there is a push or pull request on any branch.
   - stage: Test
     dependsOn: []
