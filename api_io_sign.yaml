@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  version: 1.0.0
+  version: 1.0.1
   title: IO Sign - Backend API
 servers:
   - url: https://api-app.io.pagopa.it/api/v1/sign
@@ -171,10 +171,6 @@ paths:
                 $ref: "#/components/schemas/ProblemJson"
         "401":
           description: Bearer token null or expired.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ProblemJson"
         "403":
           description: Forbidden.
           content:
@@ -211,10 +207,6 @@ paths:
                 $ref: "#/components/schemas/SignatureRequestList"
         "401":
           description: Bearer token null or expired.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ProblemJson"
         "403":
           description: Resource not found.
           content:
@@ -260,10 +252,6 @@ paths:
                 $ref: "#/components/schemas/SignatureRequestDetailView"
         "401":
           description: Bearer token null or expired.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ProblemJson"
         "403":
           description: Resource not found.
           content:
