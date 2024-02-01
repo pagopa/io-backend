@@ -740,7 +740,8 @@ export async function newApp({
           allowZendeskIPSourceRange,
           PROFILE_SERVICE,
           TOKEN_SERVICE,
-          authMiddlewares.bearerZendesk
+          authMiddlewares.bearerZendesk,
+          appInsightsClient
         );
         return { acsController, app };
       },
@@ -953,11 +954,13 @@ function registerZendeskRoutes(
   profileService: ProfileService,
   tokenService: TokenService,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerZendeskTokenAuth: any
+  bearerZendeskTokenAuth: any,
+  appInsightsClient?: appInsights.TelemetryClient
 ): void {
   const zendeskController: ZendeskController = new ZendeskController(
     profileService,
-    tokenService
+    tokenService,
+    appInsightsClient
   );
 
   app.post(

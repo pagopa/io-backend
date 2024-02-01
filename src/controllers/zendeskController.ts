@@ -3,6 +3,7 @@
  * to zendesk support
  */
 
+import * as appInsights from "applicationinsights";
 import * as express from "express";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
@@ -21,6 +22,7 @@ import {
 import ProfileService from "src/services/profileService";
 import * as t from "io-ts/lib";
 import { pipe } from "fp-ts/lib/function";
+import { sha256 } from "@pagopa/io-functions-commons/dist/src/utils/crypto";
 import { ZendeskToken } from "../../generated/zendesk/ZendeskToken";
 import {
   JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION,
@@ -43,7 +45,8 @@ type ValidZendeskProfile = t.TypeOf<typeof ValidZendeskProfile>;
 export default class ZendeskController {
   constructor(
     private readonly profileService: ProfileService,
-    private readonly tokenService: TokenService
+    private readonly tokenService: TokenService,
+    private readonly appInsightsTelemetryClient?: appInsights.TelemetryClient
   ) {}
 
   public readonly getZendeskSupportToken = (
@@ -92,6 +95,18 @@ export default class ZendeskController {
             jwt: token,
           })
         ),
+        TE.mapLeft((err) => {
+          this.appInsightsTelemetryClient?.trackEvent({
+            name: "appbackend.zendesk.error",
+            properties: {
+              fiscal_code: sha256(user.fiscal_code),
+              message: err.detail,
+            },
+            tagOverrides: { samplingEnabled: "false" },
+          });
+
+          return err;
+        }),
         TE.map(ResponseSuccessJson),
         TE.toUnion
       )()
