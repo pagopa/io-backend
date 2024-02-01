@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   title: IO API parameters
-  version: 13.32.2
+  version: 13.32.3
 paths:
   /dummy:
     get:
