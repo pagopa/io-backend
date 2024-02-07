@@ -14,10 +14,10 @@ paths:
     x-swagger-router-controller: ServicesController
     parameters:
       - in: path
-        type: string
         name: service_id
         required: true
         description: The ID of an existing Service.
+        type: string
     get:
       operationId: getService
       summary: Get Service
@@ -61,9 +61,9 @@ paths:
       parameters:
         - in: path
           name: service_id
-          type: string
           required: true
           description: The ID of an existing Service.
+          type: string
         - in: body
           name: body
           schema:
@@ -1478,12 +1478,12 @@ definitions:
       - expires_in
   InvalidThirdPartyMessageType:
     type: string
-    x-extensible-enum: 
+    x-extensible-enum:
       - ATTACHMENTS_NOT_PRESENT
       - REMOTE_CONTENT_NOT_PRESENT
       - MARKDOWN_VALIDATION_ERROR
       - SUBJECT_VALIDATION_ERROR
-    description: A representation of all the error type for an invalid ThirdPartyMessage 
+    description: A representation of all the error type for an invalid ThirdPartyMessage
     x-example: ATTACHMENTS_NOT_PRESENT
 responses: {}
 parameters:

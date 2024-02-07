@@ -69,6 +69,7 @@ import {
   IOLOGIN_USERS_LIST,
   isUserElegibleForFastLogin,
   FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED,
+  IS_SPID_EMAIL_PERSISTENCE_ENABLED,
   TEST_LOGIN_FISCAL_CODES,
 } from "../config";
 import { ISessionStorage } from "../services/ISessionStorage";
@@ -530,7 +531,7 @@ export default class AuthenticationController {
       // one
       const newProfile: NewProfile = createNewProfile(
         user.fiscal_code,
-        spidUser.email
+        IS_SPID_EMAIL_PERSISTENCE_ENABLED ? spidUser.email : undefined
       )({
         FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED,
         testLoginFiscalCodes: TEST_LOGIN_FISCAL_CODES,
