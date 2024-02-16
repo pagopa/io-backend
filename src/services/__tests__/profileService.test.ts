@@ -5,7 +5,6 @@ import {
   PreferredLanguage,
   PreferredLanguageEnum,
 } from "../../../generated/backend/PreferredLanguage";
-import { Profile } from "../../../generated/backend/Profile";
 import { PushNotificationsContentTypeEnum } from "../../../generated/backend/PushNotificationsContentType";
 import { ReminderStatusEnum } from "../../../generated/backend/ReminderStatus";
 import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
@@ -25,6 +24,7 @@ import {
 } from "../../__mocks__/user_mock";
 import ApiClientFactory from "../apiClientFactory";
 import ProfileService from "../profileService";
+import { UpdateProfileParams } from "@pagopa/io-functions-app-sdk/UpdateProfileParams";
 
 const aValidAPIEmail = anEmailAddress;
 const aValidSPIDEmail = aSpidEmailAddress;
@@ -89,13 +89,14 @@ const proxyInitializedProfileResponse = {
   version: 42,
 };
 
-const updateProfileRequest: Profile = {
+const updateProfileRequest: UpdateProfileParams = {
   email: aValidAPIEmail,
   is_email_enabled: true,
   is_inbox_enabled: anIsInboxEnabled,
   is_webhook_enabled: anIsWebookEnabled,
   preferred_languages: aPreferredLanguages,
   version: 42,
+  name: aValidName,
 };
 
 const createProfileRequest: NewProfile = {
@@ -646,6 +647,11 @@ describe("ProfileService#emailValidationProcess", () => {
     jest.clearAllMocks();
   });
 
+  const aValidEmailValidationProcessParams = {
+    fiscal_code: mockedUser.fiscal_code,
+    body: { name: aValidName },
+  };
+
   it("should returns ResponseSuccessAccepted if no error occours", async () => {
     mockStartEmailValidationProcess.mockImplementation(() =>
       t.success(acceptedApiResponse)
@@ -655,9 +661,9 @@ describe("ProfileService#emailValidationProcess", () => {
 
     const res = await service.emailValidationProcess(mockedUser);
 
-    expect(mockStartEmailValidationProcess).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code,
-    });
+    expect(mockStartEmailValidationProcess).toHaveBeenCalledWith(
+      aValidEmailValidationProcessParams
+    );
     expect(res).toMatchObject({
       kind: "IResponseSuccessAccepted",
     });
@@ -672,9 +678,9 @@ describe("ProfileService#emailValidationProcess", () => {
 
     const res = await service.emailValidationProcess(mockedUser);
 
-    expect(mockStartEmailValidationProcess).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code,
-    });
+    expect(mockStartEmailValidationProcess).toHaveBeenCalledWith(
+      aValidEmailValidationProcessParams
+    );
     expect(res).toMatchObject({
       detail: "Not found: User not found.",
       kind: "IResponseErrorNotFound",
