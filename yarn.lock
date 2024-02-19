@@ -984,9 +984,9 @@
     prettier "^2.6.2"
 
 "@pagopa/io-functions-app-sdk@x":
-  version "5.9.0"
-  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-app-sdk/-/io-functions-app-sdk-5.9.0.tgz#069dcd46502954eab98cab3bbf013471e27e414a"
-  integrity sha512-GhgGBpppIrexXs+biYO35mkxKJrO4tu0gjwAMd+0X7/MKKLrOtVy2fb7n0LVyJAHMWfaFr8DGrM3d2arj3v0pw==
+  version "5.13.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-app-sdk/-/io-functions-app-sdk-5.13.0.tgz#e24664dea0b252e6ea96cd081991ff85eb5e53d6"
+  integrity sha512-n/RB+XFRsGhvNTzR/9jvo2q3L8mA3kEuVgWc9e+WK/t9da9P1hfLZVlOxxA4T2yHHRXEWGIS54Xc3y8iaJypGA==
   dependencies:
     "@pagopa/ts-commons" "^10.0.0"
     fp-ts "^2.10.5"

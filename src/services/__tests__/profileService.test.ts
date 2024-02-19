@@ -5,7 +5,6 @@ import {
   PreferredLanguage,
   PreferredLanguageEnum,
 } from "../../../generated/backend/PreferredLanguage";
-import { Profile } from "../../../generated/backend/Profile";
 import { PushNotificationsContentTypeEnum } from "../../../generated/backend/PushNotificationsContentType";
 import { ReminderStatusEnum } from "../../../generated/backend/ReminderStatus";
 import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
@@ -25,6 +24,8 @@ import {
 } from "../../__mocks__/user_mock";
 import ApiClientFactory from "../apiClientFactory";
 import ProfileService from "../profileService";
+import { Profile } from "../../../generated/backend/Profile";
+import { UpdateProfileParams } from "@pagopa/io-functions-app-sdk/UpdateProfileParams";
 
 const aValidAPIEmail = anEmailAddress;
 const aValidSPIDEmail = aSpidEmailAddress;
@@ -436,6 +437,12 @@ describe("ProfileService#getApiProfile", () => {
 });
 
 describe("ProfileService#updateProfile", () => {
+  const aValidMockUpdateProfilePayload: UpdateProfileParams = {
+    ...updateProfileRequest,
+    blocked_inbox_or_channels: undefined,
+    name: aValidName,
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -451,7 +458,7 @@ describe("ProfileService#updateProfile", () => {
 
     expect(mockUpdateProfile).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
-      body: updateProfileRequest,
+      body: aValidMockUpdateProfilePayload,
     });
 
     expect(res).toMatchObject({
@@ -475,7 +482,7 @@ describe("ProfileService#updateProfile", () => {
     expect(mockUpdateProfile).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
       body: {
-        ...updateProfileRequest,
+        ...aValidMockUpdateProfilePayload,
         last_app_version: lastAppVersion,
       },
     });
@@ -503,7 +510,7 @@ describe("ProfileService#updateProfile", () => {
     expect(mockUpdateProfile).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
       body: {
-        ...updateProfileRequest,
+        ...aValidMockUpdateProfilePayload,
         reminder_status: ReminderStatusEnum.DISABLED,
       },
     });
@@ -532,7 +539,7 @@ describe("ProfileService#updateProfile", () => {
     expect(mockUpdateProfile).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
       body: {
-        ...updateProfileRequest,
+        ...aValidMockUpdateProfilePayload,
         push_notifications_content_type:
           PushNotificationsContentTypeEnum.ANONYMOUS,
       },
@@ -646,6 +653,11 @@ describe("ProfileService#emailValidationProcess", () => {
     jest.clearAllMocks();
   });
 
+  const aValidEmailValidationProcessParams = {
+    fiscal_code: mockedUser.fiscal_code,
+    body: { name: aValidName },
+  };
+
   it("should returns ResponseSuccessAccepted if no error occours", async () => {
     mockStartEmailValidationProcess.mockImplementation(() =>
       t.success(acceptedApiResponse)
@@ -655,9 +667,9 @@ describe("ProfileService#emailValidationProcess", () => {
 
     const res = await service.emailValidationProcess(mockedUser);
 
-    expect(mockStartEmailValidationProcess).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code,
-    });
+    expect(mockStartEmailValidationProcess).toHaveBeenCalledWith(
+      aValidEmailValidationProcessParams
+    );
     expect(res).toMatchObject({
       kind: "IResponseSuccessAccepted",
     });
@@ -672,9 +684,9 @@ describe("ProfileService#emailValidationProcess", () => {
 
     const res = await service.emailValidationProcess(mockedUser);
 
-    expect(mockStartEmailValidationProcess).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code,
-    });
+    expect(mockStartEmailValidationProcess).toHaveBeenCalledWith(
+      aValidEmailValidationProcessParams
+    );
     expect(res).toMatchObject({
       detail: "Not found: User not found.",
       kind: "IResponseErrorNotFound",
