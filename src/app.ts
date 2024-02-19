@@ -70,7 +70,6 @@ import {
   APP_MESSAGES_API_CLIENT,
   FF_ENABLE_NOTIFY_ENDPOINT,
   FF_ENABLE_SESSION_ENDPOINTS,
-  THIRD_PARTY_CONFIG_LIST,
   PN_ADDRESS_BOOK_CLIENT_SELECTOR,
   PNAddressBookConfig,
   FF_IO_SIGN_ENABLED,
@@ -169,7 +168,6 @@ import EUCovidCertController from "./controllers/eucovidcertController";
 import MitVoucherController from "./controllers/mitVoucherController";
 import NewMessagesService from "./services/newMessagesService";
 import bearerFIMSTokenStrategy from "./strategies/bearerFIMSTokenStrategy";
-import { getThirdPartyServiceClientFactory } from "./clients/third-party-service-client";
 import { PNService } from "./services/pnService";
 import IoSignService from "./services/ioSignService";
 import IoSignController from "./controllers/ioSignController";
@@ -579,16 +577,11 @@ export async function newApp({
           );
         }
 
-        const thirdPartyClientFactory = getThirdPartyServiceClientFactory(
-          THIRD_PARTY_CONFIG_LIST
-        );
-
         // Create the function app service.
         const FN_APP_SERVICE = new FunctionsAppService(API_CLIENT);
         // Create the new messages service.
         const APP_MESSAGES_SERVICE = new NewMessagesService(
-          APP_MESSAGES_API_CLIENT,
-          thirdPartyClientFactory
+          APP_MESSAGES_API_CLIENT
         );
 
         const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT);
@@ -1043,8 +1036,7 @@ function registerAPIRoutes(
   const messagesController: MessagesController = new MessagesController(
     appMessagesService,
     lollipopClient,
-    sessionStorage,
-    THIRD_PARTY_CONFIG_LIST
+    sessionStorage
   );
 
   const servicesController: ServicesController = new ServicesController(

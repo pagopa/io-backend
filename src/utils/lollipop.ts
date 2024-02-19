@@ -11,7 +11,6 @@ import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
 import { eventLog } from "@pagopa/winston-ts";
 import { sha256 } from "@pagopa/io-functions-commons/dist/src/utils/crypto";
-import { ServiceId } from "@pagopa/io-functions-app-sdk/ServiceId";
 import { Errors } from "io-ts";
 import * as O from "fp-ts/Option";
 import { withoutUndefinedValues } from "@pagopa/ts-commons/lib/types";
@@ -29,7 +28,7 @@ import {
 import { LollipopSignatureInput } from "../../generated/lollipop/LollipopSignatureInput";
 import { LcParams } from "../../generated/lollipop-api/LcParams";
 import { log } from "./logger";
-import { ThirdPartyConfigList } from "./thirdPartyConfig";
+import { RCConfigurationPublic } from "generated/io-messages-api/RCConfigurationPublic";
 
 type ErrorsResponses =
   | IResponseErrorInternal
@@ -64,29 +63,26 @@ export const getKeyThumbprintFromSignature = (
 };
 
 export const checkIfLollipopIsEnabled = (
-  thirdPartyConfigList: ThirdPartyConfigList,
   fiscalCode: FiscalCode,
-  serviceId: ServiceId
+  remoteContentConfiguration: RCConfigurationPublic
 ) =>
   pipe(
-    thirdPartyConfigList.find((c) => c.serviceId === serviceId),
-    TE.fromNullable(
-      Error(`Cannot find configuration for service ${serviceId}`)
-    ),
+    TE.of(remoteContentConfiguration),
     eventLog.taskEither.info((config) => [
       `Third party lollipop configuration`,
       {
-        isLollipopDisabledFor: config.disableLollipopFor.includes(fiscalCode),
-        isLollipopEnabled: config.isLollipopEnabled,
+        isLollipopDisabledFor: config.disable_lollipop_for.includes(fiscalCode),
+        isLollipopEnabled: config.is_lollipop_enabled,
         name: "lollipop.status.info",
       },
     ]),
     TE.map(
       (config) =>
-        config.isLollipopEnabled &&
-        !config.disableLollipopFor.includes(fiscalCode)
+        config.is_lollipop_enabled &&
+        !config.disable_lollipop_for.includes(fiscalCode)
     )
   );
+
 const getAndValidateAssertionRefForUser = (
   sessionStorage: ISessionStorage,
   fiscalCode: FiscalCode,

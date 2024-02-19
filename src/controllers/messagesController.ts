@@ -28,7 +28,6 @@ import * as B from "fp-ts/boolean";
 import { NonEmptyString, Ulid } from "@pagopa/ts-commons/lib/strings";
 import NewMessagesService from "src/services/newMessagesService";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
-import { ThirdPartyConfigList } from "src/utils/thirdPartyConfig";
 import * as QueryString from "qs";
 import { User, withUserFromRequest } from "../types/user";
 
@@ -71,8 +70,7 @@ export default class MessagesController {
   constructor(
     private readonly messageService: NewMessagesService,
     private readonly lollipopClient: ReturnType<typeof LollipopApiClient>,
-    private readonly sessionStorage: ISessionStorage,
-    private readonly thirdPartyConfigList: ThirdPartyConfigList
+    private readonly sessionStorage: ISessionStorage
   ) {}
 
   /**
@@ -159,19 +157,19 @@ export default class MessagesController {
         messageId
       ),
       TE.bindTo("message"),
-      TE.bindW("hasLollipopEnabled", ({ message }) =>
+      TE.bindW("remoteContentConfiguration", ({ message }) =>
         pipe(
-          checkIfLollipopIsEnabled(
-            this.thirdPartyConfigList,
-            user.fiscal_code,
-            message.sender_service_id
+          message.content.third_party_data.configuration_id,
+          TE.fromNullable(
+            ResponseErrorInternal("Cannot get remote content configuration")
           ),
-          TE.mapLeft((e) =>
-            ResponseErrorInternal(
-              `Cannot define if Lollipop is enabled or not: ${e.name} | ${e.message}`
-            )
+          TE.chain((configId) =>
+            this.messageService.getRCConfiguration(configId)
           )
         )
+      ),
+      TE.bindW("hasLollipopEnabled", ({ remoteContentConfiguration }) =>
+        checkIfLollipopIsEnabled(user.fiscal_code, remoteContentConfiguration)
       ),
       TE.bindW("lollipopLocals", ({ hasLollipopEnabled }) =>
         pipe(
@@ -227,11 +225,12 @@ export default class MessagesController {
       withValidatedOrValidationError(Ulid.decode(req.params.id), (messageId) =>
         pipe(
           this.checkLollipopAndGetLocalsOrDefault(req, user, messageId),
-          TE.chainW(({ message, lollipopLocals }) =>
+          TE.chainW(({ message, lollipopLocals, remoteContentConfiguration }) =>
             TE.tryCatch(
               () =>
                 this.messageService.getThirdPartyMessagePrecondition(
                   message,
+                  remoteContentConfiguration,
                   lollipopLocals as LollipopLocalsType
                 ),
               (_) =>
@@ -263,11 +262,12 @@ export default class MessagesController {
       withValidatedOrValidationError(Ulid.decode(req.params.id), (messageId) =>
         pipe(
           this.checkLollipopAndGetLocalsOrDefault(req, user, messageId),
-          TE.chainW(({ message, lollipopLocals }) =>
+          TE.chainW(({ message, lollipopLocals, remoteContentConfiguration }) =>
             TE.tryCatch(
               () =>
                 this.messageService.getThirdPartyMessage(
                   message,
+                  remoteContentConfiguration,
                   lollipopLocals as LollipopLocalsType
                 ),
               (_) =>
@@ -301,12 +301,13 @@ export default class MessagesController {
       withGetThirdPartyAttachmentParams(req, async (messageId, attachmentUrl) =>
         pipe(
           this.checkLollipopAndGetLocalsOrDefault(req, user, messageId),
-          TE.chainW(({ message, lollipopLocals }) =>
+          TE.chainW(({ message, lollipopLocals, remoteContentConfiguration }) =>
             TE.tryCatch(
               () =>
                 this.messageService.getThirdPartyAttachment(
                   message,
                   attachmentUrl,
+                  remoteContentConfiguration,
                   lollipopLocals as LollipopLocalsType
                 ),
               (_) =>

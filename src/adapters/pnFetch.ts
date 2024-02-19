@@ -5,7 +5,11 @@ import * as t from "io-ts";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
 import * as O from "fp-ts/Option";
-import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import {
+  FiscalCode,
+  NonEmptyString,
+  Ulid,
+} from "@pagopa/ts-commons/lib/strings";
 import { ProblemJson } from "@pagopa/ts-commons/lib/responses";
 import { Response as NodeResponse } from "node-fetch";
 import { NotificationAttachmentDownloadMetadataResponse } from "generated/piattaforma-notifiche/NotificationAttachmentDownloadMetadataResponse";
@@ -17,8 +21,7 @@ import { eventLog } from "@pagopa/winston-ts";
 import { PnAPIClient } from "../clients/pn-clients";
 import { errorsToError } from "../utils/errorsFormatter";
 import { pathParamsFromUrl } from "../types/pathParams";
-import { ServiceId } from "../../generated/backend/ServiceId";
-import { PN_SERVICE_ID } from "../config";
+import { PN_CONFIGURATION_ID } from "../config";
 
 const getPath = (input: RequestInfo | URL): string =>
   input instanceof URL
@@ -481,18 +484,18 @@ export const redirectAttachment =
 export const pnFetch =
   (
     origFetch: Fetch = nodeFetch as unknown as Fetch,
-    serviceId: ServiceId,
+    configurationId: Ulid,
     pnUrl: string,
     pnApiKey: string,
     lollipopLocals?: LollipopLocalsType
   ): typeof fetch =>
   (input, init) => {
     eventLog.peek.info(
-      serviceId === PN_SERVICE_ID
+      configurationId === PN_CONFIGURATION_ID
         ? [`Calling PN api`, { name: "lollipop.pn.api" }]
         : ["Calling third party api", { name: "lollipop.third-party.api" }]
     );
-    return serviceId === PN_SERVICE_ID
+    return configurationId === PN_CONFIGURATION_ID
       ? match(getPath(input))
           .when(
             (url) => E.isRight(ThirdPartyMessagesUrl.decode(url)),
