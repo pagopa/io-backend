@@ -24,6 +24,7 @@ import {
 } from "../../__mocks__/user_mock";
 import ApiClientFactory from "../apiClientFactory";
 import ProfileService from "../profileService";
+import { Profile } from "../../../generated/backend/Profile";
 import { UpdateProfileParams } from "@pagopa/io-functions-app-sdk/UpdateProfileParams";
 
 const aValidAPIEmail = anEmailAddress;
@@ -89,14 +90,13 @@ const proxyInitializedProfileResponse = {
   version: 42,
 };
 
-const updateProfileRequest: UpdateProfileParams = {
+const updateProfileRequest: Profile = {
   email: aValidAPIEmail,
   is_email_enabled: true,
   is_inbox_enabled: anIsInboxEnabled,
   is_webhook_enabled: anIsWebookEnabled,
   preferred_languages: aPreferredLanguages,
   version: 42,
-  name: aValidName,
 };
 
 const createProfileRequest: NewProfile = {
@@ -437,6 +437,12 @@ describe("ProfileService#getApiProfile", () => {
 });
 
 describe("ProfileService#updateProfile", () => {
+  const aValidMockUpdateProfilePayload: UpdateProfileParams = {
+    ...updateProfileRequest,
+    blocked_inbox_or_channels: undefined,
+    name: aValidName,
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -452,7 +458,7 @@ describe("ProfileService#updateProfile", () => {
 
     expect(mockUpdateProfile).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
-      body: updateProfileRequest,
+      body: aValidMockUpdateProfilePayload,
     });
 
     expect(res).toMatchObject({
@@ -476,7 +482,7 @@ describe("ProfileService#updateProfile", () => {
     expect(mockUpdateProfile).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
       body: {
-        ...updateProfileRequest,
+        ...aValidMockUpdateProfilePayload,
         last_app_version: lastAppVersion,
       },
     });
@@ -504,7 +510,7 @@ describe("ProfileService#updateProfile", () => {
     expect(mockUpdateProfile).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
       body: {
-        ...updateProfileRequest,
+        ...aValidMockUpdateProfilePayload,
         reminder_status: ReminderStatusEnum.DISABLED,
       },
     });
@@ -533,7 +539,7 @@ describe("ProfileService#updateProfile", () => {
     expect(mockUpdateProfile).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
       body: {
-        ...updateProfileRequest,
+        ...aValidMockUpdateProfilePayload,
         push_notifications_content_type:
           PushNotificationsContentTypeEnum.ANONYMOUS,
       },
