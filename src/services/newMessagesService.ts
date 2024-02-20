@@ -38,7 +38,7 @@ import { RCConfigurationPublic } from "generated/io-messages-api/RCConfiguration
 import {
   Fetch,
   getThirdPartyServiceClient,
-} from "src/clients/third-party-service-client";
+} from "../clients/third-party-service-client";
 import { PN_SERVICE_ID } from "../config";
 import { MessageSubject } from "../../generated/backend/MessageSubject";
 import { InvalidThirdPartyMessageTypeEnum } from "../../generated/backend/InvalidThirdPartyMessageType";
@@ -479,6 +479,7 @@ export default class NewMessagesService {
         nodeFetch as unknown as Fetch,
         lollipopLocals
       ),
+      x => x,
       TE.of,
       TE.map((getClientByFiscalCode) =>
         getClientByFiscalCode(message.fiscal_code)

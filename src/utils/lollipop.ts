@@ -17,6 +17,7 @@ import { withoutUndefinedValues } from "@pagopa/ts-commons/lib/types";
 import { AssertionRef } from "generated/backend/AssertionRef";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as TE from "fp-ts/TaskEither";
+import { RCConfigurationPublic } from "generated/io-messages-api/RCConfigurationPublic";
 import { ISessionStorage } from "../services/ISessionStorage";
 import { LollipopApiClient } from "../clients/lollipop";
 import {
@@ -28,7 +29,6 @@ import {
 import { LollipopSignatureInput } from "../../generated/lollipop/LollipopSignatureInput";
 import { LcParams } from "../../generated/lollipop-api/LcParams";
 import { log } from "./logger";
-import { RCConfigurationPublic } from "generated/io-messages-api/RCConfigurationPublic";
 
 type ErrorsResponses =
   | IResponseErrorInternal

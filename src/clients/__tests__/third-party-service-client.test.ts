@@ -1,31 +1,19 @@
 import * as E from "fp-ts/lib/Either";
-import { pipe } from "fp-ts/lib/function";
-
-import { ServiceId } from "../../../generated/io-messages-api/ServiceId";
-import { getThirdPartyServiceClientFactory } from "../third-party-service-client";
-import { ThirdPartyConfig } from "../../utils/thirdPartyConfig";
 
 import { getThirdPartyServiceClient } from "../third-party-service-client";
 
 import { aFiscalCode } from "../../__mocks__/user_mock";
-import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode, Ulid } from "@pagopa/ts-commons/lib/strings";
 import {
   aPnThirdPartyMessage,
-  aPNServiceId,
   aPNThirdPartyNotification,
-  base64File
+  base64File,
+  aPNConfigurationId
 } from "../../__mocks__/pn";
 import { lollipopParams } from "../../__mocks__/lollipop";
+import { aRemoteContentConfigurationWithBothEnv } from "../../__mocks__/remote-configuration";
 
-const aValidDetailAuthentication = {
-  type: "API_KEY",
-  header_key_name: "aParamName",
-  key: "aKey"
-};
-
-const aServiceId = "aServiceId" as ServiceId;
-
-const aValidTestAndProdThirdPartyConfig = pipe(
+/*const aValidTestAndProdThirdPartyConfig = pipe(
   {
     serviceId: aServiceId,
     schemaKind: "PN",
@@ -46,27 +34,7 @@ const aValidTestAndProdThirdPartyConfig = pipe(
   E.getOrElseW(() => {
     throw Error("Error decoding ThirdPartyConfig");
   })
-);
-
-const aConfigList = [aValidTestAndProdThirdPartyConfig];
-
-describe("getThirdPartyServiceClientFactory", () => {
-  it("should return an Error if serviceId is not present in config list", async () => {
-    const factory = getThirdPartyServiceClientFactory(aConfigList);
-
-    const res = factory("anotherServiceId" as ServiceId);
-
-    expect(E.isLeft(res)).toBeTruthy();
-  });
-
-  it("should return a client if serviceId is present in config list", async () => {
-    const factory = getThirdPartyServiceClientFactory(aConfigList);
-
-    const res = factory("aServiceId" as ServiceId);
-
-    expect(E.isRight(res)).toBeTruthy();
-  });
-});
+);*/
 
 const mockNodeFetch = jest.fn();
 mockNodeFetch.mockImplementation(
@@ -79,6 +47,7 @@ mockNodeFetch.mockImplementation(
   }
 );
 
+const aConfigurationId = "01HMRBX079WB6SGYBQP1A7FSKH" as Ulid;
 const aThirdPartyId = "aThirdPartyId";
 
 describe("third-party-service-client", () => {
@@ -88,7 +57,7 @@ describe("third-party-service-client", () => {
 
   it("should add ApiKey header to Third Party service call with API_KEY configuration when user is a TEST user", async () => {
     const client = getThirdPartyServiceClient(
-      aValidTestAndProdThirdPartyConfig,
+      aRemoteContentConfigurationWithBothEnv,
       mockNodeFetch,
       lollipopParams
     )(aFiscalCode);
@@ -97,15 +66,15 @@ describe("third-party-service-client", () => {
       id: aThirdPartyId,
       ...lollipopParams
     });
-    const expectedConfig = aValidTestAndProdThirdPartyConfig.testEnvironment!;
+    const expectedConfig = aRemoteContentConfigurationWithBothEnv.test_environment!;
 
     expect(mockNodeFetch).toHaveBeenCalledWith(
-      `${expectedConfig.baseUrl}/messages/${aThirdPartyId}`,
+      `${expectedConfig.base_url}/messages/${aThirdPartyId}`,
       {
         headers: {
           fiscal_code: aFiscalCode,
-          [expectedConfig.detailsAuthentication.header_key_name]:
-            expectedConfig.detailsAuthentication.key,
+          [expectedConfig.details_authentication.header_key_name]:
+            expectedConfig.details_authentication.key,
           ...lollipopParams
         },
         method: "get",
@@ -118,24 +87,24 @@ describe("third-party-service-client", () => {
     const aProdFiscalCode = "GRBRPP87L04L741X" as FiscalCode;
 
     const client = getThirdPartyServiceClient(
-      aValidTestAndProdThirdPartyConfig,
+      aRemoteContentConfigurationWithBothEnv,
       mockNodeFetch,
       lollipopParams
     )(aProdFiscalCode);
 
-    client.getThirdPartyMessageDetails({
+    await client.getThirdPartyMessageDetails({
       id: aThirdPartyId,
       ...lollipopParams
     });
-    const expectedConfig = aValidTestAndProdThirdPartyConfig.prodEnvironment!;
+    const expectedConfig = aRemoteContentConfigurationWithBothEnv.prod_environment!;
 
     expect(mockNodeFetch).toHaveBeenCalledWith(
-      `${expectedConfig.baseUrl}/messages/${aThirdPartyId}`,
+      `${expectedConfig.base_url}/messages/${aThirdPartyId}`,
       {
         headers: {
           fiscal_code: aProdFiscalCode,
-          [expectedConfig.detailsAuthentication.header_key_name]:
-            expectedConfig.detailsAuthentication.key,
+          [expectedConfig.details_authentication.header_key_name]:
+            expectedConfig.details_authentication.key,
           ...lollipopParams
         },
         method: "get",
@@ -148,7 +117,7 @@ describe("third-party-service-client", () => {
     const aProdFiscalCode = "GRBRPP87L04L741X" as FiscalCode;
 
     const client = getThirdPartyServiceClient(
-      { ...aValidTestAndProdThirdPartyConfig, serviceId: aPNServiceId },
+      { ...aRemoteContentConfigurationWithBothEnv, configuration_id: aPNConfigurationId },
       mockNodeFetch,
       lollipopParams
     )(aProdFiscalCode);
@@ -157,17 +126,17 @@ describe("third-party-service-client", () => {
       id: aThirdPartyId,
       ...lollipopParams
     });
-    const expectedConfig = aValidTestAndProdThirdPartyConfig.prodEnvironment!;
+    const expectedConfig = aRemoteContentConfigurationWithBothEnv.prod_environment!;
 
     expect(mockNodeFetch).toHaveBeenCalledWith(
-      `${expectedConfig.baseUrl}/delivery/notifications/received/${aThirdPartyId}`,
+      `${expectedConfig.base_url}/delivery/notifications/received/${aThirdPartyId}`,
       {
         headers: {
           Accept: "application/io+json",
           "x-pagopa-cx-taxid": aProdFiscalCode,
-          "x-api-key": "aKey",
-          [expectedConfig.detailsAuthentication.header_key_name]:
-            expectedConfig.detailsAuthentication.key,
+          "x-api-key": "anykey",
+          [expectedConfig.details_authentication.header_key_name]:
+            expectedConfig.details_authentication.key,
           ...lollipopParams
         },
         method: "get",
@@ -181,8 +150,6 @@ describe("third-party-service-client", () => {
         value: aPNThirdPartyNotification
       })
     );
-
-
   });
 
   it("should call custom decoder when getThirdPartyMessageAttachment is called", async () => {
@@ -202,7 +169,7 @@ describe("third-party-service-client", () => {
     const aProdFiscalCode = "GRBRPP87L04L741X" as FiscalCode;
 
     const client = getThirdPartyServiceClient(
-      { ...aValidTestAndProdThirdPartyConfig, serviceId: aServiceId },
+      { ...aRemoteContentConfigurationWithBothEnv, configuration_id: aConfigurationId },
       mockNodeFetch,
       lollipopParams
     )(aProdFiscalCode);
@@ -212,7 +179,7 @@ describe("third-party-service-client", () => {
       attachment_url: "an/url",
       ...lollipopParams
     });
-    const expectedConfig = aValidTestAndProdThirdPartyConfig.prodEnvironment!;
+    const expectedConfig = aRemoteContentConfigurationWithBothEnv.prod_environment!;
 
     expect(res).toMatchObject(
       E.right({
@@ -222,12 +189,12 @@ describe("third-party-service-client", () => {
     );
 
     expect(mockNodeFetch).toHaveBeenCalledWith(
-      `${expectedConfig.baseUrl}/messages/${aThirdPartyId}/an/url`,
+      `${expectedConfig.base_url}/messages/${aThirdPartyId}/an/url`,
       {
         headers: {
           fiscal_code: aProdFiscalCode,
-          [expectedConfig.detailsAuthentication.header_key_name]:
-            expectedConfig.detailsAuthentication.key,
+          [expectedConfig.details_authentication.header_key_name]:
+            expectedConfig.details_authentication.key,
           ...lollipopParams
         },
         method: "get",
@@ -240,7 +207,7 @@ describe("third-party-service-client", () => {
     const aProdFiscalCode = "GRBRPP87L04L741X" as FiscalCode;
 
     const client = getThirdPartyServiceClient(
-      { ...aValidTestAndProdThirdPartyConfig, serviceId: aPNServiceId },
+      { ...aRemoteContentConfigurationWithBothEnv, configuration_id: aPNConfigurationId },
       mockNodeFetch,
       lollipopParams
     )(aProdFiscalCode);
@@ -250,16 +217,16 @@ describe("third-party-service-client", () => {
       attachment_url: `delivery/notifications/received/${aThirdPartyId}/attachments/documents/0`,
       ...lollipopParams
     });
-    const expectedConfig = aValidTestAndProdThirdPartyConfig.prodEnvironment!;
+    const expectedConfig = aRemoteContentConfigurationWithBothEnv.prod_environment!;
 
     expect(mockNodeFetch).toHaveBeenCalledWith(
-      `${expectedConfig.baseUrl}/delivery/notifications/received/${aThirdPartyId}/attachments/documents/0`,
+      `${expectedConfig.base_url}/delivery/notifications/received/${aThirdPartyId}/attachments/documents/0`,
       {
         headers: {
           "x-pagopa-cx-taxid": aProdFiscalCode,
-          "x-api-key": "aKey",
-          [expectedConfig.detailsAuthentication.header_key_name]:
-            expectedConfig.detailsAuthentication.key,
+          "x-api-key": "anykey",
+          [expectedConfig.details_authentication.header_key_name]:
+            expectedConfig.details_authentication.key,
           ...lollipopParams
         },
         method: "get",

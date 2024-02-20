@@ -13,20 +13,18 @@ import mockRes from "../../__mocks__/response";
 import { GetMessagesParameters } from "../../../generated/parameters/GetMessagesParameters";
 import { MessageStatusChange } from "../../../generated/io-messages-api/MessageStatusChange";
 import { Change_typeEnum as Reading_Change_typeEnum } from "../../../generated/io-messages-api/MessageStatusReadingChange";
-import { MessageStatusValueEnum } from "../../../generated/io-messages-api/MessageStatusValue";
-import { NonEmptyString, Ulid } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString, Ulid } from "@pagopa/ts-commons/lib/strings";
 import { MessageStatusAttributes } from "../../../generated/io-messages-api/MessageStatusAttributes";
 import { MessageStatusWithAttributes } from "../../../generated/io-messages-api/MessageStatusWithAttributes";
 import { AppMessagesAPIClient } from "../../clients/app-messages.client";
-import { ServiceId } from "../../../generated/backend/ServiceId";
-import { FiscalCode } from "../../../generated/backend/FiscalCode";
-
-import { ThirdPartyServiceClient } from "../../clients/third-party-service-client";
 import { base64File } from "../../__mocks__/pn";
 import { NON_VALID_PDF } from "../../utils/__mocks__/pdf_files";
 import { PreconditionContent } from "../../../generated/piattaforma-notifiche/PreconditionContent";
 import * as lollipopUtils from "../../utils/lollipop";
+import * as thirdPartyServiceClient from "../../clients/third-party-service-client";
 import { lollipopParams } from "../../__mocks__/lollipop";
+import { NotRejectedMessageStatusValueEnum } from "../../../generated/io-messages-api/NotRejectedMessageStatusValue";
+import { aRemoteContentConfigurationWithBothEnv } from "../../__mocks__/remote-configuration";
 
 const dummyExtractLollipopLocalsFromLollipopHeaders = jest.spyOn(
   lollipopUtils,
@@ -251,6 +249,7 @@ const mockGetMessages = jest.fn();
 const mockGetMessage = jest.fn();
 const mockUpsertMessageStatus = jest.fn();
 const mockGetTPMessagePrecondition = jest.fn();
+const mockGetRCConfiguration = jest.fn();
 
 const mockGetTPMessageFromExternalService = jest.fn();
 mockGetTPMessageFromExternalService.mockImplementation(async (_messageId) =>
@@ -271,17 +270,17 @@ mockGetTPMessagePrecondition.mockImplementation(async (_message) =>
 
 const mockGetTPAttachment = jest.fn();
 
-const mockGetThirdPartyMessageClientFactory = jest.fn((_serviceId: ServiceId) =>
-  E.right<Error, ReturnType<ThirdPartyServiceClient>>(
-    (_fiscalCode: FiscalCode) => {
-      return {
-        getThirdPartyMessageDetails: mockGetTPMessageFromExternalService,
-        getThirdPartyMessageAttachment: mockGetTPAttachment,
-        getThirdPartyMessagePrecondition: mockGetTPMessagePrecondition,
-      };
-    }
-  )
+const dummyGetThirdPartyServiceClient = jest.spyOn(
+  thirdPartyServiceClient,
+  "getThirdPartyServiceClient"
 );
+dummyGetThirdPartyServiceClient.mockReturnValue(((_fiscalCode: FiscalCode) => {
+  return {
+    getThirdPartyMessageDetails: mockGetTPMessageFromExternalService,
+    getThirdPartyMessageAttachment: mockGetTPAttachment,
+    getThirdPartyMessagePrecondition: mockGetTPMessagePrecondition,
+  };
+}));
 
 // ----------------------------
 // Tests
@@ -295,6 +294,7 @@ const api: ReturnType<typeof AppMessagesAPIClient> = {
   getMessage: mockGetMessage,
   getMessagesByUser: mockGetMessages,
   upsertMessageStatusAttributes: mockUpsertMessageStatus,
+  getRCConfiguration: mockGetRCConfiguration
 };
 
 describe("MessageService#getMessagesByUser", () => {
@@ -304,8 +304,7 @@ describe("MessageService#getMessagesByUser", () => {
     });
 
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getMessagesByUser(mockedUser, mockParameters);
@@ -325,8 +324,7 @@ describe("MessageService#getMessagesByUser", () => {
     );
 
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getMessagesByUser(mockedUser, mockParameters);
@@ -343,8 +341,7 @@ describe("MessageService#getMessagesByUser", () => {
     );
 
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getMessagesByUser(mockedUser, mockParameters);
@@ -356,8 +353,7 @@ describe("MessageService#getMessagesByUser", () => {
     mockGetMessages.mockImplementation(() => t.success(problemJson));
 
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getMessagesByUser(mockedUser, mockParameters);
@@ -373,8 +369,7 @@ describe("MessageService#getMessagesByUser", () => {
     );
 
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getMessagesByUser(mockedUser, mockParameters);
@@ -390,8 +385,7 @@ describe("MessageService#getMessage", () => {
     mockGetMessage.mockImplementation(() => t.success(validApiMessageResponse));
 
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getMessage(
@@ -415,8 +409,7 @@ describe("MessageService#getMessage", () => {
     );
 
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getMessage(mockedUser, getMessageParam);
@@ -438,8 +431,7 @@ describe("MessageService#getMessage", () => {
     );
 
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getMessage(mockedUser, { id: aValidMessageId });
@@ -455,8 +447,7 @@ describe("MessageService#getMessage", () => {
     mockGetMessage.mockImplementation(() => t.success(problemJson));
 
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getMessage(
@@ -476,8 +467,7 @@ describe("MessageService#getMessage", () => {
     );
 
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getMessage(
@@ -497,8 +487,7 @@ describe("MessageService#getMessage", () => {
     );
 
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getMessage(
@@ -519,7 +508,7 @@ describe("MessageService#upsertMessageStatus", () => {
   const aMessageStatusWithAttributes: MessageStatusWithAttributes = {
     is_read: true,
     is_archived: false,
-    status: MessageStatusValueEnum.PROCESSED,
+    status: NotRejectedMessageStatusValueEnum.PROCESSED,
     version: 1,
     updated_at: new Date(),
   };
@@ -537,8 +526,7 @@ describe("MessageService#upsertMessageStatus", () => {
     });
 
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
     const res = await service.upsertMessageStatus(
       mockedUser.fiscal_code,
@@ -588,8 +576,7 @@ describe("MessageService#upsertMessageStatus", () => {
       });
 
       const service = new NewMessageService(
-        api,
-        mockGetThirdPartyMessageClientFactory
+        api
       );
       const res = await service.upsertMessageStatus(
         mockedUser.fiscal_code,
@@ -621,8 +608,7 @@ describe("MessageService#getThirdPartyMessageFnApp", () => {
     );
 
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getThirdPartyMessageFnApp(
@@ -643,8 +629,7 @@ describe("MessageService#getThirdPartyMessageFnApp", () => {
     );
 
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getThirdPartyMessageFnApp(
@@ -670,8 +655,7 @@ describe("MessageService#getThirdPartyMessageFnApp", () => {
     );
 
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getThirdPartyMessageFnApp(
@@ -696,8 +680,7 @@ describe("MessageService#getThirdPartyMessageFnApp", () => {
     );
 
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getThirdPartyMessageFnApp(
@@ -724,8 +707,7 @@ describe("MessageService#getThirdPartyMessage", () => {
 
   it("should return a message from the API", async () => {
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     // @ts-ignore
@@ -742,27 +724,6 @@ describe("MessageService#getThirdPartyMessage", () => {
     });
   });
 
-  it("should return an error if service configuration cannot be found", async () => {
-    mockGetThirdPartyMessageClientFactory.mockImplementationOnce((serviceId) =>
-      E.left(Error(`Service ${serviceId} not found`))
-    );
-
-    const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
-    );
-
-    const res = await service.getThirdPartyMessage(
-      aValidMessageWithThirdPartyData
-    );
-
-    expect(mockGetTPMessageFromExternalService).not.toHaveBeenCalled();
-    expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
-      detail: `Internal server error: Service ${aServiceId} not found`,
-    });
-  });
-
   it("should return an error if ThirParty service client throws an error", async () => {
     const anError = "Error calling Third Party client";
     mockGetTPMessageFromExternalService.mockImplementationOnce(async () => {
@@ -770,12 +731,12 @@ describe("MessageService#getThirdPartyMessage", () => {
     });
 
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getThirdPartyMessage(
-      aValidMessageWithThirdPartyData
+      aValidMessageWithThirdPartyData,
+      aRemoteContentConfigurationWithBothEnv
     );
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
@@ -793,12 +754,12 @@ describe("MessageService#getThirdPartyMessage", () => {
     );
 
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getThirdPartyMessage(
-      aValidMessageWithThirdPartyData
+      aValidMessageWithThirdPartyData,
+      aRemoteContentConfigurationWithBothEnv
     );
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
@@ -815,12 +776,12 @@ describe("MessageService#getThirdPartyMessage", () => {
     );
 
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getThirdPartyMessage(
-      aValidMessageWithThirdPartyData
+      aValidMessageWithThirdPartyData,
+      aRemoteContentConfigurationWithBothEnv
     );
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
@@ -845,8 +806,7 @@ describe("MessageService#getThirdPartyMessage", () => {
     );
 
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getThirdPartyMessage({
@@ -858,7 +818,8 @@ describe("MessageService#getThirdPartyMessage", () => {
           has_attachments: true,
         },
       },
-    } as unknown as MessageWithThirdPartyData);
+    } as unknown as MessageWithThirdPartyData,
+    aRemoteContentConfigurationWithBothEnv);
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
@@ -882,8 +843,7 @@ describe("MessageService#getThirdPartyMessage", () => {
         })
     );
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getThirdPartyMessage({
@@ -895,7 +855,8 @@ describe("MessageService#getThirdPartyMessage", () => {
           has_remote_content: true,
         },
       },
-    } as unknown as MessageWithThirdPartyData);
+    } as unknown as MessageWithThirdPartyData,
+    aRemoteContentConfigurationWithBothEnv);
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
@@ -922,8 +883,7 @@ describe("MessageService#getThirdPartyMessage", () => {
         })
     );
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getThirdPartyMessage({
@@ -935,7 +895,8 @@ describe("MessageService#getThirdPartyMessage", () => {
           has_remote_content: true,
         },
       },
-    } as unknown as MessageWithThirdPartyData);
+    } as unknown as MessageWithThirdPartyData,
+    aRemoteContentConfigurationWithBothEnv);
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
@@ -962,8 +923,7 @@ describe("MessageService#getThirdPartyMessage", () => {
         })
     );
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getThirdPartyMessage({
@@ -975,7 +935,8 @@ describe("MessageService#getThirdPartyMessage", () => {
           has_remote_content: true,
         },
       },
-    } as unknown as MessageWithThirdPartyData);
+    } as unknown as MessageWithThirdPartyData,
+    aRemoteContentConfigurationWithBothEnv);
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
@@ -997,8 +958,7 @@ describe("MessageService#getThirdPartyMessage", () => {
     );
 
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getThirdPartyMessage({
@@ -1011,7 +971,8 @@ describe("MessageService#getThirdPartyMessage", () => {
           has_attachments: true,
         },
       },
-    } as unknown as MessageWithThirdPartyData);
+    } as unknown as MessageWithThirdPartyData,
+    aRemoteContentConfigurationWithBothEnv);
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
@@ -1035,8 +996,7 @@ describe("MessageService#getThirdPartyMessage", () => {
     );
 
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getThirdPartyMessage({
@@ -1049,7 +1009,8 @@ describe("MessageService#getThirdPartyMessage", () => {
           has_attachments: false,
         },
       },
-    } as unknown as MessageWithThirdPartyData);
+    } as unknown as MessageWithThirdPartyData,
+    aRemoteContentConfigurationWithBothEnv);
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
@@ -1077,8 +1038,7 @@ describe("MessageService#getThirdPartyMessage", () => {
     );
 
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getThirdPartyMessage({
@@ -1091,7 +1051,8 @@ describe("MessageService#getThirdPartyMessage", () => {
           has_attachments: true,
         },
       },
-    } as unknown as MessageWithThirdPartyData);
+    } as unknown as MessageWithThirdPartyData,
+    aRemoteContentConfigurationWithBothEnv);
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
@@ -1122,8 +1083,7 @@ describe("MessageService#getThirdPartyMessage", () => {
         })
     );
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const aValidContent = {
@@ -1137,7 +1097,8 @@ describe("MessageService#getThirdPartyMessage", () => {
     const res = await service.getThirdPartyMessage({
       ...aValidMessage,
       content: aValidContent,
-    } as unknown as MessageWithThirdPartyData);
+    } as unknown as MessageWithThirdPartyData,
+    aRemoteContentConfigurationWithBothEnv);
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
@@ -1157,17 +1118,15 @@ describe("MessageService#getThirdPartyMessagePrecondition", () => {
 
   it("should return a valid PreconditionContent when third party service return 200", async () => {
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
-    // @ts-ignore
     const res = await service.getThirdPartyMessagePrecondition(
-      aValidMessageWithThirdPartyData
+      aValidMessageWithThirdPartyData,
+      aRemoteContentConfigurationWithBothEnv
     );
 
     // we call getMessage to ensure that the message exists
-
     expect(mockGetTPMessagePrecondition).toHaveBeenCalledWith({
       id: validApiThirdPartyMessageResponse.value.message.content
         .third_party_data.id,
@@ -1191,13 +1150,12 @@ describe("MessageService#getThirdPartyMessagePrecondition", () => {
     );
 
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
-    // @ts-ignore
     const res = await service.getThirdPartyMessagePrecondition(
-      aValidMessageWithThirdPartyData
+      aValidMessageWithThirdPartyData,
+      aRemoteContentConfigurationWithBothEnv
     );
 
     expect(mockGetTPMessagePrecondition).toHaveBeenCalledWith({
@@ -1223,13 +1181,12 @@ describe("MessageService#getThirdPartyMessagePrecondition", () => {
     );
 
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
-    // @ts-ignore
     const res = await service.getThirdPartyMessagePrecondition(
-      aValidMessageWithThirdPartyData
+      aValidMessageWithThirdPartyData,
+      aRemoteContentConfigurationWithBothEnv
     );
 
     expect(mockGetTPMessagePrecondition).toHaveBeenCalledWith({
@@ -1262,13 +1219,13 @@ describe("MessageService#getThirdPartyAttachment", () => {
 
   it("should return an attachment from the API", async () => {
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getThirdPartyAttachment(
       aValidMessageWithThirdPartyData,
-      anAttachmentUrl
+      anAttachmentUrl,
+      aRemoteContentConfigurationWithBothEnv
     );
 
     expect(mockGetTPAttachment).toHaveBeenCalledWith({
@@ -1291,13 +1248,13 @@ describe("MessageService#getThirdPartyAttachment", () => {
     });
 
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getThirdPartyAttachment(
       aValidMessageWithThirdPartyData,
-      anAttachmentUrl
+      anAttachmentUrl,
+      aRemoteContentConfigurationWithBothEnv
     );
 
     expect(mockGetTPAttachment).toHaveBeenCalledWith({
@@ -1309,28 +1266,6 @@ describe("MessageService#getThirdPartyAttachment", () => {
     });
   });
 
-  it("should return an error if service configuration cannot be found", async () => {
-    mockGetThirdPartyMessageClientFactory.mockImplementationOnce((serviceId) =>
-      E.left(Error(`Service ${serviceId} not found`))
-    );
-
-    const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
-    );
-
-    const res = await service.getThirdPartyAttachment(
-      aValidMessageWithThirdPartyData,
-      anAttachmentUrl
-    );
-
-    expect(mockGetTPAttachment).not.toHaveBeenCalled();
-    expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
-      detail: `Internal server error: Service ${aServiceId} not found`,
-    });
-  });
-
   it("should return an error if ThirParty service client throws an error", async () => {
     const anError = "Error calling Third Party client";
     mockGetTPAttachment.mockImplementationOnce(async () => {
@@ -1338,13 +1273,13 @@ describe("MessageService#getThirdPartyAttachment", () => {
     });
 
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getThirdPartyAttachment(
       aValidMessageWithThirdPartyData,
-      anAttachmentUrl
+      anAttachmentUrl,
+      aRemoteContentConfigurationWithBothEnv
     );
 
     expect(mockGetTPAttachment).toHaveBeenCalledWith({
@@ -1363,13 +1298,13 @@ describe("MessageService#getThirdPartyAttachment", () => {
     );
 
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getThirdPartyAttachment(
       aValidMessageWithThirdPartyData,
-      anAttachmentUrl
+      anAttachmentUrl,
+      aRemoteContentConfigurationWithBothEnv
     );
 
     expect(mockGetTPAttachment).toHaveBeenCalledWith({
@@ -1387,15 +1322,19 @@ describe("MessageService#getThirdPartyAttachment", () => {
     );
 
     const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory
+      api
     );
 
     const res = await service.getThirdPartyAttachment(
       aValidMessageWithThirdPartyData,
-      anAttachmentUrl
+      anAttachmentUrl,
+      aRemoteContentConfigurationWithBothEnv
     );
 
+    expect(res).toMatchObject({
+      kind: "IResponseErrorNotFound",
+    });
+    
     expect(mockGetTPAttachment).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
       attachment_url: anAttachmentUrl,

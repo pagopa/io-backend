@@ -23,7 +23,7 @@ import {
   aPnKey,
   aPnNotificationDocument,
   aPnNotificationId,
-  aPNServiceId,
+  aPNConfigurationId,
   aPNThirdPartyNotification,
   aPNThirdPartyNotificationWithInvalidCategory,
   aPnUrl,
@@ -182,7 +182,7 @@ describe("getThirdPartyMessageDetails", () => {
   it("GIVEN a working PN endpoint WHEN a Third-Party get message is called THEN the get is properly orchestrated on PN endpoints without lollipopParams", async () => {
     const aFetch = pnFetch(
       nodeFetch as any as typeof fetch,
-      aPNServiceId,
+      aPNConfigurationId,
       aPnUrl,
       aPnKey
     );
@@ -221,7 +221,7 @@ describe("getThirdPartyMessageDetails", () => {
   it("GIVEN a working PN endpoint WHEN a Third-Party get message is called THEN the get is properly orchestrated on PN endpoints", async () => {
     const aFetch = pnFetch(
       nodeFetch as any as typeof fetch,
-      aPNServiceId,
+      aPNConfigurationId,
       aPnUrl,
       aPnKey,
       lollipopParams
@@ -268,7 +268,7 @@ describe("getThirdPartyMessageDetails", () => {
 
     const aFetch = pnFetch(
       nodeFetch as any as typeof fetch,
-      aPNServiceId,
+      aPNConfigurationId,
       aPnUrl,
       aPnKey,
       lollipopParams
@@ -316,7 +316,7 @@ describe("getThirdPartyMessageDetails", () => {
 
     const aFetch = pnFetch(
       nodeFetch as any as typeof fetch,
-      aPNServiceId,
+      aPNConfigurationId,
       aPnUrl,
       aPnKey,
       lollipopParams
@@ -343,7 +343,7 @@ describe("getThirdPartyMessageDetails", () => {
 
     const aFetch = pnFetch(
       nodeFetch as any as typeof fetch,
-      aPNServiceId,
+      aPNConfigurationId,
       aPnUrl,
       aPnKey,
       lollipopParams
@@ -393,7 +393,7 @@ describe("getThirdPartyAttachments", () => {
 
     const aFetch = pnFetch(
       dummyFetch as any as typeof fetch,
-      aPNServiceId,
+      aPNConfigurationId,
       aPnUrl,
       aPnKey
     );
@@ -434,7 +434,7 @@ describe("getThirdPartyAttachments", () => {
 
     const aFetch = pnFetch(
       dummyFetch as any as typeof fetch,
-      aPNServiceId,
+      aPNConfigurationId,
       aPnUrl,
       aPnKey,
       lollipopParams
@@ -475,7 +475,7 @@ describe("getThirdPartyAttachments", () => {
 
     const aFetch = pnFetch(
       dummyFetch as any as typeof fetch,
-      aPNServiceId,
+      aPNConfigurationId,
       aPnUrl,
       aPnKey,
       lollipopParams
@@ -522,7 +522,7 @@ describe("getThirdPartyAttachments", () => {
 
     const aFetch = pnFetch(
       dummyFetch as any as typeof fetch,
-      aPNServiceId,
+      aPNConfigurationId,
       aPnUrl,
       aPnKey,
       lollipopParams
@@ -576,7 +576,7 @@ describe("getThirdPartyAttachments", () => {
 
     const aFetch = pnFetch(
       dummyFetch as any as typeof fetch,
-      aPNServiceId,
+      aPNConfigurationId,
       aPnUrl,
       aPnKey,
       lollipopParams
@@ -623,7 +623,7 @@ describe("getThirdPartyAttachments", () => {
 
     const aFetch = pnFetch(
       dummyFetch as any as typeof fetch,
-      aPNServiceId,
+      aPNConfigurationId,
       aPnUrl,
       aPnKey,
       lollipopParams
@@ -662,7 +662,7 @@ describe("getThirdPartyAttachments", () => {
   it("GIVEN not working PN endpoint WHEN a Third-Party get attachments is called THEN the get is properly forwarded to PN endpoint returning an error", async () => {
     const aFetch = pnFetch(
       nodeFetch as any as typeof fetch,
-      aPNServiceId,
+      aPNConfigurationId,
       aPnUrl,
       aPnKey,
       lollipopParams
@@ -698,7 +698,7 @@ describe("getThirdPartyMessagePrecondition", () => {
   it("GIVEN a working PN endpoint WHEN a Third-Party get precondition is called THEN the get is properly orchestrated on PN endpoints without lollipopParams", async () => {
     const aFetch = pnFetch(
       nodeFetch as any as typeof fetch,
-      aPNServiceId,
+      aPNConfigurationId,
       aPnUrl,
       aPnKey
     );
@@ -733,7 +733,7 @@ describe("getThirdPartyMessagePrecondition", () => {
   it("GIVEN a working PN endpoint WHEN a Third-Party get precondition is called THEN the get is properly orchestrated on PN endpoints", async () => {
     const aFetch = pnFetch(
       nodeFetch as any as typeof fetch,
-      aPNServiceId,
+      aPNConfigurationId,
       aPnUrl,
       aPnKey,
       lollipopParams
@@ -772,7 +772,7 @@ describe("getThirdPartyMessagePrecondition", () => {
 
     const aFetch = pnFetch(
       nodeFetch as any as typeof fetch,
-      aPNServiceId,
+      aPNConfigurationId,
       aPnUrl,
       aPnKey,
       lollipopParams
