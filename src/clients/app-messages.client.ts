@@ -12,6 +12,11 @@ export function AppMessagesAPIClient(
     baseUrl,
     fetchApi,
     withDefaults: (op) => (params) =>
+      // since the client is generated with endpoints without commons fields
+      // we have to ignore ts errors because abstractions are based on disjointed unions
+      // TOFIX: the codegen needs to be fixed to handle client that have endpoints without common fields
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       op({
         ...params,
         SubscriptionKey: token,
