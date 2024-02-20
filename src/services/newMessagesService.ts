@@ -479,7 +479,7 @@ export default class NewMessagesService {
         nodeFetch as unknown as Fetch,
         lollipopLocals
       ),
-      x => x,
+      (x) => x,
       TE.of,
       TE.map((getClientByFiscalCode) =>
         getClientByFiscalCode(message.fiscal_code)
