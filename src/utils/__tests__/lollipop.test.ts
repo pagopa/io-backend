@@ -19,6 +19,7 @@ import * as RA from "fp-ts/ReadonlyArray";
 import { aRemoteContentConfigurationWithBothEnv } from "../../__mocks__/remote-configuration";
 
 const aLollipopEnabledFiscalCode = "ABCABC00A00B000C" as FiscalCode;
+const aLollipopDisabledFiscalCode = "ABCABC01A00B000C" as FiscalCode;
 
 describe("checkIfLollipopIsEnabled", () => {
   it("Should return true when lollipop is enabled and the user is not in the blacklist", async () => {
@@ -59,7 +60,7 @@ describe("checkIfLollipopIsEnabled", () => {
 
   it("Should return false when lollipop is disabled and the user is in the blacklist", async () => {
     const res = await checkIfLollipopIsEnabled(
-      aLollipopEnabledFiscalCode,
+      aLollipopDisabledFiscalCode,
       { ...aRemoteContentConfigurationWithBothEnv, is_lollipop_enabled: false }
     )();
 
