@@ -85,6 +85,28 @@ dummyPnAPIClient.mockImplementation(
 
 const anErrorMessage = "ERROR TEST";
 
+const dummyFetch = jest.fn((_input: RequestInfo, _init?: RequestInit) =>
+  T.of(
+    new NodeResponse(documentBody, {
+      status: 200,
+      statusText: "OK",
+    }) as unknown as Response
+  )()
+);
+
+const aDummyPn200Fetch = pnFetch(
+  dummyFetch as any as typeof fetch,
+  aPNConfigurationId,
+  aPnUrl,
+  aPnKey,
+  lollipopParams
+);
+
+const aPnSuccessClient = createClient({
+  baseUrl: "https://localhost",
+  fetchApi: aDummyPn200Fetch,
+});
+
 describe("errorResponse", () => {
   it("GIVEN a generic error WHEN errorResponse is called THEN a response containing the error message is returned", async () => {
     const response = errorResponse(new Error(anErrorMessage));
@@ -382,15 +404,6 @@ describe("getThirdPartyAttachments", () => {
   beforeEach(() => jest.clearAllMocks());
 
   it("GIVEN a working PN endpoint WHEN a Third-Party get attachments is called THEN the get is properly forwarded to PN endpoint without lollipopParams", async () => {
-    const dummyFetch = jest.fn((_input: RequestInfo, _init?: RequestInit) =>
-      T.of(
-        new NodeResponse(documentBody, {
-          status: 200,
-          statusText: "OK",
-        }) as unknown as Response
-      )()
-    );
-
     const aFetch = pnFetch(
       dummyFetch as any as typeof fetch,
       aPNConfigurationId,
@@ -423,29 +436,7 @@ describe("getThirdPartyAttachments", () => {
   });
 
   it("GIVEN a working PN endpoint WHEN a Third-Party get attachments is called THEN the get is properly forwarded to PN endpoint", async () => {
-    const dummyFetch = jest.fn((_input: RequestInfo, _init?: RequestInit) =>
-      T.of(
-        new NodeResponse(documentBody, {
-          status: 200,
-          statusText: "OK",
-        }) as unknown as Response
-      )()
-    );
-
-    const aFetch = pnFetch(
-      dummyFetch as any as typeof fetch,
-      aPNConfigurationId,
-      aPnUrl,
-      aPnKey,
-      lollipopParams
-    );
-
-    const client = createClient({
-      baseUrl: "https://localhost",
-      fetchApi: aFetch,
-    });
-
-    const result = await client.getThirdPartyMessageAttachment({
+    const result = await aPnSuccessClient.getThirdPartyMessageAttachment({
       fiscal_code: aFiscalCode,
       id: aPnNotificationId,
       attachment_url: aThirdPartyAttachmentForPnRelativeUrl,
@@ -464,29 +455,7 @@ describe("getThirdPartyAttachments", () => {
   });
 
   it("GIVEN an available PN GetReceivedNotificationAttachment endpoint WHEN a Third-Party get attachments is called THEN the get is properly forwarded to PN endpoint returning an attachment", async () => {
-    const dummyFetch = jest.fn((_input: RequestInfo, _init?: RequestInit) =>
-      T.of(
-        new NodeResponse(documentBody, {
-          status: 200,
-          statusText: "OK",
-        }) as unknown as Response
-      )()
-    );
-
-    const aFetch = pnFetch(
-      dummyFetch as any as typeof fetch,
-      aPNConfigurationId,
-      aPnUrl,
-      aPnKey,
-      lollipopParams
-    );
-
-    const client = createClient({
-      baseUrl: "https://localhost",
-      fetchApi: aFetch,
-    });
-
-    const result = await client.getThirdPartyMessageAttachment({
+    const result = await aPnSuccessClient.getThirdPartyMessageAttachment({
       fiscal_code: aFiscalCode,
       id: aPnNotificationId,
       attachment_url: aThirdPartyAttachmentForPnF24RelativeUrl,
