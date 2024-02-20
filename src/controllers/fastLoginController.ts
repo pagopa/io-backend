@@ -8,7 +8,7 @@ import {
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import * as t from "io-ts";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { flow, identity, pipe } from "fp-ts/function";
 import * as E from "fp-ts/lib/Either";
 import * as AP from "fp-ts/lib/Apply";
@@ -17,7 +17,6 @@ import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
 import * as T from "fp-ts/lib/Task";
 import { safeXMLParseFromString } from "@pagopa/io-spid-commons/dist/utils/samlUtils";
 import { decodeIPAddressFromReq } from "../utils/network";
-import { FiscalCode } from "../../generated/io-bonus-api/FiscalCode";
 import { withLollipopLocals } from "../types/lollipop";
 import { ResLocals } from "../utils/express";
 import { getFastLoginLollipopConsumerClient } from "../clients/fastLoginLollipopConsumerClient";

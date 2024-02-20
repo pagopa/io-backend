@@ -14,9 +14,13 @@ import expressEnforcesSsl = require("express-enforces-ssl");
 import { TableClient } from "@azure/data-tables";
 import {
   NodeEnvironment,
-  NodeEnvironmentEnum
+  NodeEnvironmentEnum,
 } from "@pagopa/ts-commons/lib/environment";
-import { CIDR, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import {
+  CIDR,
+  FiscalCode,
+  NonEmptyString,
+} from "@pagopa/ts-commons/lib/strings";
 import { QueueClient } from "@azure/storage-queue";
 import { withSpid } from "@pagopa/io-spid-commons";
 import { getSpidStrategyOption } from "@pagopa/io-spid-commons/dist/utils/middleware";
@@ -89,7 +93,7 @@ import {
   ALLOWED_CIE_TEST_FISCAL_CODES,
   LOCKED_PROFILES_STORAGE_CONNECTION_STRING,
   LOCKED_PROFILES_TABLE_NAME,
-  isUserElegibleForFastLogin
+  isUserElegibleForFastLogin,
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -108,12 +112,12 @@ import CgnController from "./controllers/cgnController";
 import SessionLockController from "./controllers/sessionLockController";
 import {
   getPNActivationController,
-  upsertPNActivationController
+  upsertPNActivationController,
 } from "./controllers/pnController";
 import {
   getUserForBPD,
   getUserForFIMS,
-  getUserForMyPortal
+  getUserForMyPortal,
 } from "./controllers/ssoController";
 import SupportController from "./controllers/supportController";
 import ZendeskController from "./controllers/zendeskController";
@@ -129,7 +133,7 @@ import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import TokenService from "./services/tokenService";
 import UserDataProcessingService from "./services/userDataProcessingService";
 import UsersLoginLogService, {
-  onUserLogin
+  onUserLogin,
 } from "./services/usersLoginLogService";
 import bearerBPDTokenStrategy from "./strategies/bearerBPDTokenStrategy";
 import bearerMyPortalTokenStrategy from "./strategies/bearerMyPortalTokenStrategy";
@@ -141,21 +145,20 @@ import { User } from "./types/user";
 import {
   attachTrackingData,
   StartupEventName,
-  trackStartupTime
+  trackStartupTime,
 } from "./utils/appinsights";
 import { getRequiredENVVar } from "./utils/container";
 import {
   constantExpressHandler,
   toExpressHandler,
-  toExpressMiddleware
+  toExpressMiddleware,
 } from "./utils/express";
 import { expressErrorMiddleware } from "./utils/middleware/express";
 import {
   getCurrentBackendVersion,
-  getObjectFromPackageJson
+  getObjectFromPackageJson,
 } from "./utils/package";
 import { RedisClientSelector, RedisClientMode } from "./utils/redis";
-import { ResponseErrorDismissed } from "./utils/responses";
 import { makeSpidLogCallback } from "./utils/spid";
 import { TimeTracer } from "./utils/timer";
 import CgnOperatorSearchController from "./controllers/cgnOperatorSearchController";
@@ -170,14 +173,14 @@ import IoSignService from "./services/ioSignService";
 import IoSignController from "./controllers/ioSignController";
 import {
   getNotificationServiceFactory,
-  NotificationServiceFactory
+  NotificationServiceFactory,
 } from "./services/notificationServiceFactory";
 import { lollipopLoginMiddleware } from "./handlers/lollipop";
 import LollipopService from "./services/lollipopService";
 import { firstLollipopSign } from "./controllers/firstLollipopConsumerController";
 import {
   expressLollipopMiddleware,
-  expressLollipopMiddlewareLegacy
+  expressLollipopMiddlewareLegacy,
 } from "./utils/middleware/lollipop";
 import { LollipopApiClient } from "./clients/lollipop";
 import { ISessionStorage } from "./services/ISessionStorage";
@@ -186,11 +189,11 @@ import {
   AdditionalLoginProps,
   LoginTypeEnum,
   acsRequestMapper,
-  getLoginType
+  getLoginType,
 } from "./utils/fastLogin";
 import {
   fastLoginEndpoint,
-  generateNonceEndpoint
+  generateNonceEndpoint,
 } from "./controllers/fastLoginController";
 import { getFastLoginLollipopConsumerClient } from "./clients/fastLoginLollipopConsumerClient";
 import { FeatureFlagEnum } from "./utils/featureFlag";
@@ -198,7 +201,7 @@ import AuthenticationLockService from "./services/authenticationLockService";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
-  newApp
+  newApp,
 };
 
 export interface IAppFactoryParameters {
@@ -212,7 +215,6 @@ export interface IAppFactoryParameters {
   readonly allowZendeskIPSourceRange: ReadonlyArray<CIDR>;
   readonly authenticationBasePath: string;
   readonly APIBasePath: string;
-  readonly BonusAPIBasePath: string;
   readonly PagoPABasePath: string;
   readonly MyPortalBasePath: string;
   readonly BPDBasePath: string;
@@ -237,7 +239,6 @@ export async function newApp({
   appInsightsClient,
   authenticationBasePath,
   APIBasePath,
-  BonusAPIBasePath,
   PagoPABasePath,
   MyPortalBasePath,
   BPDBasePath,
@@ -247,7 +248,7 @@ export async function newApp({
   CGNOperatorSearchAPIBasePath,
   EUCovidCertBasePath,
   MitVoucherBasePath,
-  ZendeskBasePath
+  ZendeskBasePath,
 }: IAppFactoryParameters): Promise<Express> {
   const isDevEnvironment = ENV === NodeEnvironmentEnum.DEVELOPMENT;
   const REDIS_CLIENT_SELECTOR = await RedisClientSelector(
@@ -293,29 +294,29 @@ export async function newApp({
   // Creates middlewares for each implemented strategy
   const authMiddlewares = {
     bearerBPD: passport.authenticate("bearer.bpd", {
-      session: false
+      session: false,
     }),
     bearerFIMS: passport.authenticate("bearer.fims", {
-      session: false
+      session: false,
     }),
     bearerMyPortal: passport.authenticate("bearer.myportal", {
-      session: false
+      session: false,
     }),
     bearerSession: passport.authenticate("bearer.session", {
-      session: false
+      session: false,
     }),
     bearerWallet: passport.authenticate("bearer.wallet", {
-      session: false
+      session: false,
     }),
     bearerZendesk: passport.authenticate("bearer.zendesk", {
-      session: false
+      session: false,
     }),
     local: passport.authenticate("local", {
-      session: false
+      session: false,
     }),
     urlToken: passport.authenticate("authtoken", {
-      session: false
-    })
+      session: false,
+    }),
   };
 
   // Create and setup the Express app.
@@ -350,7 +351,7 @@ export async function newApp({
     pipe(
       req.user,
       User.decode,
-      E.map(user => String(user.fiscal_code).slice(0, 6)),
+      E.map((user) => String(user.fiscal_code).slice(0, 6)),
       E.getOrElse(() => "")
     )
   );
@@ -378,7 +379,7 @@ export async function newApp({
       verify: (_req, res: express.Response, buf, _encoding: BufferEncoding) => {
         // eslint-disable-next-line functional/immutable-data
         res.locals.body = buf;
-      }
+      },
     })
   );
 
@@ -416,9 +417,6 @@ export async function newApp({
           tableClient
         );
 
-        // Create the bonus service
-        const BONUS_SERVICE = new BonusService(BONUS_API_CLIENT);
-
         // Create the cgn service
         const CGN_SERVICE = new CgnService(CGN_API_CLIENT);
 
@@ -448,10 +446,10 @@ export async function newApp({
                 NOTIFICATIONS_STORAGE_CONNECTION_STRING,
                 NOTIFICATIONS_QUEUE_NAME
               ),
-            err =>
+            (err) =>
               new Error(`Error initializing Notification Service: [${err}]`)
           ),
-          E.getOrElseW(err => {
+          E.getOrElseW((err) => {
             throw err;
           })
         );
@@ -464,12 +462,12 @@ export async function newApp({
                 PUSH_NOTIFICATIONS_STORAGE_CONNECTION_STRING,
                 PUSH_NOTIFICATIONS_QUEUE_NAME
               ),
-            err =>
+            (err) =>
               new Error(
                 `Error initializing Push Notification Service: [${err}]`
               )
           ),
-          E.getOrElseW(err => {
+          E.getOrElseW((err) => {
             throw err;
           })
         );
@@ -490,10 +488,10 @@ export async function newApp({
                 USERS_LOGIN_STORAGE_CONNECTION_STRING,
                 USERS_LOGIN_QUEUE_NAME
               ),
-            err =>
+            (err) =>
               new Error(`Error initializing UsersLoginLogService: [${err}]`)
           ),
-          E.getOrElseW(err => {
+          E.getOrElseW((err) => {
             throw err;
           })
         );
@@ -507,35 +505,36 @@ export async function newApp({
                 LOLLIPOP_REVOKE_QUEUE_NAME,
                 appInsightsClient
               ),
-            err =>
+            (err) =>
               new Error(`Error initializing UsersLoginLogService: [${err}]`)
           ),
-          E.getOrElseW(err => {
+          E.getOrElseW((err) => {
             throw err;
           })
         );
 
-        const acsController: AuthenticationController = new AuthenticationController(
-          SESSION_STORAGE,
-          TOKEN_SERVICE,
-          getClientProfileRedirectionUrl,
-          getClientErrorRedirectionUrl,
-          PROFILE_SERVICE,
-          AUTHENTICATION_LOCK_SERVICE,
-          notificationServiceFactory,
-          USERS_LOGIN_LOG_SERVICE,
-          onUserLogin(API_CLIENT),
-          FF_USER_AGE_LIMIT_ENABLED,
-          {
-            isLollipopEnabled: FF_LOLLIPOP_ENABLED,
-            lollipopService: LOLLIPOP_SERVICE
-          },
-          tokenDurationSecs as Second,
-          lvTokenDurationSecs as Second,
-          lvLongSessionDurationSecs as Second,
-          ALLOWED_CIE_TEST_FISCAL_CODES,
-          appInsightsClient
-        );
+        const acsController: AuthenticationController =
+          new AuthenticationController(
+            SESSION_STORAGE,
+            TOKEN_SERVICE,
+            getClientProfileRedirectionUrl,
+            getClientErrorRedirectionUrl,
+            PROFILE_SERVICE,
+            AUTHENTICATION_LOCK_SERVICE,
+            notificationServiceFactory,
+            USERS_LOGIN_LOG_SERVICE,
+            onUserLogin(API_CLIENT),
+            FF_USER_AGE_LIMIT_ENABLED,
+            {
+              isLollipopEnabled: FF_LOLLIPOP_ENABLED,
+              lollipopService: LOLLIPOP_SERVICE,
+            },
+            tokenDurationSecs as Second,
+            lvTokenDurationSecs as Second,
+            lvLongSessionDurationSecs as Second,
+            ALLOWED_CIE_TEST_FISCAL_CODES,
+            appInsightsClient
+          );
 
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         registerPublicRoutes(app);
@@ -620,15 +619,6 @@ export async function newApp({
           AUTHENTICATION_LOCK_SERVICE,
           notificationServiceFactory
         );
-        if (FF_BONUS_ENABLED) {
-          // eslint-disable-next-line @typescript-eslint/no-use-before-define
-          registerBonusAPIRoutes(
-            app,
-            BonusAPIBasePath,
-            BONUS_SERVICE,
-            authMiddlewares.bearerSession
-          );
-        }
         if (FF_CGN_ENABLED) {
           // eslint-disable-next-line @typescript-eslint/no-use-before-define
           registerCgnAPIRoutes(
@@ -739,9 +729,9 @@ export async function newApp({
         );
         return { acsController, app };
       },
-      err => new Error(`Error on app routes setup: [${err}]`)
+      (err) => new Error(`Error on app routes setup: [${err}]`)
     ),
-    TE.chain(_ => {
+    TE.chain((_) => {
       const spidQueueClient = new QueueClient(
         SPID_LOG_STORAGE_CONNECTION_STRING,
         SPID_LOG_QUEUE_NAME
@@ -764,19 +754,19 @@ export async function newApp({
               app: _.app,
               appConfig: {
                 ...appConfig,
-                eventTraker: event => {
+                eventTraker: (event) => {
                   appInsightsClient?.trackEvent({
                     name: event.name,
                     properties: {
                       type: event.type,
-                      ...event.data
-                    }
+                      ...event.data,
+                    },
                   });
                 },
                 extraLoginRequestParamConfig: {
                   codec: AdditionalLoginProps,
-                  requestMapper: acsRequestMapper
-                }
+                  requestMapper: acsRequestMapper,
+                },
               },
               doneCb: spidLogCallback,
               logout: _.acsController.slo.bind(_.acsController),
@@ -791,17 +781,17 @@ export async function newApp({
                 RedisClientMode.FAST
               ),
               samlConfig,
-              serviceProviderConfig
+              serviceProviderConfig,
             })(),
-          err => new Error(`Unexpected error initizing Spid Login: [${err}]`)
+          (err) => new Error(`Unexpected error initizing Spid Login: [${err}]`)
         ),
-        TE.map(withSpidApp => ({
+        TE.map((withSpidApp) => ({
           ...withSpidApp,
-          spidConfigTime: timer.getElapsedMilliseconds()
+          spidConfigTime: timer.getElapsedMilliseconds(),
         }))
       );
     }),
-    TE.map(_ => {
+    TE.map((_) => {
       if (appInsightsClient) {
         trackStartupTime(
           appInsightsClient,
@@ -827,8 +817,8 @@ export async function newApp({
           log.info(`Graceful closing redis connection`);
           pipe(
             O.fromNullable(client.quit),
-            O.map(redisQuitFn =>
-              redisQuitFn().catch(err =>
+            O.map((redisQuitFn) =>
+              redisQuitFn().catch((err) =>
                 log.error(
                   `An Error occurred closing the redis connection: [${
                     E.toError(err).message
@@ -841,7 +831,7 @@ export async function newApp({
       });
       return _.app;
     }),
-    TE.chain(_ => {
+    TE.chain((_) => {
       const spidStrategyOption = getSpidStrategyOption(_);
       // Process ends in case no IDP is configured
       if (R.isEmpty(spidStrategyOption?.idp || {})) {
@@ -856,14 +846,14 @@ export async function newApp({
       }
       return TE.of(_);
     }),
-    TE.map(_ => {
+    TE.map((_) => {
       // Register the express error handler
       // This middleware must be the last in order to catch all the errors
       // forwarded with express next function.
       _.use(expressErrorMiddleware);
       return _;
     }),
-    TE.getOrElse(err => {
+    TE.getOrElse((err) => {
       app.emit("server:stop");
       throw err;
     })
@@ -975,9 +965,8 @@ function registerEUCovidCertAPIRoutes(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bearerSessionTokenAuth: any
 ): void {
-  const eucovidCertController: EUCovidCertController = new EUCovidCertController(
-    eucovidcertService
-  );
+  const eucovidCertController: EUCovidCertController =
+    new EUCovidCertController(eucovidcertService);
 
   app.post(
     `${basePath}/certificate`,
@@ -1046,14 +1035,11 @@ function registerAPIRoutes(
     fnAppService
   );
 
-  const notificationController: NotificationController = new NotificationController(
-    notificationServiceFactory,
-    sessionStorage,
-    {
+  const notificationController: NotificationController =
+    new NotificationController(notificationServiceFactory, sessionStorage, {
       notificationDefaultSubject: NOTIFICATION_DEFAULT_SUBJECT,
-      notificationDefaultTitle: NOTIFICATION_DEFAULT_TITLE
-    }
-  );
+      notificationDefaultTitle: NOTIFICATION_DEFAULT_TITLE,
+    });
 
   const sessionController: SessionController = new SessionController(
     sessionStorage,
@@ -1061,17 +1047,14 @@ function registerAPIRoutes(
     profileService
   );
 
-  const pagoPAProxyController: PagoPAProxyController = new PagoPAProxyController(
-    pagoPaProxyService
-  );
+  const pagoPAProxyController: PagoPAProxyController =
+    new PagoPAProxyController(pagoPaProxyService);
 
-  const userMetadataController: UserMetadataController = new UserMetadataController(
-    userMetadataStorage
-  );
+  const userMetadataController: UserMetadataController =
+    new UserMetadataController(userMetadataStorage);
 
-  const userDataProcessingController: UserDataProcessingController = new UserDataProcessingController(
-    userDataProcessingService
-  );
+  const userDataProcessingController: UserDataProcessingController =
+    new UserDataProcessingController(userDataProcessingService);
 
   const supportController: SupportController = new SupportController(
     tokenService
@@ -1298,13 +1281,14 @@ function registerSessionAPIRoutes(
   notificationServiceFactory: NotificationServiceFactory
 ): void {
   if (FF_ENABLE_SESSION_ENDPOINTS) {
-    const sessionLockController: SessionLockController = new SessionLockController(
-      sessionStorage,
-      userMetadataStorage,
-      lollipopService,
-      authenticationLockService,
-      notificationServiceFactory
-    );
+    const sessionLockController: SessionLockController =
+      new SessionLockController(
+        sessionStorage,
+        userMetadataStorage,
+        lollipopService,
+        authenticationLockService,
+        notificationServiceFactory
+      );
 
     app.get(
       `${basePath}/sessions/:fiscal_code`,
@@ -1453,7 +1437,7 @@ function registerIoSignAPIRoutes(
     bearerSessionTokenAuth,
     constantExpressHandler(
       ResponseSuccessJson({
-        serviceId: IO_SIGN_SERVICE_ID as NonEmptyString
+        serviceId: IO_SIGN_SERVICE_ID as NonEmptyString,
       })
     )
   );
@@ -1498,10 +1482,8 @@ function registerCgnOperatorSearchAPIRoutes(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bearerSessionTokenAuth: any
 ): void {
-  const cgnOperatorController: CgnOperatorSearchController = new CgnOperatorSearchController(
-    cgnService,
-    cgnOperatorSearchService
-  );
+  const cgnOperatorController: CgnOperatorSearchController =
+    new CgnOperatorSearchController(cgnService, cgnOperatorSearchService);
 
   app.get(
     `${basePath}/published-product-categories`,
@@ -1546,49 +1528,6 @@ function registerCgnOperatorSearchAPIRoutes(
   );
 }
 
-function registerBonusAPIRoutes(
-  app: Express,
-  basePath: string,
-  bonusService: BonusService,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any
-): void {
-  const bonusController: BonusController = new BonusController(bonusService);
-
-  app.post(
-    `${basePath}/bonus/vacanze/eligibility`,
-    bearerSessionTokenAuth,
-    constantExpressHandler(ResponseErrorDismissed)
-  );
-
-  app.get(
-    `${basePath}/bonus/vacanze/eligibility`,
-    bearerSessionTokenAuth,
-    toExpressHandler(bonusController.getBonusEligibilityCheck, bonusController)
-  );
-
-  app.get(
-    `${basePath}/bonus/vacanze/activations/:bonus_id`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      bonusController.getLatestBonusActivationById,
-      bonusController
-    )
-  );
-
-  app.get(
-    `${basePath}/bonus/vacanze/activations`,
-    bearerSessionTokenAuth,
-    toExpressHandler(bonusController.getAllBonusActivations, bonusController)
-  );
-
-  app.post(
-    `${basePath}/bonus/vacanze/activations`,
-    bearerSessionTokenAuth,
-    constantExpressHandler(ResponseErrorDismissed)
-  );
-}
-
 // eslint-disable-next-line max-params
 function registerAuthenticationRoutes(
   app: Express,
@@ -1603,7 +1542,7 @@ function registerAuthenticationRoutes(
 ): void {
   pipe(
     TEST_LOGIN_PASSWORD,
-    E.map(testLoginPassword => {
+    E.map((testLoginPassword) => {
       passport.use(
         "local",
         localStrategy(
@@ -1617,10 +1556,10 @@ function registerAuthenticationRoutes(
         `${authBasePath}/test-login`,
         localAuth,
         toExpressHandler(
-          req =>
+          (req) =>
             acsController.acsTest({
               ...req.user,
-              getAcsOriginalRequest: () => req
+              getAcsOriginalRequest: () => req,
             }),
           acsController
         )
@@ -1680,17 +1619,17 @@ function registerPublicRoutes(app: Express): void {
         minAppVersion,
         O.getOrElse(() => ({
           android: "UNKNOWN",
-          ios: "UNKNOWN"
+          ios: "UNKNOWN",
         }))
       ),
       min_app_version_pagopa: pipe(
         minAppVersionPagoPa,
         O.getOrElse(() => ({
           android: "UNKNOWN",
-          ios: "UNKNOWN"
+          ios: "UNKNOWN",
         }))
       ),
-      version
+      version,
     };
     res.status(200).json(serverInfo);
   });
@@ -1725,9 +1664,7 @@ function registerFastLoginRoutes(
   basePath: string,
   lollipopClient: ReturnType<typeof LollipopApiClient>,
   sessionStorage: ISessionStorage,
-  fastLoginLollipopConsumerClient: ReturnType<
-    getFastLoginLollipopConsumerClient
-  >,
+  fastLoginLollipopConsumerClient: ReturnType<getFastLoginLollipopConsumerClient>,
   tokenService: TokenService
 ): void {
   app.post(

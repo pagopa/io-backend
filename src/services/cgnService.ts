@@ -1,5 +1,5 @@
 /**
- * This service interactsnwith the Bonus API
+ * This service interactsnwith the CGN API
  */
 
 import {

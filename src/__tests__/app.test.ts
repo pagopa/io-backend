@@ -69,7 +69,6 @@ const aValidCIDR = "192.168.0.0/16" as CIDR;
 const X_FORWARDED_PROTO_HEADER = "X-Forwarded-Proto";
 
 const aAPIBasePath = "/api/v1";
-const aBonusAPIBasePath = "/bonus/api/v1";
 const aPagoPABasePath = "/pagopa/api/v1";
 const aMyPortalBasePath = "/myportal/api/v1";
 const aBPDBasePath = "/bpd/api/v1";
@@ -88,7 +87,6 @@ describe("Success app start", () => {
     app = await appModule.newApp({
       APIBasePath: aAPIBasePath,
       BPDBasePath: aBPDBasePath,
-      BonusAPIBasePath: aBonusAPIBasePath,
       CGNAPIBasePath: aCgnAPIBasePath,
       CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
       EUCovidCertBasePath: aEuCovidCertAPIBasePath,
@@ -192,7 +190,6 @@ describe("Failure app start", () => {
       await appModule.newApp({
         APIBasePath: aAPIBasePath,
         BPDBasePath: aBPDBasePath,
-        BonusAPIBasePath: aBonusAPIBasePath,
         CGNAPIBasePath: aCgnAPIBasePath,
         CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
         EUCovidCertBasePath: aEuCovidCertAPIBasePath,
@@ -226,7 +223,6 @@ describe("Failure app start", () => {
       await appModule.newApp({
         APIBasePath: aAPIBasePath,
         BPDBasePath: aBPDBasePath,
-        BonusAPIBasePath: aBonusAPIBasePath,
         CGNAPIBasePath: aCgnAPIBasePath,
         CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
         EUCovidCertBasePath: aEuCovidCertAPIBasePath,
@@ -260,7 +256,6 @@ describe("Failure app start", () => {
       await appModule.newApp({
         APIBasePath: aAPIBasePath,
         BPDBasePath: aBPDBasePath,
-        BonusAPIBasePath: aBonusAPIBasePath,
         CGNAPIBasePath: aCgnAPIBasePath,
         CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
         EUCovidCertBasePath: aEuCovidCertAPIBasePath,

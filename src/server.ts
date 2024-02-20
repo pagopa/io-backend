@@ -20,7 +20,6 @@ import {
   ALLOW_ZENDESK_IP_SOURCE_RANGE,
   API_BASE_PATH,
   AUTHENTICATION_BASE_PATH,
-  BONUS_API_BASE_PATH,
   BPD_BASE_PATH,
   CGN_API_BASE_PATH,
   CGN_OPERATOR_SEARCH_API_BASE_PATH,
@@ -50,7 +49,6 @@ import { TimeTracer } from "./utils/timer";
 
 const authenticationBasePath = AUTHENTICATION_BASE_PATH;
 const APIBasePath = API_BASE_PATH;
-const BonusAPIBasePath = BONUS_API_BASE_PATH;
 const PagoPABasePath = PAGOPA_BASE_PATH;
 const MyPortalBasePath = MYPORTAL_BASE_PATH;
 const BPDBasePath = BPD_BASE_PATH;
@@ -110,7 +108,6 @@ const maybeAppInsightsClient = pipe(
 newApp({
   APIBasePath,
   BPDBasePath,
-  BonusAPIBasePath,
   CGNAPIBasePath,
   CGNOperatorSearchAPIBasePath,
   EUCovidCertBasePath,

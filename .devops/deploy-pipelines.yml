@@ -46,9 +46,6 @@ parameters:
       api_backend: 
         openapi_spec_path: 'openapi/generated/api_backend.yaml'
         package_name: '@pagopa/io-backend-sdk'
-      api_bonus: 
-        openapi_spec_path: 'openapi/generated/api_bonus.yaml'
-        package_name: '@pagopa/io-backend-bonus-sdk'
       api_bpd: 
         openapi_spec_path: 'openapi/generated/api_bpd.yaml'
         package_name: '@pagopa/io-backend-bpd-sdk'
