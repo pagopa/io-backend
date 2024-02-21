@@ -161,7 +161,9 @@ export default class MessagesController {
         pipe(
           message.content.third_party_data.configuration_id,
           TE.fromNullable(
-            ResponseErrorInternal("Cannot get remote content configuration")
+            ResponseErrorInternal(
+              "ConfigurationId missing in ThirdPartyData, cannot get remote content configuration"
+            )
           ),
           TE.chain((configId) =>
             this.messageService.getRCConfiguration(configId)
