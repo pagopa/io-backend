@@ -2,6 +2,7 @@
  * This service retrieves messages from the API system using an API client.
  */
 import * as t from "io-ts";
+import nodeFetch from "node-fetch";
 import {
   IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
@@ -33,6 +34,11 @@ import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import * as T from "fp-ts/Task";
 import { LollipopLocalsType } from "src/types/lollipop";
+import { RCConfigurationPublic } from "generated/io-messages-api/RCConfigurationPublic";
+import {
+  Fetch,
+  getThirdPartyServiceClient,
+} from "../clients/third-party-service-client";
 import { PN_SERVICE_ID } from "../config";
 import { MessageSubject } from "../../generated/backend/MessageSubject";
 import { InvalidThirdPartyMessageTypeEnum } from "../../generated/backend/InvalidThirdPartyMessageType";
@@ -64,7 +70,6 @@ import {
   ThirdPartyMessageDetails,
 } from "../../generated/third-party-service/ThirdPartyMessage";
 import { ThirdPartyData } from "../../generated/backend/ThirdPartyData";
-import { ThirdPartyServiceClientFactory } from "../../src/clients/third-party-service-client";
 import { log } from "../utils/logger";
 import { FileType, getIsFileTypeForTypes } from "../utils/file-type";
 import { MessageBodyMarkdown } from "../../generated/backend/MessageBodyMarkdown";
@@ -91,8 +96,7 @@ const isMessageWithThirdPartyData = (
 
 export default class NewMessagesService {
   constructor(
-    private readonly apiClient: ReturnType<typeof AppMessagesAPIClient>,
-    private readonly thirdPartyClientFactory: ThirdPartyServiceClientFactory
+    private readonly apiClient: ReturnType<typeof AppMessagesAPIClient>
   ) {}
 
   /**
@@ -243,6 +247,7 @@ export default class NewMessagesService {
    */
   public readonly getThirdPartyMessagePrecondition = async (
     message: MessageWithThirdPartyData,
+    remoteContentConfiguration: RCConfigurationPublic,
     lollipopLocals?: LollipopLocalsType
   ): Promise<
     | IResponseErrorInternal
@@ -256,6 +261,7 @@ export default class NewMessagesService {
     pipe(
       this.getThirdPartyMessagePreconditionFromThirdPartyService(
         message,
+        remoteContentConfiguration,
         lollipopLocals
       ),
       TE.map(ResponseSuccessJson),
@@ -267,6 +273,7 @@ export default class NewMessagesService {
    */
   public readonly getThirdPartyMessage = async (
     message: MessageWithThirdPartyData,
+    remoteContentConfiguration: RCConfigurationPublic,
     lollipopLocals?: LollipopLocalsType
   ): Promise<
     | IResponseErrorInternal
@@ -279,7 +286,11 @@ export default class NewMessagesService {
   > =>
     pipe(
       pipe(
-        this.getThirdPartyMessageFromThirdPartyService(message, lollipopLocals),
+        this.getThirdPartyMessageFromThirdPartyService(
+          message,
+          remoteContentConfiguration,
+          lollipopLocals
+        ),
         TE.map((thirdPartyMessage) => ({
           ...message,
           third_party_message: thirdPartyMessage,
@@ -295,6 +306,7 @@ export default class NewMessagesService {
   public readonly getThirdPartyAttachment = async (
     message: MessageWithThirdPartyData,
     attachmentUrl: NonEmptyString,
+    remoteContentConfiguration: RCConfigurationPublic,
     lollipopLocals?: LollipopLocalsType
   ): Promise<
     | IResponseErrorInternal
@@ -311,6 +323,7 @@ export default class NewMessagesService {
         this.getThirdPartyAttachmentFromThirdPartyService(
           message,
           attachmentUrl,
+          remoteContentConfiguration,
           lollipopLocals
         )
       ),
@@ -387,6 +400,60 @@ export default class NewMessagesService {
       )
     );
 
+  public readonly getRCConfiguration = (
+    configurationId: Ulid
+  ): TE.TaskEither<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests,
+    RCConfigurationPublic
+  > =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          this.apiClient.getRCConfiguration({
+            id: configurationId,
+          }),
+        (e) => ResponseErrorInternal(E.toError(e).message)
+      ),
+      TE.chain(wrapValidationWithInternalError),
+
+      TE.chainW(
+        flow(
+          (response) =>
+            response.status === 200 ? E.of(response.value) : E.left(response),
+          TE.fromEither,
+          TE.mapLeft((response) => {
+            log.error(
+              `newMessagesService|getRCConfiguration|result:${
+                response.status
+              }  [title: ${response.value?.title ?? "No title"}, detail: ${
+                response.value?.detail ?? "No detail"
+              }, type: ${response.value?.type ?? "No type"}]`
+            );
+            return response;
+          }),
+          TE.mapLeft((response) => {
+            switch (response.status) {
+              case 401:
+                return ResponseErrorUnexpectedAuthProblem();
+              case 404:
+                return ResponseErrorNotFound(
+                  "Not found",
+                  "RC Configuration not found"
+                );
+              case 429:
+                return ResponseErrorTooManyRequests();
+              default:
+                return ResponseErrorStatusNotDefinedInSpec(response);
+            }
+          })
+        )
+      )
+    );
+
   // ------------------------------------
   // Private Functions
   // ------------------------------------
@@ -395,6 +462,7 @@ export default class NewMessagesService {
   // return an error otherwise
   private readonly getThirdPartyMessagePreconditionFromThirdPartyService = (
     message: MessageWithThirdPartyData,
+    remoteContentConfiguration: RCConfigurationPublic,
     lollipopLocals?: LollipopLocalsType
   ): TE.TaskEither<
     | IResponseErrorInternal
@@ -406,15 +474,12 @@ export default class NewMessagesService {
     ThirdPartyMessagePrecondition
   > =>
     pipe(
-      this.thirdPartyClientFactory(message.sender_service_id, lollipopLocals),
-      TE.fromEither,
-      TE.mapLeft((error) => {
-        log.error(
-          "newMessagesService|getThirdPartyMessagePreconditionFromThirdPartyService|%s",
-          error.message
-        );
-        return ResponseErrorInternal(error.message);
-      }),
+      getThirdPartyServiceClient(
+        remoteContentConfiguration,
+        nodeFetch as unknown as Fetch,
+        lollipopLocals
+      ),
+      TE.of,
       TE.map((getClientByFiscalCode) =>
         getClientByFiscalCode(message.fiscal_code)
       ),
@@ -479,6 +544,7 @@ export default class NewMessagesService {
   // return an error otherwise
   private readonly getThirdPartyMessageFromThirdPartyService = (
     message: MessageWithThirdPartyData,
+    remoteContentConfiguration: RCConfigurationPublic,
     lollipopLocals?: LollipopLocalsType
   ): TE.TaskEither<
     | IResponseErrorInternal
@@ -490,15 +556,12 @@ export default class NewMessagesService {
     ThirdPartyMessage
   > =>
     pipe(
-      this.thirdPartyClientFactory(message.sender_service_id, lollipopLocals),
-      TE.fromEither,
-      TE.mapLeft((error) => {
-        log.error(
-          "newMessagesService|getThirdPartyMessageFromThirdPartyService|%s",
-          error.message
-        );
-        return ResponseErrorInternal(error.message);
-      }),
+      getThirdPartyServiceClient(
+        remoteContentConfiguration,
+        nodeFetch as unknown as Fetch,
+        lollipopLocals
+      ),
+      TE.of,
       TE.map((getClientByFiscalCode) =>
         getClientByFiscalCode(message.fiscal_code)
       ),
@@ -630,6 +693,7 @@ export default class NewMessagesService {
   private readonly getThirdPartyAttachmentFromThirdPartyService = (
     message: MessageWithThirdPartyData,
     attachmentUrl: NonEmptyString,
+    remoteContentConfiguration: RCConfigurationPublic,
     lollipopLocals?: LollipopLocalsType
   ): TE.TaskEither<
     | IResponseErrorInternal
@@ -641,15 +705,12 @@ export default class NewMessagesService {
     Buffer
   > =>
     pipe(
-      this.thirdPartyClientFactory(message.sender_service_id, lollipopLocals),
-      TE.fromEither,
-      TE.mapLeft((error) => {
-        log.error(
-          "newMessagesService|getThirdPartyAttachmentFromThirdPartyService|%s",
-          error.message
-        );
-        return ResponseErrorInternal(error.message);
-      }),
+      getThirdPartyServiceClient(
+        remoteContentConfiguration,
+        nodeFetch as unknown as Fetch,
+        lollipopLocals
+      ),
+      TE.of,
       TE.map((getClientByFiscalCode) =>
         getClientByFiscalCode(message.fiscal_code)
       ),

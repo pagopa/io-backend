@@ -2,16 +2,15 @@ import * as util from "util";
 import * as E from "fp-ts/Either";
 import { NotificationAttachmentDownloadMetadataResponse } from "../../generated/piattaforma-notifiche/NotificationAttachmentDownloadMetadataResponse";
 import { pipe } from "fp-ts/lib/function";
-import { ServiceId } from "../../generated/io-messages-api/ServiceId";
 import { VALID_PDF } from "../utils/__mocks__/pdf_files";
 import { ThirdPartyMessage as PNThirdParthyMessage } from "../../generated/piattaforma-notifiche/ThirdPartyMessage";
 import { aFiscalCode } from "./user_mock";
 import { aSignatureInput, anAssertionRef } from "./lollipop";
+import { Ulid } from "@pagopa/ts-commons/lib/strings";
 
 const STATUS_ACCEPTED = "ACCEPTED";
 
-export const aPNServiceId = "aPNServiceId" as ServiceId;
-
+export const aPNConfigurationId = "01HMRBX079WA6SGYBQP1A7FSKH" as Ulid;
 export const aTimelineId = "a-timeline-id";
 export const aDate = new Date();
 export const aPnUrl = "https://pn-url";

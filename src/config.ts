@@ -36,7 +36,7 @@ import {
   IntegerFromString,
   NonNegativeIntegerFromString,
 } from "@pagopa/ts-commons/lib/numbers";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { NonEmptyString, Ulid } from "@pagopa/ts-commons/lib/strings";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { Millisecond, Second } from "@pagopa/ts-commons/lib/units";
 import { pipe } from "fp-ts/lib/function";
@@ -56,7 +56,6 @@ import { CgnOperatorSearchAPIClient } from "./clients/cgn-operator-search";
 import { EUCovidCertAPIClient } from "./clients/eucovidcert.client";
 import { ognlTypeFor } from "./utils/ognl";
 import { AppMessagesAPIClient } from "./clients/app-messages.client";
-import { ThirdPartyConfigListFromString } from "./utils/thirdPartyConfig";
 import { PNClientFactory } from "./clients/pn-clients";
 import { IoSignAPIClient } from "./clients/io-sign";
 import {
@@ -1016,12 +1015,6 @@ export const PECSERVERS = pipe(
 );
 //
 
-export const THIRD_PARTY_CONFIG_LIST = pipe(
-  process.env.THIRD_PARTY_CONFIG_LIST ?? "",
-  ThirdPartyConfigListFromString.decode,
-  E.getOrElse(() => [] as ThirdPartyConfigListFromString)
-);
-
 // -------------------------------
 // FF Appbackendli
 // -------------------------------
@@ -1045,6 +1038,19 @@ export const PN_SERVICE_ID = pipe(
   E.getOrElseW((errs) => {
     log.error(
       `Missing or invalid PN_SERVICE_ID environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
+
+export const PN_CONFIGURATION_ID = pipe(
+  process.env.PN_CONFIGURATION_ID,
+  Ulid.decode,
+  E.getOrElseW((errs) => {
+    log.error(
+      `Missing or invalid PN_CONFIGURATION_ID environment variable: ${readableReport(
         errs
       )}`
     );
