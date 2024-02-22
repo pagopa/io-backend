@@ -13,29 +13,6 @@ import {
 import { lollipopParams } from "../../__mocks__/lollipop";
 import { aRemoteContentConfigurationWithBothEnv } from "../../__mocks__/remote-configuration";
 
-/*const aValidTestAndProdThirdPartyConfig = pipe(
-  {
-    serviceId: aServiceId,
-    schemaKind: "PN",
-    jsonSchema: "aJsonSchema",
-    isLollipopEnabled: "false",
-    disableLollipopFor: [],
-    prodEnvironment: {
-      baseUrl: "http://aBaseUrl",
-      detailsAuthentication: aValidDetailAuthentication
-    },
-    testEnvironment: {
-      testUsers: [aFiscalCode],
-      baseUrl: "http://anotherBaseUrl",
-      detailsAuthentication: aValidDetailAuthentication
-    }
-  },
-  ThirdPartyConfig.decode,
-  E.getOrElseW(() => {
-    throw Error("Error decoding ThirdPartyConfig");
-  })
-);*/
-
 const mockNodeFetch = jest.fn();
 mockNodeFetch.mockImplementation(
   async (_input: RequestInfo | URL, _init?: RequestInit) => {
