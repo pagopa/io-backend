@@ -31,14 +31,14 @@ export type ThirdPartyServiceClient = typeof getThirdPartyServiceClient;
  * @returns a fetch with api key name/value in header
  */
 const withApiKey =
-  (apiKey: RCAuthenticationConfig) =>
+  (authConfig: RCAuthenticationConfig) =>
   (fetchApi: Fetch): Fetch =>
   async (input, init) =>
     fetchApi(input, {
       ...init,
       headers: {
         ...(init?.headers ?? {}),
-        ...{ [apiKey.header_key_name]: apiKey.key },
+        ...{ [authConfig.header_key_name]: authConfig.key },
       },
     });
 
