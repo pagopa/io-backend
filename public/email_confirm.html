@@ -94,7 +94,7 @@
   </div>
   <script>
     const base64UrlDecode = (input) => {
-      if (!input) return "";
+      if (!input) return null;
 
       // base64url to base64
       input = input.replace(/-/g, "+").replace(/_/g, "/");
@@ -103,15 +103,21 @@
       while (input.length % 4 !== 0)
         input += "="
 
-      return atob(input);
+      let output;
+      try {
+        output = atob(input);
+      } catch (_) {
+        output = null
+      }
+      return output
     }
     const url_string = window.location.href;
     const url = new URL(url_string);
-    const email = url.searchParams.get("email");
+    const email = base64UrlDecode(url.searchParams.get("email"));
     const token = url.searchParams.get("token");
 
     if (email && token) {
-      $("#bold-email").text(base64UrlDecode(email));
+      $("#bold-email").text(email);
       $(".cta").attr("href", `https://api.io.pagopa.it/public/validate-profile-email?token=${token}&flow=VALIDATE`);
     } else {
       $("#title").append("Non siamo riusciti a confermare la tua email");
