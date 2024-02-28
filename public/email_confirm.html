@@ -112,7 +112,7 @@
 
     if (email && token) {
       $("#bold-email").text(base64UrlDecode(email));
-      $(".cta").attr("href", `http://functions-public.localhost/validate-profile-email?token=${token}&flow=VALIDATE`);
+      $(".cta").attr("href", `https://api.io.pagopa.it/public/validate-profile-email?token=${token}&flow=VALIDATE`);
     } else {
       $("#title").append("Non siamo riusciti a confermare la tua email");
       $("#message").text("Riprova, altrimenti torna su IO e chiedi una nuova conferma dell’indirizzo email.");
