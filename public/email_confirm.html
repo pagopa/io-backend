@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Conferma validazione Email</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+    integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css?family=Titillium+Web:400,700&display=swap" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js"
+    integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <style>
+    html {
+      height: 100%;
+    }
+
+    body {
+      font-family: 'Titillium Web', sans-serif;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .logo {
+      height: 44px;
+      width: auto;
+      margin: 20px;
+      position: fixed;
+      left: 0;
+      top: 0;
+    }
+
+    .icon {
+      height: 110px;
+      padding-left: 25px;
+      width: auto;
+      margin-bottom: 15px;
+    }
+
+    .title {
+      font-size: 35px;
+      margin-bottom: 20px;
+      font-weight: 700;
+      color: #26364D;
+    }
+
+    .message {
+      font-size: 18px;
+      color: #5C6F82;
+    }
+
+    .content-info {
+      padding: 0 20px;
+    }
+
+    .cta {
+      background-color: #0073E6;
+      border-color: #0073E6;
+      color: #FFF;
+      width: 145px;
+      padding: 11px 20px 11px 20px;
+      font-size: 16px;
+      font-weight: bold;
+      display: inline;
+    }
+
+    .cta:hover {
+      background-color: #0073E6;
+      border-color: #0073E6;
+      color: #FFF;
+    }
+  </style>
+</head>
+
+<body>
+  <img class="logo" src="/assets/logo_app_io.png" alt="io_logo">
+  <div>
+    <div class="text-center">
+      <div id="content" class="content-info">
+        <img class="icon" src="/assets/email-checked-icon.svg" alt="result_icon" />
+        <h1 id="title" class="title"></h1>
+        <p id="message" class="message">Se confermi, useremo l'email <strong id="bold-email"></strong> per
+          inviarti le
+          comunicazioni di IO.</p>
+        <a href="" class="btn btn-default cta">Conferma email</a>
+      </div>
+    </div>
+  </div>
+  <script>
+    const base64UrlDecode = (input) => {
+      if (!input) return null;
+
+      // base64url to base64
+      input = input.replace(/-/g, "+").replace(/_/g, "/");
+
+      // fill with '=' char to make the length a multiple of 4
+      while (input.length % 4 !== 0)
+        input += "="
+
+      let output;
+      try {
+        output = atob(input);
+      } catch (_) {
+        output = null
+      }
+      return output
+    }
+    const url_string = window.location.href;
+    const url = new URL(url_string);
+    const email = base64UrlDecode(url.searchParams.get("email"));
+    const token = url.searchParams.get("token");
+
+    if (email && token) {
+      $("#bold-email").text(email);
+      $(".cta").attr("href", `https://api.io.pagopa.it/public/validate-profile-email?token=${token}&flow=VALIDATE`);
+    } else {
+      $("#title").append("Non siamo riusciti a confermare la tua email");
+      $("#message").text("Riprova, altrimenti torna su IO e chiedi una nuova conferma dell’indirizzo email.");
+      $(".icon").attr("src", "/assets/error-generic-icon.svg");
+      $(".cta").hide();
+    }
+  </script>
+</body>
+
+</html>
