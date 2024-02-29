@@ -84,7 +84,7 @@
     <div class="text-center">
       <div id="content" class="content-info">
         <img class="icon" src="/assets/email-checked-icon.svg" alt="result_icon" />
-        <h1 id="title" class="title"></h1>
+        <h1 id="title" class="title">È la tua email?</h1>
         <p id="message" class="message">Se confermi, useremo l'email <strong id="bold-email"></strong> per
           inviarti le
           comunicazioni di IO.</p>
@@ -120,7 +120,7 @@
       $("#bold-email").text(email);
       $(".cta").attr("href", `https://api.io.pagopa.it/public/validate-profile-email?token=${token}&flow=VALIDATE`);
     } else {
-      $("#title").append("Non siamo riusciti a confermare la tua email");
+      $("#title").text("Non siamo riusciti a confermare la tua email");
       $("#message").text("Riprova, altrimenti torna su IO e chiedi una nuova conferma dell’indirizzo email.");
       $(".icon").attr("src", "/assets/error-generic-icon.svg");
       $(".cta").hide();
