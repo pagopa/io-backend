@@ -91,7 +91,7 @@ components:
       pattern: ^https://
     LollipopSignatureInput:
       type: string
-      pattern: "^(?:sig\\d+=[^,]*)(?:,\\s*(?:sig\\d+=[^,]*))*$"
+      pattern: ^(?:sig\d+=[^,]*)(?:,\s*(?:sig\d+=[^,]*))*$
     LollipopSignature:
       type: string
       pattern: ^((sig[0-9]+)=:[A-Za-z0-9+/=]*:(, ?)?)+$
