@@ -2,7 +2,7 @@ openapi: 3.0.3
 servers:
   - url: https://api-app.io.pagopa.it/api/v2
 info:
-  title: Services API
+  title: Services App Backend API
   version: 0.4.0
 tags:
   - name: search
@@ -146,19 +146,19 @@ paths:
           description: Not found
         "500":
           description: Internal Server Error
-  /services/featured:
+  /featured:
     get:
       tags:
         - featured
-      summary: Retrieve featured services
-      operationId: getFeaturedServices
+      summary: Retrieve featured intitutions and/or services
+      operationId: getFeaturedItems
       responses:
         "200":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/FeaturedServices"
+                $ref: "#/components/schemas/FeaturedItems"
         "401":
           description: Unauthorized
         "403":
@@ -180,19 +180,23 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Institution"
+      required:
+        - institutions
     Institution:
       type: object
       properties:
         id:
           type: string
           description: Institution ID
-          example: 12345678901
         name:
           type: string
           description: Institution Name
-          example: Comune di Roma
         fiscal_code:
           $ref: "#/components/schemas/OrganizationFiscalCode"
+      required:
+        - id
+        - name
+        - fiscal_code
     InstitutionServicesResource:
       allOf:
         - $ref: "#/components/schemas/Services"
@@ -204,6 +208,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ServiceMinified"
+      required:
+        - services
     ServiceMinified:
       type: object
       description: Service data (minified)
@@ -217,8 +223,11 @@ components:
           example: Tari
         version:
           type: integer
-          description: Service Version (_ts)_
-          example: 1687776265
+          description: Service Version
+      required:
+        - id
+        - name
+        - version
     ServiceDetails:
       type: object
       properties:
@@ -244,28 +253,123 @@ components:
         - id
         - name
         - version
-    FeaturedServices:
+    FeaturedItems:
       type: object
       properties:
-        services:
+        items:
           type: array
           items:
-            $ref: "#/components/schemas/FeaturedService"
-    FeaturedService:
-      type: object
-      properties:
-        organization_fiscal_code:
-          $ref: "#/components/schemas/OrganizationFiscalCode"
+            $ref: "#/components/schemas/FeaturedItem"
+      required:
+        - items
+    FeaturedItem:
+      x-one-of: true
       allOf:
         - $ref: "#/components/schemas/ServiceMinified"
+        - $ref: "#/components/schemas/Institution"
     ServiceMetadata:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceMetadata"
+      description: A set of service metadata properties
+      allOf:
+        - $ref: '#/components/schemas/ServiceBaseMetadata'
+        - type: object
+          properties:
+            topic:
+              $ref: '#/components/schemas/ServiceTopic'
+    ServiceTopic:
+      type: object
+      properties:
+        id:
+          type: number
+          description: The topic id
+          example: 3
+        name:
+          type: string
+          description: The topic name
+          example: 'Benessere sociale'
+      required:
+        - id
+        - name
+    ServiceBaseMetadata:
+      type: object
+      description: A set of common service metadata properties
+      properties:
+        web_url:
+          type: string
+          minLength: 1
+        app_ios:
+          type: string
+          minLength: 1
+        app_android:
+          type: string
+          minLength: 1
+        tos_url:
+          type: string
+          minLength: 1
+        privacy_url:
+          type: string
+          minLength: 1
+        address:
+          type: string
+          minLength: 1
+        phone:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          minLength: 1
+        pec:
+          type: string
+          minLength: 1
+        cta:
+          type: string
+          minLength: 1
+        token_name:
+          type: string
+          minLength: 1
+        support_url:
+          type: string
+          minLength: 1
+        category:
+          type: string
+          enum: [SPECIAL, STANDARD]
+        custom_special_flow:
+          type: string
+          minLength: 1
+        scope:
+          type: string
+          enum: [NATIONAL, LOCAL]
+      required:
+        - scope
     Organization:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/Organization"
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        fiscal_code:
+          $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/OrganizationFiscalCode'
+        department_name:
+          type: string
+          minLength: 1
+      required:
+        - name
+        - fiscal_code
     OrganizationFiscalCode:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/OrganizationFiscalCode"
+      type: string
+      x-import: '@pagopa/ts-commons/lib/strings'
+      format: OrganizationFiscalCode
     PaginationResultSet:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/PaginationResultSet"
+      type: object
+      properties:
+        offset:
+          type: number
+          description: result set offset
+        limit:
+          type: number
+          description: result set size
+        count:
+          type: number
+          description: total record count
     AvailableNotificationChannels:
       description: All the notification channels available for a service
       type: array
