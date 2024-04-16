@@ -120,7 +120,7 @@
     "redis": "^4.5.1",
     "ts-pattern": "^4.0.3",
     "ulid": "^2.2.2",
-    "validator": "^10.8.0",
+    "validator": "^13.0.0",
     "winston": "^3.3.3",
     "xmldom": "^0.6.0"
   },
