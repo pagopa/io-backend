@@ -370,6 +370,10 @@ components:
         count:
           type: number
           description: total record count
+      required:
+        - offset
+        - limit
+        - count
     AvailableNotificationChannels:
       description: All the notification channels available for a service
       type: array
