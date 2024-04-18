@@ -3,7 +3,7 @@ servers:
   - url: https://api-app.io.pagopa.it/api/v2
 info:
   title: Services App Backend API
-  version: 13.34.2
+  version: 13.34.3
 tags:
   - name: search
     description: Search APIs
@@ -31,10 +31,7 @@ paths:
           description: Institution scope
           required: false
           schema:
-            type: string
-            enum:
-              - NATIONAL
-              - LOCAL
+            $ref: '#/components/schemas/ScopeType'
         - name: limit
           in: query
           description: >-
@@ -408,3 +405,9 @@ components:
         - WEBHOOK
       example:
         - EMAIL
+    ScopeType:
+      type: string
+      description: Institutions/Services Scopes
+      enum:
+        - NATIONAL
+        - LOCAL

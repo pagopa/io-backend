@@ -31,10 +31,7 @@ paths:
           description: Institution scope
           required: false
           schema:
-            type: string
-            enum:
-              - NATIONAL
-              - LOCAL
+            $ref: '#/components/schemas/ScopeType'
         - name: limit
           in: query
           description: >-
@@ -407,4 +404,10 @@ components:
         - EMAIL
         - WEBHOOK
       example:
-        - EMAIL
+        - EMAILL
+    ScopeType:
+      type: string
+      description: Institutions/Services Scopes
+      enum:
+        - NATIONAL
+        - LOCAL
