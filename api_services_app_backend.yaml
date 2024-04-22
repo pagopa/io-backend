@@ -75,15 +75,15 @@ paths:
         '404':
           description: Not found
         '500':
-          description: Internal Server Error.
+          description: Internal Server Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
         '502':
-          description: Bad gateway.
+          description: Bad gateway
         '504':
-          description: Gateway timeout.
+          description: Gateway timeout
   /institutions/{institutionId}/services:
     get:
       tags:
@@ -137,15 +137,15 @@ paths:
         '404':
           description: Not found
         '500':
-          description: Internal Server Error.
+          description: Internal Server Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
         '502':
-          description: Bad gateway.
+          description: Bad gateway
         '504':
-          description: Gateway timeout.
+          description: Gateway timeout
   /services/{serviceId}:
     get:
       tags:
@@ -174,15 +174,15 @@ paths:
         '404':
           description: Not found
         '500':
-          description: Internal Server Error.
+          description: Internal Server Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
         '502':
-          description: Bad gateway.
+          description: Bad gateway
         '504':
-          description: Gateway timeout.
+          description: Gateway timeout
   /featured:
     get:
       tags:
@@ -203,15 +203,15 @@ paths:
         '404':
           description: Not found
         '500':
-          description: Internal Server Error.
+          description: Internal Server Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
         '502':
-          description: Bad gateway.
+          description: Bad gateway
         '504':
-          description: Gateway timeout.
+          description: Gateway timeout
 components:
   securitySchemes:
     Bearer:

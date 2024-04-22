@@ -68,11 +68,11 @@ paths:
         "404":
           description: Not found
         "502":
-          description: Bad gateway.
+          description: Bad gateway
         "504":
-          description: Gateway timeout.
+          description: Gateway timeout
         "500":
-          description: Internal Server Error.
+          description: Internal Server Error
           content:
             application/json:
               schema:
@@ -123,11 +123,11 @@ paths:
         "404":
           description: Not found
         "502":
-          description: Bad gateway.
+          description: Bad gateway
         "504":
-          description: Gateway timeout.
+          description: Gateway timeout
         "500":
-          description: Internal Server Error.
+          description: Internal Server Error
           content:
             application/json:
               schema:
@@ -160,11 +160,11 @@ paths:
         "404":
           description: Not found
         "502":
-          description: Bad gateway.
+          description: Bad gateway
         "504":
-          description: Gateway timeout.
+          description: Gateway timeout
         "500":
-          description: Internal Server Error.
+          description: Internal Server Error
           content:
             application/json:
               schema:
@@ -189,11 +189,11 @@ paths:
         "404":
           description: Not found
         "502":
-          description: Bad gateway.
+          description: Bad gateway
         "504":
-          description: Gateway timeout.
+          description: Gateway timeout
         "500":
-          description: Internal Server Error.
+          description: Internal Server Error
           content:
             application/json:
               schema:
@@ -204,7 +204,7 @@ components:
       type: apiKey
       name: Authorization
       in: header
-      
+
   schemas:
     InstitutionsResource:
       allOf:
