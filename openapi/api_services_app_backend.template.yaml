@@ -11,6 +11,8 @@ tags:
     description: Retrieve resources details
   - name: featured
     description: Retrieve featured Lists
+security:
+  - Bearer: []
 paths:
   /institutions:
     get:
@@ -65,8 +67,16 @@ paths:
           description: Forbidden
         "404":
           description: Not found
+        "502":
+          description: Bad gateway.
+        "504":
+          description: Gateway timeout.
         "500":
-          description: Internal Server Error
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
   /institutions/{institutionId}/services:
     get:
       tags:
@@ -112,8 +122,16 @@ paths:
           description: Forbidden
         "404":
           description: Not found
+        "502":
+          description: Bad gateway.
+        "504":
+          description: Gateway timeout.
         "500":
-          description: Internal Server Error
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
   /services/{serviceId}:
     get:
       tags:
@@ -141,8 +159,16 @@ paths:
           description: Forbidden
         "404":
           description: Not found
+        "502":
+          description: Bad gateway.
+        "504":
+          description: Gateway timeout.
         "500":
-          description: Internal Server Error
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
   /featured:
     get:
       tags:
@@ -162,9 +188,23 @@ paths:
           description: Forbidden
         "404":
           description: Not found
+        "502":
+          description: Bad gateway.
+        "504":
+          description: Gateway timeout.
         "500":
-          description: Internal Server Error
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
 components:
+  securitySchemes:
+    Bearer:
+      type: apiKey
+      name: Authorization
+      in: header
+      
   schemas:
     InstitutionsResource:
       allOf:
@@ -389,3 +429,5 @@ components:
       enum:
         - NATIONAL
         - LOCAL
+    ProblemJson:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v26.3.0/openapi/definitions.yaml#/ProblemJson"
