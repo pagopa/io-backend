@@ -57,7 +57,7 @@ paths:
           schema:
             type: integer
             minimum: 0
-            maximum: 1000
+            maximum: 100
             default: 0
       responses:
         '200':
@@ -121,7 +121,7 @@ paths:
           schema:
             type: integer
             minimum: 0
-            maximum: 1000
+            maximum: 100
             default: 0
       responses:
         '200':
