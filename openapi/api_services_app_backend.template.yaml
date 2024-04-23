@@ -302,8 +302,16 @@ components:
     FeaturedItem:
       x-one-of: true
       allOf:
-        - $ref: "#/components/schemas/ServiceMinified"
+        - $ref: "#/components/schemas/FeaturedService"
         - $ref: "#/components/schemas/Institution"
+    FeaturedService:
+      allOf:
+        - $ref: '#/components/schemas/ServiceMinified'
+      type: object
+      properties:
+        organization_name:
+          type: string
+          description: Organization Name
     ServiceMetadata:
       description: A set of service metadata properties
       allOf:
