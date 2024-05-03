@@ -303,6 +303,8 @@ components:
         - id
         - name
         - version
+        - organization
+        - metadata
     FeaturedItems:
       type: object
       properties:
