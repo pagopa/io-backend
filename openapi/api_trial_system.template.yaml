@@ -74,7 +74,7 @@ definitions:
     type: string
     description: |-
       - PENDING: The user do not have any access to the specified trial. The
-          system is going to process the user if any slot for the trial si
+          system is going to process the user if any slot for the trial is
       - available. ACTIVE: The user have the access to the specified trial.
       - DISABLED: The user don't have the access to the specified trial.
     enum:
