@@ -1,0 +1,120 @@
+swagger: "2.0"
+info:
+  version: 0.0.1
+  title: Trial System API
+host: localhost
+basePath: /trials/api/v1
+schemes:
+  - https
+security:
+  - Bearer: []
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+paths:
+  "/subscriptions":
+    get:
+      operationId: getSubscription
+      summary: Get subscription detail
+      description: >-
+        Returns the details about the subscription of the authenticated user for
+        the specified trial.
+      parameters:
+        - $ref: "#/parameters/queryTrialId"
+      responses:
+        "200":
+          $ref: "#/responses/200Subscription"
+        "401":
+          $ref: "#/responses/401Unauthorized"
+        "429":
+          $ref: "#/responses/429TooManyRequest"
+        "500":
+          $ref: "#/responses/500Error"
+    post:
+      operationId: createSubscription
+      summary: Create a subscription
+      description: >-
+        Subscribe the authenticated user to the given trial.
+      parameters:
+        - $ref: "#/parameters/bodyCreateSubscription"
+      responses:
+        "200":
+          $ref: "#/responses/200Subscription"
+        "400":
+          $ref: "#/responses/400Error"
+        "401":
+          $ref: "#/responses/401Unauthorized"
+        "429":
+          $ref: "#/responses/429TooManyRequest"
+        "500":
+          $ref: "#/responses/500Error"
+
+parameters:
+  queryTrialId:
+    name: trialId
+    in: query
+    required: true
+    type: string
+    minLength: 1
+  bodyCreateSubscription:
+    name: createSubscription
+    in: body
+    required: true
+    schema:
+      $ref: "#/definitions/CreateSubscription"
+
+definitions:
+  ProblemJson:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ProblemJson"
+  CreatedAt:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/Timestamp"
+  SubscriptionStatus:
+    type: string
+    description: |-
+      - PENDING: The user do not have any access to the specified trial. The
+          system is going to process the user if any slot for the trial si
+      - available. ACTIVE: The user have the access to the specified trial.
+      - DISABLED: The user don't have the access to the specified trial.
+    enum:
+      - PENDING
+      - ACTIVE
+      - DISABLED
+  TrialId:
+    type: string
+    description: >-
+      Unique identifier of the trial.
+    minLength: 1
+  CreateSubscription:
+    type: object
+    properties:
+      trialId:
+        $ref: '#/definitions/TrialId'
+  Subscription:
+    type: object
+    properties:
+      trialId:
+        $ref: '#/definitions/TrialId'
+      state:
+        $ref: '#/definitions/SubscriptionStatus'
+      createdAt:
+        $ref: '#/definitions/CreatedAt'
+
+responses:
+  200Subscription:
+    description: Success.
+    schema:
+      $ref: "#/definitions/Subscription"
+  400Error:
+    description: Validation error.
+    schema:
+      $ref: "#/definitions/ProblemJson"
+  401Unauthorized:
+    description: Authorization error.
+  429TooManyRequest:
+    description: Too may requests.
+  500Error:
+    description: There was an error.
+    schema:
+      $ref: "#/definitions/ProblemJson"
