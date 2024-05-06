@@ -73,12 +73,16 @@ definitions:
   SubscriptionStatus:
     type: string
     description: |-
-      - PENDING: The user do not have any access to the specified trial. The
-          system is going to process the user if any slot for the trial is
-      - available. ACTIVE: The user have the access to the specified trial.
-      - DISABLED: The user don't have the access to the specified trial.
+      - UNSUBSCRIBED: The user is not subscribed to the specified trial and does
+          not have any access to the specified trial.
+      - SUBSCRIBED: The user is subscribed to the specified trial and does
+          not have any access to the specified trial. The system is going to
+          activate the user if any slot for the trial is available.
+      - ACTIVE: The user has the access to the specified trial.
+      - DISABLED: The user does not have the access to the specified trial.
     enum:
-      - PENDING
+      - UNSUBSCRIBED
+      - SUBSCRIBED
       - ACTIVE
       - DISABLED
   TrialId:
