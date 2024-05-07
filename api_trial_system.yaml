@@ -14,7 +14,7 @@ securityDefinitions:
     name: Authorization
     in: header
 paths:
-  /subscriptions:
+  /subscriptions/{trialId}:
     get:
       operationId: getSubscription
       summary: Get subscription detail
@@ -22,7 +22,7 @@ paths:
         Returns the details about the subscription of the authenticated user for
         the specified trial.
       parameters:
-        - $ref: '#/parameters/queryTrialId'
+        - $ref: '#/parameters/pathTrialId'
       responses:
         '200':
           $ref: '#/responses/200Subscription'
@@ -32,6 +32,7 @@ paths:
           $ref: '#/responses/429TooManyRequest'
         '500':
           $ref: '#/responses/500Error'
+  /subscriptions:
     post:
       operationId: createSubscription
       summary: Create a subscription
@@ -50,9 +51,9 @@ paths:
         '500':
           $ref: '#/responses/500Error'
 parameters:
-  queryTrialId:
+  pathTrialId:
     name: trialId
-    in: query
+    in: path
     required: true
     type: string
     minLength: 1
