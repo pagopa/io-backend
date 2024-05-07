@@ -28,6 +28,8 @@ paths:
           $ref: '#/responses/200Subscription'
         '401':
           $ref: '#/responses/401Unauthorized'
+        '404':
+          $ref: '#/responses/404NotFound'
         '429':
           $ref: '#/responses/429TooManyRequest'
         '500':
@@ -158,6 +160,8 @@ responses:
       $ref: '#/definitions/ProblemJson'
   401Unauthorized:
     description: Authorization error.
+  404NotFound:
+    description: Resource not found.
   409Conflict:
     description: The resource already exists.
   429TooManyRequest:
