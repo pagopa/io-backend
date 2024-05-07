@@ -46,6 +46,8 @@ paths:
           $ref: '#/responses/400Error'
         '401':
           $ref: '#/responses/401Unauthorized'
+        '409':
+          $ref: '#/responses/409Conflict'
         '429':
           $ref: '#/responses/429TooManyRequest'
         '500':
@@ -156,6 +158,8 @@ responses:
       $ref: '#/definitions/ProblemJson'
   401Unauthorized:
     description: Authorization error.
+  409Conflict:
+    description: The resource already exists.
   429TooManyRequest:
     description: Too may requests.
   500Error:
