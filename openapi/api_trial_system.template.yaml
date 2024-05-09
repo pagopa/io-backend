@@ -14,15 +14,15 @@ securityDefinitions:
     name: Authorization
     in: header
 paths:
-  "/subscriptions/{trialId}":
+  "/trials/{trialId}/subscriptions":
+    parameters:
+      - $ref: "#/parameters/pathTrialId"
     get:
       operationId: getSubscription
       summary: Get subscription detail
       description: >-
         Returns the details about the subscription of the authenticated user for
         the specified trial.
-      parameters:
-        - $ref: "#/parameters/pathTrialId"
       responses:
         "200":
           $ref: "#/responses/200Subscription"
@@ -34,17 +34,14 @@ paths:
           $ref: "#/responses/429TooManyRequest"
         "500":
           $ref: "#/responses/500Error"
-  "/subscriptions":
     post:
       operationId: createSubscription
       summary: Create a subscription
       description: >-
         Subscribe the authenticated user to the given trial.
-      parameters:
-        - $ref: "#/parameters/bodyCreateSubscription"
       responses:
-        "200":
-          $ref: "#/responses/200Subscription"
+        "201":
+          $ref: "#/responses/201Subscription"
         "400":
           $ref: "#/responses/400Error"
         "401":
@@ -63,12 +60,6 @@ parameters:
     required: true
     type: string
     minLength: 1
-  bodyCreateSubscription:
-    name: createSubscription
-    in: body
-    required: true
-    schema:
-      $ref: "#/definitions/CreateSubscription"
 
 definitions:
   ProblemJson:
@@ -95,11 +86,6 @@ definitions:
     description: >-
       Unique identifier of the trial.
     minLength: 1
-  CreateSubscription:
-    type: object
-    properties:
-      trialId:
-        $ref: '#/definitions/TrialId'
   Subscription:
     type: object
     properties:
@@ -112,6 +98,10 @@ definitions:
 
 responses:
   200Subscription:
+    description: Success.
+    schema:
+      $ref: "#/definitions/Subscription"
+  201Subscription:
     description: Success.
     schema:
       $ref: "#/definitions/Subscription"
