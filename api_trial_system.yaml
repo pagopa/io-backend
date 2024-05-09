@@ -116,7 +116,7 @@ definitions:
     description: A date-time field in ISO-8601 format and UTC timezone.
     x-import: '@pagopa/ts-commons/lib/dates'
     example: '2018-10-13T00:00:00.000Z'
-  SubscriptionStatus:
+  SubscriptionState:
     type: string
     description: |-
       - UNSUBSCRIBED: The user is not subscribed to the specified trial and does
@@ -146,7 +146,7 @@ definitions:
       trialId:
         $ref: '#/definitions/TrialId'
       state:
-        $ref: '#/definitions/SubscriptionStatus'
+        $ref: '#/definitions/SubscriptionState'
       createdAt:
         $ref: '#/definitions/CreatedAt'
 responses:

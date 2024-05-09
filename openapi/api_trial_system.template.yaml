@@ -75,7 +75,7 @@ definitions:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ProblemJson"
   CreatedAt:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/Timestamp"
-  SubscriptionStatus:
+  SubscriptionState:
     type: string
     description: |-
       - UNSUBSCRIBED: The user is not subscribed to the specified trial and does
@@ -106,7 +106,7 @@ definitions:
       trialId:
         $ref: '#/definitions/TrialId'
       state:
-        $ref: '#/definitions/SubscriptionStatus'
+        $ref: '#/definitions/SubscriptionState'
       createdAt:
         $ref: '#/definitions/CreatedAt'
 
