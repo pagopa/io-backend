@@ -84,6 +84,35 @@ paths:
           description: Bad gateway
         '504':
           description: Gateway timeout
+  /institutions/featured:
+    get:
+      tags:
+        - featured
+      summary: Retrieve featured intitutions
+      operationId: getFeaturedInstitutions
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Institutions'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '502':
+          description: Bad gateway
+        '504':
+          description: Gateway timeout
   /institutions/{institutionId}/services:
     get:
       tags:
@@ -130,6 +159,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InstitutionServicesResource'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '502':
+          description: Bad gateway
+        '504':
+          description: Gateway timeout
+  /services/featured:
+    get:
+      tags:
+        - featured
+      summary: Retrieve featured services
+      operationId: getFeaturedServices
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeaturedServices'
         '401':
           description: Unauthorized
         '403':
@@ -319,6 +377,15 @@ components:
       allOf:
         - $ref: '#/components/schemas/FeaturedService'
         - $ref: '#/components/schemas/Institution'
+    FeaturedServices:
+      type: object
+      properties:
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeaturedService'
+      required:
+        - services
     FeaturedService:
       allOf:
         - $ref: '#/components/schemas/ServiceMinified'
