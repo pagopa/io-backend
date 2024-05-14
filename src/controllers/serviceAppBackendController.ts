@@ -12,6 +12,7 @@ import express = require("express");
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { ServiceDetails } from "generated/services-app-backend/ServiceDetails";
 import { FeaturedServices } from "generated/services-app-backend/FeaturedServices";
+import { Institutions } from "generated/services-app-backend/Institutions";
 
 const parseOptionalStringParam = (stringParam?: unknown) =>
   stringParam ? String(stringParam) : undefined;
@@ -61,4 +62,12 @@ export default class ServicesAppBackendController {
     | IResponseErrorValidation
     | IResponseSuccessJson<FeaturedServices>
   > => this.servicesAppBackendService.getFeaturedServices();
+
+  public readonly getFeaturedInstitutions = async (
+    _req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseSuccessJson<Institutions>
+  > => this.servicesAppBackendService.getFeaturedInstitutions();
 }

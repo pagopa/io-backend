@@ -977,7 +977,7 @@ function registerServicesAppBackendRoutes(
     )
   );
 
-  /* app.get(
+  app.get(
     `${basePath}/institutions/featured`,
     bearerSessionTokenAuth,
     toExpressHandler(
@@ -986,15 +986,15 @@ function registerServicesAppBackendRoutes(
     )
   );
 
-  app.get(
-    `${basePath}/institutions/:institutionId/services`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      servicesAppBackendController.findInstutionServices,
-      servicesAppBackendController
-    )
-  );
-*/
+  // app.get(
+  //   `${basePath}/institutions/:institutionId/services`,
+  //   bearerSessionTokenAuth,
+  //   toExpressHandler(
+  //     servicesAppBackendController.findInstutionServices,
+  //     servicesAppBackendController
+  //   )
+  // );
+
   app.get(
     `${basePath}/services/featured`,
     bearerSessionTokenAuth,
