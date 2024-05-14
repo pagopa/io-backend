@@ -1,3 +1,4 @@
+import * as express from "express";
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
@@ -5,18 +6,17 @@ import {
   IResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { FeaturedServices } from "generated/services-app-backend/FeaturedServices";
-import { Institutions } from "generated/services-app-backend/Institutions";
-import { InstitutionServicesResource } from "generated/services-app-backend/InstitutionServicesResource";
-import { InstitutionsResource } from "generated/services-app-backend/InstitutionsResource";
-import { ScopeType } from "generated/services-app-backend/ScopeType";
-import { ServiceDetails } from "generated/services-app-backend/ServiceDetails";
-import ServicesAppBackendService from "src/services/servicesAppBackendService";
+import { FeaturedServices } from "../../generated/services-app-backend/FeaturedServices";
+import { Institutions } from "../../generated/services-app-backend/Institutions";
+import { InstitutionServicesResource } from "../../generated/services-app-backend/InstitutionServicesResource";
+import { InstitutionsResource } from "../../generated/services-app-backend/InstitutionsResource";
+import { ScopeType } from "../../generated/services-app-backend/ScopeType";
+import { ServiceDetails } from "../../generated/services-app-backend/ServiceDetails";
+import ServicesAppBackendService from "../services/servicesAppBackendService";
 import {
   withValidatedOrInternalError,
   withValidatedOrValidationError,
-} from "src/utils/responses";
-import express = require("express");
+} from "../utils/responses";
 
 const parseOptionalStringParam = (stringParam?: unknown) =>
   stringParam ? String(stringParam) : undefined;

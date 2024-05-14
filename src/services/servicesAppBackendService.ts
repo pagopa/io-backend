@@ -6,18 +6,18 @@ import {
   ResponseErrorNotFound,
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
-import { FeaturedServices } from "generated/services-app-backend/FeaturedServices";
-import { InstitutionServicesResource } from "generated/services-app-backend/InstitutionServicesResource";
-import { Institutions } from "generated/services-app-backend/Institutions";
-import { InstitutionsResource } from "generated/services-app-backend/InstitutionsResource";
-import { ScopeType } from "generated/services-app-backend/ScopeType";
-import { ServiceDetails } from "generated/services-app-backend/ServiceDetails";
-import { ServicesAppBackendAPIClient } from "src/clients/services-app-backend";
+import { FeaturedServices } from "../../generated/services-app-backend/FeaturedServices";
+import { InstitutionServicesResource } from "../../generated/services-app-backend/InstitutionServicesResource";
+import { Institutions } from "../../generated/services-app-backend/Institutions";
+import { InstitutionsResource } from "../../generated/services-app-backend/InstitutionsResource";
+import { ScopeType } from "../../generated/services-app-backend/ScopeType";
+import { ServiceDetails } from "../../generated/services-app-backend/ServiceDetails";
+import { ServicesAppBackendAPIClient } from "../clients/services-app-backend";
 import {
   unhandledResponseStatus,
   withCatchAsInternalError,
   withValidatedOrInternalError,
-} from "src/utils/responses";
+} from "../utils/responses";
 
 // TODO: Aggiungere le altre operazioni del service
 export default class ServicesAppBackendService {
