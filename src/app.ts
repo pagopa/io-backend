@@ -1003,7 +1003,7 @@ function registerServicesAppBackendRoutes(
       servicesAppBackendController
     )
   );
-
+*/
   app.get(
     `${basePath}/services/:serviceId`,
     bearerSessionTokenAuth,
@@ -1011,7 +1011,7 @@ function registerServicesAppBackendRoutes(
       servicesAppBackendController.getServiceById,
       servicesAppBackendController
     )
-  ); */
+  );
 }
 
 // eslint-disable-next-line max-params

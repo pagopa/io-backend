@@ -1,5 +1,6 @@
 import {
   IResponseErrorInternal,
+  IResponseErrorNotFound,
   IResponseErrorValidation,
   IResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
@@ -8,6 +9,8 @@ import { ScopeType } from "generated/services-app-backend/ScopeType";
 import ServicesAppBackendService from "src/services/servicesAppBackendService";
 import { withValidatedOrInternalError } from "src/utils/responses";
 import express = require("express");
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { ServiceDetails } from "generated/services-app-backend/ServiceDetails";
 
 const parseOptionalStringParam = (stringParam?: unknown) =>
   stringParam ? String(stringParam) : undefined;
@@ -28,12 +31,25 @@ export default class ServicesAppBackendController {
     | IResponseErrorValidation
     | IResponseSuccessJson<InstitutionsResource>
   > =>
-    withValidatedOrInternalError(ScopeType.decode(req.params.scope), (scope) =>
+    withValidatedOrInternalError(ScopeType.decode(req.query.scope), (scope) =>
       this.servicesAppBackendService.findInstitutions(
         parseOptionalStringParam(req.query.search),
         scope,
         parseOptionalNumberParam(req.query.limit),
         parseOptionalNumberParam(req.query.offset)
       )
+    );
+
+  public readonly getServiceById = async (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<ServiceDetails>
+  > =>
+    withValidatedOrInternalError(
+      NonEmptyString.decode(req.params.serviceId),
+      (serviceId) => this.servicesAppBackendService.getServiceById(serviceId)
     );
 }

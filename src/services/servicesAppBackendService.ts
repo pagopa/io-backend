@@ -1,11 +1,14 @@
 import {
   IResponseErrorInternal,
+  IResponseErrorNotFound,
   IResponseErrorValidation,
   IResponseSuccessJson,
+  ResponseErrorNotFound,
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import { InstitutionsResource } from "generated/services-app-backend/InstitutionsResource";
 import { ScopeType } from "generated/services-app-backend/ScopeType";
+import { ServiceDetails } from "generated/services-app-backend/ServiceDetails";
 import { ServicesAppBackendAPIClient } from "src/clients/services-app-backend";
 import {
   unhandledResponseStatus,
@@ -44,6 +47,32 @@ export default class ServicesAppBackendService {
               InstitutionsResource.decode(response.value),
               ResponseSuccessJson
             )
+          : unhandledResponseStatus(response.status)
+      );
+    });
+
+  public readonly getServiceById = (
+    serviceId: string
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<ServiceDetails>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.apiClient.getServiceById({
+        serviceId,
+      });
+
+      // TODO: sistemare i vari return
+      return withValidatedOrInternalError(validated, (response) =>
+        response.status === 200
+          ? withValidatedOrInternalError(
+              ServiceDetails.decode(response.value),
+              ResponseSuccessJson
+            )
+          : response.status === 404
+          ? ResponseErrorNotFound("Not found", "Service not found")
           : unhandledResponseStatus(response.status)
       );
     });
