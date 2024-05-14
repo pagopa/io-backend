@@ -125,6 +125,7 @@ import {
   getPNActivationController,
   upsertPNActivationController,
 } from "./controllers/pnController";
+import ServicesAppBackendController from "./controllers/serviceAppBackendController";
 import SessionLockController from "./controllers/sessionLockController";
 import {
   getUserForBPD,
@@ -155,6 +156,7 @@ import { PNService } from "./services/pnService";
 import ProfileService from "./services/profileService";
 import RedisSessionStorage from "./services/redisSessionStorage";
 import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
+import ServicesAppBackendService from "./services/servicesAppBackendService";
 import TokenService from "./services/tokenService";
 import UserDataProcessingService from "./services/userDataProcessingService";
 import UsersLoginLogService, {
@@ -447,7 +449,6 @@ export async function newApp({
         );
 
         // Create the the io-services-app-backend service
-        //TODO: creare service per ServicesAppBackend
         const SERVICES_APP_BACKEND_SERVICE = new ServicesAppBackendService(
           SERVICES_APP_BACKEND_CLIENT
         );
@@ -960,13 +961,12 @@ function registerFIMSRoutes(
 function registerServicesAppBackendRoutes(
   app: Express,
   basePath: string,
-  servicesAppBackendService: ServicesAppBackendService, //TODO: creare service per ServicesAppBackend
+  servicesAppBackendService: ServicesAppBackendService,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bearerSessionTokenAuth: any
 ): void {
-  //TODO: creare controller per ServicesAppBackend
   const servicesAppBackendController: ServicesAppBackendController =
-    new ServicesController(new FunctionsAppService(API_CLIENT));
+    new ServicesAppBackendController(servicesAppBackendService);
 
   app.get(
     `${basePath}/institutions`,
@@ -977,7 +977,7 @@ function registerServicesAppBackendRoutes(
     )
   );
 
-  app.get(
+  /* app.get(
     `${basePath}/institutions/featured`,
     bearerSessionTokenAuth,
     toExpressHandler(
@@ -1011,7 +1011,7 @@ function registerServicesAppBackendRoutes(
       servicesAppBackendController.getServiceById,
       servicesAppBackendController
     )
-  );
+  ); */
 }
 
 // eslint-disable-next-line max-params
