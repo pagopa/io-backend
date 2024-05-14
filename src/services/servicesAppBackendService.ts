@@ -1,9 +1,7 @@
 import {
   IResponseErrorInternal,
-  IResponseErrorNotFound,
   IResponseErrorValidation,
   IResponseSuccessJson,
-  ResponseErrorNotFound,
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import { InstitutionsResource } from "generated/services-app-backend/InstitutionsResource";
@@ -29,7 +27,6 @@ export default class ServicesAppBackendService {
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
-    | IResponseErrorNotFound
     | IResponseSuccessJson<InstitutionsResource>
   > =>
     withCatchAsInternalError(async () => {
@@ -47,11 +44,7 @@ export default class ServicesAppBackendService {
               InstitutionsResource.decode(response.value),
               ResponseSuccessJson
             )
-          : response.status === 404
-          ? ResponseErrorNotFound("Not found", "Service not found")
-          : /*           : response.status === 429
-          ? ResponseErrorTooManyRequests() */
-            unhandledResponseStatus(response.status)
+          : unhandledResponseStatus(response.status)
       );
     });
 }

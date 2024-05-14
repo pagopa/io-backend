@@ -1,6 +1,5 @@
 import {
   IResponseErrorInternal,
-  IResponseErrorNotFound,
   IResponseErrorValidation,
   IResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
@@ -27,7 +26,6 @@ export default class ServicesAppBackendController {
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
-    | IResponseErrorNotFound
     | IResponseSuccessJson<InstitutionsResource>
   > =>
     withValidatedOrInternalError(ScopeType.decode(req.params.scope), (scope) =>
