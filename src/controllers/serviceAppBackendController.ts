@@ -4,16 +4,19 @@ import {
   IResponseErrorValidation,
   IResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
-import { InstitutionsResource } from "generated/services-app-backend/InstitutionsResource";
-import { ScopeType } from "generated/services-app-backend/ScopeType";
-import ServicesAppBackendService from "src/services/servicesAppBackendService";
-import { withValidatedOrInternalError } from "src/utils/responses";
-import express = require("express");
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { ServiceDetails } from "generated/services-app-backend/ServiceDetails";
 import { FeaturedServices } from "generated/services-app-backend/FeaturedServices";
 import { Institutions } from "generated/services-app-backend/Institutions";
 import { InstitutionServicesResource } from "generated/services-app-backend/InstitutionServicesResource";
+import { InstitutionsResource } from "generated/services-app-backend/InstitutionsResource";
+import { ScopeType } from "generated/services-app-backend/ScopeType";
+import { ServiceDetails } from "generated/services-app-backend/ServiceDetails";
+import ServicesAppBackendService from "src/services/servicesAppBackendService";
+import {
+  withValidatedOrInternalError,
+  withValidatedOrValidationError,
+} from "src/utils/responses";
+import express = require("express");
 
 const parseOptionalStringParam = (stringParam?: unknown) =>
   stringParam ? String(stringParam) : undefined;
@@ -21,7 +24,6 @@ const parseOptionalStringParam = (stringParam?: unknown) =>
 const parseOptionalNumberParam = (numberParam?: unknown) =>
   numberParam ? Number(numberParam) : undefined;
 
-// TODO: Aggiungere le altre operazioni del controller
 export default class ServicesAppBackendController {
   constructor(
     private readonly servicesAppBackendService: ServicesAppBackendService
@@ -34,7 +36,7 @@ export default class ServicesAppBackendController {
     | IResponseErrorValidation
     | IResponseSuccessJson<InstitutionsResource>
   > =>
-    withValidatedOrInternalError(ScopeType.decode(req.query.scope), (scope) =>
+    withValidatedOrValidationError(ScopeType.decode(req.query.scope), (scope) =>
       this.servicesAppBackendService.findInstitutions(
         parseOptionalStringParam(req.query.search),
         scope,
@@ -47,7 +49,6 @@ export default class ServicesAppBackendController {
     req: express.Request
   ): Promise<
     | IResponseErrorInternal
-    | IResponseErrorValidation
     | IResponseErrorNotFound
     | IResponseSuccessJson<ServiceDetails>
   > =>
@@ -58,19 +59,13 @@ export default class ServicesAppBackendController {
 
   public readonly getFeaturedServices = async (
     _req: express.Request
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorValidation
-    | IResponseSuccessJson<FeaturedServices>
-  > => this.servicesAppBackendService.getFeaturedServices();
+  ): Promise<IResponseErrorInternal | IResponseSuccessJson<FeaturedServices>> =>
+    this.servicesAppBackendService.getFeaturedServices();
 
   public readonly getFeaturedInstitutions = async (
     _req: express.Request
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorValidation
-    | IResponseSuccessJson<Institutions>
-  > => this.servicesAppBackendService.getFeaturedInstitutions();
+  ): Promise<IResponseErrorInternal | IResponseSuccessJson<Institutions>> =>
+    this.servicesAppBackendService.getFeaturedInstitutions();
 
   public readonly findInstutionServices = async (
     req: express.Request
@@ -80,7 +75,6 @@ export default class ServicesAppBackendController {
     | IResponseSuccessJson<InstitutionServicesResource>
   > =>
     withValidatedOrInternalError(
-      // TODO: after fixing institutionId type update decoder type
       NonEmptyString.decode(req.params.institutionId),
       (institutionId) =>
         this.servicesAppBackendService.findInstutionServices(institutionId)

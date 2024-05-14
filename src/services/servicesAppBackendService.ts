@@ -43,7 +43,6 @@ export default class ServicesAppBackendService {
         search,
       });
 
-      // TODO: sistemare i vari return
       return withValidatedOrInternalError(validated, (response) =>
         response.status === 200
           ? withValidatedOrInternalError(
@@ -58,7 +57,6 @@ export default class ServicesAppBackendService {
     serviceId: string
   ): Promise<
     | IResponseErrorInternal
-    | IResponseErrorValidation
     | IResponseErrorNotFound
     | IResponseSuccessJson<ServiceDetails>
   > =>
@@ -67,7 +65,6 @@ export default class ServicesAppBackendService {
         serviceId,
       });
 
-      // TODO: sistemare i vari return
       return withValidatedOrInternalError(validated, (response) =>
         response.status === 200
           ? withValidatedOrInternalError(
@@ -81,9 +78,7 @@ export default class ServicesAppBackendService {
     });
 
   public readonly getFeaturedServices = (): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorValidation
-    | IResponseSuccessJson<FeaturedServices>
+    IResponseErrorInternal | IResponseSuccessJson<FeaturedServices>
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.apiClient.getFeaturedServices({});
@@ -100,9 +95,7 @@ export default class ServicesAppBackendService {
     });
 
   public readonly getFeaturedInstitutions = (): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorValidation
-    | IResponseSuccessJson<Institutions>
+    IResponseErrorInternal | IResponseSuccessJson<Institutions>
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.apiClient.getFeaturedInstitutions({});
@@ -122,9 +115,7 @@ export default class ServicesAppBackendService {
     // TODO: fix institutionId type
     institutionId: string
   ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorValidation
-    | IResponseSuccessJson<InstitutionServicesResource>
+    IResponseErrorInternal | IResponseSuccessJson<InstitutionServicesResource>
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.apiClient.findInstutionServices({
