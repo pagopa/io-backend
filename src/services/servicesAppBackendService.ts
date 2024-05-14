@@ -7,6 +7,7 @@ import {
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import { FeaturedServices } from "generated/services-app-backend/FeaturedServices";
+import { InstitutionServicesResource } from "generated/services-app-backend/InstitutionServicesResource";
 import { Institutions } from "generated/services-app-backend/Institutions";
 import { InstitutionsResource } from "generated/services-app-backend/InstitutionsResource";
 import { ScopeType } from "generated/services-app-backend/ScopeType";
@@ -111,6 +112,30 @@ export default class ServicesAppBackendService {
         response.status === 200
           ? withValidatedOrInternalError(
               Institutions.decode(response.value),
+              ResponseSuccessJson
+            )
+          : unhandledResponseStatus(response.status)
+      );
+    });
+
+  public readonly findInstutionServices = (
+    // TODO: fix institutionId type
+    institutionId: string
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseSuccessJson<InstitutionServicesResource>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.apiClient.findInstutionServices({
+        institutionId,
+      });
+
+      // TODO: sistemare i vari return
+      return withValidatedOrInternalError(validated, (response) =>
+        response.status === 200
+          ? withValidatedOrInternalError(
+              InstitutionServicesResource.decode(response.value),
               ResponseSuccessJson
             )
           : unhandledResponseStatus(response.status)

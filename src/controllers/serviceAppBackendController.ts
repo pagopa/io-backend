@@ -13,6 +13,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { ServiceDetails } from "generated/services-app-backend/ServiceDetails";
 import { FeaturedServices } from "generated/services-app-backend/FeaturedServices";
 import { Institutions } from "generated/services-app-backend/Institutions";
+import { InstitutionServicesResource } from "generated/services-app-backend/InstitutionServicesResource";
 
 const parseOptionalStringParam = (stringParam?: unknown) =>
   stringParam ? String(stringParam) : undefined;
@@ -70,4 +71,18 @@ export default class ServicesAppBackendController {
     | IResponseErrorValidation
     | IResponseSuccessJson<Institutions>
   > => this.servicesAppBackendService.getFeaturedInstitutions();
+
+  public readonly findInstutionServices = async (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseSuccessJson<InstitutionServicesResource>
+  > =>
+    withValidatedOrInternalError(
+      // TODO: after fixing institutionId type update decoder type
+      NonEmptyString.decode(req.params.institutionId),
+      (institutionId) =>
+        this.servicesAppBackendService.findInstutionServices(institutionId)
+    );
 }
