@@ -726,7 +726,7 @@ export async function newApp({
         registerServicesAppBackendRoutes(
           app,
           ServicesAppBackendBasePath,
-          SERVICES_APP_BACKEND_SERVICE, // TODO: creare service per ServicesAppBackend
+          SERVICES_APP_BACKEND_SERVICE,
           authMiddlewares.bearerSession
         );
 
