@@ -553,6 +553,9 @@ export const EUCOVIDCERT_API_CLIENT = EUCovidCertAPIClient(
   httpOrHttpsApiFetch
 );
 
+//TODO: creare servicesAppBackend client
+export const SERVICES_APP_BACKEND_CLIENT = undefined;
+
 /**
  * Piattaforma Notifiche configuration environments variables.
  * Missing or invalid variables kill the backend process.
@@ -673,6 +676,10 @@ export const BPD_BASE_PATH = getRequiredENVVar("BPD_BASE_PATH");
 export const FIMS_BASE_PATH = getRequiredENVVar("FIMS_BASE_PATH");
 
 export const ZENDESK_BASE_PATH = getRequiredENVVar("ZENDESK_BASE_PATH");
+
+export const SERVICES_APP_BACKEND_BASE_PATH = getRequiredENVVar(
+  "SERVICES_APP_BACKEND_BASE_PATH"
+);
 
 // Token needed to receive API calls (notifications, metadata update) from io-functions-services
 export const PRE_SHARED_KEY = getRequiredENVVar("PRE_SHARED_KEY");

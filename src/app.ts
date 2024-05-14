@@ -12,86 +12,87 @@ import { Express } from "express";
 import expressEnforcesSsl = require("express-enforces-ssl");
 
 import { TableClient } from "@azure/data-tables";
+import { QueueClient } from "@azure/storage-queue";
+import { withSpid } from "@pagopa/io-spid-commons";
+import { getSpidStrategyOption } from "@pagopa/io-spid-commons/dist/utils/middleware";
 import {
   NodeEnvironment,
   NodeEnvironmentEnum,
 } from "@pagopa/ts-commons/lib/environment";
+import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { CIDR, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { QueueClient } from "@azure/storage-queue";
-import { withSpid } from "@pagopa/io-spid-commons";
-import { getSpidStrategyOption } from "@pagopa/io-spid-commons/dist/utils/middleware";
+import { Second } from "@pagopa/ts-commons/lib/units";
 import * as appInsights from "applicationinsights";
-import * as O from "fp-ts/lib/Option";
 import * as E from "fp-ts/lib/Either";
+import * as O from "fp-ts/lib/Option";
 import * as R from "fp-ts/lib/Record";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
-import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
-import { Second } from "@pagopa/ts-commons/lib/units";
 import { FiscalCode } from "generated/io-bonus-api/FiscalCode";
 import { ServerInfo } from "../generated/public/ServerInfo";
 
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
 import {
+  ALLOWED_CIE_TEST_FISCAL_CODES,
   API_CLIENT,
-  appConfig,
+  APP_MESSAGES_API_CLIENT,
   BONUS_API_CLIENT,
   CGN_API_CLIENT,
+  CGN_OPERATOR_SEARCH_API_CLIENT,
+  DEFAULT_LOLLIPOP_ASSERTION_REF_DURATION,
   ENABLE_NOTICE_EMAIL_CACHE,
   ENV,
+  EUCOVIDCERT_API_CLIENT,
+  FAST_LOGIN_LOLLIPOP_CONSUMER_CLIENT,
   FF_BONUS_ENABLED,
   FF_CGN_ENABLED,
+  FF_ENABLE_NOTIFY_ENDPOINT,
+  FF_ENABLE_SESSION_ENDPOINTS,
   FF_EUCOVIDCERT_ENABLED,
-  getClientProfileRedirectionUrl,
+  FF_FAST_LOGIN,
+  FF_IO_SIGN_ENABLED,
+  FF_LOLLIPOP_ENABLED,
+  FF_MIT_VOUCHER_ENABLED,
+  FF_ROUTING_PUSH_NOTIF,
+  FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST,
+  FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX,
+  FF_USER_AGE_LIMIT_ENABLED,
+  FIRST_LOLLIPOP_CONSUMER_CLIENT,
   IDP_METADATA_REFRESH_INTERVAL_SECONDS,
-  NOTIFICATION_DEFAULT_SUBJECT,
-  NOTIFICATION_DEFAULT_TITLE,
+  IO_SIGN_API_CLIENT,
+  IO_SIGN_SERVICE_ID,
+  LOCKED_PROFILES_STORAGE_CONNECTION_STRING,
+  LOCKED_PROFILES_TABLE_NAME,
+  LOLLIPOP_API_CLIENT,
+  LOLLIPOP_REVOKE_QUEUE_NAME,
+  LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING,
   NOTIFICATIONS_QUEUE_NAME,
   NOTIFICATIONS_STORAGE_CONNECTION_STRING,
+  NOTIFICATION_DEFAULT_SUBJECT,
+  NOTIFICATION_DEFAULT_TITLE,
+  PAGOPA_CLIENT,
+  PNAddressBookConfig,
+  PN_ADDRESS_BOOK_CLIENT_SELECTOR,
   PUSH_NOTIFICATIONS_QUEUE_NAME,
   PUSH_NOTIFICATIONS_STORAGE_CONNECTION_STRING,
-  PAGOPA_CLIENT,
-  samlConfig,
-  serviceProviderConfig,
+  SERVICES_APP_BACKEND_CLIENT,
   SPID_LOG_QUEUE_NAME,
   SPID_LOG_STORAGE_CONNECTION_STRING,
+  TEST_CGN_FISCAL_CODES,
   TEST_LOGIN_FISCAL_CODES,
   TEST_LOGIN_PASSWORD,
-  tokenDurationSecs,
   URL_TOKEN_STRATEGY,
   USERS_LOGIN_QUEUE_NAME,
   USERS_LOGIN_STORAGE_CONNECTION_STRING,
-  TEST_CGN_FISCAL_CODES,
-  CGN_OPERATOR_SEARCH_API_CLIENT,
-  EUCOVIDCERT_API_CLIENT,
-  FF_MIT_VOUCHER_ENABLED,
+  appConfig,
   getClientErrorRedirectionUrl,
-  FF_USER_AGE_LIMIT_ENABLED,
-  APP_MESSAGES_API_CLIENT,
-  FF_ENABLE_NOTIFY_ENDPOINT,
-  FF_ENABLE_SESSION_ENDPOINTS,
-  PN_ADDRESS_BOOK_CLIENT_SELECTOR,
-  PNAddressBookConfig,
-  FF_IO_SIGN_ENABLED,
-  IO_SIGN_API_CLIENT,
-  FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST,
-  FF_ROUTING_PUSH_NOTIF,
-  FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX,
-  LOLLIPOP_API_CLIENT,
-  FF_LOLLIPOP_ENABLED,
-  DEFAULT_LOLLIPOP_ASSERTION_REF_DURATION,
-  LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING,
-  LOLLIPOP_REVOKE_QUEUE_NAME,
-  IO_SIGN_SERVICE_ID,
-  FIRST_LOLLIPOP_CONSUMER_CLIENT,
-  lvTokenDurationSecs,
-  lvLongSessionDurationSecs,
-  FF_FAST_LOGIN,
-  FAST_LOGIN_LOLLIPOP_CONSUMER_CLIENT,
-  ALLOWED_CIE_TEST_FISCAL_CODES,
-  LOCKED_PROFILES_STORAGE_CONNECTION_STRING,
-  LOCKED_PROFILES_TABLE_NAME,
+  getClientProfileRedirectionUrl,
   isUserElegibleForFastLogin,
+  lvLongSessionDurationSecs,
+  lvTokenDurationSecs,
+  samlConfig,
+  serviceProviderConfig,
+  tokenDurationSecs,
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -106,27 +107,51 @@ import UserMetadataController from "./controllers/userMetadataController";
 import { log } from "./utils/logger";
 import checkIP from "./utils/middleware/checkIP";
 
+import { getFastLoginLollipopConsumerClient } from "./clients/fastLoginLollipopConsumerClient";
+import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
+import { LollipopApiClient } from "./clients/lollipop";
 import BonusController from "./controllers/bonusController";
 import CgnController from "./controllers/cgnController";
-import SessionLockController from "./controllers/sessionLockController";
+import CgnOperatorSearchController from "./controllers/cgnOperatorSearchController";
+import EUCovidCertController from "./controllers/eucovidcertController";
+import {
+  fastLoginEndpoint,
+  generateNonceEndpoint,
+} from "./controllers/fastLoginController";
+import { firstLollipopSign } from "./controllers/firstLollipopConsumerController";
+import IoSignController from "./controllers/ioSignController";
+import MitVoucherController from "./controllers/mitVoucherController";
 import {
   getPNActivationController,
   upsertPNActivationController,
 } from "./controllers/pnController";
+import SessionLockController from "./controllers/sessionLockController";
 import {
   getUserForBPD,
   getUserForFIMS,
   getUserForMyPortal,
 } from "./controllers/ssoController";
 import SupportController from "./controllers/supportController";
-import ZendeskController from "./controllers/zendeskController";
 import UserDataProcessingController from "./controllers/userDataProcessingController";
+import ZendeskController from "./controllers/zendeskController";
+import { lollipopLoginMiddleware } from "./handlers/lollipop";
+import { ISessionStorage } from "./services/ISessionStorage";
+import AuthenticationLockService from "./services/authenticationLockService";
 import BonusService from "./services/bonusService";
-import CgnService from "./services/cgnService";
 import CgnOperatorSearchService from "./services/cgnOperatorSearchService";
+import CgnService from "./services/cgnService";
+import EUCovidCertService from "./services/eucovidcertService";
 import FunctionsAppService from "./services/functionAppService";
+import IoSignService from "./services/ioSignService";
+import LollipopService from "./services/lollipopService";
+import NewMessagesService from "./services/newMessagesService";
 import NotificationService from "./services/notificationService";
+import {
+  NotificationServiceFactory,
+  getNotificationServiceFactory,
+} from "./services/notificationServiceFactory";
 import PagoPAProxyService from "./services/pagoPAProxyService";
+import { PNService } from "./services/pnService";
 import ProfileService from "./services/profileService";
 import RedisSessionStorage from "./services/redisSessionStorage";
 import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
@@ -136,6 +161,7 @@ import UsersLoginLogService, {
   onUserLogin,
 } from "./services/usersLoginLogService";
 import bearerBPDTokenStrategy from "./strategies/bearerBPDTokenStrategy";
+import bearerFIMSTokenStrategy from "./strategies/bearerFIMSTokenStrategy";
 import bearerMyPortalTokenStrategy from "./strategies/bearerMyPortalTokenStrategy";
 import bearerSessionTokenStrategy from "./strategies/bearerSessionTokenStrategy";
 import bearerWalletTokenStrategy from "./strategies/bearerWalletTokenStrategy";
@@ -143,8 +169,8 @@ import bearerZendeskTokenStrategy from "./strategies/bearerZendeskTokenStrategy"
 import { localStrategy } from "./strategies/localStrategy";
 import { User } from "./types/user";
 import {
-  attachTrackingData,
   StartupEventName,
+  attachTrackingData,
   trackStartupTime,
 } from "./utils/appinsights";
 import { getRequiredENVVar } from "./utils/container";
@@ -153,51 +179,26 @@ import {
   toExpressHandler,
   toExpressMiddleware,
 } from "./utils/express";
-import { expressErrorMiddleware } from "./utils/middleware/express";
-import {
-  getCurrentBackendVersion,
-  getObjectFromPackageJson,
-} from "./utils/package";
-import { RedisClientSelector, RedisClientMode } from "./utils/redis";
-import { ResponseErrorDismissed } from "./utils/responses";
-import { makeSpidLogCallback } from "./utils/spid";
-import { TimeTracer } from "./utils/timer";
-import CgnOperatorSearchController from "./controllers/cgnOperatorSearchController";
-import EUCovidCertService from "./services/eucovidcertService";
-import EUCovidCertController from "./controllers/eucovidcertController";
-import MitVoucherController from "./controllers/mitVoucherController";
-import NewMessagesService from "./services/newMessagesService";
-import bearerFIMSTokenStrategy from "./strategies/bearerFIMSTokenStrategy";
-import { PNService } from "./services/pnService";
-import IoSignService from "./services/ioSignService";
-import IoSignController from "./controllers/ioSignController";
-import {
-  getNotificationServiceFactory,
-  NotificationServiceFactory,
-} from "./services/notificationServiceFactory";
-import { lollipopLoginMiddleware } from "./handlers/lollipop";
-import LollipopService from "./services/lollipopService";
-import { firstLollipopSign } from "./controllers/firstLollipopConsumerController";
-import {
-  expressLollipopMiddleware,
-  expressLollipopMiddlewareLegacy,
-} from "./utils/middleware/lollipop";
-import { LollipopApiClient } from "./clients/lollipop";
-import { ISessionStorage } from "./services/ISessionStorage";
-import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
 import {
   AdditionalLoginProps,
   LoginTypeEnum,
   acsRequestMapper,
   getLoginType,
 } from "./utils/fastLogin";
-import {
-  fastLoginEndpoint,
-  generateNonceEndpoint,
-} from "./controllers/fastLoginController";
-import { getFastLoginLollipopConsumerClient } from "./clients/fastLoginLollipopConsumerClient";
 import { FeatureFlagEnum } from "./utils/featureFlag";
-import AuthenticationLockService from "./services/authenticationLockService";
+import { expressErrorMiddleware } from "./utils/middleware/express";
+import {
+  expressLollipopMiddleware,
+  expressLollipopMiddlewareLegacy,
+} from "./utils/middleware/lollipop";
+import {
+  getCurrentBackendVersion,
+  getObjectFromPackageJson,
+} from "./utils/package";
+import { RedisClientMode, RedisClientSelector } from "./utils/redis";
+import { ResponseErrorDismissed } from "./utils/responses";
+import { makeSpidLogCallback } from "./utils/spid";
+import { TimeTracer } from "./utils/timer";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -225,6 +226,7 @@ export interface IAppFactoryParameters {
   readonly IoSignAPIBasePath: string;
   readonly EUCovidCertBasePath: string;
   readonly MitVoucherBasePath: string;
+  readonly ServicesAppBackendBasePath: string;
   readonly ZendeskBasePath: string;
 }
 
@@ -250,6 +252,7 @@ export async function newApp({
   CGNOperatorSearchAPIBasePath,
   EUCovidCertBasePath,
   MitVoucherBasePath,
+  ServicesAppBackendBasePath,
   ZendeskBasePath,
 }: IAppFactoryParameters): Promise<Express> {
   const isDevEnvironment = ENV === NodeEnvironmentEnum.DEVELOPMENT;
@@ -441,6 +444,12 @@ export async function newApp({
         // Create the user data processing service
         const USER_DATA_PROCESSING_SERVICE = new UserDataProcessingService(
           API_CLIENT
+        );
+
+        // Create the the io-services-app-backend service
+        //TODO: creare service per ServicesAppBackend
+        const SERVICES_APP_BACKEND_SERVICE = new ServicesAppBackendService(
+          SERVICES_APP_BACKEND_CLIENT
         );
 
         // Create the Notification Service
@@ -712,6 +721,14 @@ export async function newApp({
           authMiddlewares.bearerFIMS
         );
 
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        registerServicesAppBackendRoutes(
+          app,
+          ServicesAppBackendBasePath,
+          SERVICES_APP_BACKEND_SERVICE, // TODO: creare service per ServicesAppBackend
+          authMiddlewares.bearerSession
+        );
+
         if (
           PNAddressBookConfig.FF_PN_ACTIVATION_ENABLED === "1" &&
           O.isSome(PN_ADDRESS_BOOK_CLIENT_SELECTOR)
@@ -736,6 +753,7 @@ export async function newApp({
           authMiddlewares.bearerZendesk,
           appInsightsClient
         );
+
         return { acsController, app };
       },
       (err) => new Error(`Error on app routes setup: [${err}]`)
@@ -936,6 +954,63 @@ function registerFIMSRoutes(
     `${basePath}/user`,
     bearerFIMSTokenAuth,
     toExpressHandler(getUserForFIMS(profileService))
+  );
+}
+
+function registerServicesAppBackendRoutes(
+  app: Express,
+  basePath: string,
+  servicesAppBackendService: ServicesAppBackendService, //TODO: creare service per ServicesAppBackend
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  bearerSessionTokenAuth: any
+): void {
+  //TODO: creare controller per ServicesAppBackend
+  const servicesAppBackendController: ServicesAppBackendController =
+    new ServicesController(new FunctionsAppService(API_CLIENT));
+
+  app.get(
+    `${basePath}/institutions`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      servicesAppBackendController.findInstitutions,
+      servicesAppBackendController
+    )
+  );
+
+  app.get(
+    `${basePath}/institutions/featured`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      servicesAppBackendController.getFeaturedInstitutions,
+      servicesAppBackendController
+    )
+  );
+
+  app.get(
+    `${basePath}/institutions/:institutionId/services`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      servicesAppBackendController.findInstutionServices,
+      servicesAppBackendController
+    )
+  );
+
+  app.get(
+    `${basePath}/services/featured`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      servicesAppBackendController.getFeaturedServices,
+      servicesAppBackendController
+    )
+  );
+
+  app.get(
+    `${basePath}/services/:serviceId`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      servicesAppBackendController.getServiceById,
+      servicesAppBackendController
+    )
   );
 }
 
