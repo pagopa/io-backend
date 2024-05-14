@@ -11,6 +11,7 @@ import { withValidatedOrInternalError } from "src/utils/responses";
 import express = require("express");
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { ServiceDetails } from "generated/services-app-backend/ServiceDetails";
+import { FeaturedServices } from "generated/services-app-backend/FeaturedServices";
 
 const parseOptionalStringParam = (stringParam?: unknown) =>
   stringParam ? String(stringParam) : undefined;
@@ -52,4 +53,12 @@ export default class ServicesAppBackendController {
       NonEmptyString.decode(req.params.serviceId),
       (serviceId) => this.servicesAppBackendService.getServiceById(serviceId)
     );
+
+  public readonly getFeaturedServices = async (
+    _req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseSuccessJson<FeaturedServices>
+  > => this.servicesAppBackendService.getFeaturedServices();
 }

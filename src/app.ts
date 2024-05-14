@@ -994,7 +994,7 @@ function registerServicesAppBackendRoutes(
       servicesAppBackendController
     )
   );
-
+*/
   app.get(
     `${basePath}/services/featured`,
     bearerSessionTokenAuth,
@@ -1003,7 +1003,7 @@ function registerServicesAppBackendRoutes(
       servicesAppBackendController
     )
   );
-*/
+
   app.get(
     `${basePath}/services/:serviceId`,
     bearerSessionTokenAuth,

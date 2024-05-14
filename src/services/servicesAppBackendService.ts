@@ -6,6 +6,7 @@ import {
   ResponseErrorNotFound,
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
+import { FeaturedServices } from "generated/services-app-backend/FeaturedServices";
 import { InstitutionsResource } from "generated/services-app-backend/InstitutionsResource";
 import { ScopeType } from "generated/services-app-backend/ScopeType";
 import { ServiceDetails } from "generated/services-app-backend/ServiceDetails";
@@ -73,6 +74,25 @@ export default class ServicesAppBackendService {
             )
           : response.status === 404
           ? ResponseErrorNotFound("Not found", "Service not found")
+          : unhandledResponseStatus(response.status)
+      );
+    });
+
+  public readonly getFeaturedServices = (): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseSuccessJson<FeaturedServices>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.apiClient.getFeaturedServices({});
+
+      // TODO: sistemare i vari return
+      return withValidatedOrInternalError(validated, (response) =>
+        response.status === 200
+          ? withValidatedOrInternalError(
+              FeaturedServices.decode(response.value),
+              ResponseSuccessJson
+            )
           : unhandledResponseStatus(response.status)
       );
     });
