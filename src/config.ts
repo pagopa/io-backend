@@ -53,6 +53,7 @@ import { IoLoginHostUrl, STRINGS_RECORD } from "./types/commons";
 import { SpidLevelArray } from "./types/spidLevel";
 import { decodeCIDRs } from "./utils/network";
 import { CgnOperatorSearchAPIClient } from "./clients/cgn-operator-search";
+import { ServicesAppBackendAPIClient } from "./clients/services-app-backend";
 import { EUCovidCertAPIClient } from "./clients/eucovidcert.client";
 import { ognlTypeFor } from "./utils/ognl";
 import { AppMessagesAPIClient } from "./clients/app-messages.client";
@@ -553,6 +554,20 @@ export const EUCOVIDCERT_API_CLIENT = EUCovidCertAPIClient(
   httpOrHttpsApiFetch
 );
 
+export const SERVICES_APP_BACKEND_API_BASE_PATH = getRequiredENVVar(
+  "SERVICES_APP_BACKEND_API_BASE_PATH"
+);
+export const SERVICES_APP_BACKEND_API_URL = getRequiredENVVar(
+  "SERVICES_APP_BACKEND_API_URL"
+);
+
+// TODO: creare servicesAppBackend client
+export const SERVICES_APP_BACKEND_CLIENT = ServicesAppBackendAPIClient(
+  SERVICES_APP_BACKEND_API_URL,
+  SERVICES_APP_BACKEND_API_BASE_PATH,
+  httpOrHttpsApiFetch
+);
+
 /**
  * Piattaforma Notifiche configuration environments variables.
  * Missing or invalid variables kill the backend process.
@@ -673,6 +688,10 @@ export const BPD_BASE_PATH = getRequiredENVVar("BPD_BASE_PATH");
 export const FIMS_BASE_PATH = getRequiredENVVar("FIMS_BASE_PATH");
 
 export const ZENDESK_BASE_PATH = getRequiredENVVar("ZENDESK_BASE_PATH");
+
+export const SERVICES_APP_BACKEND_BASE_PATH = getRequiredENVVar(
+  "SERVICES_APP_BACKEND_BASE_PATH"
+);
 
 // Token needed to receive API calls (notifications, metadata update) from io-functions-services
 export const PRE_SHARED_KEY = getRequiredENVVar("PRE_SHARED_KEY");
