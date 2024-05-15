@@ -113,13 +113,17 @@ export default class ServicesAppBackendService {
 
   public readonly findInstutionServices = (
     // TODO: fix institutionId type
-    institutionId: string
+    institutionId: string,
+    limit?: number,
+    offset?: number
   ): Promise<
     IResponseErrorInternal | IResponseSuccessJson<InstitutionServicesResource>
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.apiClient.findInstutionServices({
         institutionId,
+        limit,
+        offset,
       });
 
       // TODO: sistemare i vari return

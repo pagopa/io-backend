@@ -1,4 +1,3 @@
-import * as express from "express";
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
@@ -6,6 +5,10 @@ import {
   IResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import * as express from "express";
+import * as E from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
+import * as O from "fp-ts/lib/Option";
 import { FeaturedServices } from "../../generated/services-app-backend/FeaturedServices";
 import { Institutions } from "../../generated/services-app-backend/Institutions";
 import { InstitutionServicesResource } from "../../generated/services-app-backend/InstitutionServicesResource";
@@ -36,13 +39,22 @@ export default class ServicesAppBackendController {
     | IResponseErrorValidation
     | IResponseSuccessJson<InstitutionsResource>
   > =>
-    withValidatedOrValidationError(ScopeType.decode(req.query.scope), (scope) =>
-      this.servicesAppBackendService.findInstitutions(
-        parseOptionalStringParam(req.query.search),
-        scope,
-        parseOptionalNumberParam(req.query.limit),
-        parseOptionalNumberParam(req.query.offset)
-      )
+    withValidatedOrValidationError(
+      pipe(
+        req.query.scope,
+        O.fromNullable,
+        O.foldW(
+          () => E.right(undefined),
+          (scope) => ScopeType.decode(scope)
+        )
+      ),
+      (scope) =>
+        this.servicesAppBackendService.findInstitutions(
+          parseOptionalStringParam(req.query.search),
+          scope,
+          parseOptionalNumberParam(req.query.limit),
+          parseOptionalNumberParam(req.query.offset)
+        )
     );
 
   public readonly getServiceById = async (
@@ -77,6 +89,10 @@ export default class ServicesAppBackendController {
     withValidatedOrInternalError(
       NonEmptyString.decode(req.params.institutionId),
       (institutionId) =>
-        this.servicesAppBackendService.findInstutionServices(institutionId)
+        this.servicesAppBackendService.findInstutionServices(
+          institutionId,
+          parseOptionalNumberParam(req.query.limit),
+          parseOptionalNumberParam(req.query.offset)
+        )
     );
 }
