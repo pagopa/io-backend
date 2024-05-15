@@ -112,6 +112,16 @@ const problemJson = {
   status: 500,
 };
 
+const notFoundApiServiceResponse = {
+  status: 404,
+  value: {},
+};
+
+const invalidApiServiceResponse = {
+  status: 500,
+  value: { random: "notGood" },
+};
+
 const mockFindInstitutions = jest.fn();
 const mockGetServiceById = jest.fn();
 const mockGetFeaturedServices = jest.fn();
@@ -174,6 +184,34 @@ describe("FunctionsServicesAppBackendService#getServiceById", () => {
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
+
+  it("returns not found error if the response from the API returns 404", async () => {
+    mockGetServiceById.mockImplementation(() =>
+      t.success(notFoundApiServiceResponse)
+    );
+
+    const service = new ServicesAppBackendService(api);
+
+    const res = await service.getServiceById(aValidServiceId);
+    expect(mockGetServiceById).toHaveBeenCalledWith({
+      serviceId: aValidServiceId,
+    });
+    expect(res.kind).toEqual("IResponseErrorNotFound");
+  });
+
+  it("returns unknown response if the response from the API returns something wrong", async () => {
+    mockGetServiceById.mockImplementation(() =>
+      t.success(invalidApiServiceResponse)
+    );
+
+    const service = new ServicesAppBackendService(api);
+
+    const res = await service.getServiceById(aValidServiceId);
+    expect(mockGetServiceById).toHaveBeenCalledWith({
+      serviceId: aValidServiceId,
+    });
+    expect(res.kind).toEqual("IResponseErrorInternal");
+  });
 });
 
 describe("FunctionsServicesAppBackendService#getFeaturedServices", () => {
@@ -198,6 +236,17 @@ describe("FunctionsServicesAppBackendService#getFeaturedServices", () => {
 
   it("returns an error if the API returns an error", async () => {
     mockGetFeaturedServices.mockImplementation(() => t.success(problemJson));
+
+    const service = new ServicesAppBackendService(api);
+    const res = await service.getFeaturedServices();
+    expect(mockGetFeaturedServices).toHaveBeenCalledWith({});
+    expect(res.kind).toEqual("IResponseErrorInternal");
+  });
+
+  it("returns unknown response if the response from the API returns something wrong", async () => {
+    mockGetFeaturedServices.mockImplementation(() =>
+      t.success(invalidApiServiceResponse)
+    );
 
     const service = new ServicesAppBackendService(api);
     const res = await service.getFeaturedServices();
@@ -236,6 +285,17 @@ describe("FunctionsServicesAppBackendService#getFeaturedInstitutions", () => {
     expect(mockGetFeaturedInstitutions).toHaveBeenCalledWith({});
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
+
+  it("returns unknown response if the response from the API returns something wrong", async () => {
+    mockGetFeaturedInstitutions.mockImplementation(() =>
+      t.success(invalidApiServiceResponse)
+    );
+
+    const service = new ServicesAppBackendService(api);
+    const res = await service.getFeaturedInstitutions();
+    expect(mockGetFeaturedInstitutions).toHaveBeenCalledWith({});
+    expect(res.kind).toEqual("IResponseErrorInternal");
+  });
 });
 
 describe("FunctionsServicesAppBackendService#findInstitutions", () => {
@@ -260,6 +320,17 @@ describe("FunctionsServicesAppBackendService#findInstitutions", () => {
 
   it("returns an error if the API returns an error", async () => {
     mockFindInstitutions.mockImplementation(() => t.success(problemJson));
+
+    const service = new ServicesAppBackendService(api);
+    const res = await service.findInstitutions();
+    expect(mockFindInstitutions).toHaveBeenCalledWith({});
+    expect(res.kind).toEqual("IResponseErrorInternal");
+  });
+
+  it("returns unknown response if the response from the API returns something wrong", async () => {
+    mockFindInstitutions.mockImplementation(() =>
+      t.success(invalidApiServiceResponse)
+    );
 
     const service = new ServicesAppBackendService(api);
     const res = await service.findInstitutions();
@@ -292,6 +363,19 @@ describe("FunctionsServicesAppBackendService#findInstutionServices", () => {
 
   it("returns an error if the API returns an error", async () => {
     mockFindInstutionServices.mockImplementation(() => t.success(problemJson));
+
+    const service = new ServicesAppBackendService(api);
+    const res = await service.findInstutionServices(aValidInstitutionId);
+    expect(mockFindInstutionServices).toHaveBeenCalledWith({
+      institutionId: aValidInstitutionId,
+    });
+    expect(res.kind).toEqual("IResponseErrorInternal");
+  });
+
+  it("returns unknown response if the response from the API returns something wrong", async () => {
+    mockFindInstutionServices.mockImplementation(() =>
+      t.success(invalidApiServiceResponse)
+    );
 
     const service = new ServicesAppBackendService(api);
     const res = await service.findInstutionServices(aValidInstitutionId);
