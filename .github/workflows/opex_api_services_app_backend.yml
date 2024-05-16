@@ -1,0 +1,23 @@
+name: Opex Dashboard api_services_app_backend
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'openapi/generated/api_services_app_backend.yaml'
+      - '.github/workflows/opex_api_services_app_backend.yml'
+      - '.opex/api_services_app_backend/**'
+
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+
+jobs:
+  apply:
+    uses: ./.github/workflows/call_opex_api.yml
+    name: Apply changes to Production
+    secrets: inherit
+    with:
+      api_name: api_services_app_backend
