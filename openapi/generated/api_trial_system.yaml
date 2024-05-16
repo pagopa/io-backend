@@ -25,32 +25,42 @@ paths:
         the specified trial.
       responses:
         '200':
-          $ref: '#/responses/200Subscription'
+          description: Success.
+          schema:
+            $ref: '#/definitions/Subscription'
         '401':
-          $ref: '#/responses/401Unauthorized'
+          description: Authorization error.
         '404':
-          $ref: '#/responses/404NotFound'
+          description: Resource not found.
         '429':
-          $ref: '#/responses/429TooManyRequest'
+          description: Too may requests.
         '500':
-          $ref: '#/responses/500Error'
+          description: There was an error.
+          schema:
+            $ref: '#/definitions/ProblemJson'
     post:
       operationId: createSubscription
       summary: Create a subscription
       description: Subscribe the authenticated user to the given trial.
       responses:
         '201':
-          $ref: '#/responses/201Subscription'
+          description: Success.
+          schema:
+            $ref: '#/definitions/Subscription'
         '400':
-          $ref: '#/responses/400Error'
+          description: Validation error.
+          schema:
+            $ref: '#/definitions/ProblemJson'
         '401':
-          $ref: '#/responses/401Unauthorized'
+          description: Authorization error.
         '409':
-          $ref: '#/responses/409Conflict'
+          description: The resource already exists.
         '429':
-          $ref: '#/responses/429TooManyRequest'
+          description: Too may requests.
         '500':
-          $ref: '#/responses/500Error'
+          description: There was an error.
+          schema:
+            $ref: '#/definitions/ProblemJson'
 parameters:
   pathTrialId:
     name: trialId
@@ -128,6 +138,10 @@ definitions:
     minLength: 1
   Subscription:
     type: object
+    required:
+      - trialId
+      - state
+      - createdAt
     properties:
       trialId:
         $ref: '#/definitions/TrialId'
@@ -135,28 +149,3 @@ definitions:
         $ref: '#/definitions/SubscriptionState'
       createdAt:
         $ref: '#/definitions/CreatedAt'
-responses:
-  200Subscription:
-    description: Success.
-    schema:
-      $ref: '#/definitions/Subscription'
-  201Subscription:
-    description: Success.
-    schema:
-      $ref: '#/definitions/Subscription'
-  400Error:
-    description: Validation error.
-    schema:
-      $ref: '#/definitions/ProblemJson'
-  401Unauthorized:
-    description: Authorization error.
-  404NotFound:
-    description: Resource not found.
-  409Conflict:
-    description: The resource already exists.
-  429TooManyRequest:
-    description: Too may requests.
-  500Error:
-    description: There was an error.
-    schema:
-      $ref: '#/definitions/ProblemJson'
