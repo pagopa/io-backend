@@ -1,0 +1,30 @@
+name: PR - Opex Dashboard api_services_app_backend
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+    branches:
+      - master
+    paths:
+      - 'openapi/generated/api_services_app_backend.yaml'
+      - '.github/workflows/pr_opex_api_services_app_backend.yml'
+      - '.github/workflows/opex_api_services_app_backend.yml'
+      - '.opex/api_services_app_backend/**'
+
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    uses: ./.github/workflows/call_pr_opex_api.yml
+    name: Plan changes against Production
+    secrets: inherit
+    with:
+      api_name: api_services_app_backend
