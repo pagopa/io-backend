@@ -47,6 +47,10 @@ paths:
           description: Success.
           schema:
             $ref: '#/definitions/Subscription'
+        '202':
+          description: >-
+            The request has been accepted for processing, but the processing has
+            not been completed.
         '400':
           description: Validation error.
           schema:
