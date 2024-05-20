@@ -1,0 +1,115 @@
+swagger: "2.0"
+info:
+  version: 0.0.1
+  title: Trial System API
+host: localhost
+basePath: /trials/api/v1
+schemes:
+  - https
+security:
+  - Bearer: []
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+paths:
+  "/trials/{trialId}/subscriptions":
+    parameters:
+      - $ref: "#/parameters/pathTrialId"
+    get:
+      operationId: getSubscription
+      summary: Get subscription detail
+      description: >-
+        Returns the details about the subscription of the authenticated user for
+        the specified trial.
+      responses:
+        "200":
+          description: Success.
+          schema:
+            $ref: "#/definitions/Subscription"
+        "401":
+          description: Authorization error.
+        "404":
+          description: Resource not found.
+        "429":
+          description: Too may requests.
+        "500":
+          description: There was an error.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+    post:
+      operationId: createSubscription
+      summary: Create a subscription
+      description: >-
+        Subscribe the authenticated user to the given trial.
+      responses:
+        "201":
+          description: Success.
+          schema:
+            $ref: "#/definitions/Subscription"
+        "202":
+          description: >-
+            The request has been accepted for processing, but the processing has
+            not been completed.
+        "400":
+          description: Validation error.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "401":
+          description: Authorization error.
+        "409":
+          description: The resource already exists.
+        "429":
+          description: Too may requests.
+        "500":
+          description: There was an error.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+
+parameters:
+  pathTrialId:
+    name: trialId
+    in: path
+    required: true
+    type: string
+    minLength: 1
+
+definitions:
+  ProblemJson:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ProblemJson"
+  CreatedAt:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/Timestamp"
+  SubscriptionState:
+    type: string
+    description: |-
+      - UNSUBSCRIBED: The user is not subscribed to the specified trial and does
+          not have any access to the specified trial.
+      - SUBSCRIBED: The user is subscribed to the specified trial and does
+          not have any access to the specified trial. The system is going to
+          activate the user if any slot for the trial is available.
+      - ACTIVE: The user has the access to the specified trial.
+      - DISABLED: The user does not have the access to the specified trial.
+    enum:
+      - UNSUBSCRIBED
+      - SUBSCRIBED
+      - ACTIVE
+      - DISABLED
+  TrialId:
+    type: string
+    description: >-
+      Unique identifier of the trial.
+    minLength: 1
+  Subscription:
+    type: object
+    required:
+      - trialId
+      - state
+      - createdAt
+    properties:
+      trialId:
+        $ref: '#/definitions/TrialId'
+      state:
+        $ref: '#/definitions/SubscriptionState'
+      createdAt:
+        $ref: '#/definitions/CreatedAt'
