@@ -69,6 +69,7 @@ import { LollipopApiClient } from "./clients/lollipop";
 import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
 import { getFastLoginLollipopConsumerClient } from "./clients/fastLoginLollipopConsumerClient";
 import { getIsUserElegibleForfastLogin } from "./utils/fastLogin";
+import { TrialSystemAPIClient } from "./clients/trial-system.client";
 
 // Without this, the environment variables loaded by dotenv aren't available in
 // this file.
@@ -1148,4 +1149,19 @@ export const IS_SPID_EMAIL_PERSISTENCE_ENABLED = pipe(
   O.fromNullable(process.env.IS_SPID_EMAIL_PERSISTENCE_ENABLED),
   O.map((val) => val.toLowerCase() === "true"),
   O.getOrElse(() => true)
+);
+
+// ####### TRIAL_SYSTEM ########
+export const FF_TRIAL_SYSTEM_ENABLED =
+  process.env.FF_TRIAL_SYSTEM_ENABLED === "1";
+
+export const TRIAL_SYSTEM_API_BASE_PATH = getRequiredENVVar(
+  "TRIAL_SYSTEM_API_BASE_PATH"
+);
+export const TRIAL_SYSTEM_API_KEY = getRequiredENVVar("TRIAL_SYSTEM_API_KEY");
+export const TRIAL_SYSTEM_API_URL = getRequiredENVVar("TRIAL_SYSTEM_API_URL");
+
+export const TRIAL_SYSTEM_CLIENT = TrialSystemAPIClient(
+  TRIAL_SYSTEM_API_KEY,
+  TRIAL_SYSTEM_API_URL
 );
