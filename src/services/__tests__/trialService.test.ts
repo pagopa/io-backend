@@ -69,9 +69,7 @@ describe("TrialService#createSubscription", () => {
       },
       trialId: aTrialId
     });
-    expect(res.kind).toEqual({
-      kind: "IResponseSuccessRedirectToResource"
-    });
+    expect(res.kind).toEqual("IResponseSuccessRedirectToResource");
   });
 
   it("returns 202 from the API if subscription request was processed in async", async () => {
