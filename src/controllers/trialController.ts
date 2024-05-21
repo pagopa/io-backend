@@ -19,6 +19,7 @@ import { TrialId } from "../../generated/trial-system-api/TrialId";
 import { withUserFromRequest } from "../types/user";
 
 import { withValidatedOrValidationError } from "../utils/responses";
+import { Subscription } from "../../generated/trial-system/Subscription";
 
 export default class TrialController {
   // eslint-disable-next-line max-params
@@ -32,7 +33,7 @@ export default class TrialController {
     | IResponseErrorNotFound
     | IResponseErrorConflict
     | IResponseSuccessAccepted
-    | IResponseSuccessRedirectToResource<TrialId, TrialId>
+    | IResponseSuccessRedirectToResource<Subscription, Subscription>
   > =>
     withUserFromRequest(req, async (user) =>
       withValidatedOrValidationError(

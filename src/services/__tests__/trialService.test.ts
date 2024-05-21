@@ -14,18 +14,16 @@ const nowDate = new Date();
 
 const aValidCreatedSubscription = {
   trialId: aTrialId,
-  userId: aUserId,
   state: SubscriptionStateEnum.SUBSCRIBED,
   createdAt: nowDate,
-  updatedAt: nowDate
 };
 
 const validApiRedirectToResourceResponse = {
   status: 201,
-  value: aValidCreatedSubscription
+  value: aValidCreatedSubscription,
 };
 const validApiAcceptedResponse = {
-  status: 202
+  status: 202,
 };
 const notFoundApiResponse = {
   status: 404,
@@ -39,7 +37,7 @@ const problemJson = {
 
 const mockCreateSubscription = jest.fn();
 const api = {
-  createSubscription: mockCreateSubscription
+  createSubscription: mockCreateSubscription,
 } as any as ReturnType<TrialSystemAPIClient>;
 
 // ----------------------------
@@ -50,16 +48,13 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-
 describe("TrialService#createSubscription", () => {
   it("returns 201 from the API if subscription request was processed in sync", async () => {
     mockCreateSubscription.mockImplementation(() => {
       return t.success(validApiRedirectToResourceResponse);
     });
 
-    const service = new TrialService(
-      api
-    );
+    const service = new TrialService(api);
 
     const res = await service.createSubscription(aUserId, aTrialId);
 
@@ -67,7 +62,7 @@ describe("TrialService#createSubscription", () => {
       body: {
         userId: aUserId,
       },
-      trialId: aTrialId
+      trialId: aTrialId,
     });
     expect(res.kind).toEqual("IResponseSuccessRedirectToResource");
   });
@@ -77,9 +72,7 @@ describe("TrialService#createSubscription", () => {
       t.success(validApiAcceptedResponse)
     );
 
-    const service = new TrialService(
-      api
-    );
+    const service = new TrialService(api);
 
     const res = await service.createSubscription(aUserId, aTrialId);
 
@@ -87,7 +80,7 @@ describe("TrialService#createSubscription", () => {
       body: {
         userId: aUserId,
       },
-      trialId: aTrialId
+      trialId: aTrialId,
     });
     expect(res.kind).toEqual("IResponseSuccessAccepted");
   });
@@ -97,9 +90,7 @@ describe("TrialService#createSubscription", () => {
       t.success(notFoundApiResponse)
     );
 
-    const service = new TrialService(
-      api
-    );
+    const service = new TrialService(api);
 
     const res = await service.createSubscription(aUserId, aTrialId);
 
@@ -107,7 +98,7 @@ describe("TrialService#createSubscription", () => {
       body: {
         userId: aUserId,
       },
-      trialId: aTrialId
+      trialId: aTrialId,
     });
     expect(res.kind).toEqual("IResponseErrorNotFound");
   });
@@ -117,9 +108,7 @@ describe("TrialService#createSubscription", () => {
       t.success(conflictReqApiMessagesResponse)
     );
 
-    const service = new TrialService(
-      api
-    );
+    const service = new TrialService(api);
 
     const res = await service.createSubscription(aUserId, aTrialId);
 
@@ -127,16 +116,14 @@ describe("TrialService#createSubscription", () => {
       body: {
         userId: aUserId,
       },
-      trialId: aTrialId
+      trialId: aTrialId,
     });
     expect(res.kind).toEqual("IResponseErrorConflict");
   });
 
   it("returns an error if the getMessagesByUser API returns an error", async () => {
     mockCreateSubscription.mockImplementationOnce(() => t.success(problemJson));
-    const service = new TrialService(
-      api
-    );
+    const service = new TrialService(api);
 
     const res = await service.createSubscription(aUserId, aTrialId);
 
@@ -144,7 +131,7 @@ describe("TrialService#createSubscription", () => {
       body: {
         userId: aUserId,
       },
-      trialId: aTrialId
+      trialId: aTrialId,
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });

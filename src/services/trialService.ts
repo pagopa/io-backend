@@ -26,6 +26,7 @@ import {
   withValidatedOrInternalError,
 } from "../utils/responses";
 import { TrialId } from "../../generated/trial-system-api/TrialId";
+import { Subscription } from "../../generated/trial-system/Subscription";
 
 export default class TrialService {
   constructor(
@@ -44,7 +45,7 @@ export default class TrialService {
     | IResponseErrorNotFound
     | IResponseErrorConflict
     | IResponseSuccessAccepted
-    | IResponseSuccessRedirectToResource<TrialId, TrialId>
+    | IResponseSuccessRedirectToResource<Subscription, Subscription>
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.apiClient.createSubscription({
@@ -57,10 +58,18 @@ export default class TrialService {
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
           case 201:
-            return ResponseSuccessRedirectToResource(
-              trialId,
-              `/api/v1/trials/${trialId}/subscriptions`,
-              trialId
+            return pipe(
+              {
+                createdAt: response.value.createdAt,
+                state: response.value.state,
+                trialId: response.value.trialId,
+              },
+              (resBody) =>
+                ResponseSuccessRedirectToResource(
+                  resBody,
+                  `/api/v1/trials/${trialId}/subscriptions`,
+                  resBody
+                )
             );
           case 202:
             return ResponseSuccessAccepted();
