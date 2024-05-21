@@ -33,10 +33,6 @@ const notFoundApiResponse = {
 const conflictReqApiMessagesResponse = {
   status: 409,
 };
-const tooManyReqApiMessagesResponse = {
-  status: 429,
-};
-
 const problemJson = {
   status: 500,
 };
