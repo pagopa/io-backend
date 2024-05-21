@@ -1844,6 +1844,12 @@ function registerTrialSystemAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(trialController.createTrialSubscription, trialController)
   );
+
+  app.get(
+    `${basePath}/trials/:trialId/subscriptions`,
+    bearerSessionTokenAuth,
+    toExpressHandler(trialController.getTrialSubscription, trialController)
+  );
 }
 
 export default defaultModule;

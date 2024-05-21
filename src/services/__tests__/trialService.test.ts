@@ -18,6 +18,11 @@ const aValidCreatedSubscription = {
   createdAt: nowDate,
 };
 
+const validApiSuccessResponse = {
+  status: 200,
+  value: aValidCreatedSubscription,
+};
+
 const validApiRedirectToResourceResponse = {
   status: 201,
   value: aValidCreatedSubscription,
@@ -36,8 +41,10 @@ const problemJson = {
 };
 
 const mockCreateSubscription = jest.fn();
+const mockGetSubscription = jest.fn();
 const api = {
   createSubscription: mockCreateSubscription,
+  getSubscription: mockGetSubscription,
 } as any as ReturnType<TrialSystemAPIClient>;
 
 // ----------------------------
@@ -121,7 +128,7 @@ describe("TrialService#createSubscription", () => {
     expect(res.kind).toEqual("IResponseErrorConflict");
   });
 
-  it("returns an error if the getMessagesByUser API returns an error", async () => {
+  it("returns an error if the createSubscription API returns an error", async () => {
     mockCreateSubscription.mockImplementationOnce(() => t.success(problemJson));
     const service = new TrialService(api);
 
@@ -132,6 +139,53 @@ describe("TrialService#createSubscription", () => {
         userId: aUserId,
       },
       trialId: aTrialId,
+    });
+    expect(res.kind).toEqual("IResponseErrorInternal");
+  });
+});
+
+describe("TrialService#getSubscription", () => {
+  it("returns 200 from the API if subscription is found", async () => {
+    mockGetSubscription.mockImplementation(() => {
+      return t.success(validApiSuccessResponse);
+    });
+
+    const service = new TrialService(api);
+
+    const res = await service.getSubscription(aUserId, aTrialId);
+
+    expect(mockGetSubscription).toHaveBeenCalledWith({
+      trialId: aTrialId,
+      userId: aUserId,
+    });
+    expect(res).toMatchObject({kind:"IResponseSuccessRedirectToResource", value: aValidCreatedSubscription});
+  });
+
+  it("returns 404 from the API if subscription does not exists", async () => {
+    mockGetSubscription.mockImplementationOnce(() =>
+      t.success(notFoundApiResponse)
+    );
+
+    const service = new TrialService(api);
+
+    const res = await service.getSubscription(aUserId, aTrialId);
+
+    expect(mockGetSubscription).toHaveBeenCalledWith({
+      trialId: aTrialId,
+      userId: aUserId,
+    });
+    expect(res.kind).toEqual("IResponseErrorNotFound");
+  });
+
+  it("returns an error if the getSubscription API returns an error", async () => {
+    mockGetSubscription.mockImplementationOnce(() => t.success(problemJson));
+    const service = new TrialService(api);
+
+    const res = await service.getSubscription(aUserId, aTrialId);
+
+    expect(mockGetSubscription).toHaveBeenCalledWith({
+      trialId: aTrialId,
+      userId: aUserId,
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });

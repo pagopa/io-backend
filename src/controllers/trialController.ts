@@ -10,6 +10,7 @@ import {
   IResponseErrorNotFound,
   IResponseErrorValidation,
   IResponseSuccessAccepted,
+  IResponseSuccessJson,
   IResponseSuccessRedirectToResource,
 } from "@pagopa/ts-commons/lib/responses";
 
@@ -42,6 +43,25 @@ export default class TrialController {
           withValidatedOrValidationError(
             NonEmptyString.decode(user.fiscal_code),
             (userId) => this.trialService.createSubscription(userId, trialId)
+          )
+      )
+    );
+
+  public readonly getTrialSubscription = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<Subscription>
+  > =>
+    withUserFromRequest(req, async (user) =>
+      withValidatedOrValidationError(
+        TrialId.decode(req.params.trialId),
+        (trialId) =>
+          withValidatedOrValidationError(
+            NonEmptyString.decode(user.fiscal_code),
+            (userId) => this.trialService.getSubscription(userId, trialId)
           )
       )
     );
