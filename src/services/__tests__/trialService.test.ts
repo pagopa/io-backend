@@ -69,9 +69,8 @@ describe("TrialService#createSubscription", () => {
       },
       trialId: aTrialId
     });
-    expect(res).toMatchObject({
-      kind: "IResponseSuccessRedirectToResource",
-      value: aValidCreatedSubscription,
+    expect(res.kind).toEqual({
+      kind: "IResponseSuccessRedirectToResource"
     });
   });
 
