@@ -21,7 +21,7 @@ export default class IoWalletService {
   ) {}
 
   /**
-   * Get the User id.
+   * Get the Wallet User id.
    */
   public readonly getUserByFiscalCode = (fiscalCode: FiscalCode) =>
     withCatchAsInternalError(async () => {
@@ -36,14 +36,12 @@ export default class IoWalletService {
             return ResponseErrorGeneric(
               response.status,
               "Unprocessable Content",
-              ""
+              "Your request didn't validate"
             );
           case 500:
             return ResponseErrorInternal(
               `Internal server error | ${response.value}`
             );
-          default:
-            return ResponseErrorInternal(`Internal server error`);
         }
       });
     });
