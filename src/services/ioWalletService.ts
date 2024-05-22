@@ -3,6 +3,9 @@
  */
 
 import {
+  IResponseErrorGeneric,
+  IResponseErrorInternal,
+  IResponseSuccessJson,
   ResponseErrorGeneric,
   ResponseErrorInternal,
   ResponseSuccessJson,
@@ -14,6 +17,7 @@ import {
   withValidatedOrInternalError,
 } from "../utils/responses";
 import { IoWalletAPIClient } from "src/clients/io-wallet";
+import { UserDetailView } from "generated/io-wallet-api/UserDetailView";
 
 export default class IoWalletService {
   constructor(
@@ -23,7 +27,13 @@ export default class IoWalletService {
   /**
    * Get the Wallet User id.
    */
-  public readonly getUserByFiscalCode = (fiscalCode: FiscalCode) =>
+  public readonly getUserByFiscalCode = (
+    fiscalCode: FiscalCode
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorGeneric
+    | IResponseSuccessJson<UserDetailView>
+  > =>
     withCatchAsInternalError(async () => {
       const validated = await this.ioWalletApiClient.getUserByFiscalCode({
         body: { fiscal_code: fiscalCode },
