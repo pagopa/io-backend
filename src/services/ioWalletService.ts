@@ -12,12 +12,12 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import { IoWalletAPIClient } from "src/clients/io-wallet";
+import { UserDetailView } from "generated/io-wallet-api/UserDetailView";
 import {
   withCatchAsInternalError,
   withValidatedOrInternalError,
 } from "../utils/responses";
-import { IoWalletAPIClient } from "src/clients/io-wallet";
-import { UserDetailView } from "generated/io-wallet-api/UserDetailView";
 
 export default class IoWalletService {
   constructor(

@@ -7,8 +7,8 @@ type Fetch = (
 
 export function IoWalletAPIClient(
   token: string,
-  baseUrl: string,
   basePath: string,
+  baseUrl: string,
   fetchApi: Fetch
 ): Client<"FunctionsKey"> {
   return createClient<"FunctionsKey">({

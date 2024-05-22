@@ -10,8 +10,8 @@ import { IResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 
 import { pipe } from "fp-ts/lib/function";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
-import IoWalletService from "../services/ioWalletService";
 import { UserDetailView } from "generated/io-wallet-api/UserDetailView";
+import IoWalletService from "../services/ioWalletService";
 
 export const retrieveUserId = (
   ioWalletService: IoWalletService,
