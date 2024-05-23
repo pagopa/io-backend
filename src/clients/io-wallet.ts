@@ -12,8 +12,8 @@ export function IoWalletAPIClient(
   fetchApi: Fetch
 ): Client<"FunctionsKey"> {
   return createClient<"FunctionsKey">({
-    baseUrl,
     basePath,
+    baseUrl,
     fetchApi,
     withDefaults: (op) => (params) =>
       op({
