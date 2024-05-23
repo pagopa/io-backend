@@ -1806,7 +1806,14 @@ definitions:
   PublicMessage:
     x-one-of: true
     allOf:
-      - $ref: '#/definitions/EnrichedMessage'
+      - allOf:
+          - $ref: '#/definitions/EnrichedMessage'
+          - type: object
+            properties:
+              organization_fiscal_code:
+                $ref: '#/definitions/OrganizationFiscalCode'
+            required:
+              - organization_fiscal_code
       - $ref: '#/definitions/CreatedMessageWithoutContent'
   PublicMessagesCollection:
     description: A collection of messages
