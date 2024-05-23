@@ -158,7 +158,10 @@ describe("TrialService#getSubscription", () => {
       trialId: aTrialId,
       userId: aUserId,
     });
-    expect(res).toMatchObject({kind:"IResponseSuccessRedirectToResource", value: aValidCreatedSubscription});
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: aValidCreatedSubscription,
+    });
   });
 
   it("returns 404 from the API if subscription does not exists", async () => {

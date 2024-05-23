@@ -89,7 +89,8 @@ describe("trialController#getTrialSubscription", () => {
     expect(mockGetSubscription).toHaveBeenCalledWith(mockedUser.fiscal_code, aTrialId);
     expect(response).toEqual({
       apply: expect.any(Function),
-      kind: "IResponseSuccessJson"
+      kind: "IResponseSuccessJson",
+      value: aValidSubscription
     });
   });
 
