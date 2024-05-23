@@ -1,3 +1,4 @@
+/* eslint-disable default-case */
 /**
  * This service interacts with the IO Wallet API
  */
