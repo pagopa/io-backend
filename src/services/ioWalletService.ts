@@ -1,4 +1,3 @@
-/* eslint-disable default-case */
 /**
  * This service interacts with the IO Wallet API
  */
@@ -16,6 +15,7 @@ import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { IoWalletAPIClient } from "src/clients/io-wallet";
 import { UserDetailView } from "generated/io-wallet-api/UserDetailView";
 import {
+  ResponseErrorStatusNotDefinedInSpec,
   withCatchAsInternalError,
   withValidatedOrInternalError,
 } from "../utils/responses";
@@ -53,6 +53,8 @@ export default class IoWalletService {
             return ResponseErrorInternal(
               `Internal server error | ${response.value}`
             );
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
         }
       });
     });

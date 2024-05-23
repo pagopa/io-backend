@@ -85,6 +85,21 @@ describe("IoWalletService#getUserByFiscalCode", () => {
     });
   });
 
+  it("should handle an internal error when the API client returns a code not specified in spec", async () => {
+    const aGenericProblem = {};
+    mockGetUserByFiscalCode.mockImplementationOnce(() =>
+      t.success({ status: 599, value: aGenericProblem })
+    );
+
+    const service = new IoWalletService(api);
+
+    const res = await service.getUserByFiscalCode(aFiscalCode);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal",
+    });
+  });
+
   it("should return an error if the api call throws an error", async () => {
     mockGetUserByFiscalCode.mockImplementationOnce(() => {
       throw new Error();
