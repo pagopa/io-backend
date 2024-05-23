@@ -56,6 +56,7 @@ import {
   FF_ROUTING_PUSH_NOTIF,
   FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST,
   FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX,
+  FF_TRIAL_SYSTEM_ENABLED,
   FF_USER_AGE_LIMIT_ENABLED,
   FIRST_LOLLIPOP_CONSUMER_CLIENT,
   IDP_METADATA_REFRESH_INTERVAL_SECONDS,
@@ -81,6 +82,7 @@ import {
   TEST_CGN_FISCAL_CODES,
   TEST_LOGIN_FISCAL_CODES,
   TEST_LOGIN_PASSWORD,
+  TRIAL_SYSTEM_CLIENT,
   URL_TOKEN_STRATEGY,
   USERS_LOGIN_QUEUE_NAME,
   USERS_LOGIN_STORAGE_CONNECTION_STRING,
@@ -201,6 +203,8 @@ import { RedisClientMode, RedisClientSelector } from "./utils/redis";
 import { ResponseErrorDismissed } from "./utils/responses";
 import { makeSpidLogCallback } from "./utils/spid";
 import { TimeTracer } from "./utils/timer";
+import TrialService from "./services/trialService";
+import TrialController from "./controllers/trialController";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -230,6 +234,7 @@ export interface IAppFactoryParameters {
   readonly MitVoucherBasePath: string;
   readonly ServicesAppBackendBasePath: string;
   readonly ZendeskBasePath: string;
+  readonly TrialSystemBasePath: string;
 }
 
 // eslint-disable-next-line max-lines-per-function, sonarjs/cognitive-complexity
@@ -256,6 +261,7 @@ export async function newApp({
   MitVoucherBasePath,
   ServicesAppBackendBasePath,
   ZendeskBasePath,
+  TrialSystemBasePath,
 }: IAppFactoryParameters): Promise<Express> {
   const isDevEnvironment = ENV === NodeEnvironmentEnum.DEVELOPMENT;
   const REDIS_CLIENT_SELECTOR = await RedisClientSelector(
@@ -528,6 +534,8 @@ export async function newApp({
           })
         );
 
+        const TRIAL_SERVICE = new TrialService(TRIAL_SYSTEM_CLIENT);
+
         const acsController: AuthenticationController =
           new AuthenticationController(
             SESSION_STORAGE,
@@ -754,6 +762,16 @@ export async function newApp({
           authMiddlewares.bearerZendesk,
           appInsightsClient
         );
+
+        if (FF_TRIAL_SYSTEM_ENABLED) {
+          // eslint-disable-next-line @typescript-eslint/no-use-before-define
+          registerTrialSystemAPIRoutes(
+            app,
+            TrialSystemBasePath,
+            TRIAL_SERVICE,
+            authMiddlewares.bearerSession
+          );
+        }
 
         return { acsController, app };
       },
@@ -1809,6 +1827,22 @@ function registerFastLoginRoutes(
         lvTokenDurationSecs
       )
     )
+  );
+}
+
+function registerTrialSystemAPIRoutes(
+  app: Express,
+  basePath: string,
+  trialService: TrialService,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  bearerSessionTokenAuth: any
+): void {
+  const trialController: TrialController = new TrialController(trialService);
+
+  app.post(
+    `${basePath}/trials/:trialId/subscriptions`,
+    bearerSessionTokenAuth,
+    toExpressHandler(trialController.createTrialSubscription, trialController)
   );
 }
 

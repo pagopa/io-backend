@@ -235,6 +235,10 @@ Those are all Environment variables needed by the application:
 | SERVICES_APP_BACKEND_BASE_PATH            | New Service APIs(include search engine) basepath                                                     | string |
 | SERVICES_APP_BACKEND_API_URL              | Services App Backend FunctionApp Url                                                                 | string |
 | SERVICES_APP_BACKEND_API_BASE_PATH        | Services App Backend FunctionApp Api Basepath                                                        | string |
+| FF_TRIAL_SYSTEM_ENABLED                   | (Optional) enables Trial System API to be registered into backend app - default false                | string |
+| TRIAL_SYSTEM_API_BASE_PATH                | Trial System Api Base path                                                                           | string |
+| TRIAL_SYSTEM_API_URL                      | Trial System FunctionApp Api url                                                                     | string |
+| TRIAL_SYSTEM_API_KEY                      | The key used to authenticate to the Trial System API                                                 | string |
 
 Notes:
  * `FETCH_KEEPALIVE_ENABLED` should be enabled when deploying on Azure App Service to avoid [SNAT Exhaustion](https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-outbound-connections)

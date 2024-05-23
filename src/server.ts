@@ -37,6 +37,7 @@ import {
   SERVER_PORT,
   ZENDESK_BASE_PATH,
   SERVICES_APP_BACKEND_BASE_PATH,
+  TRIAL_SYSTEM_API_BASE_PATH,
 } from "./config";
 import {
   initAppInsights,
@@ -63,6 +64,7 @@ const EUCovidCertBasePath = EUCOVIDCERT_API_BASE_PATH;
 const MitVoucherBasePath = MIT_VOUCHER_API_BASE_PATH;
 const ZendeskBasePath = ZENDESK_BASE_PATH;
 const ServicesAppBackendBasePath = SERVICES_APP_BACKEND_BASE_PATH;
+const TrialSystemBasePath = TRIAL_SYSTEM_API_BASE_PATH;
 
 // Set default for graceful-shutdown
 const DEFAULT_SHUTDOWN_SIGNALS = "SIGINT SIGTERM";
@@ -122,6 +124,7 @@ newApp({
   MyPortalBasePath,
   PagoPABasePath,
   ServicesAppBackendBasePath,
+  TrialSystemBasePath,
   ZendeskBasePath,
   allowBPDIPSourceRange: ALLOW_BPD_IP_SOURCE_RANGE,
   allowMyPortalIPSourceRange: ALLOW_MYPORTAL_IP_SOURCE_RANGE,

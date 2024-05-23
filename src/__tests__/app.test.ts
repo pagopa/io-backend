@@ -80,7 +80,8 @@ const aEuCovidCertAPIBasePath = "/api/v1/eucovidcert";
 const aMitVoucherBasePath = "/api/v1/mitvoucher/auth";
 const aZendeskBasePath = "/api/backend/zendesk/v1";
 const aIoSignAPIBasePath = "/api/v1/sign";
-const aServicesAppBackendBasePath = "/api/v2"
+const aServicesAppBackendBasePath = "/api/v2";
+const aTrialSystemBasePath = "/trials/api/v1";
 
 describe("Success app start", () => {
   // tslint:disable:no-let
@@ -99,6 +100,7 @@ describe("Success app start", () => {
       MyPortalBasePath: aMyPortalBasePath,
       PagoPABasePath: aPagoPABasePath,
       ServicesAppBackendBasePath: aServicesAppBackendBasePath,
+      TrialSystemBasePath: aTrialSystemBasePath,
       ZendeskBasePath: aZendeskBasePath,
       allowBPDIPSourceRange: [aValidCIDR],
       allowMyPortalIPSourceRange: [aValidCIDR],
@@ -204,6 +206,7 @@ describe("Failure app start", () => {
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
         ServicesAppBackendBasePath: aServicesAppBackendBasePath,
+        TrialSystemBasePath: aTrialSystemBasePath,
         ZendeskBasePath: aZendeskBasePath,
         allowBPDIPSourceRange: [aValidCIDR],
         allowMyPortalIPSourceRange: [aValidCIDR],
@@ -239,6 +242,7 @@ describe("Failure app start", () => {
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
         ServicesAppBackendBasePath: aServicesAppBackendBasePath,
+        TrialSystemBasePath: aTrialSystemBasePath,
         ZendeskBasePath: aZendeskBasePath,
         allowBPDIPSourceRange: [aValidCIDR],
         allowMyPortalIPSourceRange: [aValidCIDR],
@@ -274,6 +278,7 @@ describe("Failure app start", () => {
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
         ServicesAppBackendBasePath: aServicesAppBackendBasePath,
+        TrialSystemBasePath: aTrialSystemBasePath,
         ZendeskBasePath: aZendeskBasePath,
         allowBPDIPSourceRange: [aValidCIDR],
         allowMyPortalIPSourceRange: [aValidCIDR],
