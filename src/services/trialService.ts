@@ -14,6 +14,8 @@ import {
   ResponseSuccessAccepted,
   ResponseErrorConflict,
   IResponseErrorConflict,
+  IResponseSuccessJson,
+  ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import { TrialSystemAPIClient } from "src/clients/trial-system.client";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -94,6 +96,52 @@ export default class TrialService {
                 response.value.detail,
                 O.fromNullable,
                 O.getOrElse(() => "Cannot create subscription")
+              )
+            );
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
+  /**
+   * Get the subscription given a specific trial and user.
+   */
+  public readonly getSubscription = async (
+    userId: NonEmptyString,
+    trialId: TrialId
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<Subscription>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.apiClient.getSubscription({
+        trialId,
+        userId,
+      });
+
+      return withValidatedOrInternalError(validated, (response) => {
+        switch (response.status) {
+          case 200:
+            return pipe(
+              {
+                createdAt: response.value.createdAt,
+                state: response.value.state,
+                trialId: response.value.trialId,
+              },
+              ResponseSuccessJson
+            );
+          case 401:
+            return ResponseErrorUnexpectedAuthProblem();
+          case 404:
+            return ResponseErrorNotFound("Not Found", "Trial not found");
+          case 500:
+            return ResponseErrorInternal(
+              pipe(
+                response.value.detail,
+                O.fromNullable,
+                O.getOrElse(() => "Cannot get subscription")
               )
             );
           default:
