@@ -145,7 +145,7 @@ describe("TrialService#createSubscription", () => {
 });
 
 describe("TrialService#getSubscription", () => {
-  it("returns 200 from the API if subscription is found", async () => {
+  it("returns 200 from the API if the subscription is found", async () => {
     mockGetSubscription.mockImplementation(() => {
       return t.success(validApiSuccessResponse);
     });
@@ -164,7 +164,7 @@ describe("TrialService#getSubscription", () => {
     });
   });
 
-  it("returns 404 from the API if subscription does not exists", async () => {
+  it("returns 404 from the API if the subscription does not exist", async () => {
     mockGetSubscription.mockImplementationOnce(() =>
       t.success(notFoundApiResponse)
     );

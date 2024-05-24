@@ -105,7 +105,7 @@ export default class TrialService {
     });
 
   /**
-   * Subscribe a user to a specific trial.
+   * Get the subscription given a specific trial and user.
    */
   public readonly getSubscription = async (
     userId: NonEmptyString,
