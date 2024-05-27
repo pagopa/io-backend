@@ -82,6 +82,7 @@ const aZendeskBasePath = "/api/backend/zendesk/v1";
 const aIoSignAPIBasePath = "/api/v1/sign";
 const aServicesAppBackendBasePath = "/api/v2";
 const aTrialSystemBasePath = "/trials/api/v1";
+const aIoWalletAPIBasePath = "/api/v1/wallet";
 
 describe("Success app start", () => {
   // tslint:disable:no-let
@@ -96,6 +97,7 @@ describe("Success app start", () => {
       EUCovidCertBasePath: aEuCovidCertAPIBasePath,
       FIMSBasePath: aFIMSBasePath,
       IoSignAPIBasePath: aIoSignAPIBasePath,
+      IoWalletAPIBasePath: aIoWalletAPIBasePath,
       MitVoucherBasePath: aMitVoucherBasePath,
       MyPortalBasePath: aMyPortalBasePath,
       PagoPABasePath: aPagoPABasePath,
@@ -202,6 +204,7 @@ describe("Failure app start", () => {
         EUCovidCertBasePath: aEuCovidCertAPIBasePath,
         FIMSBasePath: aFIMSBasePath,
         IoSignAPIBasePath: aIoSignAPIBasePath,
+        IoWalletAPIBasePath: aIoWalletAPIBasePath,
         MitVoucherBasePath: aMitVoucherBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
@@ -238,6 +241,7 @@ describe("Failure app start", () => {
         EUCovidCertBasePath: aEuCovidCertAPIBasePath,
         FIMSBasePath: aFIMSBasePath,
         IoSignAPIBasePath: aIoSignAPIBasePath,
+        IoWalletAPIBasePath: aIoWalletAPIBasePath,
         MitVoucherBasePath: aMitVoucherBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
@@ -274,6 +278,7 @@ describe("Failure app start", () => {
         EUCovidCertBasePath: aEuCovidCertAPIBasePath,
         FIMSBasePath: aFIMSBasePath,
         IoSignAPIBasePath: aIoSignAPIBasePath,
+        IoWalletAPIBasePath: aIoWalletAPIBasePath,
         MitVoucherBasePath: aMitVoucherBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
