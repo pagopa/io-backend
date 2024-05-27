@@ -92,8 +92,8 @@ export default class IoWalletService {
    */
   public readonly createWalletInstance = (
     challenge: NonEmptyString,
-    key_attestation: NonEmptyString,
     hardware_key_tag: NonEmptyString,
+    key_attestation: NonEmptyString,
     userId: Id
   ): Promise<
     | IResponseErrorInternal
@@ -133,8 +133,8 @@ export default class IoWalletService {
    * Create a Wallet Attestation.
    */
   public readonly createWalletAttestation = (
-    grant_type: Grant_typeEnum,
     assertion: NonEmptyString,
+    grant_type: Grant_typeEnum,
     userId: Id
   ): Promise<
     | IResponseErrorInternal

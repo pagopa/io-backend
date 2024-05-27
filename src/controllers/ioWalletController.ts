@@ -96,8 +96,8 @@ export default class IoWalletController {
           }) =>
             this.ioWalletService.createWalletInstance(
               challenge,
-              key_attestation,
               hardware_key_tag,
+              key_attestation,
               userId
             )
         ),
@@ -135,8 +135,8 @@ export default class IoWalletController {
         }),
         TE.map(({ body: { grant_type, assertion }, userId }) =>
           this.ioWalletService.createWalletAttestation(
-            grant_type,
             assertion,
+            grant_type,
             userId
           )
         ),
