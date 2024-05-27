@@ -104,8 +104,8 @@ export default class IoWalletService {
       const validated = await this.ioWalletApiClient.createWalletInstance({
         body: {
           challenge,
-          key_attestation,
           hardware_key_tag,
+          key_attestation,
         },
         "x-iowallet-user-id": userId,
       });
@@ -144,8 +144,8 @@ export default class IoWalletService {
     withCatchAsInternalError(async () => {
       const validated = await this.ioWalletApiClient.createWalletAttestation({
         body: {
-          grant_type,
           assertion,
+          grant_type,
         },
         "x-iowallet-user-id": userId,
       });
