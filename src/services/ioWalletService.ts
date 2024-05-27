@@ -23,6 +23,9 @@ import { Id } from "generated/io-wallet-api/Id";
 import { Grant_typeEnum } from "generated/io-wallet-api/CreateWalletAttestationBody";
 import { IoWalletAPIClient } from "../clients/io-wallet";
 
+const unprocessableContentError = "Unprocessable Content";
+const invalidRequest = "Your request didn't validate";
+
 export default class IoWalletService {
   constructor(
     private readonly ioWalletApiClient: ReturnType<IoWalletAPIClient>
@@ -49,8 +52,8 @@ export default class IoWalletService {
           case 422:
             return ResponseErrorGeneric(
               response.status,
-              "Unprocessable Content",
-              "Your request didn't validate"
+              unprocessableContentError,
+              invalidRequest
             );
           case 500:
             return ResponseErrorInternal(
@@ -113,8 +116,8 @@ export default class IoWalletService {
           case 422:
             return ResponseErrorGeneric(
               response.status,
-              "Unprocessable Content",
-              "Your request didn't validate"
+              unprocessableContentError,
+              invalidRequest
             );
           case 500:
             return ResponseErrorInternal(
@@ -153,8 +156,8 @@ export default class IoWalletService {
           case 422:
             return ResponseErrorGeneric(
               response.status,
-              "Unprocessable Content",
-              "Your request didn't validate"
+              unprocessableContentError,
+              invalidRequest
             );
           case 500:
             return ResponseErrorInternal(
