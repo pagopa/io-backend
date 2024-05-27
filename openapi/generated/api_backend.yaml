@@ -1784,6 +1784,8 @@ definitions:
             type: string
           organization_name:
             type: string
+          organization_fiscal_code:
+            $ref: '#/definitions/OrganizationFiscalCode'
           message_title:
             type: string
           category:
@@ -1801,19 +1803,13 @@ definitions:
           - sender_service_id
           - service_name
           - organization_name
+          - organization_fiscal_code
           - message_title
       - $ref: '#/definitions/MessageStatusAttributes'
   PublicMessage:
     x-one-of: true
     allOf:
-      - allOf:
-          - $ref: '#/definitions/EnrichedMessage'
-          - type: object
-            properties:
-              organization_fiscal_code:
-                $ref: '#/definitions/OrganizationFiscalCode'
-            required:
-              - organization_fiscal_code
+      - $ref: '#/definitions/EnrichedMessage'
       - $ref: '#/definitions/CreatedMessageWithoutContent'
   PublicMessagesCollection:
     description: A collection of messages
