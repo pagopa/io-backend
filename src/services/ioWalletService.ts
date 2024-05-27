@@ -13,15 +13,15 @@ import {
 
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { UserDetailView } from "generated/io-wallet-api/UserDetailView";
+import { NonceDetailView } from "generated/io-wallet-api/NonceDetailView";
+import { Id } from "generated/io-wallet-api/Id";
+import { Grant_typeEnum } from "generated/io-wallet-api/CreateWalletAttestationBody";
+import { IoWalletAPIClient } from "../clients/io-wallet";
 import {
   ResponseErrorStatusNotDefinedInSpec,
   withCatchAsInternalError,
   withValidatedOrInternalError,
 } from "../utils/responses";
-import { NonceDetailView } from "generated/io-wallet-api/NonceDetailView";
-import { Id } from "generated/io-wallet-api/Id";
-import { Grant_typeEnum } from "generated/io-wallet-api/CreateWalletAttestationBody";
-import { IoWalletAPIClient } from "../clients/io-wallet";
 
 const unprocessableContentError = "Unprocessable Content";
 const invalidRequest = "Your request didn't validate";
