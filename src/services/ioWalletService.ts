@@ -12,7 +12,7 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
-import { IoWalletAPIClient } from "src/clients/io-wallet";
+import { IoWalletAPIClient } from "../clients/io-wallet";
 import { UserDetailView } from "generated/io-wallet-api/UserDetailView";
 import {
   ResponseErrorStatusNotDefinedInSpec,
