@@ -70,6 +70,7 @@ import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
 import { getFastLoginLollipopConsumerClient } from "./clients/fastLoginLollipopConsumerClient";
 import { getIsUserElegibleForfastLogin } from "./utils/fastLogin";
 import { TrialSystemAPIClient } from "./clients/trial-system.client";
+import { IoWalletAPIClient } from "./clients/io-wallet";
 
 // Without this, the environment variables loaded by dotenv aren't available in
 // this file.
@@ -1165,3 +1166,16 @@ export const TRIAL_SYSTEM_CLIENT = TrialSystemAPIClient(
   TRIAL_SYSTEM_API_KEY,
   TRIAL_SYSTEM_API_URL
 );
+
+export const IO_WALLET_API_KEY = getRequiredENVVar("IO_WALLET_API_KEY");
+export const IO_WALLET_API_URL = getRequiredENVVar("IO_WALLET_API_URL");
+export const IO_WALLET_API_BASE_PATH = getRequiredENVVar(
+  "IO_WALLET_API_BASE_PATH"
+);
+export const IO_WALLET_API_CLIENT = IoWalletAPIClient(
+  IO_WALLET_API_KEY,
+  IO_WALLET_API_URL,
+  IO_WALLET_API_BASE_PATH,
+  httpOrHttpsApiFetch
+);
+export const FF_IO_WALLET_ENABLED = process.env.FF_IO_WALLET_ENABLED === "1";

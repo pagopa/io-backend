@@ -51,6 +51,7 @@ import {
   FF_EUCOVIDCERT_ENABLED,
   FF_FAST_LOGIN,
   FF_IO_SIGN_ENABLED,
+  FF_IO_WALLET_ENABLED,
   FF_LOLLIPOP_ENABLED,
   FF_MIT_VOUCHER_ENABLED,
   FF_ROUTING_PUSH_NOTIF,
@@ -62,6 +63,7 @@ import {
   IDP_METADATA_REFRESH_INTERVAL_SECONDS,
   IO_SIGN_API_CLIENT,
   IO_SIGN_SERVICE_ID,
+  IO_WALLET_API_CLIENT,
   LOCKED_PROFILES_STORAGE_CONNECTION_STRING,
   LOCKED_PROFILES_TABLE_NAME,
   LOLLIPOP_API_CLIENT,
@@ -205,6 +207,8 @@ import { makeSpidLogCallback } from "./utils/spid";
 import { TimeTracer } from "./utils/timer";
 import TrialService from "./services/trialService";
 import TrialController from "./controllers/trialController";
+import IoWalletController from "./controllers/ioWalletController";
+import IoWalletService from "./services/ioWalletService";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -230,6 +234,7 @@ export interface IAppFactoryParameters {
   readonly CGNAPIBasePath: string;
   readonly CGNOperatorSearchAPIBasePath: string;
   readonly IoSignAPIBasePath: string;
+  readonly IoWalletAPIBasePath: string;
   readonly EUCovidCertBasePath: string;
   readonly MitVoucherBasePath: string;
   readonly ServicesAppBackendBasePath: string;
@@ -256,6 +261,7 @@ export async function newApp({
   FIMSBasePath,
   CGNAPIBasePath,
   IoSignAPIBasePath,
+  IoWalletAPIBasePath,
   CGNOperatorSearchAPIBasePath,
   EUCovidCertBasePath,
   MitVoucherBasePath,
@@ -458,6 +464,9 @@ export async function newApp({
         const SERVICES_APP_BACKEND_SERVICE = new ServicesAppBackendService(
           SERVICES_APP_BACKEND_CLIENT
         );
+
+        // Create the io wallet
+        const IO_WALLET_SERVICE = new IoWalletService(IO_WALLET_API_CLIENT);
 
         // Create the Notification Service
         const OLD_NOTIFICATION_SERVICE = pipe(
@@ -769,6 +778,16 @@ export async function newApp({
             app,
             TrialSystemBasePath,
             TRIAL_SERVICE,
+            authMiddlewares.bearerSession
+          );
+        }
+
+        if (FF_IO_WALLET_ENABLED) {
+          // eslint-disable-next-line @typescript-eslint/no-use-before-define
+          registerIoWalletAPIRoutes(
+            app,
+            IoWalletAPIBasePath,
+            IO_WALLET_SERVICE,
             authMiddlewares.bearerSession
           );
         }
@@ -1849,6 +1868,40 @@ function registerTrialSystemAPIRoutes(
     `${basePath}/trials/:trialId/subscriptions`,
     bearerSessionTokenAuth,
     toExpressHandler(trialController.getTrialSubscription, trialController)
+  );
+}
+
+function registerIoWalletAPIRoutes(
+  app: Express,
+  basePath: string,
+  ioWalletService: IoWalletService,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  bearerSessionTokenAuth: any
+): void {
+  const ioWalletController = new IoWalletController(ioWalletService);
+
+  app.get(
+    `${basePath}/nonce`,
+    bearerSessionTokenAuth,
+    toExpressHandler(ioWalletController.getNonce, ioWalletController)
+  );
+
+  app.post(
+    `${basePath}/wallet-instances`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      ioWalletController.createWalletInstance,
+      ioWalletController
+    )
+  );
+
+  app.post(
+    `${basePath}/token`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      ioWalletController.createWalletAttestation,
+      ioWalletController
+    )
   );
 }
 
