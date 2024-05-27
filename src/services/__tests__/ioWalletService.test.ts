@@ -215,8 +215,8 @@ describe("IoWalletService#createWalletInstance", () => {
 
     await service.createWalletInstance(
       "challenge" as NonEmptyString,
-      "key_attestation" as NonEmptyString,
       "hardware_key_tag" as NonEmptyString,
+      "key_attestation" as NonEmptyString,
       "userId"
     );
 
@@ -235,8 +235,8 @@ describe("IoWalletService#createWalletInstance", () => {
 
     const res = await service.createWalletInstance(
       "challenge" as NonEmptyString,
-      "key_attestation" as NonEmptyString,
       "hardware_key_tag" as NonEmptyString,
+      "key_attestation" as NonEmptyString,
       "userId"
     );
 
@@ -254,8 +254,8 @@ describe("IoWalletService#createWalletInstance", () => {
 
     const res = await service.createWalletInstance(
       "challenge" as NonEmptyString,
-      "key_attestation" as NonEmptyString,
       "hardware_key_tag" as NonEmptyString,
+      "key_attestation" as NonEmptyString,
       "userId"
     );
 
@@ -274,8 +274,8 @@ describe("IoWalletService#createWalletInstance", () => {
 
     const res = await service.createWalletInstance(
       "challenge" as NonEmptyString,
-      "key_attestation" as NonEmptyString,
       "hardware_key_tag" as NonEmptyString,
+      "key_attestation" as NonEmptyString,
       "userId"
     );
 
@@ -294,8 +294,8 @@ describe("IoWalletService#createWalletInstance", () => {
 
     const res = await service.createWalletInstance(
       "challenge" as NonEmptyString,
-      "key_attestation" as NonEmptyString,
       "hardware_key_tag" as NonEmptyString,
+      "key_attestation" as NonEmptyString,
       "userId"
     );
 
@@ -312,8 +312,8 @@ describe("IoWalletService#createWalletInstance", () => {
 
     const res = await service.createWalletInstance(
       "challenge" as NonEmptyString,
-      "key_attestation" as NonEmptyString,
       "hardware_key_tag" as NonEmptyString,
+      "key_attestation" as NonEmptyString,
       "userId"
     );
 
@@ -335,8 +335,8 @@ describe("IoWalletService#createWalletAttestation", () => {
     const service = new IoWalletService(api);
 
     await service.createWalletAttestation(
-      grant_type,
       "assertion" as NonEmptyString,
+      grant_type,
       "userId"
     );
 
@@ -353,8 +353,8 @@ describe("IoWalletService#createWalletAttestation", () => {
     const service = new IoWalletService(api);
 
     const res = await service.createWalletAttestation(
-      grant_type,
       "assertion" as NonEmptyString,
+      grant_type,
       "userId"
     );
 
@@ -371,8 +371,8 @@ describe("IoWalletService#createWalletAttestation", () => {
     const service = new IoWalletService(api);
 
     const res = await service.createWalletAttestation(
-      grant_type,
       "assertion" as NonEmptyString,
+      grant_type,
       "userId"
     );
 
@@ -390,8 +390,8 @@ describe("IoWalletService#createWalletAttestation", () => {
     const service = new IoWalletService(api);
 
     const res = await service.createWalletAttestation(
-      grant_type,
       "assertion" as NonEmptyString,
+      grant_type,
       "userId"
     );
 
@@ -409,8 +409,8 @@ describe("IoWalletService#createWalletAttestation", () => {
     const service = new IoWalletService(api);
 
     const res = await service.createWalletAttestation(
-      grant_type,
       "assertion" as NonEmptyString,
+      grant_type,
       "userId"
     );
 
@@ -426,8 +426,8 @@ describe("IoWalletService#createWalletAttestation", () => {
     const service = new IoWalletService(api);
 
     const res = await service.createWalletAttestation(
-      grant_type,
       "assertion" as NonEmptyString,
+      grant_type,
       "userId"
     );
 
