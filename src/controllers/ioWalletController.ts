@@ -56,6 +56,13 @@ export const retrieveUserId = (
 export default class IoWalletController {
   constructor(private readonly ioWalletService: IoWalletService) {}
 
+  private readonly getUserId = (fiscalCode: FiscalCode) =>
+    pipe(
+      retrieveUserId(this.ioWalletService, fiscalCode),
+      TE.mapLeft(() => toErrorRetrievingTheUserId),
+      TE.map((response) => response.value.id)
+    );
+
   /**
    * Get nonce
    */
@@ -87,11 +94,7 @@ export default class IoWalletController {
             ),
             TE.fromEither
           ),
-          userId: pipe(
-            retrieveUserId(this.ioWalletService, user.fiscal_code),
-            TE.mapLeft(() => toErrorRetrievingTheUserId),
-            TE.map((response) => response.value.id)
-          ),
+          userId: this.getUserId(user.fiscal_code),
         }),
         TE.map(
           ({
@@ -131,11 +134,7 @@ export default class IoWalletController {
             ),
             TE.fromEither
           ),
-          userId: pipe(
-            retrieveUserId(this.ioWalletService, user.fiscal_code),
-            TE.mapLeft(() => toErrorRetrievingTheUserId),
-            TE.map((response) => response.value.id)
-          ),
+          userId: this.getUserId(user.fiscal_code),
         }),
         TE.map(({ body: { grant_type, assertion }, userId }) =>
           this.ioWalletService.createWalletAttestation(
