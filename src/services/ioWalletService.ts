@@ -6,9 +6,11 @@ import {
   IResponseErrorGeneric,
   IResponseErrorInternal,
   IResponseSuccessJson,
+  IResponseSuccessNoContent,
   ResponseErrorGeneric,
   ResponseErrorInternal,
   ResponseSuccessJson,
+  ResponseSuccessNoContent,
 } from "@pagopa/ts-commons/lib/responses";
 
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -96,9 +98,7 @@ export default class IoWalletService {
     key_attestation: NonEmptyString,
     userId: Id
   ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorGeneric
-    | IResponseSuccessJson<undefined>
+    IResponseErrorInternal | IResponseErrorGeneric | IResponseSuccessNoContent
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.ioWalletApiClient.createWalletInstance({
@@ -112,7 +112,7 @@ export default class IoWalletService {
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
           case 204:
-            return ResponseSuccessJson(undefined);
+            return ResponseSuccessNoContent();
           case 422:
             return ResponseErrorGeneric(
               response.status,

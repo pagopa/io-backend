@@ -13,6 +13,7 @@ import {
   IResponseErrorInternal,
   IResponseErrorValidation,
   IResponseSuccessJson,
+  IResponseSuccessNoContent,
   ResponseErrorInternal,
 } from "@pagopa/ts-commons/lib/responses";
 
@@ -25,6 +26,7 @@ import { NonceDetailView } from "../../generated/io-wallet-api/NonceDetailView";
 import { withUserFromRequest } from "../types/user";
 import { CreateWalletInstanceBody } from "../../generated/io-wallet-api/CreateWalletInstanceBody";
 import { CreateWalletAttestationBody } from "../../generated/io-wallet-api/CreateWalletAttestationBody";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 
 const toErrorRetrievingTheUserId = ResponseErrorInternal(
   "Error retrieving the user id"
@@ -70,7 +72,7 @@ export default class IoWalletController {
     | IResponseErrorInternal
     | IResponseErrorGeneric
     | IResponseErrorValidation
-    | IResponseSuccessJson<undefined>
+    | IResponseSuccessNoContent
   > =>
     withUserFromRequest(req, async (user) =>
       pipe(
@@ -78,8 +80,10 @@ export default class IoWalletController {
           body: pipe(
             req.body,
             CreateWalletInstanceBody.decode,
-            E.mapLeft(() =>
-              ResponseErrorInternal("Error validating the request body")
+            E.mapLeft((errors) =>
+              ResponseErrorInternal(
+                `Error validating the request body: ${readableReport(errors)}`
+              )
             ),
             TE.fromEither
           ),

@@ -241,7 +241,7 @@ describe("IoWalletService#createWalletInstance", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessJson",
+      kind: "IResponseSuccessNoContent",
     });
   });
 
