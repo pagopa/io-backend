@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-identical-functions */
 /**
  * This service interacts with the IO Wallet API
  */

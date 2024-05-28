@@ -19,6 +19,7 @@ import {
 
 import { pipe } from "fp-ts/lib/function";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { UserDetailView } from "../../generated/io-wallet-api/UserDetailView";
 import IoWalletService from "../services/ioWalletService";
 
@@ -26,7 +27,6 @@ import { NonceDetailView } from "../../generated/io-wallet-api/NonceDetailView";
 import { withUserFromRequest } from "../types/user";
 import { CreateWalletInstanceBody } from "../../generated/io-wallet-api/CreateWalletInstanceBody";
 import { CreateWalletAttestationBody } from "../../generated/io-wallet-api/CreateWalletAttestationBody";
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 
 const toErrorRetrievingTheUserId = ResponseErrorInternal(
   "Error retrieving the user id"
@@ -55,13 +55,6 @@ export const retrieveUserId = (
 
 export default class IoWalletController {
   constructor(private readonly ioWalletService: IoWalletService) {}
-
-  private readonly getUserId = (fiscalCode: FiscalCode) =>
-    pipe(
-      retrieveUserId(this.ioWalletService, fiscalCode),
-      TE.mapLeft(() => toErrorRetrievingTheUserId),
-      TE.map((response) => response.value.id)
-    );
 
   /**
    * Get nonce
@@ -145,5 +138,12 @@ export default class IoWalletController {
         ),
         TE.toUnion
       )()
+    );
+
+  private readonly getUserId = (fiscalCode: FiscalCode) =>
+    pipe(
+      retrieveUserId(this.ioWalletService, fiscalCode),
+      TE.mapLeft(() => toErrorRetrievingTheUserId),
+      TE.map((response) => response.value.id)
     );
 }
