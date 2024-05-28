@@ -151,7 +151,7 @@ export default class IoWalletService {
       });
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
-          case 201:
+          case 200:
             return ResponseSuccessJson(response.value);
           case 422:
             return ResponseErrorGeneric(

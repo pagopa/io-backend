@@ -51,7 +51,7 @@ paths:
             schema:
               $ref: "#/components/schemas/CreateWalletAttestationBody"
       responses:
-        "201":
+        "200":
           description: Wallet Attestation generated
           content:
             application/jwt:

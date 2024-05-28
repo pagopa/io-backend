@@ -37,7 +37,7 @@ mockCreateWalletInstance.mockImplementation(() =>
 
 mockCreateWalletAttestation.mockImplementation(() =>
   t.success({
-    status: 201,
+    status: 200,
     value: "value",
   })
 );
