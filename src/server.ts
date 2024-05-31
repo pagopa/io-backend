@@ -29,6 +29,7 @@ import {
   EUCOVIDCERT_API_BASE_PATH,
   FIMS_BASE_PATH,
   IO_SIGN_API_BASE_PATH,
+  IO_WALLET_API_BASE_PATH,
   MIT_VOUCHER_API_BASE_PATH,
   MYPORTAL_BASE_PATH,
   PAGOPA_BASE_PATH,
@@ -65,6 +66,7 @@ const MitVoucherBasePath = MIT_VOUCHER_API_BASE_PATH;
 const ZendeskBasePath = ZENDESK_BASE_PATH;
 const ServicesAppBackendBasePath = SERVICES_APP_BACKEND_BASE_PATH;
 const TrialSystemBasePath = TRIAL_SYSTEM_API_BASE_PATH;
+const IoWalletAPIBasePath = IO_WALLET_API_BASE_PATH;
 
 // Set default for graceful-shutdown
 const DEFAULT_SHUTDOWN_SIGNALS = "SIGINT SIGTERM";
@@ -120,6 +122,7 @@ newApp({
   EUCovidCertBasePath,
   FIMSBasePath,
   IoSignAPIBasePath,
+  IoWalletAPIBasePath,
   MitVoucherBasePath,
   MyPortalBasePath,
   PagoPABasePath,
