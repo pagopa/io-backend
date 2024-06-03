@@ -134,7 +134,7 @@ microservice-chart:
     FF_LOLLIPOP_ENABLED: '1'
     FF_IOLOGIN: 'BETA'
     SERVICES_APP_BACKEND_BASE_PATH: '/api/v2'
-    SERVICES_APP_BACKEND_API_URL: 'https://io-p-itn-svc-app-be-fn-01.azurewebsites.net'
+    SERVICES_APP_BACKEND_API_URL: 'https://io-p-itn-svc-app-be-func-01.azurewebsites.net'
     SERVICES_APP_BACKEND_API_BASE_PATH: '/api/v1'
   envSecret:
     APPINSIGHTS_INSTRUMENTATIONKEY: 'appinsights-instrumentation-key'
