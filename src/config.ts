@@ -815,6 +815,23 @@ export const TEST_LOGIN_PASSWORD = NonEmptyString.decode(
   process.env.TEST_LOGIN_PASSWORD
 );
 
+// Regex login params
+
+const DEFAULT_TEST_LOGIN_REGEX = "EEEEEE00E00E000A";
+export const TEST_LOGIN_REGEX: RegExp = pipe(
+  process.env.TEST_LOGIN_REGEX,
+  NonEmptyString.decode,
+  E.getOrElseW(() => DEFAULT_TEST_LOGIN_REGEX),
+  (reg) => new RegExp(reg)
+);
+
+export const TEST_LOGIN_REGEX_ENABLED: boolean = pipe(
+  process.env.TEST_LOGIN_REGEX_ENABLED,
+  O.fromNullable,
+  O.map((_) => _.toLowerCase() === "true"),
+  O.getOrElseW(() => false)
+);
+
 // Feature flags
 export const FF_BONUS_ENABLED = process.env.FF_BONUS_ENABLED === "1";
 export const FF_CGN_ENABLED = process.env.FF_CGN_ENABLED === "1";
