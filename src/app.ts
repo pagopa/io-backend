@@ -84,6 +84,8 @@ import {
   TEST_CGN_FISCAL_CODES,
   TEST_LOGIN_FISCAL_CODES,
   TEST_LOGIN_PASSWORD,
+  TEST_LOGIN_REGEX,
+  TEST_LOGIN_REGEX_ENABLED,
   TRIAL_SYSTEM_CLIENT,
   URL_TOKEN_STRATEGY,
   USERS_LOGIN_QUEUE_NAME,
@@ -1710,6 +1712,8 @@ function registerAuthenticationRoutes(
         "local",
         localStrategy(
           TEST_LOGIN_FISCAL_CODES,
+          TEST_LOGIN_REGEX_ENABLED,
+          TEST_LOGIN_REGEX,
           testLoginPassword,
           isLollipopEnabled,
           lollipopAPIClient

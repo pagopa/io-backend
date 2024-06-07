@@ -29,15 +29,19 @@ import {
  */
 export const localStrategy = (
   validUsernameList: ReadonlyArray<FiscalCode>,
+  isRegexEnabled: boolean,
+  usernameRegex: RegExp,
   validPassword: string,
   isLollipopEnabled: boolean,
   lollipopApiClient: ReturnType<LollipopApiClient>
+  // eslint-disable-next-line max-params
 ): passport.Strategy =>
   new Strategy({ passReqToCallback: true }, (req, username, password, done) => {
     pipe(
       TE.of(
         FiscalCode.is(username) &&
-          validUsernameList.includes(username) &&
+          (validUsernameList.includes(username) ||
+            (isRegexEnabled && usernameRegex.test(username))) &&
           validPassword === password
       ),
       TE.chain(
