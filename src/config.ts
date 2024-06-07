@@ -1174,8 +1174,8 @@ export const IO_WALLET_API_BASE_PATH = getRequiredENVVar(
 );
 export const IO_WALLET_API_CLIENT = IoWalletAPIClient(
   IO_WALLET_API_KEY,
-  IO_WALLET_API_URL,
   IO_WALLET_API_BASE_PATH,
+  IO_WALLET_API_URL,
   httpOrHttpsApiFetch
 );
 export const FF_IO_WALLET_ENABLED = process.env.FF_IO_WALLET_ENABLED === "1";
