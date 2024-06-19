@@ -211,35 +211,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ProblemJson"
-  /featured:
-    get:
-      tags:
-        - featured
-      summary: Retrieve featured intitutions and/or services
-      operationId: getFeaturedItems
-      responses:
-        "200":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/FeaturedItems"
-        "401":
-          description: Bearer token null or expired
-        "403":
-          description: Forbidden
-        "404":
-          description: Not found
-        "502":
-          description: Bad gateway
-        "504":
-          description: Gateway timeout
-        "500":
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ProblemJson"
 components:
   securitySchemes:
     Bearer:
@@ -333,20 +304,6 @@ components:
         - version
         - organization
         - metadata
-    FeaturedItems:
-      type: object
-      properties:
-        items:
-          type: array
-          items:
-            $ref: "#/components/schemas/FeaturedItem"
-      required:
-        - items
-    FeaturedItem:
-      x-one-of: true
-      allOf:
-        - $ref: "#/components/schemas/FeaturedService"
-        - $ref: "#/components/schemas/Institution"
     FeaturedServices:
       type: object
       properties:
