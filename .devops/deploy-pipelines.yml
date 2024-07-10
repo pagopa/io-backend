@@ -32,6 +32,9 @@ parameters:
       appbackendl2:
         appname: io-p-app-appbackendl2
         rg: io-p-rg-linux
+      appbackendl3:
+        appname: io-p-weu-backend-asp-03
+        rg: io-p-weu-backend-rg-03
       appbackendli:
         appname: io-p-app-appbackendli
         rg: io-p-rg-linux
