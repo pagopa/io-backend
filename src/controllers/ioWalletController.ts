@@ -40,15 +40,12 @@ const toErrorRetrievingTheUserId = ResponseErrorInternal(
 
 const ensureUserIsAllowed = (
   ioWalletService: IoWalletService,
-  fiscalCode: NonEmptyString
+  userId: NonEmptyString
 ): TE.TaskEither<Error, void> =>
   FF_IO_WALLET_TRIAL_ENABLED
     ? pipe(
-        TE.tryCatch(
-          () => ioWalletService.getSubscription(fiscalCode),
-          E.toError
-        ),
-        // if a successful response with state != "ACTIVE" or an error is returned, return error
+        TE.tryCatch(() => ioWalletService.getSubscription(userId), E.toError),
+        // if a successful response with state != "ACTIVE" or an error is returned, return left
         TE.chain((response) =>
           response.kind === "IResponseSuccessJson" &&
           response.value.state === "ACTIVE"
@@ -114,7 +111,7 @@ export default class IoWalletController {
             ),
             TE.fromEither
           ),
-          userId: this.getUserId(user.fiscal_code),
+          userId: this.getAllowedUserId(user.fiscal_code),
         }),
         TE.map(
           ({
@@ -155,7 +152,7 @@ export default class IoWalletController {
             ),
             TE.fromEither
           ),
-          userId: this.getUserId(user.fiscal_code),
+          userId: this.getAllowedUserId(user.fiscal_code),
         }),
         TE.map(({ body: { grant_type, assertion }, userId }) =>
           this.ioWalletService.createWalletAttestation(
@@ -186,7 +183,7 @@ export default class IoWalletController {
       )
     );
 
-  private readonly getUserId = (fiscalCode: FiscalCode) =>
+  private readonly getAllowedUserId = (fiscalCode: FiscalCode) =>
     pipe(
       fiscalCode,
       NonEmptyString.decode,

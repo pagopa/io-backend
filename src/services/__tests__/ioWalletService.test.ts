@@ -2,6 +2,9 @@ import * as t from "io-ts";
 import IoWalletService from "../ioWalletService";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { Grant_typeEnum } from "../../../generated/io-wallet-api/CreateWalletAttestationBody";
+import { TrialSystemAPIClient } from "../../clients/trial-system.client";
+import { SubscriptionStateEnum } from "../../../generated/trial-system-api/SubscriptionState";
+import { IO_WALLET_TRIAL_ID } from "../../config";
 
 const mockGetEntityConfiguration = jest.fn();
 const mockGetNonce = jest.fn();
@@ -51,6 +54,25 @@ const api = {
   healthCheck: mockHealthCheck,
 };
 
+const mockCreateSubscription = jest.fn();
+const mockGetSubscription = jest.fn();
+
+mockGetSubscription.mockImplementation(() => {
+  return t.success({
+    status: 200,
+    value: {
+      trialId: "trialId",
+      state: SubscriptionStateEnum.SUBSCRIBED,
+      createdAt: new Date(),
+    },
+  });
+});
+
+const trialSystemApi = {
+  createSubscription: mockCreateSubscription,
+  getSubscription: mockGetSubscription,
+} as unknown as ReturnType<TrialSystemAPIClient>;
+
 const aFiscalCode = "GRBGPP87L04L741X" as FiscalCode;
 
 describe("IoWalletService#getUserByFiscalCode", () => {
@@ -59,7 +81,7 @@ describe("IoWalletService#getUserByFiscalCode", () => {
   });
 
   it("should make the correct api call", async () => {
-    const service = new IoWalletService(api);
+    const service = new IoWalletService(api, trialSystemApi);
 
     await service.getUserByFiscalCode(aFiscalCode);
 
@@ -71,7 +93,7 @@ describe("IoWalletService#getUserByFiscalCode", () => {
   });
 
   it("should handle a success response", async () => {
-    const service = new IoWalletService(api);
+    const service = new IoWalletService(api, trialSystemApi);
 
     const res = await service.getUserByFiscalCode(aFiscalCode);
 
@@ -85,7 +107,7 @@ describe("IoWalletService#getUserByFiscalCode", () => {
       t.success({ status: 422 })
     );
 
-    const service = new IoWalletService(api);
+    const service = new IoWalletService(api, trialSystemApi);
 
     const res = await service.getUserByFiscalCode(aFiscalCode);
 
@@ -100,7 +122,7 @@ describe("IoWalletService#getUserByFiscalCode", () => {
       t.success({ status: 500, value: aGenericProblem })
     );
 
-    const service = new IoWalletService(api);
+    const service = new IoWalletService(api, trialSystemApi);
 
     const res = await service.getUserByFiscalCode(aFiscalCode);
 
@@ -115,7 +137,7 @@ describe("IoWalletService#getUserByFiscalCode", () => {
       t.success({ status: 599, value: aGenericProblem })
     );
 
-    const service = new IoWalletService(api);
+    const service = new IoWalletService(api, trialSystemApi);
 
     const res = await service.getUserByFiscalCode(aFiscalCode);
 
@@ -128,7 +150,7 @@ describe("IoWalletService#getUserByFiscalCode", () => {
     mockGetUserByFiscalCode.mockImplementationOnce(() => {
       throw new Error();
     });
-    const service = new IoWalletService(api);
+    const service = new IoWalletService(api, trialSystemApi);
 
     const res = await service.getUserByFiscalCode(aFiscalCode);
 
@@ -144,7 +166,7 @@ describe("IoWalletService#getNonce", () => {
   });
 
   it("should make the correct api call", async () => {
-    const service = new IoWalletService(api);
+    const service = new IoWalletService(api, trialSystemApi);
 
     await service.getNonce();
 
@@ -152,7 +174,7 @@ describe("IoWalletService#getNonce", () => {
   });
 
   it("should handle a success response", async () => {
-    const service = new IoWalletService(api);
+    const service = new IoWalletService(api, trialSystemApi);
 
     const res = await service.getNonce();
 
@@ -167,7 +189,7 @@ describe("IoWalletService#getNonce", () => {
       t.success({ status: 500, value: aGenericProblem })
     );
 
-    const service = new IoWalletService(api);
+    const service = new IoWalletService(api, trialSystemApi);
 
     const res = await service.getNonce();
 
@@ -182,7 +204,7 @@ describe("IoWalletService#getNonce", () => {
       t.success({ status: 599, value: aGenericProblem })
     );
 
-    const service = new IoWalletService(api);
+    const service = new IoWalletService(api, trialSystemApi);
 
     const res = await service.getNonce();
 
@@ -195,7 +217,7 @@ describe("IoWalletService#getNonce", () => {
     mockGetNonce.mockImplementationOnce(() => {
       throw new Error();
     });
-    const service = new IoWalletService(api);
+    const service = new IoWalletService(api, trialSystemApi);
 
     const res = await service.getNonce();
 
@@ -211,7 +233,7 @@ describe("IoWalletService#createWalletInstance", () => {
   });
 
   it("should make the correct api call", async () => {
-    const service = new IoWalletService(api);
+    const service = new IoWalletService(api, trialSystemApi);
 
     await service.createWalletInstance(
       "challenge" as NonEmptyString,
@@ -231,7 +253,7 @@ describe("IoWalletService#createWalletInstance", () => {
   });
 
   it("should handle a success response", async () => {
-    const service = new IoWalletService(api);
+    const service = new IoWalletService(api, trialSystemApi);
 
     const res = await service.createWalletInstance(
       "challenge" as NonEmptyString,
@@ -250,7 +272,7 @@ describe("IoWalletService#createWalletInstance", () => {
       t.success({ status: 422 })
     );
 
-    const service = new IoWalletService(api);
+    const service = new IoWalletService(api, trialSystemApi);
 
     const res = await service.createWalletInstance(
       "challenge" as NonEmptyString,
@@ -270,7 +292,7 @@ describe("IoWalletService#createWalletInstance", () => {
       t.success({ status: 500, value: aGenericProblem })
     );
 
-    const service = new IoWalletService(api);
+    const service = new IoWalletService(api, trialSystemApi);
 
     const res = await service.createWalletInstance(
       "challenge" as NonEmptyString,
@@ -290,7 +312,7 @@ describe("IoWalletService#createWalletInstance", () => {
       t.success({ status: 599, value: aGenericProblem })
     );
 
-    const service = new IoWalletService(api);
+    const service = new IoWalletService(api, trialSystemApi);
 
     const res = await service.createWalletInstance(
       "challenge" as NonEmptyString,
@@ -308,7 +330,7 @@ describe("IoWalletService#createWalletInstance", () => {
     mockCreateWalletInstance.mockImplementationOnce(() => {
       throw new Error();
     });
-    const service = new IoWalletService(api);
+    const service = new IoWalletService(api, trialSystemApi);
 
     const res = await service.createWalletInstance(
       "challenge" as NonEmptyString,
@@ -332,7 +354,7 @@ describe("IoWalletService#createWalletAttestation", () => {
     Grant_typeEnum["urn:ietf:params:oauth:grant-type:jwt-bearer"];
 
   it("should make the correct api call", async () => {
-    const service = new IoWalletService(api);
+    const service = new IoWalletService(api, trialSystemApi);
 
     await service.createWalletAttestation(
       "assertion" as NonEmptyString,
@@ -350,7 +372,7 @@ describe("IoWalletService#createWalletAttestation", () => {
   });
 
   it("should handle a success response", async () => {
-    const service = new IoWalletService(api);
+    const service = new IoWalletService(api, trialSystemApi);
 
     const res = await service.createWalletAttestation(
       "assertion" as NonEmptyString,
@@ -368,7 +390,7 @@ describe("IoWalletService#createWalletAttestation", () => {
       t.success({ status: 422 })
     );
 
-    const service = new IoWalletService(api);
+    const service = new IoWalletService(api, trialSystemApi);
 
     const res = await service.createWalletAttestation(
       "assertion" as NonEmptyString,
@@ -387,7 +409,7 @@ describe("IoWalletService#createWalletAttestation", () => {
       t.success({ status: 500, value: aGenericProblem })
     );
 
-    const service = new IoWalletService(api);
+    const service = new IoWalletService(api, trialSystemApi);
 
     const res = await service.createWalletAttestation(
       "assertion" as NonEmptyString,
@@ -406,7 +428,7 @@ describe("IoWalletService#createWalletAttestation", () => {
       t.success({ status: 599, value: aGenericProblem })
     );
 
-    const service = new IoWalletService(api);
+    const service = new IoWalletService(api, trialSystemApi);
 
     const res = await service.createWalletAttestation(
       "assertion" as NonEmptyString,
@@ -423,13 +445,113 @@ describe("IoWalletService#createWalletAttestation", () => {
     mockCreateWalletAttestation.mockImplementationOnce(() => {
       throw new Error();
     });
-    const service = new IoWalletService(api);
+    const service = new IoWalletService(api, trialSystemApi);
 
     const res = await service.createWalletAttestation(
       "assertion" as NonEmptyString,
       grant_type,
       "userId"
     );
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal",
+    });
+  });
+});
+
+describe("IoWalletService#getSubscription", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const userId = "userId" as NonEmptyString;
+
+  it("should make the correct api call", async () => {
+    const service = new IoWalletService(api, trialSystemApi);
+
+    await service.getSubscription(userId);
+
+    expect(mockGetSubscription).toHaveBeenCalledWith({
+      userId,
+      trialId: IO_WALLET_TRIAL_ID,
+    });
+  });
+
+  it("should handle a success response", async () => {
+    const service = new IoWalletService(api, trialSystemApi);
+
+    const res = await service.getSubscription(userId);
+
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+    });
+  });
+
+  it("should handle an internal error when the API client returns 401", async () => {
+    mockGetSubscription.mockImplementationOnce(() =>
+      t.success({ status: 401 })
+    );
+
+    const service = new IoWalletService(api, trialSystemApi);
+
+    const res = await service.getSubscription(userId);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal",
+    });
+  });
+
+  it("should handle a not foound error when the API client returns 404", async () => {
+    mockGetSubscription.mockImplementationOnce(() =>
+      t.success({ status: 404 })
+    );
+
+    const service = new IoWalletService(api, trialSystemApi);
+
+    const res = await service.getSubscription(userId);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorNotFound",
+    });
+  });
+
+  it("should handle an internal error when the API client returns 500", async () => {
+    const aGenericProblem = {};
+    mockGetSubscription.mockImplementationOnce(() =>
+      t.success({ status: 500, value: aGenericProblem })
+    );
+
+    const service = new IoWalletService(api, trialSystemApi);
+
+    const res = await service.getSubscription(userId);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal",
+    });
+  });
+
+  it("should handle an internal error when the API client returns a code not specified in spec", async () => {
+    const aGenericProblem = {};
+    mockGetSubscription.mockImplementationOnce(() =>
+      t.success({ status: 599, value: aGenericProblem })
+    );
+
+    const service = new IoWalletService(api, trialSystemApi);
+
+    const res = await service.getSubscription(userId);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal",
+    });
+  });
+
+  it("should return an error if the api call throws an error", async () => {
+    mockGetSubscription.mockImplementationOnce(() => {
+      throw new Error();
+    });
+    const service = new IoWalletService(api, trialSystemApi);
+
+    const res = await service.getSubscription(userId);
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal",
