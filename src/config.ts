@@ -1166,12 +1166,12 @@ export const TRIAL_SYSTEM_CLIENT = TrialSystemAPIClient(
   TRIAL_SYSTEM_API_KEY,
   TRIAL_SYSTEM_API_URL
 );
-
 export const IO_WALLET_API_KEY = getRequiredENVVar("IO_WALLET_API_KEY");
 export const IO_WALLET_API_URL = getRequiredENVVar("IO_WALLET_API_URL");
 export const IO_WALLET_API_BASE_PATH = getRequiredENVVar(
   "IO_WALLET_API_BASE_PATH"
 );
+export const IO_WALLET_TRIAL_ID = getRequiredENVVar("IO_WALLET_TRIAL_ID");
 export const IO_WALLET_API_CLIENT = IoWalletAPIClient(
   IO_WALLET_API_KEY,
   IO_WALLET_API_BASE_PATH,
@@ -1179,3 +1179,5 @@ export const IO_WALLET_API_CLIENT = IoWalletAPIClient(
   httpOrHttpsApiFetch
 );
 export const FF_IO_WALLET_ENABLED = process.env.FF_IO_WALLET_ENABLED === "1";
+export const FF_IO_WALLET_TRIAL_ENABLED =
+  process.env.FF_IO_WALLET_TRIAL_ENABLED === "1";

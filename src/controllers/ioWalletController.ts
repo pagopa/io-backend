@@ -9,8 +9,11 @@ import * as E from "fp-ts/Either";
 import { sequenceS } from "fp-ts/lib/Apply";
 
 import {
+  getResponseErrorForbiddenNotAuthorized,
+  IResponse,
   IResponseErrorGeneric,
   IResponseErrorInternal,
+  IResponseErrorNotFound,
   IResponseErrorValidation,
   IResponseSuccessJson,
   IResponseSuccessNoContent,
@@ -18,7 +21,7 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 
 import { pipe } from "fp-ts/lib/function";
-import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { UserDetailView } from "../../generated/io-wallet-api/UserDetailView";
 import IoWalletService from "../services/ioWalletService";
@@ -27,12 +30,35 @@ import { NonceDetailView } from "../../generated/io-wallet-api/NonceDetailView";
 import { withUserFromRequest } from "../types/user";
 import { CreateWalletInstanceBody } from "../../generated/io-wallet-api/CreateWalletInstanceBody";
 import { CreateWalletAttestationBody } from "../../generated/io-wallet-api/CreateWalletAttestationBody";
+import { Subscription } from "../../generated/trial-system-api/Subscription";
+import { withValidatedOrValidationError } from "../utils/responses";
+import { FF_IO_WALLET_TRIAL_ENABLED } from "../config";
 
 const toErrorRetrievingTheUserId = ResponseErrorInternal(
   "Error retrieving the user id"
 );
 
-export const retrieveUserId = (
+const ensureUserIsAllowed = (
+  ioWalletService: IoWalletService,
+  fiscalCode: NonEmptyString
+): TE.TaskEither<Error, void> =>
+  FF_IO_WALLET_TRIAL_ENABLED
+    ? pipe(
+        TE.tryCatch(
+          () => ioWalletService.getSubscription(fiscalCode),
+          E.toError
+        ),
+        // if a successful response with state != "ACTIVE" or an error is returned, return error
+        TE.chain((response) =>
+          response.kind === "IResponseSuccessJson" &&
+          response.value.state === "ACTIVE"
+            ? TE.right(undefined)
+            : TE.left(new Error())
+        )
+      )
+    : TE.right(undefined);
+
+const retrieveUserId = (
   ioWalletService: IoWalletService,
   fiscalCode: FiscalCode
 ) =>
@@ -73,6 +99,7 @@ export default class IoWalletController {
     | IResponseErrorGeneric
     | IResponseErrorValidation
     | IResponseSuccessNoContent
+    | IResponse<"IResponseErrorForbiddenNotAuthorized">
   > =>
     withUserFromRequest(req, async (user) =>
       pipe(
@@ -114,6 +141,7 @@ export default class IoWalletController {
     | IResponseErrorInternal
     | IResponseErrorGeneric
     | IResponseErrorValidation
+    | IResponse<"IResponseErrorForbiddenNotAuthorized">
     | IResponseSuccessJson<string>
   > =>
     withUserFromRequest(req, async (user) =>
@@ -140,10 +168,43 @@ export default class IoWalletController {
       )()
     );
 
+  /**
+   * Get the subscription given a specific user.
+   */
+  public readonly getTrialSubscription = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<Pick<Subscription, "state" | "createdAt">>
+  > =>
+    withUserFromRequest(req, async (user) =>
+      withValidatedOrValidationError(
+        NonEmptyString.decode(user.fiscal_code),
+        (userId) => this.ioWalletService.getSubscription(userId)
+      )
+    );
+
   private readonly getUserId = (fiscalCode: FiscalCode) =>
     pipe(
-      retrieveUserId(this.ioWalletService, fiscalCode),
-      TE.mapLeft(() => toErrorRetrievingTheUserId),
+      fiscalCode,
+      NonEmptyString.decode,
+      TE.fromEither,
+      TE.chainW((fiscalCode) =>
+        ensureUserIsAllowed(this.ioWalletService, fiscalCode)
+      ),
+      TE.mapLeft(() =>
+        getResponseErrorForbiddenNotAuthorized(
+          "Not authorized to perform this action"
+        )
+      ),
+      TE.chainW(() =>
+        pipe(
+          retrieveUserId(this.ioWalletService, fiscalCode),
+          TE.mapLeft(() => toErrorRetrievingTheUserId)
+        )
+      ),
       TE.map((response) => response.value.id)
     );
 }
