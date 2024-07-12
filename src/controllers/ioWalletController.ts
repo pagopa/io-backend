@@ -166,7 +166,7 @@ export default class IoWalletController {
       fiscalCode,
       NonEmptyString.decode,
       TE.fromEither,
-      TE.chainW((fiscalCode) => this.ensureUserIsAllowed(fiscalCode)),
+      TE.chainW(this.ensureUserIsAllowed),
       TE.mapLeft(() =>
         getResponseErrorForbiddenNotAuthorized(
           "Not authorized to perform this action"

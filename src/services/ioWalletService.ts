@@ -21,6 +21,8 @@ import { UserDetailView } from "generated/io-wallet-api/UserDetailView";
 import { NonceDetailView } from "generated/io-wallet-api/NonceDetailView";
 import { Id } from "generated/io-wallet-api/Id";
 import { Grant_typeEnum } from "generated/io-wallet-api/CreateWalletAttestationBody";
+import { pipe } from "fp-ts/lib/function";
+import * as O from "fp-ts/Option";
 import { IoWalletAPIClient } from "../clients/io-wallet";
 import {
   ResponseErrorStatusNotDefinedInSpec,
@@ -29,8 +31,6 @@ import {
 } from "../utils/responses";
 import { IO_WALLET_TRIAL_ID } from "../config";
 import { TrialSystemAPIClient } from "../clients/trial-system.client";
-import { pipe } from "fp-ts/lib/function";
-import * as O from "fp-ts/Option";
 import { Subscription } from "../../generated/trial-system-api/Subscription";
 
 const unprocessableContentError = "Unprocessable Content";
