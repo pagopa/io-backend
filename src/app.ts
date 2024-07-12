@@ -1906,15 +1906,6 @@ function registerIoWalletAPIRoutes(
       ioWalletController
     )
   );
-
-  app.get(
-    `${basePath}/subscriptions`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      ioWalletController.getTrialSubscription,
-      ioWalletController
-    )
-  );
 }
 
 export default defaultModule;
