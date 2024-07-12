@@ -13,7 +13,6 @@ import {
   IResponse,
   IResponseErrorGeneric,
   IResponseErrorInternal,
-  IResponseErrorNotFound,
   IResponseErrorValidation,
   IResponseSuccessJson,
   IResponseSuccessNoContent,
@@ -30,51 +29,11 @@ import { NonceDetailView } from "../../generated/io-wallet-api/NonceDetailView";
 import { withUserFromRequest } from "../types/user";
 import { CreateWalletInstanceBody } from "../../generated/io-wallet-api/CreateWalletInstanceBody";
 import { CreateWalletAttestationBody } from "../../generated/io-wallet-api/CreateWalletAttestationBody";
-import { Subscription } from "../../generated/trial-system-api/Subscription";
-import { withValidatedOrValidationError } from "../utils/responses";
 import { FF_IO_WALLET_TRIAL_ENABLED } from "../config";
 
 const toErrorRetrievingTheUserId = ResponseErrorInternal(
   "Error retrieving the user id"
 );
-
-const ensureUserIsAllowed = (
-  ioWalletService: IoWalletService,
-  userId: NonEmptyString
-): TE.TaskEither<Error, void> =>
-  FF_IO_WALLET_TRIAL_ENABLED
-    ? pipe(
-        TE.tryCatch(() => ioWalletService.getSubscription(userId), E.toError),
-        // if a successful response with state != "ACTIVE" or an error is returned, return left
-        TE.chain((response) =>
-          response.kind === "IResponseSuccessJson" &&
-          response.value.state === "ACTIVE"
-            ? TE.right(undefined)
-            : TE.left(new Error())
-        )
-      )
-    : TE.right(undefined);
-
-const retrieveUserId = (
-  ioWalletService: IoWalletService,
-  fiscalCode: FiscalCode
-) =>
-  pipe(
-    TE.tryCatch(
-      () => ioWalletService.getUserByFiscalCode(fiscalCode),
-      E.toError
-    ),
-    TE.chain(
-      TE.fromPredicate(
-        (r): r is IResponseSuccessJson<UserDetailView> =>
-          r.kind === "IResponseSuccessJson",
-        (e) =>
-          new Error(
-            `An error occurred while retrieving the User id. | ${e.detail}`
-          )
-      )
-    )
-  );
 
 export default class IoWalletController {
   constructor(private readonly ioWalletService: IoWalletService) {}
@@ -165,32 +124,49 @@ export default class IoWalletController {
       )()
     );
 
-  /**
-   * Get the subscription given a specific user.
-   */
-  public readonly getTrialSubscription = (
-    req: express.Request
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorValidation
-    | IResponseErrorNotFound
-    | IResponseSuccessJson<Pick<Subscription, "state" | "createdAt">>
-  > =>
-    withUserFromRequest(req, async (user) =>
-      withValidatedOrValidationError(
-        NonEmptyString.decode(user.fiscal_code),
-        (userId) => this.ioWalletService.getSubscription(userId)
+  private readonly retrieveUserId = (fiscalCode: FiscalCode) =>
+    pipe(
+      TE.tryCatch(
+        () => this.ioWalletService.getUserByFiscalCode(fiscalCode),
+        E.toError
+      ),
+      TE.chain(
+        TE.fromPredicate(
+          (r): r is IResponseSuccessJson<UserDetailView> =>
+            r.kind === "IResponseSuccessJson",
+          (e) =>
+            new Error(
+              `An error occurred while retrieving the User id. | ${e.detail}`
+            )
+        )
       )
     );
+
+  private readonly ensureUserIsAllowed = (
+    userId: NonEmptyString
+  ): TE.TaskEither<Error, void> =>
+    FF_IO_WALLET_TRIAL_ENABLED
+      ? pipe(
+          TE.tryCatch(
+            () => this.ioWalletService.getSubscription(userId),
+            E.toError
+          ),
+          // if a successful response with state != "ACTIVE" or an error is returned, return left
+          TE.chain((response) =>
+            response.kind === "IResponseSuccessJson" &&
+            response.value.state === "ACTIVE"
+              ? TE.right(undefined)
+              : TE.left(new Error())
+          )
+        )
+      : TE.right(undefined);
 
   private readonly getAllowedUserId = (fiscalCode: FiscalCode) =>
     pipe(
       fiscalCode,
       NonEmptyString.decode,
       TE.fromEither,
-      TE.chainW((fiscalCode) =>
-        ensureUserIsAllowed(this.ioWalletService, fiscalCode)
-      ),
+      TE.chainW((fiscalCode) => this.ensureUserIsAllowed(fiscalCode)),
       TE.mapLeft(() =>
         getResponseErrorForbiddenNotAuthorized(
           "Not authorized to perform this action"
@@ -198,7 +174,7 @@ export default class IoWalletController {
       ),
       TE.chainW(() =>
         pipe(
-          retrieveUserId(this.ioWalletService, fiscalCode),
+          this.retrieveUserId(fiscalCode),
           TE.mapLeft(() => toErrorRetrievingTheUserId)
         )
       ),
