@@ -6,10 +6,12 @@
 import {
   IResponseErrorGeneric,
   IResponseErrorInternal,
+  IResponseErrorNotFound,
   IResponseSuccessJson,
   IResponseSuccessNoContent,
   ResponseErrorGeneric,
   ResponseErrorInternal,
+  ResponseErrorNotFound,
   ResponseSuccessJson,
   ResponseSuccessNoContent,
 } from "@pagopa/ts-commons/lib/responses";
@@ -19,19 +21,27 @@ import { UserDetailView } from "generated/io-wallet-api/UserDetailView";
 import { NonceDetailView } from "generated/io-wallet-api/NonceDetailView";
 import { Id } from "generated/io-wallet-api/Id";
 import { Grant_typeEnum } from "generated/io-wallet-api/CreateWalletAttestationBody";
+import { pipe } from "fp-ts/lib/function";
+import * as O from "fp-ts/Option";
 import { IoWalletAPIClient } from "../clients/io-wallet";
 import {
   ResponseErrorStatusNotDefinedInSpec,
   withCatchAsInternalError,
   withValidatedOrInternalError,
 } from "../utils/responses";
+import { IO_WALLET_TRIAL_ID } from "../config";
+import { TrialSystemAPIClient } from "../clients/trial-system.client";
+import { Subscription } from "../../generated/trial-system-api/Subscription";
 
 const unprocessableContentError = "Unprocessable Content";
 const invalidRequest = "Your request didn't validate";
 
 export default class IoWalletService {
   constructor(
-    private readonly ioWalletApiClient: ReturnType<IoWalletAPIClient>
+    private readonly ioWalletApiClient: ReturnType<IoWalletAPIClient>,
+    private readonly trialSystemApiClient: ReturnType<
+      typeof TrialSystemAPIClient
+    >
   ) {}
 
   /**
@@ -163,6 +173,50 @@ export default class IoWalletService {
           case 500:
             return ResponseErrorInternal(
               `Internal server error | ${response.value}`
+            );
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
+  /**
+   * Get the subscription given a specific user.
+   */
+  public readonly getSubscription = async (
+    userId: NonEmptyString
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<Pick<Subscription, "state" | "createdAt">>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.trialSystemApiClient.getSubscription({
+        trialId: IO_WALLET_TRIAL_ID,
+        userId,
+      });
+
+      return withValidatedOrInternalError(validated, (response) => {
+        switch (response.status) {
+          case 200:
+            return pipe(
+              {
+                createdAt: response.value.createdAt,
+                state: response.value.state,
+              },
+              ResponseSuccessJson
+            );
+          case 401:
+            return ResponseErrorInternal("Internal server error");
+          case 404:
+            return ResponseErrorNotFound("Not Found", "Subscription not found");
+          case 500:
+            return ResponseErrorInternal(
+              pipe(
+                response.value.detail,
+                O.fromNullable,
+                O.getOrElse(() => "Cannot get subscription")
+              )
             );
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);

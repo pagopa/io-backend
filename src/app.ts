@@ -466,7 +466,10 @@ export async function newApp({
         );
 
         // Create the io wallet
-        const IO_WALLET_SERVICE = new IoWalletService(IO_WALLET_API_CLIENT);
+        const IO_WALLET_SERVICE = new IoWalletService(
+          IO_WALLET_API_CLIENT,
+          TRIAL_SYSTEM_CLIENT
+        );
 
         // Create the Notification Service
         const OLD_NOTIFICATION_SERVICE = pipe(

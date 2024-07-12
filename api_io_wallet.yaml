@@ -34,6 +34,10 @@ paths:
       responses:
         "204":
           description: Wallet instance successfully created
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "422":
           $ref: "#/components/responses/UnprocessableContent"
         "500":
@@ -57,6 +61,10 @@ paths:
             application/jwt:
               schema:
                 $ref: "#/components/schemas/WalletAttestationView"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "422":
           $ref: "#/components/responses/UnprocessableContent"
         "500":
@@ -70,8 +78,22 @@ components:
       in: header
 
   responses:
+    Forbidden:
+      description: The server understands the request but refuses to authorize it
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetail"
+
     UnprocessableContent:
       description: Unprocessable Content
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetail"
+
+    BadRequest:
+      description: Validation error
       content:
         application/json:
           schema:
@@ -129,7 +151,7 @@ components:
       required:
         - grant_type
         - assertion
-
+        
     ProblemDetail:
       type: object
       properties:
