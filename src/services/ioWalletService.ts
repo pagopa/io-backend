@@ -40,17 +40,15 @@ import { Subscription } from "../../generated/trial-system-api/Subscription";
 const unprocessableContentError = "Unprocessable Content";
 const invalidRequest = "Your request didn't validate";
 
-const ResponseSuccessJwt = (o: string): IResponseSuccessJwt => {
-  return {
-    apply: (res) =>
-      res
-        .status(HttpStatusCodeEnum.HTTP_STATUS_200)
-        .set("Content-Type", "application/jwt")
-        .send(o),
-    kind: "IResponseSuccessJwt",
-    value: o,
-  };
-};
+const ResponseSuccessJwt = (o: string): IResponseSuccessJwt => ({
+  apply: (res) =>
+    res
+      .status(HttpStatusCodeEnum.HTTP_STATUS_200)
+      .set("Content-Type", "application/jwt")
+      .send(o),
+  kind: "IResponseSuccessJwt",
+  value: o,
+});
 
 export interface IResponseSuccessJwt extends IResponse<"IResponseSuccessJwt"> {
   readonly value: string;
