@@ -10,9 +10,10 @@ import { sequenceS } from "fp-ts/lib/Apply";
 
 import {
   getResponseErrorForbiddenNotAuthorized,
-  IResponse,
+  IResponseErrorForbiddenNotAuthorized,
   IResponseErrorGeneric,
   IResponseErrorInternal,
+  IResponseErrorNotFound,
   IResponseErrorValidation,
   IResponseSuccessJson,
   IResponseSuccessNoContent,
@@ -23,7 +24,9 @@ import { pipe } from "fp-ts/lib/function";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { UserDetailView } from "../../generated/io-wallet-api/UserDetailView";
-import IoWalletService from "../services/ioWalletService";
+import IoWalletService, {
+  IResponseSuccessJwt,
+} from "../services/ioWalletService";
 
 import { NonceDetailView } from "../../generated/io-wallet-api/NonceDetailView";
 import { withUserFromRequest } from "../types/user";
@@ -55,7 +58,7 @@ export default class IoWalletController {
     | IResponseErrorGeneric
     | IResponseErrorValidation
     | IResponseSuccessNoContent
-    | IResponse<"IResponseErrorForbiddenNotAuthorized">
+    | IResponseErrorForbiddenNotAuthorized
   > =>
     withUserFromRequest(req, async (user) =>
       pipe(
@@ -97,8 +100,9 @@ export default class IoWalletController {
     | IResponseErrorInternal
     | IResponseErrorGeneric
     | IResponseErrorValidation
-    | IResponse<"IResponseErrorForbiddenNotAuthorized">
-    | IResponseSuccessJson<string>
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseSuccessJwt
+    | IResponseErrorNotFound
   > =>
     withUserFromRequest(req, async (user) =>
       pipe(
