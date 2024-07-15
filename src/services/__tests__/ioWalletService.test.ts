@@ -12,6 +12,8 @@ const mockGetUserByFiscalCode = jest.fn();
 const mockCreateWalletInstance = jest.fn();
 const mockCreateWalletAttestation = jest.fn();
 const mockHealthCheck = jest.fn();
+const mockGetCurrentWalletInstanceStatus = jest.fn();
+const mockSetWalletInstanceStatus = jest.fn();
 
 mockGetUserByFiscalCode.mockImplementation(() =>
   t.success({
@@ -45,6 +47,19 @@ mockCreateWalletAttestation.mockImplementation(() =>
   })
 );
 
+mockGetCurrentWalletInstanceStatus.mockImplementation(() =>
+  t.success({
+    status: 200,
+    value: "value",
+  })
+);
+
+mockSetWalletInstanceStatus.mockImplementation(() =>
+  t.success({
+    status: 204,
+  })
+);
+
 const api = {
   getEntityConfiguration: mockGetEntityConfiguration,
   getNonce: mockGetNonce,
@@ -52,6 +67,8 @@ const api = {
   createWalletInstance: mockCreateWalletInstance,
   createWalletAttestation: mockCreateWalletAttestation,
   healthCheck: mockHealthCheck,
+  getCurrentWalletInstanceStatus: mockGetCurrentWalletInstanceStatus,
+  setWalletInstanceStatus: mockSetWalletInstanceStatus,
 };
 
 const mockCreateSubscription = jest.fn();
@@ -381,7 +398,7 @@ describe("IoWalletService#createWalletAttestation", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessJson",
+      kind: "IResponseSuccessJwt",
     });
   });
 

@@ -65,6 +65,8 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "403":
           $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/Forbidden"
         "422":
           $ref: "#/components/responses/UnprocessableContent"
         "500":
@@ -80,6 +82,13 @@ components:
   responses:
     Forbidden:
       description: The server understands the request but refuses to authorize it
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetail"
+
+    NotFound:
+      description: The specified resource was not found
       content:
         application/json:
           schema:

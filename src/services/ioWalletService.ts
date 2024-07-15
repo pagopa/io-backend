@@ -4,6 +4,10 @@
  */
 
 import {
+  getResponseErrorForbiddenNotAuthorized,
+  HttpStatusCodeEnum,
+  IResponse,
+  IResponseErrorForbiddenNotAuthorized,
   IResponseErrorGeneric,
   IResponseErrorInternal,
   IResponseErrorNotFound,
@@ -35,6 +39,22 @@ import { Subscription } from "../../generated/trial-system-api/Subscription";
 
 const unprocessableContentError = "Unprocessable Content";
 const invalidRequest = "Your request didn't validate";
+
+const ResponseSuccessJwt = (o: string): IResponseSuccessJwt => {
+  return {
+    apply: (res) =>
+      res
+        .status(HttpStatusCodeEnum.HTTP_STATUS_200)
+        .set("Content-Type", "application/jwt")
+        .send(o),
+    kind: "IResponseSuccessJwt",
+    value: o,
+  };
+};
+
+export interface IResponseSuccessJwt extends IResponse<"IResponseSuccessJwt"> {
+  readonly value: string;
+}
 
 export default class IoWalletService {
   constructor(
@@ -150,7 +170,9 @@ export default class IoWalletService {
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorGeneric
-    | IResponseSuccessJson<string>
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorNotFound
+    | IResponseSuccessJwt
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.ioWalletApiClient.createWalletAttestation({
@@ -163,7 +185,16 @@ export default class IoWalletService {
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
           case 200:
-            return ResponseSuccessJson(response.value);
+            return ResponseSuccessJwt(response.value);
+          case 403:
+            return getResponseErrorForbiddenNotAuthorized(
+              "Wallet instance has been revoked"
+            );
+          case 404:
+            return ResponseErrorNotFound(
+              "Not Found",
+              "Wallet instance not found"
+            );
           case 422:
             return ResponseErrorGeneric(
               response.status,
