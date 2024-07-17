@@ -67,7 +67,6 @@ import {
 import { CommaSeparatedListOf } from "./utils/separated-list";
 import { LollipopApiClient } from "./clients/lollipop";
 import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
-import { getFastLoginLollipopConsumerClient } from "./clients/fastLoginLollipopConsumerClient";
 import { getIsUserElegibleForfastLogin } from "./utils/fastLogin";
 import { TrialSystemAPIClient } from "./clients/trial-system.client";
 import { IoWalletAPIClient } from "./clients/io-wallet";
@@ -91,13 +90,6 @@ const DEFAULT_CACHE_MAX_AGE_SECONDS: string = "300";
 export const CACHE_MAX_AGE_SECONDS: number = parseInt(
   process.env.CACHE_MAX_AGE_SECONDS || DEFAULT_CACHE_MAX_AGE_SECONDS,
   10
-);
-
-export const ENABLE_NOTICE_EMAIL_CACHE: boolean = pipe(
-  process.env.ENABLE_NOTICE_EMAIL_CACHE,
-  O.fromNullable,
-  O.map((_) => _.toLowerCase() === "true"),
-  O.getOrElseW(() => false)
 );
 
 // Default cache control max-age value is 1 hour
@@ -351,20 +343,6 @@ export const ALLOW_NOTIFY_IP_SOURCE_RANGE = pipe(
   })
 );
 
-// IP(s) or CIDR(s) allowed for payment manager endpoint
-export const ALLOW_PAGOPA_IP_SOURCE_RANGE = pipe(
-  process.env.ALLOW_PAGOPA_IP_SOURCE_RANGE,
-  decodeCIDRs,
-  E.getOrElseW((errs) => {
-    log.error(
-      `Missing or invalid ALLOW_PAGOPA_IP_SOURCE_RANGE environment variable: ${readableReport(
-        errs
-      )}`
-    );
-    return process.exit(1);
-  })
-);
-
 // IP(s) or CIDR(s) allowed for myportal endpoint
 export const ALLOW_MYPORTAL_IP_SOURCE_RANGE = pipe(
   process.env.ALLOW_MYPORTAL_IP_SOURCE_RANGE,
@@ -372,34 +350,6 @@ export const ALLOW_MYPORTAL_IP_SOURCE_RANGE = pipe(
   E.getOrElseW((errs) => {
     log.error(
       `Missing or invalid ALLOW_MYPORTAL_IP_SOURCE_RANGE environment variable: ${readableReport(
-        errs
-      )}`
-    );
-    return process.exit(1);
-  })
-);
-
-// IP(s) or CIDR(s) allowed for bpd endpoint
-export const ALLOW_BPD_IP_SOURCE_RANGE = pipe(
-  process.env.ALLOW_BPD_IP_SOURCE_RANGE,
-  decodeCIDRs,
-  E.getOrElseW((errs) => {
-    log.error(
-      `Missing or invalid ALLOW_BPD_IP_SOURCE_RANGE environment variable: ${readableReport(
-        errs
-      )}`
-    );
-    return process.exit(1);
-  })
-);
-
-// IP(s) or CIDR(s) allowed for zendesk endpoint
-export const ALLOW_ZENDESK_IP_SOURCE_RANGE = pipe(
-  process.env.ALLOW_ZENDESK_IP_SOURCE_RANGE,
-  decodeCIDRs,
-  E.getOrElseW((errs) => {
-    log.error(
-      `Missing or invalid ALLOW_ZENDESK_IP_SOURCE_RANGE environment variable: ${readableReport(
         errs
       )}`
     );
@@ -522,12 +472,6 @@ export const FIRST_LOLLIPOP_CONSUMER_CLIENT = FirstLollipopConsumerClient(
   LOLLIPOP_API_KEY,
   LOLLIPOP_API_URL
 );
-
-export const FAST_LOGIN_API_KEY = getRequiredENVVar("FAST_LOGIN_API_KEY");
-export const FAST_LOGIN_API_URL = getRequiredENVVar("FAST_LOGIN_API_URL");
-
-export const FAST_LOGIN_LOLLIPOP_CONSUMER_CLIENT =
-  getFastLoginLollipopConsumerClient(FAST_LOGIN_API_KEY, FAST_LOGIN_API_URL);
 
 export const CGN_OPERATOR_SEARCH_API_KEY = getRequiredENVVar(
   "CGN_OPERATOR_SEARCH_API_KEY"
@@ -681,15 +625,8 @@ export const PAGOPA_CLIENT = new PagoPAClientFactory(
 export const AUTHENTICATION_BASE_PATH = getRequiredENVVar(
   "AUTHENTICATION_BASE_PATH"
 );
-export const PAGOPA_BASE_PATH = getRequiredENVVar("PAGOPA_BASE_PATH");
 
 export const MYPORTAL_BASE_PATH = getRequiredENVVar("MYPORTAL_BASE_PATH");
-
-export const BPD_BASE_PATH = getRequiredENVVar("BPD_BASE_PATH");
-
-export const FIMS_BASE_PATH = getRequiredENVVar("FIMS_BASE_PATH");
-
-export const ZENDESK_BASE_PATH = getRequiredENVVar("ZENDESK_BASE_PATH");
 
 export const SERVICES_APP_BACKEND_BASE_PATH = getRequiredENVVar(
   "SERVICES_APP_BACKEND_BASE_PATH"
@@ -809,10 +746,6 @@ export const TEST_LOGIN_FISCAL_CODES: ReadonlyArray<FiscalCode> = pipe(
   E.map((_) => _.split(",")),
   E.map((_) => A.rights(_.map(FiscalCode.decode))),
   E.getOrElseW(() => [])
-);
-
-export const TEST_LOGIN_PASSWORD = NonEmptyString.decode(
-  process.env.TEST_LOGIN_PASSWORD
 );
 
 // Feature flags

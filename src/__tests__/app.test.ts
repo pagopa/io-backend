@@ -70,15 +70,11 @@ const X_FORWARDED_PROTO_HEADER = "X-Forwarded-Proto";
 
 const aAPIBasePath = "/api/v1";
 const aBonusAPIBasePath = "/bonus/api/v1";
-const aPagoPABasePath = "/pagopa/api/v1";
 const aMyPortalBasePath = "/myportal/api/v1";
-const aBPDBasePath = "/bpd/api/v1";
-const aFIMSBasePath = "/fims/api/v1";
 const aCgnAPIBasePath = "/api/v1/cgn";
 const aCgnOperatorSearchAPIBasePath = "/api/v1/cgn-operator-search";
 const aEuCovidCertAPIBasePath = "/api/v1/eucovidcert";
 const aMitVoucherBasePath = "/api/v1/mitvoucher/auth";
-const aZendeskBasePath = "/api/backend/zendesk/v1";
 const aIoSignAPIBasePath = "/api/v1/sign";
 const aServicesAppBackendBasePath = "/api/v2";
 const aTrialSystemBasePath = "/trials/api/v1";
@@ -90,26 +86,19 @@ describe("Success app start", () => {
   beforeAll(async () => {
     app = await appModule.newApp({
       APIBasePath: aAPIBasePath,
-      BPDBasePath: aBPDBasePath,
       BonusAPIBasePath: aBonusAPIBasePath,
       CGNAPIBasePath: aCgnAPIBasePath,
       CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
       EUCovidCertBasePath: aEuCovidCertAPIBasePath,
-      FIMSBasePath: aFIMSBasePath,
       IoSignAPIBasePath: aIoSignAPIBasePath,
       IoWalletAPIBasePath: aIoWalletAPIBasePath,
       MitVoucherBasePath: aMitVoucherBasePath,
       MyPortalBasePath: aMyPortalBasePath,
-      PagoPABasePath: aPagoPABasePath,
       ServicesAppBackendBasePath: aServicesAppBackendBasePath,
       TrialSystemBasePath: aTrialSystemBasePath,
-      ZendeskBasePath: aZendeskBasePath,
-      allowBPDIPSourceRange: [aValidCIDR],
       allowMyPortalIPSourceRange: [aValidCIDR],
       allowNotifyIPSourceRange: [aValidCIDR],
-      allowPagoPAIPSourceRange: [aValidCIDR],
       allowSessionHandleIPSourceRange: [aValidCIDR],
-      allowZendeskIPSourceRange: [aValidCIDR],
       authenticationBasePath: "",
       env: NodeEnvironmentEnum.PRODUCTION,
     });
@@ -197,26 +186,19 @@ describe("Failure app start", () => {
     try {
       await appModule.newApp({
         APIBasePath: aAPIBasePath,
-        BPDBasePath: aBPDBasePath,
         BonusAPIBasePath: aBonusAPIBasePath,
         CGNAPIBasePath: aCgnAPIBasePath,
         CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
         EUCovidCertBasePath: aEuCovidCertAPIBasePath,
-        FIMSBasePath: aFIMSBasePath,
         IoSignAPIBasePath: aIoSignAPIBasePath,
         IoWalletAPIBasePath: aIoWalletAPIBasePath,
         MitVoucherBasePath: aMitVoucherBasePath,
         MyPortalBasePath: aMyPortalBasePath,
-        PagoPABasePath: aPagoPABasePath,
         ServicesAppBackendBasePath: aServicesAppBackendBasePath,
         TrialSystemBasePath: aTrialSystemBasePath,
-        ZendeskBasePath: aZendeskBasePath,
-        allowBPDIPSourceRange: [aValidCIDR],
         allowMyPortalIPSourceRange: [aValidCIDR],
         allowNotifyIPSourceRange: [aValidCIDR],
-        allowPagoPAIPSourceRange: [aValidCIDR],
         allowSessionHandleIPSourceRange: [aValidCIDR],
-        allowZendeskIPSourceRange: [aValidCIDR],
         authenticationBasePath: "",
         env: NodeEnvironmentEnum.PRODUCTION,
       });
@@ -234,26 +216,19 @@ describe("Failure app start", () => {
     try {
       await appModule.newApp({
         APIBasePath: aAPIBasePath,
-        BPDBasePath: aBPDBasePath,
         BonusAPIBasePath: aBonusAPIBasePath,
         CGNAPIBasePath: aCgnAPIBasePath,
         CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
         EUCovidCertBasePath: aEuCovidCertAPIBasePath,
-        FIMSBasePath: aFIMSBasePath,
         IoSignAPIBasePath: aIoSignAPIBasePath,
         IoWalletAPIBasePath: aIoWalletAPIBasePath,
         MitVoucherBasePath: aMitVoucherBasePath,
         MyPortalBasePath: aMyPortalBasePath,
-        PagoPABasePath: aPagoPABasePath,
         ServicesAppBackendBasePath: aServicesAppBackendBasePath,
         TrialSystemBasePath: aTrialSystemBasePath,
-        ZendeskBasePath: aZendeskBasePath,
-        allowBPDIPSourceRange: [aValidCIDR],
         allowMyPortalIPSourceRange: [aValidCIDR],
         allowNotifyIPSourceRange: [aValidCIDR],
-        allowPagoPAIPSourceRange: [aValidCIDR],
         allowSessionHandleIPSourceRange: [aValidCIDR],
-        allowZendeskIPSourceRange: [aValidCIDR],
         authenticationBasePath: "",
         env: NodeEnvironmentEnum.PRODUCTION,
       });
@@ -271,26 +246,19 @@ describe("Failure app start", () => {
     try {
       await appModule.newApp({
         APIBasePath: aAPIBasePath,
-        BPDBasePath: aBPDBasePath,
         BonusAPIBasePath: aBonusAPIBasePath,
         CGNAPIBasePath: aCgnAPIBasePath,
         CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
         EUCovidCertBasePath: aEuCovidCertAPIBasePath,
-        FIMSBasePath: aFIMSBasePath,
         IoSignAPIBasePath: aIoSignAPIBasePath,
         IoWalletAPIBasePath: aIoWalletAPIBasePath,
         MitVoucherBasePath: aMitVoucherBasePath,
         MyPortalBasePath: aMyPortalBasePath,
-        PagoPABasePath: aPagoPABasePath,
         ServicesAppBackendBasePath: aServicesAppBackendBasePath,
         TrialSystemBasePath: aTrialSystemBasePath,
-        ZendeskBasePath: aZendeskBasePath,
-        allowBPDIPSourceRange: [aValidCIDR],
         allowMyPortalIPSourceRange: [aValidCIDR],
         allowNotifyIPSourceRange: [aValidCIDR],
-        allowPagoPAIPSourceRange: [aValidCIDR],
         allowSessionHandleIPSourceRange: [aValidCIDR],
-        allowZendeskIPSourceRange: [aValidCIDR],
         authenticationBasePath: "",
         env: NodeEnvironmentEnum.PRODUCTION,
       });

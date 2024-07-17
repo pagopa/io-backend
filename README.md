@@ -168,19 +168,14 @@ Those are all Environment variables needed by the application:
 | NOTIFICATIONS_QUEUE_NAME                  | Queue name of Azure queue storage for notification hub messages                                      | string |
 | USERS_LOGIN_STORAGE_CONNECTION_STRING     | Connection string to Azure queue storage for usersLogin messages                                     | string |
 | USERS_LOGIN_QUEUE_NAME                    | Queue name of Azure queue storage for usersLogin messages                                            | string |
-| ALLOW_PAGOPA_IP_SOURCE_RANGE              | The range in CIDR form of allowed IPs for the PagoPA API                                             | string |
 | ALLOW_MYPORTAL_IP_SOURCE_RANGE            | The range in CIDR form of allowed IPs for the MyPortal API                                           | string |
-| ALLOW_BPD_IP_SOURCE_RANGE                 | The range in CIDR form of allowed IPs for the BPD API                                                | string |
 | ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE     | The range in CIDR form of IPs of service allowed to handle user sessions                             | string |
 | AUTHENTICATION_BASE_PATH                  | The root path for the authentication endpoints                                                       | string |
 | PAGOPA_API_URL_PROD                       | The url for the PagoPA api endpoints in prod mode                                                    | string |
 | PAGOPA_API_KEY_PROD                       | The api-key needed to call the pagopa proxy API                                                      | string |
 | PAGOPA_API_URL_TEST                       | The url for the PagoPA api endpoints in test mode                                                    | string |
 | PAGOPA_API_KEY_UAT                        | The api-key needed to call the pagopa proxy API for UAT instance                                     | string |
-| PAGOPA_BASE_PATH                          | The root path for the PagoPA endpoints                                                               | string |
 | MYPORTAL_BASE_PATH                        | The root path for the MyPortal endpoints                                                             | string |
-| BPD_BASE_PATH                             | The root path for the BPD endpoints                                                                  | string |
-| FIMS_BASE_PATH                            | The root path for the FIMS endpoints                                                                 | string |
 | STARTUP_IDPS_METADATA                     | Stringified JSON containing idps metadata `Record<string, string>`                                   | string |
 | CIE_METADATA_URL                          | Url to download CIE metadata from                                                                    | string |
 | IDP_METADATA_URL                          | Url to download SPID IDPs metadata from                                                              | string |
@@ -191,10 +186,8 @@ Those are all Environment variables needed by the application:
 | APICACHE_DEBUG                            | When is `true` enable the apicache debug mode                                                        | boolean |
 | GITHUB_TOKEN                              | The value of your Github Api Key, used in build phase                                                | string |
 | FETCH_KEEPALIVE_ENABLED                   | When is `true` enables `keepalive` agent in the API client (defaults to `false`)                     | boolean |
-| ENABLE_NOTICE_EMAIL_CACHE                 | (Optional) Enable `notice_email` cache in PagoPA getUser (defaults to `false`)                       | boolean |
 | SPID_LEVEL_WHITELIST                      | (Optional) Spid Level whitelist csv (defaults L2 and L3 for prod, all for dev)                       | string |
 | TEST_LOGIN_FISCAL_CODES                   | (Optional) Enabled username for password based login (coma separated Fiscal Code)                    | string |
-| TEST_LOGIN_PASSWORD                       | (Optional) Password for password based login                                                         | string |
 | FETCH_KEEPALIVE_MAX_SOCKETS               | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)               | |
 | FETCH_KEEPALIVE_FREE_SOCKET_TIMEOUT_MS    | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)               | |
 | FETCH_KEEPALIVE_KEEPALIVE_MSECS           | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)               | |
@@ -225,8 +218,6 @@ Those are all Environment variables needed by the application:
 | LOLLIPOP_REVOKE_QUEUE_NAME                | Queue name of Azure queue storage for revoke Users lollipop PubKeys                                  | string  |
 | FF_FAST_LOGIN                             | (Optional) Enable Fast Login flow. Default: NONE                                                     | string (enum) |
 | LV_TEST_USERS                             | (Optional) Comma separated list of LV beta testers. Default: empty array                             | string |
-| FAST_LOGIN_API_KEY                        | The key used to authenticate to the io-functions-fast-login API                                      | string  |
-| FAST_LOGIN_API_URL                        | The io-functions-fast-login API production URL                                                       | string  |
 | LOCKED_PROFILES_STORAGE_CONNECTION_STRING | Connection string to Azure queue storage for locked profiles table                                   | string |
 | LOCKED_PROFILES_TABLE_NAME                | The locked profiles table name                                                                       | string |
 | HAS_CLOCK_SKEW_LOG_EVENT                  | (Optional) Enable the log event with clock skew parameters for each SAMLResponse                     | boolean |

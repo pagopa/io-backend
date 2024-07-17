@@ -12,31 +12,24 @@ import { LoggerId } from "@pagopa/winston-ts/dist/types/logging";
 import { withApplicationInsight } from "@pagopa/io-functions-commons/dist/src/utils/transports/application_insight";
 import { newApp } from "./app";
 import {
-  ALLOW_BPD_IP_SOURCE_RANGE,
   ALLOW_MYPORTAL_IP_SOURCE_RANGE,
   ALLOW_NOTIFY_IP_SOURCE_RANGE,
-  ALLOW_PAGOPA_IP_SOURCE_RANGE,
   ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE,
-  ALLOW_ZENDESK_IP_SOURCE_RANGE,
   API_BASE_PATH,
   AUTHENTICATION_BASE_PATH,
   BONUS_API_BASE_PATH,
-  BPD_BASE_PATH,
   CGN_API_BASE_PATH,
   CGN_OPERATOR_SEARCH_API_BASE_PATH,
   DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE,
   ENV,
   EUCOVIDCERT_API_BASE_PATH,
-  FIMS_BASE_PATH,
   IO_SIGN_API_BASE_PATH,
   IO_WALLET_API_BASE_PATH,
   MIT_VOUCHER_API_BASE_PATH,
   MYPORTAL_BASE_PATH,
-  PAGOPA_BASE_PATH,
   SAML_CERT,
   SAML_KEY,
   SERVER_PORT,
-  ZENDESK_BASE_PATH,
   SERVICES_APP_BACKEND_BASE_PATH,
   TRIAL_SYSTEM_API_BASE_PATH,
 } from "./config";
@@ -54,16 +47,12 @@ import { TimeTracer } from "./utils/timer";
 const authenticationBasePath = AUTHENTICATION_BASE_PATH;
 const APIBasePath = API_BASE_PATH;
 const BonusAPIBasePath = BONUS_API_BASE_PATH;
-const PagoPABasePath = PAGOPA_BASE_PATH;
 const MyPortalBasePath = MYPORTAL_BASE_PATH;
-const BPDBasePath = BPD_BASE_PATH;
-const FIMSBasePath = FIMS_BASE_PATH;
 const CGNAPIBasePath = CGN_API_BASE_PATH;
 const IoSignAPIBasePath = IO_SIGN_API_BASE_PATH;
 const CGNOperatorSearchAPIBasePath = CGN_OPERATOR_SEARCH_API_BASE_PATH;
 const EUCovidCertBasePath = EUCOVIDCERT_API_BASE_PATH;
 const MitVoucherBasePath = MIT_VOUCHER_API_BASE_PATH;
-const ZendeskBasePath = ZENDESK_BASE_PATH;
 const ServicesAppBackendBasePath = SERVICES_APP_BACKEND_BASE_PATH;
 const TrialSystemBasePath = TRIAL_SYSTEM_API_BASE_PATH;
 const IoWalletAPIBasePath = IO_WALLET_API_BASE_PATH;
@@ -115,26 +104,19 @@ const maybeAppInsightsClient = pipe(
 
 newApp({
   APIBasePath,
-  BPDBasePath,
   BonusAPIBasePath,
   CGNAPIBasePath,
   CGNOperatorSearchAPIBasePath,
   EUCovidCertBasePath,
-  FIMSBasePath,
   IoSignAPIBasePath,
   IoWalletAPIBasePath,
   MitVoucherBasePath,
   MyPortalBasePath,
-  PagoPABasePath,
   ServicesAppBackendBasePath,
   TrialSystemBasePath,
-  ZendeskBasePath,
-  allowBPDIPSourceRange: ALLOW_BPD_IP_SOURCE_RANGE,
   allowMyPortalIPSourceRange: ALLOW_MYPORTAL_IP_SOURCE_RANGE,
   allowNotifyIPSourceRange: ALLOW_NOTIFY_IP_SOURCE_RANGE,
-  allowPagoPAIPSourceRange: ALLOW_PAGOPA_IP_SOURCE_RANGE,
   allowSessionHandleIPSourceRange: ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE,
-  allowZendeskIPSourceRange: ALLOW_ZENDESK_IP_SOURCE_RANGE,
   appInsightsClient: O.toUndefined(maybeAppInsightsClient),
   authenticationBasePath,
   env: ENV,
