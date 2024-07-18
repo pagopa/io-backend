@@ -22,7 +22,6 @@ This repository contains the code of the backend used by the
     - [Container description](#container-description)
     - [Environment variables](#environment-variables)
     - [Logs](#logs)
-    - [SPID user management](#spid-user-management)
   - [API Monitoring](#api-monitoring)
   - [Redis Database](#redis-database)
     - [Data Structure](#data-structure)
@@ -32,8 +31,6 @@ This repository contains the code of the backend used by the
   - [How to contribute](#how-to-contribute)
     - [Dependencies](#dependencies-1)
     - [Starting steps](#starting-steps)
-    - [Generate SAML (SPID) certs (development)](#generate-saml-spid-certs-development)
-    - [Generate SAML (SPID) certs (production)](#generate-saml-spid-certs-production)
     - [Architecture decision records](#architecture-decision-records)
   - [Troubleshooting](#troubleshooting)
 
@@ -49,14 +46,9 @@ This project is part of the Italian Digital Citizenship initiative, see the
 
 ## Authentication process
 
-The `io-app` application will authenticate to the backend in two steps:
+The `io-app` application will authenticate using the APIs exposed by the service `Session Manager` in [IO Auth monorepo](https://github.com/pagopa/io-auth-n-identity-domain).
 
-  1. an initial user initiated SPID authentication process (SAML2 based)
-     that identifies the user and, on success, triggers the creation of a new
-     authentication session (associated to a session token)
-  2. subsequent requests to the backend will be authenticated via a bearer session token
-
-![authentication_process](doc/images/authentication_process.svg)
+Once the token is obtained can be used to call autenthicated APIs of this repository.
 
 ### Token authentication
 
@@ -72,9 +64,6 @@ The code that manage this flow are in the `src/strategies/bearerSessionTokenStra
 
 * [Docker](https://www.docker.com/) and [Docker Compose](https://github.com/docker/compose)
 
-To fully simulate the SPID authentication process we use the images provided by the
-[spid-testenv2](https://github.com/italia/spid-testenv2) project.
-
 A Linux/macOS environment is required at the moment.
 
 ### Installation steps
@@ -87,20 +76,16 @@ A Linux/macOS environment is required at the moment.
 1. run `scripts/yarn.sh` to install backend dependencies
 1. run `scripts/generate-proxy-api-models.sh` to generate the models defined in api_proxy.yaml and api_notifications.yaml
 1. run `scripts/build.sh` to compile the Typescript files
-1. run `scripts/generate-test-certs-task.sh` to create SAML (SPID) certificates
-1. edit your `/etc/hosts` file by adding:
+2. run `scripts/generate-test-certs.sh` to create certificates needed to start the HTTPS server in DEV mode
+3. edit your `/etc/hosts` file by adding:
 
     ```
-    127.0.0.1    spid-testenv2
     127.0.0.1    io-backend
     ```
 
-1. copy `.env.example` to `.env` and fill the variables with your values
-1. run `docker-compose up -d` to start the containers
-1. point your browser to [https://io-backend/metadata](https://io-backend/metadata) and copy the source of the
-    page to a new `testenv2/conf/sp_metadata.xml` file
-1. run `docker-compose up -d` again to restart the containers
-1. point your browser to [https://io-backend](https://io-backend)
+4. copy `.env.example` to `.env` and fill the variables with your values
+5. run `docker compose --env-file .env up -d` to start the containers
+6. point your browser to [https://io-backend/info](https://io-backend/info) to check that the server is started
 
 If you are using Docker with a Docker Machine replace `localhost` with the IP of the Docker Machine
 ([More details here](https://docs.docker.com/machine/reference/ip/)).
@@ -108,10 +93,8 @@ If you are using Docker with a Docker Machine replace `localhost` with the IP of
 ### Container description
 
 * `backend`: the backend Node application that serves the web and mobile applications
-* `spid-testenv2`: the test IDP server
 
 Nginx is reachable at [https://io-backend]() \
-IDP is reachable at [https://spid-testenv2:8088]() \
 
 ### Environment variables
 
@@ -213,12 +196,6 @@ With the same values defined in the docker-compose.yml file.
 
 Application logs are saved into the logs folder.
 
-### SPID user management
-
-The setup procedure adds some test users to the test IDP server, the full list could be retrieved in
-`testenv2/conf/users.json`. To add more users simply add more items to this file and restart the `spid-testenv2`
-container.
-
 ---
 
 ## API Monitoring
@@ -267,32 +244,6 @@ A Linux/macOS environment is required at the moment.
 * run Jest tests directly or with `scripts/test.sh`
 
 In general follow the [Node Best Practices](https://devcenter.heroku.com/articles/node-best-practices).
-
-### Generate SAML (SPID) certs (development)
-
-The backend implements a SAML Service Provider - for authenticating the clients
-it needs a certificate that you can generate with the following command
-(you need to have `openssl` available in your path):
-
-```
-$ yarn generate:test-certs
-```
-
-### Generate SAML (SPID) certs (production)
-
-For production, the SPID certificate must be generated with
-the following command:
-
-```
-$ openssl req -x509 -nodes -sha256 -days 365 -newkey rsa:4096 -keyout key.pem -out cert.pem
-```
-
-Then, the key and the certificate must be stored in the
-Kubernetes secrets:
-
-```
-$ kubectl create secret generic spid-cert --from-file=./cert.pem --from-file=./key.pem
-```
 
 ### Architecture decision records
 
