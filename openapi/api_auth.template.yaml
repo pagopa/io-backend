@@ -10,30 +10,6 @@ schemes:
 security:
   - Bearer: []
 paths:
-  "/logout":
-    x-swagger-router-controller: AuthenticationController
-    post:
-      operationId: logout
-      summary: Execute the logout
-      description: Delete user's active session and tokens.
-      responses:
-        "200":
-          description: Logout succeeded
-          schema:
-            $ref: "#/definitions/SuccessResponse"
-          examples:
-            application/json:
-              message: "ok"
-        "400":
-          description: Bad request
-          schema:
-            $ref: "#/definitions/ProblemJson"
-        "401":
-          description: Bearer token null or expired.
-        "500":
-          description: There was an error deleting user's session.
-          schema:
-            $ref: "#/definitions/ProblemJson"
   "/user-identity":
     x-swagger-router-controller: AuthenticationController
     get:
@@ -65,8 +41,6 @@ paths:
 definitions:
   ProblemJson:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ProblemJson"
-  SuccessResponse:
-    $ref: "../api_backend.yaml#/definitions/SuccessResponse"
   EmailAddress:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/EmailAddress"
   FiscalCode:
