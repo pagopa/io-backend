@@ -1,8 +1,6 @@
 import * as t from "io-ts";
 import * as express from "express";
-import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { enumType } from "@pagopa/ts-commons/lib/types";
-import { FeatureFlag, getIsUserEligibleForNewFeature } from "./featureFlag";
 
 export enum LoginTypeEnum {
   "LV" = "LV",
@@ -31,16 +29,6 @@ export const acsRequestMapper = (
 // ----------------------------
 // FF management
 // ----------------------------
-
-export const getIsUserElegibleForfastLogin = (
-  betaTesters: ReadonlyArray<FiscalCode>,
-  FF_FastLogin: FeatureFlag
-) =>
-  getIsUserEligibleForNewFeature<FiscalCode>(
-    (fiscalCode) => betaTesters.includes(fiscalCode),
-    (_fiscalCode) => false,
-    FF_FastLogin
-  );
 
 export const getLoginType = (
   loginType: LoginTypeEnum | undefined,

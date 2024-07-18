@@ -14,7 +14,6 @@ import { AssertionTypeEnum } from "../../../generated/lollipop-api/AssertionType
 import { JwkPubKey } from "../../../generated/lollipop-api/JwkPubKey";
 import { ActivatedPubKey } from "../../../generated/lollipop-api/ActivatedPubKey";
 import LollipopService from "../../services/lollipopService";
-import { LollipopApiClient } from "../../clients/lollipop";
 import { anAssertionRef } from "../../__mocks__/lollipop";
 import { LoginTypeEnum } from "../../utils/fastLogin";
 import { addSeconds } from "date-fns";
@@ -112,11 +111,7 @@ jest.mock("../../services/lollipopService", () => {
   };
 });
 
-const mockLollipopService = new LollipopService(
-  {} as ReturnType<LollipopApiClient>,
-  "",
-  ""
-);
+const mockLollipopService = new LollipopService("", "");
 
 const mockDeleteInstallation = jest
   .fn()

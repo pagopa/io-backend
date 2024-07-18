@@ -6,51 +6,29 @@ import * as dotenv from "dotenv";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import * as t from "io-ts";
-import { toError } from "fp-ts/lib/Either";
 import { agent } from "@pagopa/ts-commons";
 
-import {
-  getNodeEnvironmentFromProcessEnv,
-  NodeEnvironmentEnum,
-} from "@pagopa/ts-commons/lib/environment";
-import {
-  errorsToReadableMessages,
-  readableReport,
-  readableReportSimplified,
-} from "@pagopa/ts-commons/lib/reporters";
+import { getNodeEnvironmentFromProcessEnv } from "@pagopa/ts-commons/lib/environment";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 
-import {
-  IApplicationConfig,
-  IServiceProviderConfig,
-  SamlConfig,
-} from "@pagopa/io-spid-commons";
-
-import * as A from "fp-ts/lib/Array";
 import {
   AbortableFetch,
   setFetchTimeout,
   toFetch,
 } from "@pagopa/ts-commons/lib/fetch";
-import {
-  IntegerFromString,
-  NonNegativeIntegerFromString,
-} from "@pagopa/ts-commons/lib/numbers";
+import { IntegerFromString } from "@pagopa/ts-commons/lib/numbers";
 import { NonEmptyString, Ulid } from "@pagopa/ts-commons/lib/strings";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { Millisecond, Second } from "@pagopa/ts-commons/lib/units";
 import { pipe } from "fp-ts/lib/function";
-import * as S from "fp-ts/lib/string";
-import { record } from "fp-ts";
 import { CgnAPIClient } from "./clients/cgn";
 import { log } from "./utils/logger";
 import urlTokenStrategy from "./strategies/urlTokenStrategy";
-import { getRequiredENVVar, readFile } from "./utils/container";
+import { getRequiredENVVar } from "./utils/container";
 import PagoPAClientFactory from "./services/pagoPAClientFactory";
 import ApiClientFactory from "./services/apiClientFactory";
 import { BonusAPIClient } from "./clients/bonus";
-import { IoLoginHostUrl, STRINGS_RECORD } from "./types/commons";
-import { SpidLevelArray } from "./types/spidLevel";
 import { decodeCIDRs } from "./utils/network";
 import { CgnOperatorSearchAPIClient } from "./clients/cgn-operator-search";
 import { ServicesAppBackendAPIClient } from "./clients/services-app-backend";
@@ -67,7 +45,6 @@ import {
 import { CommaSeparatedListOf } from "./utils/separated-list";
 import { LollipopApiClient } from "./clients/lollipop";
 import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
-import { getIsUserElegibleForfastLogin } from "./utils/fastLogin";
 import { TrialSystemAPIClient } from "./clients/trial-system.client";
 import { IoWalletAPIClient } from "./clients/io-wallet";
 
@@ -103,231 +80,11 @@ export const CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS: number = parseInt(
   10
 );
 
-// Private key used in SAML authentication to a SPID IDP.
-const samlKey = () =>
-  pipe(
-    process.env.SAML_KEY,
-    O.fromNullable,
-    O.getOrElse(() =>
-      readFile(
-        process.env.SAML_KEY_PATH || "./certs/key.pem",
-        "SAML private key"
-      )
-    )
-  );
-export const SAML_KEY = samlKey();
-
-// Public certificate used in SAML authentication to a SPID IDP.
-const samlCert = () =>
-  pipe(
-    process.env.SAML_CERT,
-    O.fromNullable,
-    O.getOrElse(() =>
-      readFile(
-        process.env.SAML_CERT_PATH || "./certs/cert.pem",
-        "SAML certificate"
-      )
-    )
-  );
-
-export const SAML_CERT = samlCert();
-
-// SAML settings.
-const SAML_CALLBACK_URL =
-  process.env.SAML_CALLBACK_URL ||
-  "http://italia-backend/assertionConsumerService";
-const SAML_LOGOUT_CALLBACK_URL =
-  process.env.SAML_LOGOUT_CALLBACK_URL || "http://italia-backend/slo";
-const SAML_ISSUER = process.env.SAML_ISSUER || "https://spid.agid.gov.it/cd";
-const DEFAULT_SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX = "1";
-const SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX =
-  process.env.SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX ||
-  DEFAULT_SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX;
-// Default SAML Request cache is 10 minutes
-const DEFAULT_SAML_REQUEST_EXPIRATION_PERIOD_MS = 10 * 60 * 1000;
-const SAML_REQUEST_EXPIRATION_PERIOD_MS = pipe(
-  process.env.SAML_REQUEST_EXPIRATION_PERIOD_MS,
-  E.fromNullable(new Error("Missing Environment configuration")),
-  E.chain((_) => pipe(IntegerFromString.decode(_), E.mapLeft(toError))),
-  E.getOrElse(() => DEFAULT_SAML_REQUEST_EXPIRATION_PERIOD_MS)
-);
-const DEFAULT_SAML_ACCEPTED_CLOCK_SKEW_MS = "-1";
-const SAML_ACCEPTED_CLOCK_SKEW_MS = parseInt(
-  process.env.SAML_ACCEPTED_CLOCK_SKEW_MS ||
-    DEFAULT_SAML_ACCEPTED_CLOCK_SKEW_MS,
-  10
-);
-
-const SPID_TESTENV_URL = process.env.SPID_TESTENV_URL;
-
-// Register the spidStrategy.
-export const IDP_METADATA_URL = getRequiredENVVar("IDP_METADATA_URL");
-const CIE_METADATA_URL = getRequiredENVVar("CIE_METADATA_URL");
-const CIE_TEST_METADATA_URL = process.env.CIE_TEST_METADATA_URL;
-
-export const STARTUP_IDPS_METADATA: Record<string, string> | undefined = pipe(
-  process.env.STARTUP_IDPS_METADATA,
-  O.fromNullable,
-  O.map((_) =>
-    pipe(
-      E.parseJSON(_, E.toError),
-      E.chain((_1) =>
-        pipe(
-          _1,
-          STRINGS_RECORD.decode,
-          E.mapLeft(
-            (err) => new Error(errorsToReadableMessages(err).join(" / "))
-          )
-        )
-      ),
-      E.getOrElseW(() => undefined)
-    )
-  ),
-  O.getOrElseW(() => undefined)
-);
-
-export const BACKEND_HOST = pipe(
-  process.env.BACKEND_HOST,
-  IoLoginHostUrl.decode,
-  E.getOrElseW((errors) => {
-    log.error(
-      `BACKEND_HOST env variable error | ${readableReportSimplified(errors)}`
-    );
-    return process.exit(1);
-  })
-);
-
-// Redirection urls
-export const CLIENT_ERROR_REDIRECTION_URL = `${BACKEND_HOST}/error.html`;
-
-export const clientProfileRedirectionUrl = `${BACKEND_HOST}/profile.html?token={token}`;
-
-export const CLIENT_REDIRECTION_URL =
-  process.env.CLIENT_REDIRECTION_URL || "/login";
-
-const SPID_LEVEL_WHITELIST = pipe(
-  process.env.SPID_LEVEL_WHITELIST,
-  O.fromNullable,
-  O.map((_) => _.split(",")),
-  O.fold(
-    // SPID_LEVEL_WHITELIST is unset
-    () => {
-      if (ENV === NodeEnvironmentEnum.DEVELOPMENT) {
-        // default config for development, all the spid levels are allowed
-        return E.right<t.Errors, SpidLevelArray>([
-          "SpidL1",
-          "SpidL2",
-          "SpidL3",
-        ]);
-      }
-      // default config for production, only L2 and L3 are allowed
-      return E.right<t.Errors, SpidLevelArray>(["SpidL2", "SpidL3"]);
-    },
-    (_) => SpidLevelArray.decode(_)
-  ),
-  E.getOrElseW((err) => {
-    log.error(
-      "Invalid value for SPID_LEVEL_WHITELIST env [%s]",
-      readableReport(err)
-    );
-    return process.exit(1);
-  })
-);
-
-const hasClockSkewLoggingEvent = pipe(
-  process.env.HAS_CLOCK_SKEW_LOG_EVENT,
-  O.fromNullable,
-  O.map((_) => _.toLowerCase() === "true"),
-  O.getOrElse(() => false)
-);
-
-export const appConfig: IApplicationConfig = {
-  assertionConsumerServicePath: "/assertionConsumerService",
-  clientErrorRedirectionUrl: CLIENT_ERROR_REDIRECTION_URL,
-  clientLoginRedirectionUrl: CLIENT_REDIRECTION_URL,
-  hasClockSkewLoggingEvent,
-  loginPath: "/login",
-  metadataPath: "/metadata",
-  sloPath: "/slo",
-  spidLevelsWhitelist: SPID_LEVEL_WHITELIST,
-  startupIdpsMetadata: STARTUP_IDPS_METADATA,
-};
-
-const maybeSpidValidatorUrlOption = pipe(
-  process.env.SPID_VALIDATOR_URL,
-  O.fromNullable,
-  O.map((_) => ({ [_]: true }))
-);
-const maybeSpidTestenvOption = pipe(
-  SPID_TESTENV_URL,
-  O.fromNullable,
-  O.map((_) => ({
-    [_]: true,
-  }))
-);
-
-/**
- * Boolean value that is `true` if some test issuer was provided in configuration.
- * When equals to `false` enable strict validation of the Issuer value retrieved from the SpidUser.
- */
-export const ALLOWED_TEST_ISSUER =
-  O.isSome(maybeSpidValidatorUrlOption) || O.isSome(maybeSpidTestenvOption);
-
-// Set default idp metadata refresh time to 7 days
-export const DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS = 3600 * 24 * 7;
-export const IDP_METADATA_REFRESH_INTERVAL_SECONDS: number = process.env
-  .IDP_METADATA_REFRESH_INTERVAL_SECONDS
-  ? parseInt(process.env.IDP_METADATA_REFRESH_INTERVAL_SECONDS, 10)
-  : DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS;
-log.info(
-  "IDP metadata refresh interval set to %s seconds",
-  IDP_METADATA_REFRESH_INTERVAL_SECONDS
-);
-
 // LolliPoP protocol configuration params
 export const DEFAULT_LOLLIPOP_ASSERTION_REF_DURATION = (3600 *
   24 *
   365 *
   2) as Second; // 2y default assertionRef duration on redis cache
-
-// Spid/Cie Service Provider Config.
-export const serviceProviderConfig: IServiceProviderConfig = {
-  IDPMetadataUrl: IDP_METADATA_URL,
-  organization: {
-    URL: "https://io.italia.it",
-    displayName: "IO - l'app dei servizi pubblici BETA",
-    name: "PagoPA S.p.A.",
-  },
-  publicCert: samlCert(),
-  requiredAttributes: {
-    attributes: ["email", "name", "familyName", "fiscalNumber", "dateOfBirth"],
-    name: "IO - l'app dei servizi pubblici BETA",
-  },
-  spidCieTestUrl: CIE_TEST_METADATA_URL,
-  spidCieUrl: CIE_METADATA_URL,
-  spidTestEnvUrl: SPID_TESTENV_URL,
-  spidValidatorUrl: process.env.SPID_VALIDATOR_URL,
-  strictResponseValidation: {
-    ...(O.isSome(maybeSpidTestenvOption) ? maybeSpidTestenvOption.value : {}),
-    ...(O.isSome(maybeSpidValidatorUrlOption)
-      ? maybeSpidValidatorUrlOption.value
-      : {}),
-  },
-};
-
-export const samlConfig: SamlConfig = {
-  RACComparison: "minimum",
-  acceptedClockSkewMs: SAML_ACCEPTED_CLOCK_SKEW_MS,
-  attributeConsumingServiceIndex: SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX,
-  // this value is dynamic and taken from query string
-  authnContext: "https://www.spid.gov.it/SpidL1",
-  callbackUrl: SAML_CALLBACK_URL,
-  identifierFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-  issuer: SAML_ISSUER,
-  logoutCallbackUrl: SAML_LOGOUT_CALLBACK_URL,
-  privateCert: samlKey(),
-  requestIdExpirationPeriodMs: SAML_REQUEST_EXPIRATION_PERIOD_MS,
-};
 
 // IP(s) or CIDR(s) allowed for notification
 export const ALLOW_NOTIFY_IP_SOURCE_RANGE = pipe(
@@ -447,7 +204,6 @@ export const CGN_API_CLIENT = CgnAPIClient(
   httpOrHttpsApiFetch
 );
 
-export const FF_LOLLIPOP_ENABLED = process.env.FF_LOLLIPOP_ENABLED === "1";
 export const LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING = getRequiredENVVar(
   "LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING"
 );
@@ -583,27 +339,6 @@ export const tokenDurationSecs: number = process.env.TOKEN_DURATION_IN_SECONDS
   : DEFAULT_TOKEN_DURATION_IN_SECONDS;
 log.info("Session token duration set to %s seconds", tokenDurationSecs);
 
-// Set default LV token duration
-const DEFAULT_LV_TOKEN_DURATION_IN_SECONDS = 60 * 15;
-export const lvTokenDurationSecs: number = pipe(
-  process.env.LV_TOKEN_DURATION_IN_SECONDS,
-  NonNegativeIntegerFromString.decode,
-  E.getOrElse(() => DEFAULT_LV_TOKEN_DURATION_IN_SECONDS)
-);
-log.info("LV Session token duration set to %s seconds", lvTokenDurationSecs);
-
-// Set default LV session duration
-const DEFAULT_LV_LONG_SESSION_DURATION_IN_SECONDS = 3600 * 24 * 365;
-export const lvLongSessionDurationSecs: number = pipe(
-  process.env.LV_LONG_SESSION_DURATION_IN_SECONDS,
-  NonNegativeIntegerFromString.decode,
-  E.getOrElse(() => DEFAULT_LV_LONG_SESSION_DURATION_IN_SECONDS)
-);
-log.info(
-  "LV Long Session duration set to %s seconds",
-  lvLongSessionDurationSecs
-);
-
 // HTTPs-only fetch with optional keepalive agent
 // @see https://github.com/pagopa/io-ts-commons/blob/master/src/agent.ts#L10
 const simpleHttpsApiFetch = agent.getHttpsFetch(process.env);
@@ -637,69 +372,6 @@ export const PRE_SHARED_KEY = getRequiredENVVar("PRE_SHARED_KEY");
 
 // Register the urlTokenStrategy.
 export const URL_TOKEN_STRATEGY = urlTokenStrategy(PRE_SHARED_KEY);
-
-export const getClientProfileRedirectionUrl = (token: string): UrlFromString =>
-  pipe(
-    clientProfileRedirectionUrl.replace("{token}", token),
-    UrlFromString.decode,
-    E.getOrElseW(() => {
-      throw new Error("Invalid url");
-    })
-  );
-
-export const ClientErrorRedirectionUrlParams = t.union([
-  t.intersection([
-    t.interface({
-      errorMessage: NonEmptyString,
-    }),
-    t.partial({
-      errorCode: t.number,
-    }),
-  ]),
-  t.intersection([
-    t.partial({
-      errorMessage: NonEmptyString,
-    }),
-    t.interface({
-      errorCode: t.number,
-    }),
-  ]),
-  t.interface({
-    errorCode: t.number,
-    errorMessage: NonEmptyString,
-  }),
-]);
-export type ClientErrorRedirectionUrlParams = t.TypeOf<
-  typeof ClientErrorRedirectionUrlParams
->;
-
-export const getClientErrorRedirectionUrl = (
-  params: ClientErrorRedirectionUrlParams
-): UrlFromString =>
-  pipe(
-    record
-      .collect(S.Ord)((key, value) => `${key}=${value}`)(params)
-      .join("&"),
-    (errorParams) => CLIENT_ERROR_REDIRECTION_URL.concat(`?${errorParams}`),
-    UrlFromString.decode,
-    E.getOrElseW(() => {
-      throw new Error("Invalid url");
-    })
-  );
-
-// Needed to forward SPID requests for logging
-export const SPID_LOG_STORAGE_CONNECTION_STRING = getRequiredENVVar(
-  "SPID_LOG_STORAGE_CONNECTION_STRING"
-);
-export const SPID_LOG_QUEUE_NAME = getRequiredENVVar("SPID_LOG_QUEUE_NAME");
-
-// Needed to forward SPID/CIE successful login
-export const USERS_LOGIN_STORAGE_CONNECTION_STRING = getRequiredENVVar(
-  "USERS_LOGIN_STORAGE_CONNECTION_STRING"
-);
-export const USERS_LOGIN_QUEUE_NAME = getRequiredENVVar(
-  "USERS_LOGIN_QUEUE_NAME"
-);
 
 // Needed to forward push notifications actions events
 export const NOTIFICATIONS_STORAGE_CONNECTION_STRING = getRequiredENVVar(
@@ -739,15 +411,6 @@ export const BARCODE_ALGORITHM = pipe(
 // Application insights sampling percentage
 export const DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE = 5;
 
-// Password login params
-export const TEST_LOGIN_FISCAL_CODES: ReadonlyArray<FiscalCode> = pipe(
-  process.env.TEST_LOGIN_FISCAL_CODES,
-  NonEmptyString.decode,
-  E.map((_) => _.split(",")),
-  E.map((_) => A.rights(_.map(FiscalCode.decode))),
-  E.getOrElseW(() => [])
-);
-
 // Feature flags
 export const FF_BONUS_ENABLED = process.env.FF_BONUS_ENABLED === "1";
 export const FF_CGN_ENABLED = process.env.FF_CGN_ENABLED === "1";
@@ -757,31 +420,6 @@ export const FF_EUCOVIDCERT_ENABLED =
 
 export const FF_MIT_VOUCHER_ENABLED =
   process.env.FF_MIT_VOUCHER_ENABLED === "1";
-
-export const FF_USER_AGE_LIMIT_ENABLED =
-  process.env.FF_USER_AGE_LIMIT_ENABLED === "1";
-
-// IOLOGIN FF variable
-export const FF_IOLOGIN = pipe(
-  process.env.FF_IOLOGIN,
-  FeatureFlag.decode,
-  E.getOrElseW(() => FeatureFlagEnum.NONE)
-);
-
-export const IOLOGIN_USERS_LIST = pipe(
-  process.env.IOLOGIN_TEST_USERS,
-  CommaSeparatedListOf(FiscalCode).decode,
-  E.getOrElseW((err) => {
-    throw new Error(`Invalid IOLOGIN_TEST_USERS value: ${readableReport(err)}`);
-  })
-);
-
-export const IOLOGIN_CANARY_USERS_SHA_REGEX = pipe(
-  process.env.IOLOGIN_CANARY_USERS_REGEX,
-  NonEmptyString.decode,
-  // allow ~6% of users by default
-  E.getOrElse(() => "^([(0-9)|(a-f)|(A-F)]{63}0)$" as NonEmptyString)
-);
 
 // LV FF variable
 export const FF_FAST_LOGIN = pipe(
@@ -796,11 +434,6 @@ export const LV_TEST_USERS = pipe(
   E.getOrElseW((err) => {
     throw new Error(`Invalid LV_TEST_USERS value: ${readableReport(err)}`);
   })
-);
-
-export const isUserElegibleForFastLogin = getIsUserElegibleForfastLogin(
-  LV_TEST_USERS,
-  FF_FAST_LOGIN
 );
 
 // Support Token
@@ -1036,21 +669,6 @@ export const FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX = pipe(
   E.getOrElse((_) => "XYZ" as NonEmptyString)
 );
 
-export const ALLOWED_CIE_TEST_FISCAL_CODES = pipe(
-  process.env.ALLOWED_CIE_TEST_FISCAL_CODES,
-  NonEmptyString.decode,
-  E.chain(CommaSeparatedListOf(FiscalCode).decode),
-  E.getOrElseW((errs) => {
-    log.warn(
-      `Missing or invalid ALLOWED_CIE_TEST_FISCAL_CODES environment variable: ${readableReport(
-        errs
-      )}`
-    );
-
-    return [] as ReadonlyArray<FiscalCode>;
-  })
-);
-
 // UNIQUE EMAIL ENFORCEMENT variables
 
 export const FF_UNIQUE_EMAIL_ENFORCEMENT = pipe(
@@ -1076,14 +694,6 @@ export const FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED =
     () => false,
     FF_UNIQUE_EMAIL_ENFORCEMENT
   );
-
-// SPID Email Persistence FF
-
-export const IS_SPID_EMAIL_PERSISTENCE_ENABLED = pipe(
-  O.fromNullable(process.env.IS_SPID_EMAIL_PERSISTENCE_ENABLED),
-  O.map((val) => val.toLowerCase() === "true"),
-  O.getOrElse(() => true)
-);
 
 // ####### TRIAL_SYSTEM ########
 export const FF_TRIAL_SYSTEM_ENABLED =

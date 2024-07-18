@@ -3,10 +3,8 @@
  * or library that will fail if some required configuration is not provided.
  */
 
-import * as spid from "@pagopa/io-spid-commons/dist/utils/metadata";
 import { Express } from "express";
 import * as E from "fp-ts/lib/Either";
-import * as TE from "fp-ts/lib/TaskEither";
 import { NodeEnvironmentEnum } from "@pagopa/ts-commons/lib/environment";
 import { CIDR } from "@pagopa/ts-commons/lib/strings";
 import * as request from "supertest";
@@ -35,13 +33,6 @@ const mockNotificationService = jest.fn().mockImplementation(() => ({}));
 jest.mock("../services/notificationService", () => {
   return {
     default: mockNotificationService,
-  };
-});
-const mockUsersLoginLogService = jest.fn().mockImplementation(() => ({}));
-jest.mock("../services/usersLoginLogService", () => {
-  return {
-    default: mockUsersLoginLogService,
-    onUserLogin: () => () => TE.of(true),
   };
 });
 
@@ -175,38 +166,6 @@ describe("Failure app start", () => {
     jest.clearAllMocks();
   });
 
-  it("Close app if download IDP metadata fails on startup", async () => {
-    // Override return value of generateSpidStrategy with a rejected promise.
-    const mockFetchIdpsMetadata = jest
-      .spyOn(spid, "fetchIdpsMetadata")
-      .mockImplementation(() => {
-        return TE.left(new Error("Error download metadata"));
-      });
-    expect.assertions(1);
-    try {
-      await appModule.newApp({
-        APIBasePath: aAPIBasePath,
-        BonusAPIBasePath: aBonusAPIBasePath,
-        CGNAPIBasePath: aCgnAPIBasePath,
-        CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
-        EUCovidCertBasePath: aEuCovidCertAPIBasePath,
-        IoSignAPIBasePath: aIoSignAPIBasePath,
-        IoWalletAPIBasePath: aIoWalletAPIBasePath,
-        MitVoucherBasePath: aMitVoucherBasePath,
-        MyPortalBasePath: aMyPortalBasePath,
-        ServicesAppBackendBasePath: aServicesAppBackendBasePath,
-        TrialSystemBasePath: aTrialSystemBasePath,
-        allowMyPortalIPSourceRange: [aValidCIDR],
-        allowNotifyIPSourceRange: [aValidCIDR],
-        allowSessionHandleIPSourceRange: [aValidCIDR],
-        authenticationBasePath: "",
-        env: NodeEnvironmentEnum.PRODUCTION,
-      });
-    } catch (err) {
-      expect(mockFetchIdpsMetadata).toBeCalledTimes(3);
-    }
-  });
-
   it("Close app if Notification Service initialization fails", async () => {
     // Override return value of generateSpidStrategy with a rejected promise.
     mockNotificationService.mockImplementationOnce(() => {
@@ -234,36 +193,6 @@ describe("Failure app start", () => {
       });
     } catch (err) {
       expect(mockNotificationService).toBeCalledTimes(1);
-    }
-  });
-
-  it("Close app if Users Login LogService initialization fails", async () => {
-    // Override return value of generateSpidStrategy with a rejected promise.
-    mockUsersLoginLogService.mockImplementationOnce(() => {
-      throw new Error("Error on UsersLoginLogService");
-    });
-    expect.assertions(1);
-    try {
-      await appModule.newApp({
-        APIBasePath: aAPIBasePath,
-        BonusAPIBasePath: aBonusAPIBasePath,
-        CGNAPIBasePath: aCgnAPIBasePath,
-        CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
-        EUCovidCertBasePath: aEuCovidCertAPIBasePath,
-        IoSignAPIBasePath: aIoSignAPIBasePath,
-        IoWalletAPIBasePath: aIoWalletAPIBasePath,
-        MitVoucherBasePath: aMitVoucherBasePath,
-        MyPortalBasePath: aMyPortalBasePath,
-        ServicesAppBackendBasePath: aServicesAppBackendBasePath,
-        TrialSystemBasePath: aTrialSystemBasePath,
-        allowMyPortalIPSourceRange: [aValidCIDR],
-        allowNotifyIPSourceRange: [aValidCIDR],
-        allowSessionHandleIPSourceRange: [aValidCIDR],
-        authenticationBasePath: "",
-        env: NodeEnvironmentEnum.PRODUCTION,
-      });
-    } catch (err) {
-      expect(mockNotificationService).toBeCalledTimes(2);
     }
   });
 });

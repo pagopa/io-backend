@@ -7,29 +7,19 @@ import * as express from "express";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import * as t from "io-ts";
-import {
-  errorsToReadableMessages,
-  readableReport,
-} from "@pagopa/ts-commons/lib/reporters";
 import { IResponseErrorValidation } from "@pagopa/ts-commons/lib/responses";
 import { DOMParser } from "xmldom";
 
-import { flow, pipe } from "fp-ts/lib/function";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { Issuer } from "@pagopa/io-spid-commons/dist/config";
+import { pipe } from "fp-ts/lib/function";
 import { EmailAddress } from "../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../generated/backend/FiscalCode";
-import { SpidLevel, SpidLevelEnum } from "../../generated/backend/SpidLevel";
+import { SpidLevel } from "../../generated/backend/SpidLevel";
 
 import { CieUserIdentity } from "../../generated/auth/CieUserIdentity";
 import { SpidUserIdentity } from "../../generated/auth/SpidUserIdentity";
 import { UserIdentity } from "../../generated/auth/UserIdentity";
-import { formatDate } from "../utils/date";
-import { log } from "../utils/logger";
 import { withValidatedOrValidationError } from "../utils/responses";
 import { getSpidLevelFromSAMLResponse } from "../utils/spid";
-import { ALLOWED_TEST_ISSUER } from "../config";
-import { isSpidL } from "./spidLevel";
 import {
   BPDToken,
   FIMSToken,
@@ -108,63 +98,6 @@ export type UserV5 = t.TypeOf<typeof UserV5>;
 export const User = t.union([UserV1, UserV2, UserV3, UserV4, UserV5], "User");
 export type User = t.TypeOf<typeof User>;
 
-// required attributes
-export const SpidUser = t.intersection([
-  t.interface({
-    authnContextClassRef: SpidLevel,
-    dateOfBirth: t.string,
-    familyName: t.string,
-    fiscalNumber: FiscalCode,
-    getAcsOriginalRequest: t.Function,
-    getAssertionXml: t.Function,
-    getSamlResponseXml: t.Function,
-    // The allowed issuer must include development Issuer
-    // and Spid SAML Check even in production if provided in config.
-    issuer: ALLOWED_TEST_ISSUER ? NonEmptyString : Issuer,
-    name: t.string,
-  }),
-  t.partial({
-    email: EmailAddress,
-    nameID: t.string,
-    nameIDFormat: t.string,
-    sessionIndex: t.string,
-  }),
-]);
-
-export type SpidUser = t.TypeOf<typeof SpidUser>;
-
-/**
- * Converts a SPID User to a Proxy User.
- */
-// eslint-disable-next-line max-params
-export function toAppUser(
-  from: SpidUser,
-  sessionToken: SessionToken,
-  walletToken: WalletToken,
-  myPortalToken: MyPortalToken,
-  bpdToken: BPDToken,
-  zendeskToken: ZendeskToken,
-  fimsToken: FIMSToken,
-  sessionTrackingId: string
-): UserV5 {
-  return {
-    bpd_token: bpdToken,
-    created_at: new Date().getTime(),
-    date_of_birth: formatDate(from.dateOfBirth),
-    family_name: from.familyName,
-    fims_token: fimsToken,
-    fiscal_code: from.fiscalNumber,
-    myportal_token: myPortalToken,
-    name: from.name,
-    session_token: sessionToken,
-    session_tracking_id: sessionTrackingId,
-    spid_email: from.email,
-    spid_level: from.authnContextClassRef,
-    wallet_token: walletToken,
-    zendesk_token: zendeskToken,
-  };
-}
-
 /**
  * Discriminate from a CieUserIdentity and a SpidUserIdentity
  * checking the spid_email property.
@@ -185,19 +118,6 @@ export function exactUserIdentityDecode(
     : t.exact(CieUserIdentity.type).decode(user);
 }
 
-const SpidObject = t.intersection([
-  t.interface({
-    fiscalNumber: t.string,
-    getAcsOriginalRequest: t.Function,
-    getAssertionXml: t.Function,
-    getSamlResponseXml: t.Function,
-  }),
-  t.partial({
-    authnContextClassRef: t.any,
-    issuer: t.any,
-  }),
-]);
-
 /**
  * Extract AuthnContextClassRef from SAML response
  *
@@ -215,74 +135,6 @@ export function getAuthnContextFromResponse(xml: string): O.Option<string> {
   );
 }
 
-/**
- * Validates a SPID User extracted from a SAML response.
- */
-export function validateSpidUser(
-  rawValue: unknown
-): E.Either<string, SpidUser> {
-  const validated = SpidObject.decode(rawValue);
-  if (E.isLeft(validated)) {
-    return E.left(`validateSpidUser: ${readableReport(validated.left)}`);
-  }
-
-  const value = validated.right;
-
-  // Remove the international prefix from fiscal number.
-  const FISCAL_NUMBER_INTERNATIONAL_PREFIX = "TINIT-";
-  const fiscalNumberWithoutPrefix = value.fiscalNumber.replace(
-    FISCAL_NUMBER_INTERNATIONAL_PREFIX,
-    ""
-  );
-
-  const maybeAuthnContextClassRef = getAuthnContextFromResponse(
-    value.getAssertionXml()
-  );
-
-  // Set SPID level to a default (SPID_L2) if the expected value is not available
-  // in the SAML assertion.
-  // Actually the value returned by the test idp is invalid
-  // @see https://github.com/italia/spid-testenv/issues/26
-  const authnContextClassRef = pipe(
-    maybeAuthnContextClassRef,
-    O.filter(isSpidL),
-    O.getOrElse(() => SpidLevelEnum["https://www.spid.gov.it/SpidL2"])
-  );
-
-  log.info(
-    "Response from IDP (authnContextClassRef): %s",
-    authnContextClassRef
-  );
-
-  const valueWithoutPrefix = {
-    ...value,
-    fiscalNumber: fiscalNumberWithoutPrefix.toUpperCase(),
-  };
-
-  const valueWithDefaultSPIDLevel = {
-    ...valueWithoutPrefix,
-    authnContextClassRef,
-  };
-
-  // Log the invalid SPID level to audit IDP responses.
-  if (!isSpidL(valueWithDefaultSPIDLevel.authnContextClassRef)) {
-    log.warn(
-      "Response from IDP: %s doesn't contain a valid SPID level: %s",
-      value.issuer,
-      value.authnContextClassRef
-    );
-  }
-
-  return pipe(
-    SpidUser.decode(valueWithDefaultSPIDLevel),
-    E.mapLeft(
-      (err) =>
-        "Cannot validate SPID user object: " +
-        errorsToReadableMessages(err).join(" / ")
-    )
-  );
-}
-
 export const withUserFromRequest = async <T>(
   req: express.Request,
   f: (user: User) => Promise<T>
@@ -296,27 +148,4 @@ export const withOptionalUserFromRequest = async <T>(
   withValidatedOrValidationError(
     req.user ? pipe(User.decode(req.user), E.map(O.some)) : E.right(O.none),
     f
-  );
-
-/**
- * Extracts a user from a json string.
- */
-export const extractUserFromJson = (from: string): E.Either<string, User> =>
-  pipe(
-    O.tryCatch(() => JSON.parse(from)),
-    O.fold(
-      () => E.left<string, unknown>(`Invalid JSON for User [${from}]`),
-      (_) => E.right<string, unknown>(_)
-    ),
-    E.chain(
-      flow(
-        User.decode,
-        E.mapLeft(
-          (err) =>
-            `Cannot decode User from JSON: ${errorsToReadableMessages(err).join(
-              " / "
-            )}`
-        )
-      )
-    )
   );

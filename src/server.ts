@@ -3,6 +3,7 @@
  */
 import * as http from "http";
 import * as https from "https";
+import { generateKeyPairSync } from "crypto";
 import * as appInsights from "applicationinsights";
 import * as O from "fp-ts/lib/Option";
 import { NodeEnvironmentEnum } from "@pagopa/ts-commons/lib/environment";
@@ -27,8 +28,6 @@ import {
   IO_WALLET_API_BASE_PATH,
   MIT_VOUCHER_API_BASE_PATH,
   MYPORTAL_BASE_PATH,
-  SAML_CERT,
-  SAML_KEY,
   SERVER_PORT,
   SERVICES_APP_BACKEND_BASE_PATH,
   TRIAL_SYSTEM_API_BASE_PATH,
@@ -127,7 +126,19 @@ newApp({
     // Kubernetes so the proxy has to run on HTTPS to behave correctly.
     if (ENV === NodeEnvironmentEnum.DEVELOPMENT) {
       log.info("Starting HTTPS server on port %d", SERVER_PORT);
-      const options = { cert: SAML_CERT, key: SAML_KEY };
+      const { publicKey, privateKey } = generateKeyPairSync("rsa", {
+        modulusLength: 4096,
+        privateKeyEncoding: {
+          cipher: "aes-256-cbc",
+          format: "pem",
+          type: "pkcs8",
+        },
+        publicKeyEncoding: {
+          format: "pem",
+          type: "spki",
+        },
+      });
+      const options = { cert: publicKey, key: privateKey };
       server = https.createServer(options, app).listen(443, () => {
         log.info("Listening on port 443");
         log.info(`Startup time: %sms`, startupTimeMs.toString());
