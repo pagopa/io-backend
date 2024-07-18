@@ -421,21 +421,6 @@ export const FF_EUCOVIDCERT_ENABLED =
 export const FF_MIT_VOUCHER_ENABLED =
   process.env.FF_MIT_VOUCHER_ENABLED === "1";
 
-// LV FF variable
-export const FF_FAST_LOGIN = pipe(
-  process.env.FF_FAST_LOGIN,
-  FeatureFlag.decode,
-  E.getOrElseW(() => FeatureFlagEnum.NONE)
-);
-
-export const LV_TEST_USERS = pipe(
-  process.env.LV_TEST_USERS,
-  CommaSeparatedListOf(FiscalCode).decode,
-  E.getOrElseW((err) => {
-    throw new Error(`Invalid LV_TEST_USERS value: ${readableReport(err)}`);
-  })
-);
-
 // Support Token
 export const JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY = pipe(
   process.env.JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY,
@@ -472,44 +457,6 @@ export const JWT_SUPPORT_TOKEN_EXPIRATION: Second = pipe(
 log.info(
   "JWT support token expiration set to %s seconds",
   JWT_SUPPORT_TOKEN_EXPIRATION
-);
-
-// Zendesk support Token
-export const JWT_ZENDESK_SUPPORT_TOKEN_SECRET = pipe(
-  process.env.JWT_ZENDESK_SUPPORT_TOKEN_SECRET,
-  NonEmptyString.decode,
-  E.getOrElseW((errs) => {
-    log.error(
-      `Missing or invalid JWT_ZENDESK_SUPPORT_TOKEN_SECRET environment variable: ${readableReport(
-        errs
-      )}`
-    );
-    return process.exit(1);
-  })
-);
-export const JWT_ZENDESK_SUPPORT_TOKEN_ISSUER = pipe(
-  process.env.JWT_ZENDESK_SUPPORT_TOKEN_ISSUER,
-  NonEmptyString.decode,
-  E.getOrElseW((errs) => {
-    log.error(
-      `Missing or invalid JWT_ZENDESK_SUPPORT_TOKEN_ISSUER environment variable: ${readableReport(
-        errs
-      )}`
-    );
-    return process.exit(1);
-  })
-);
-
-const DEFAULT_JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION = 604800 as Second;
-export const JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION: Second = pipe(
-  process.env.JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION,
-  IntegerFromString.decode,
-  E.getOrElseW(() => DEFAULT_JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION)
-) as Second;
-
-log.info(
-  "JWT Zendesk support token expiration set to %s seconds",
-  JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION
 );
 
 // Mit  Voucher Token

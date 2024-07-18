@@ -24,16 +24,6 @@ services:
       - ".:/usr/src/app"
     networks:
       - io-be
-
-  spid-testenv2:
-    container_name: spid-testenv2
-    image: italia/spid-testenv2
-    ports:
-      - "8088:8088"
-    volumes:
-      - "./testenv2/conf:/app/conf:cached"
-    networks:
-      - io-be
   #
   #                   __ __            __             __
   #   .----.-----.--|  |__.-----.----|  .--.--.-----|  |_.-----.----.

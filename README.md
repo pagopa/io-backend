@@ -175,8 +175,6 @@ Those are all Environment variables needed by the application:
 | LOLLIPOP_API_BASE_PATH                    | The io-function-lollipop api base path                                                               | string  |
 | LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING | Connection string to Azure queue storage for revoke Users lollipop PubKeys                           | string  |
 | LOLLIPOP_REVOKE_QUEUE_NAME                | Queue name of Azure queue storage for revoke Users lollipop PubKeys                                  | string  |
-| FF_FAST_LOGIN                             | (Optional) Enable Fast Login flow. Default: NONE                                                     | string (enum) |
-| LV_TEST_USERS                             | (Optional) Comma separated list of LV beta testers. Default: empty array                             | string |
 | LOCKED_PROFILES_STORAGE_CONNECTION_STRING | Connection string to Azure queue storage for locked profiles table                                   | string |
 | LOCKED_PROFILES_TABLE_NAME                | The locked profiles table name                                                                       | string |
 | FF_UNIQUE_EMAIL_ENFORCEMENT               | (Optional) Enable the unique email enforcement policy. Default: NONE                                 | string (enum: NONE, BETA, ALL) |
