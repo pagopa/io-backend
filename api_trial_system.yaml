@@ -1,9 +1,9 @@
 swagger: '2.0'
 info:
-  version: 13.35.0
+  version: 13.39.4
   title: Trial System API
 host: localhost
-basePath: /trials/api/v1
+basePath: /api/v1
 schemes:
   - https
 security:
