@@ -1,0 +1,23 @@
+name: Opex Dashboard api_trial_system
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'openapi/generated/api_trial_system.yaml'
+      - '.github/workflows/opex_api_trial_system.yml'
+      - '.opex/api_trial_system/**'
+
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+
+jobs:
+  apply:
+    uses: ./.github/workflows/call_opex_api.yml
+    name: Apply changes to Production
+    secrets: inherit
+    with:
+      api_name: api_trial_system
