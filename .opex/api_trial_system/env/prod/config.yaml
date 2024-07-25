@@ -11,4 +11,4 @@ action_groups:
 overrides:
   hosts:
     - app-backend.io.italia.it
-   - api-app.io.pagopa.it
+    - api-app.io.pagopa.it
