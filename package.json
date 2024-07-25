@@ -92,12 +92,12 @@
     "@azure/storage-queue": "^12.0.0",
     "@pagopa/io-functions-app-sdk": "x",
     "@pagopa/io-functions-cgn-sdk": "x",
-    "@pagopa/io-functions-commons": "^29.1.1",
+    "@pagopa/io-functions-commons": "^29.1.2",
     "@pagopa/io-functions-eucovidcerts-sdk": "x",
     "@pagopa/io-spid-commons": "^13.4.0",
-    "@pagopa/ts-commons": "^12.4.1",
+    "@pagopa/ts-commons": "^13.1.1",
     "@pagopa/winston-ts": "^2.2.0",
-    "applicationinsights": "1.8.10",
+    "applicationinsights": "^2.9.5",
     "body-parser": "^1.19.2",
     "bwip-js": "^2.0.6",
     "date-fns": "^1.30.1",
@@ -208,7 +208,6 @@
   },
   "resolutions": {
     "handlebars": "~4.5.3",
-    "applicationinsights": "1.8.10",
     "@types/serve-static": "1.13.10",
     "@types/express-serve-static-core": "4.17.34"
   }
