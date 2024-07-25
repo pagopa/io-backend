@@ -1,0 +1,31 @@
+name: PR - Opex Dashboard api_trial_system
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+    branches:
+      - master
+    paths:
+
+      - 'openapi/generated/api_trial_system.yaml'
+      - '.github/workflows/pr_opex_api_trial_system.yml'
+      - '.github/workflows/opex_api_trial_system.yml'
+      - '.opex/api_trial_system/**'
+
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    uses: ./.github/workflows/call_pr_opex_api.yml
+    name: Plan changes against Production
+    secrets: inherit
+    with:
+      api_name: api_trial_system
