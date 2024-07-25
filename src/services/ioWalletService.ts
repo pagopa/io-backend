@@ -34,7 +34,7 @@ import {
 import { IO_WALLET_TRIAL_ID } from "../config";
 import { TrialSystemAPIClient } from "../clients/trial-system.client";
 import { Subscription } from "../../generated/trial-system-api/Subscription";
-import { WalletAttestationView } from "generated/io-wallet-api/WalletAttestationView";
+import { WalletAttestationView } from "../../generated/io-wallet-api/WalletAttestationView";
 
 const unprocessableContentError = "Unprocessable Content";
 const invalidRequest = "Your request didn't validate";
