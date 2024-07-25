@@ -24,14 +24,13 @@ import { pipe } from "fp-ts/lib/function";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { UserDetailView } from "../../generated/io-wallet-api/UserDetailView";
-import IoWalletService, {
-  IResponseSuccessJwt,
-} from "../services/ioWalletService";
+import IoWalletService from "../services/ioWalletService";
 
 import { NonceDetailView } from "../../generated/io-wallet-api/NonceDetailView";
 import { withUserFromRequest } from "../types/user";
 import { CreateWalletInstanceBody } from "../../generated/io-wallet-api/CreateWalletInstanceBody";
 import { CreateWalletAttestationBody } from "../../generated/io-wallet-api/CreateWalletAttestationBody";
+import { WalletAttestationView } from "../../generated/io-wallet-api/WalletAttestationView";
 import { FF_IO_WALLET_TRIAL_ENABLED } from "../config";
 
 const toErrorRetrievingTheUserId = ResponseErrorInternal(
@@ -101,7 +100,7 @@ export default class IoWalletController {
     | IResponseErrorGeneric
     | IResponseErrorValidation
     | IResponseErrorForbiddenNotAuthorized
-    | IResponseSuccessJwt
+    | IResponseSuccessJson<WalletAttestationView>
     | IResponseErrorNotFound
   > =>
     withUserFromRequest(req, async (user) =>

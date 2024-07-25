@@ -51,14 +51,14 @@ paths:
       requestBody:
         required: true
         content:
-          application/x-www-form-urlencoded:
+          application/json:
             schema:
               $ref: "#/components/schemas/CreateWalletAttestationBody"
       responses:
         "200":
           description: Wallet Attestation generated
           content:
-            application/jwt:
+            application/json:
               schema:
                 $ref: "#/components/schemas/WalletAttestationView"
         "400":
@@ -125,7 +125,14 @@ components:
         - nonce
 
     WalletAttestationView:
-      type: string
+      type: object
+      properties:
+        wallet_attestation:
+          type: string
+          minLength: 1
+          format: binary
+      required:
+        - wallet_attestation
 
     CreateWalletInstanceBody:
       type: object
