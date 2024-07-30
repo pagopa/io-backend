@@ -2,7 +2,6 @@ import { RevokeAssertionRefInfo } from "@pagopa/io-functions-commons/dist/src/en
 import { base64EncodeObject } from "../../utils/messages";
 import { anAssertionRef } from "../../__mocks__/lollipop";
 import LollipopService from "../lollipopService";
-import * as appInsights from "applicationinsights";
 
 const mockSendMessage = jest.fn();
 jest.mock("@azure/storage-queue", () => ({
