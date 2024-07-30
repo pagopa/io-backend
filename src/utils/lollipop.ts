@@ -14,10 +14,10 @@ import { sha256 } from "@pagopa/io-functions-commons/dist/src/utils/crypto";
 import { Errors } from "io-ts";
 import * as O from "fp-ts/Option";
 import { withoutUndefinedValues } from "@pagopa/ts-commons/lib/types";
-import { AssertionRef } from "generated/backend/AssertionRef";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as TE from "fp-ts/TaskEither";
-import { RCConfigurationPublic } from "generated/io-messages-api/RCConfigurationPublic";
+import { RCConfigurationPublic } from "../../generated/io-messages-api/RCConfigurationPublic";
+import { AssertionRef } from "../../generated/backend/AssertionRef";
 import { ISessionStorage } from "../services/ISessionStorage";
 import { LollipopApiClient } from "../clients/lollipop";
 import {

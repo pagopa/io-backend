@@ -8,7 +8,6 @@ import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import * as t from "io-ts";
 import { IResponseErrorValidation } from "@pagopa/ts-commons/lib/responses";
-import { DOMParser } from "xmldom";
 
 import { pipe } from "fp-ts/lib/function";
 import { EmailAddress } from "../../generated/backend/EmailAddress";
@@ -19,7 +18,6 @@ import { CieUserIdentity } from "../../generated/auth/CieUserIdentity";
 import { SpidUserIdentity } from "../../generated/auth/SpidUserIdentity";
 import { UserIdentity } from "../../generated/auth/UserIdentity";
 import { withValidatedOrValidationError } from "../utils/responses";
-import { getSpidLevelFromSAMLResponse } from "../utils/spid";
 import {
   BPDToken,
   FIMSToken,
@@ -116,23 +114,6 @@ export function exactUserIdentityDecode(
   return isSpidUserIdentity(user)
     ? t.exact(SpidUserIdentity.type).decode(user)
     : t.exact(CieUserIdentity.type).decode(user);
-}
-
-/**
- * Extract AuthnContextClassRef from SAML response
- *
- * ie. for <saml2:AuthnContextClassRef>https://www.spid.gov.it/SpidL2</saml2:AuthnContextClassRef>
- * returns "https://www.spid.gov.it/SpidL2"
- */
-export function getAuthnContextFromResponse(xml: string): O.Option<string> {
-  return pipe(
-    O.fromNullable(xml),
-    O.chain((xmlStr) =>
-      O.tryCatch(() => new DOMParser().parseFromString(xmlStr))
-    ),
-    O.chain(O.fromNullable),
-    O.chain(getSpidLevelFromSAMLResponse)
-  );
 }
 
 export const withUserFromRequest = async <T>(

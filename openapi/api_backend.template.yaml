@@ -646,31 +646,6 @@ paths:
           description: There was an error in registering the device to the Notification Hub.
           schema:
             $ref: "#/definitions/ProblemJson"
-  "/session":
-    x-swagger-router-controller: AuthenticationController
-    get:
-      operationId: getSessionState
-      summary: Get the user current session
-      description: Return the session state for the current authenticated user.
-      responses:
-        "200":
-          description: Found.
-          schema:
-            $ref: "#/definitions/PublicSession"
-          examples:
-            application/json:
-              spidLevel: "https://www.spid.gov.it/SpidL2"
-              walletToken: "c77de47586c841adbd1a1caeb90dce25dcecebed620488a4f932a6280b10ee99a77b6c494a8a6e6884ccbeb6d3fe736b"
-        "400":
-          description: Bad request
-          schema:
-            $ref: "#/definitions/ProblemJson"
-        "401":
-          description: Bearer token null or expired.
-        "500":
-          description: Internal server error
-          schema:
-            $ref: "#/definitions/ProblemJson"
   "/sessions":
     x-swagger-router-controller: AuthenticationController
     get:
@@ -1278,32 +1253,6 @@ definitions:
     required:
       - version
       - metadata
-  PublicSession:
-    type: object
-    title: User session data
-    description: Describe the current session of an authenticated user.
-    properties:
-      spidLevel:
-        $ref: '#/definitions/SpidLevel'
-      lollipopAssertionRef:
-        $ref: "#/definitions/AssertionRef"
-      walletToken:
-        type: string
-      myPortalToken:
-        type: string
-      bpdToken:
-        type: string
-      zendeskToken:
-        type: string
-      fimsToken:
-        type: string
-    required:
-      - spidLevel
-      - walletToken
-      - myPortalToken
-      - bpdToken
-      - zendeskToken
-      - fimsToken
   SessionInfo:
     type: object
     title: Session info of a user

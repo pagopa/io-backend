@@ -11,7 +11,6 @@ import {
   getRequestIDFromRequest,
   getRequestIDFromResponse,
   getSpidEmailFromAssertion,
-  getSpidLevelFromSAMLResponse,
   makeSpidLogCallback,
 } from "../spid";
 import { LoginTypeEnum } from "../fastLogin";
@@ -44,11 +43,6 @@ describe("SPID logs", () => {
   it("should get SPID issuer from response", () => {
     const issuer = getIssuerFromSAMLResponse(aDOMSamlResponse);
     expect(issuer).toEqual(some("http://localhost:8080"));
-  });
-
-  it("should get SPID Level from response", () => {
-    const SPIDLevel = getSpidLevelFromSAMLResponse(aDOMSamlResponse);
-    expect(SPIDLevel).toEqual(some("https://www.spid.gov.it/SpidL2"));
   });
 
   it("should get SPID user's date of birth from response", () => {

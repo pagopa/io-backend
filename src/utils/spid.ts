@@ -16,12 +16,9 @@ import {
 import { DOMParser } from "xmldom";
 import { flow, pipe } from "fp-ts/lib/function";
 import { withDefault } from "@pagopa/ts-commons/lib/types";
-import { SpidLevel, SpidLevelEnum } from "../../generated/backend/SpidLevel";
-import { UserWithoutTokens } from "../types/user";
 import { EmailAddress } from "../../generated/backend/EmailAddress";
 import { base64EncodeObject } from "./messages";
 import { log } from "./logger";
-import { formatDate } from "./date";
 import { AdditionalLoginPropsT, LoginType, LoginTypeEnum } from "./fastLogin";
 
 const SAML_NAMESPACE = {
@@ -37,18 +34,6 @@ export const getIssuerFromSAMLResponse: (
   O.fromNullable,
   O.chainNullableK((element) => element.textContent?.trim()),
   O.chain((value) => O.fromEither(NonEmptyString.decode(value)))
-);
-
-export const getSpidLevelFromSAMLResponse: (
-  doc: Document
-) => O.Option<SpidLevelEnum> = flow(
-  (doc) =>
-    doc
-      .getElementsByTagNameNS(SAML_NAMESPACE.ASSERTION, "AuthnContextClassRef")
-      .item(0),
-  O.fromNullable,
-  O.chainNullableK((element) => element.textContent?.trim()),
-  O.chain((value) => O.fromEither(SpidLevel.decode(value)))
 );
 
 export const getUserAttributeFromAssertion =
@@ -97,29 +82,6 @@ export const getSpidEmailFromAssertion: (
   getUserAttributeFromAssertion("email"),
   O.chain((value) => O.fromEither(EmailAddress.decode(value)))
 );
-
-export const makeProxyUserFromSAMLResponse = (
-  doc: Document
-): t.Validation<UserWithoutTokens> => {
-  const proxyUserProperties = {
-    created_at: new Date().getTime(),
-    date_of_birth: pipe(
-      getDateOfBirthFromAssertion(doc),
-      O.map(formatDate),
-      O.toUndefined
-    ),
-    family_name: pipe(getFamilyNameFromAssertion(doc), O.toUndefined),
-    fiscal_code: pipe(getFiscalNumberFromPayload(doc), O.toUndefined),
-    name: pipe(getNameFromAssertion(doc), O.toUndefined),
-    spid_email: pipe(getSpidEmailFromAssertion(doc), O.toUndefined),
-    spid_idp: pipe(getIssuerFromSAMLResponse(doc), O.toUndefined),
-    spid_level: pipe(
-      getSpidLevelFromSAMLResponse(doc),
-      O.getOrElse(() => SpidLevelEnum["https://www.spid.gov.it/SpidL2"])
-    ),
-  };
-  return pipe(proxyUserProperties, UserWithoutTokens.decode);
-};
 
 const getRequestIDFromPayload =
   (tagName: string, attrName: string) =>

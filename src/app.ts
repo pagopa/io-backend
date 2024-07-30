@@ -790,9 +790,7 @@ function registerAPIRoutes(
     });
 
   const sessionController: SessionController = new SessionController(
-    sessionStorage,
-    tokenService,
-    profileService
+    sessionStorage
   );
 
   const pagoPAProxyController: PagoPAProxyController =
@@ -968,12 +966,6 @@ function registerAPIRoutes(
       toExpressHandler(notificationController.notify, notificationController)
     );
   }
-
-  app.get(
-    `${basePath}/session`,
-    bearerSessionTokenAuth,
-    toExpressHandler(sessionController.getSessionState, sessionController)
-  );
 
   app.get(
     `${basePath}/sessions`,
