@@ -81,11 +81,6 @@ definitions:
           problem.
 
           It may or may not yield further information if dereferenced.
-  SuccessResponse:
-    type: object
-    properties:
-      message:
-        type: string
   EmailAddress:
     type: string
     format: email
