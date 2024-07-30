@@ -105,7 +105,6 @@ microservice-chart:
     REDIS_PORT: '6380'
     REDIS_URL: 'io-p-redis-common.redis.cache.windows.net'
     SAML_LOGOUT_CALLBACK_URL: 'https://app-backend.io.italia.it/slo'
-    TOKEN_DURATION_IN_SECONDS: '2592000'
     WEBSITE_SITE_NAME: 'io-p-weuprod01-appbackend'
     LOLLIPOP_API_URL: 'https://io-p-weu-lollipop-fn.azurewebsites.net'
     LOLLIPOP_API_BASE_PATH: '/api/v1'

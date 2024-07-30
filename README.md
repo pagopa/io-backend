@@ -113,7 +113,6 @@ Those are all Environment variables needed by the application:
 | CGN_API_BASE_PATH                         | The root path for the backend cgn api endpoints                                                      | string |
 | PORT                                      | The HTTP port the Express server is listening to                                                     | int    |
 | REDIS_URL                                 | The URL of a Redis instance                                                                          | string |
-| TOKEN_DURATION_IN_SECONDS                 | The number of seconds a session token is considered valid                                            | int    |
 | SAML_REQUEST_EXPIRATION_PERIOD_MS         | (Optional) The TTL in milliseconds that the SAML Request was stored in cache (defaults to `600.000`) | number |
 | PRE_SHARED_KEY                            | The key shared with the API backend to authenticate the webhook notifications                        | string |
 | ALLOW_NOTIFY_IP_SOURCE_RANGE              | The range in CIDR form of allowed IPs for the webhook notifications                                  | string |

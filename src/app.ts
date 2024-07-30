@@ -70,7 +70,6 @@ import {
   TEST_CGN_FISCAL_CODES,
   TRIAL_SYSTEM_CLIENT,
   URL_TOKEN_STRATEGY,
-  tokenDurationSecs,
 } from "./config";
 import MessagesController from "./controllers/messagesController";
 import NotificationController from "./controllers/notificationController";
@@ -204,7 +203,6 @@ export async function newApp({
   // Create the Session Storage service
   const SESSION_STORAGE = new RedisSessionStorage(
     REDIS_CLIENT_SELECTOR,
-    tokenDurationSecs,
     DEFAULT_LOLLIPOP_ASSERTION_REF_DURATION
   );
   // Setup Passport.

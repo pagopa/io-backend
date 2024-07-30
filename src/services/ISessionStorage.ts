@@ -23,20 +23,6 @@ import { ActiveSessionInfo } from "../utils/fastLogin";
 
 export interface ISessionStorage {
   /**
-   * Stores or updated a value to the cache.
-   *
-   * @param user the user to store or update
-   * @param expireSec the ttl of all the session-related tokens
-   * @param isUserSessionUpdate a boolean that defines if we are updating an existing session or creating a new one
-   * @returns a promise of either an error or boolena
-   */
-  readonly set: (
-    user: UserV5,
-    expireSec?: number,
-    isUserSessionUpdate?: boolean
-  ) => Promise<Either<Error, boolean>>;
-
-  /**
    * Retrieves a value from the cache using the session token.
    */
   readonly getBySessionToken: (
@@ -141,8 +127,6 @@ export interface ISessionStorage {
   readonly isBlockedUser: (
     fiscalCode: FiscalCode
   ) => Promise<Either<Error, boolean>>;
-
-  readonly update: (updatedUser: UserV5) => Promise<Either<Error, boolean>>;
 
   readonly setPagoPaNoticeEmail: (
     user: User,

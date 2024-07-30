@@ -15,7 +15,6 @@ import {
   mockSrem,
 } from "../../__mocks__/redis";
 
-const aTokenDurationSecs = 3600;
 const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
 mockSmembers.mockImplementation((_) =>
   Promise.resolve([`SESSIONINFO-${mockedUser.session_token}`])
@@ -24,7 +23,6 @@ mockSmembers.mockImplementation((_) =>
 const controller = new SessionController(
   new RedisSessionStorage(
     mockRedisClientSelector,
-    aTokenDurationSecs,
     aDefaultLollipopAssertionRefDurationSec
   )
 );
