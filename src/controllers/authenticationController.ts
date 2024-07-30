@@ -15,8 +15,6 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 
 import { pipe } from "fp-ts/lib/function";
-import * as TE from "fp-ts/lib/TaskEither";
-import { UserLoginParams } from "@pagopa/io-functions-app-sdk/UserLoginParams";
 import { UserIdentity } from "../../generated/auth/UserIdentity";
 
 import { exactUserIdentityDecode, withUserFromRequest } from "../types/user";
@@ -33,8 +31,6 @@ export const AGE_LIMIT_ERROR_CODE = 1001;
 export const AUTHENTICATION_LOCKED_ERROR = 1002;
 // Minimum user age allowed to login if the Age limit is enabled
 export const AGE_LIMIT = 14;
-
-export type OnUserLogin = (data: UserLoginParams) => TE.TaskEither<Error, true>;
 
 /**
  * Returns the user identity stored after the login process.
