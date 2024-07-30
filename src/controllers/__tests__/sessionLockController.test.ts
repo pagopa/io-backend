@@ -58,7 +58,6 @@ const mockDelLollipop = jest.fn().mockResolvedValue(E.right(true));
 const mockGetLollipop = jest
   .fn()
   .mockResolvedValue(E.right(O.some(anAssertionRef)));
-const mockSetLollipop = jest.fn().mockResolvedValue(E.right(true));
 
 const expectedSessionTTL = 123;
 const mockGetSessionRemainingTTL = jest
@@ -73,7 +72,6 @@ const mockRedisSessionStorage = {
   userHasActiveSessionsOrLV: mockUserHasActiveSessionsOrLV,
   getLollipopAssertionRefForUser: mockGetLollipop,
   delLollipopDataForUser: mockDelLollipop,
-  setLollipopAssertionRefForUser: mockSetLollipop,
   getSessionRemainingTTL: mockGetSessionRemainingTTL,
 } as unknown as RedisSessionStorage;
 

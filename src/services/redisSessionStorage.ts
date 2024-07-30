@@ -11,17 +11,15 @@ import * as B from "fp-ts/lib/boolean";
 import * as R from "fp-ts/lib/Record";
 import * as TE from "fp-ts/lib/TaskEither";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
-import { EmailString, FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { TaskEither } from "fp-ts/lib/TaskEither";
 import { Either } from "fp-ts/lib/Either";
 import { Option } from "fp-ts/lib/Option";
 import { flow, pipe, identity } from "fp-ts/lib/function";
-import { Second } from "@pagopa/ts-commons/lib/units";
 import { NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
 import {
   NullableBackendAssertionRefFromString,
   LollipopData,
-  LollipopDataFromString,
 } from "../types/assertionRef";
 import { AssertionRef as BackendAssertionRef } from "../../generated/backend/AssertionRef";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
@@ -72,10 +70,7 @@ export default class RedisSessionStorage
   extends RedisStorageUtils
   implements ISessionStorage
 {
-  constructor(
-    private readonly redisClientSelector: RedisClientSelectorType,
-    private readonly defaultDurationAssertionRefSec: Second
-  ) {
+  constructor(private readonly redisClientSelector: RedisClientSelectorType) {
     super();
   }
 
@@ -130,72 +125,6 @@ export default class RedisSessionStorage
   ): Promise<Either<Error, Option<User>>> {
     const errorOrSession = await this.loadSessionByToken(
       myPortalTokenPrefix,
-      token
-    );
-
-    if (E.isLeft(errorOrSession)) {
-      if (errorOrSession.left === sessionNotFoundError) {
-        return E.right(O.none);
-      }
-      return E.left(errorOrSession.left);
-    }
-
-    const user = errorOrSession.right;
-
-    return E.right(O.some(user));
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public async getByBPDToken(
-    token: BPDToken
-  ): Promise<Either<Error, Option<User>>> {
-    const errorOrSession = await this.loadSessionByToken(bpdTokenPrefix, token);
-
-    if (E.isLeft(errorOrSession)) {
-      if (errorOrSession.left === sessionNotFoundError) {
-        return E.right(O.none);
-      }
-      return E.left(errorOrSession.left);
-    }
-
-    const user = errorOrSession.right;
-
-    return E.right(O.some(user));
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public async getByZendeskToken(
-    token: ZendeskToken
-  ): Promise<Either<Error, Option<User>>> {
-    const errorOrSession = await this.loadSessionByToken(
-      zendeskTokenPrefix,
-      token
-    );
-
-    if (E.isLeft(errorOrSession)) {
-      if (errorOrSession.left === sessionNotFoundError) {
-        return E.right(O.none);
-      }
-      return E.left(errorOrSession.left);
-    }
-
-    const user = errorOrSession.right;
-
-    return E.right(O.some(user));
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public async getByFIMSToken(
-    token: FIMSToken
-  ): Promise<Either<Error, Option<User>>> {
-    const errorOrSession = await this.loadSessionByToken(
-      fimsTokenPrefix,
       token
     );
 
@@ -477,28 +406,6 @@ export default class RedisSessionStorage
   }
 
   /**
-   * Check if a user is blocked
-   *
-   * @param fiscalCode id of the user
-   *
-   * @returns a promise with either an error or a boolean indicating if the user is blocked
-   */
-  public async isBlockedUser(
-    fiscalCode: FiscalCode
-  ): Promise<Either<Error, boolean>> {
-    return pipe(
-      TE.tryCatch(
-        () => this.sIsMember(blockedUserSetKey, fiscalCode),
-        E.toError
-      ),
-      TE.bimap(
-        (err) => new Error(`Error accessing blocked users collection: ${err}`),
-        identity
-      )
-    )();
-  }
-
-  /**
    * Delete all user session data
    *
    * @param fiscalCode
@@ -558,44 +465,6 @@ export default class RedisSessionStorage
   }
 
   /**
-   * Cache on redis the notify email for pagopa
-   */
-  public async setPagoPaNoticeEmail(
-    user: User,
-    NoticeEmail: EmailString
-  ): Promise<Either<Error, boolean>> {
-    const errorOrSessionTtl = await this.getSessionTtl(user.session_token);
-
-    if (E.isLeft(errorOrSessionTtl)) {
-      return E.left(
-        new Error(
-          `Error retrieving user session ttl [${errorOrSessionTtl.left.message}]`
-        )
-      );
-    }
-    const sessionTtl = errorOrSessionTtl.right;
-    if (sessionTtl < 0) {
-      throw new Error(`Unexpected session TTL value [${sessionTtl}]`);
-    }
-
-    return pipe(
-      TE.tryCatch(
-        () =>
-          this.redisClientSelector
-            .selectOne(RedisClientMode.FAST)
-            .setEx(
-              `${noticeEmailPrefix}${user.session_token}`,
-              sessionTtl,
-              NoticeEmail
-            ),
-        E.toError
-      ),
-      this.singleStringReplyAsync,
-      this.falsyResponseToErrorAsync(new Error("Error setting session token"))
-    )();
-  }
-
-  /**
    * Delete notify email cache related to an user
    */
   public async delPagoPaNoticeEmail(user: User): Promise<Either<Error, true>> {
@@ -608,41 +477,6 @@ export default class RedisSessionStorage
         E.toError
       ),
       TE.map<number, true>((_) => true)
-    )();
-  }
-
-  /**
-   * Get the notify email value from cache
-   */
-  public async getPagoPaNoticeEmail(
-    user: User
-  ): Promise<Either<Error, EmailString>> {
-    return pipe(
-      TE.tryCatch(
-        () =>
-          this.redisClientSelector
-            .selectOne(RedisClientMode.FAST)
-            .get(`${noticeEmailPrefix}${user.session_token}`),
-        E.toError
-      ),
-      TE.chain((maybeEmail) =>
-        pipe(
-          O.fromNullable(maybeEmail),
-          TE.fromOption(() => new Error("Notify email value not found")),
-          TE.chain(
-            flow(
-              EmailString.decode,
-              TE.fromEither,
-              TE.mapLeft(
-                (validationErrors) =>
-                  new Error(
-                    errorsToReadableMessages(validationErrors).join("/")
-                  )
-              )
-            )
-          )
-        )
-      )
     )();
   }
 
@@ -749,57 +583,6 @@ export default class RedisSessionStorage
   /**
    * {@inheritDoc}
    */
-  public async setLollipopDataForUser(
-    user: UserV5,
-    data: LollipopData,
-    expireAssertionRefSec: Second = this.defaultDurationAssertionRefSec
-  ) {
-    return pipe(
-      TE.tryCatch(
-        () =>
-          this.redisClientSelector
-            .selectOne(RedisClientMode.FAST)
-            .setEx(
-              `${lollipopDataPrefix}${user.fiscal_code}`,
-              expireAssertionRefSec,
-              LollipopDataFromString.encode(data)
-            ),
-        E.toError
-      ),
-      this.singleStringReplyAsync,
-      this.falsyResponseToErrorAsync(new Error("Error setting user key"))
-    )();
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  // eslint-disable-next-line @typescript-eslint/member-ordering
-  public async setLollipopAssertionRefForUser(
-    user: UserV5,
-    assertionRef: BackendAssertionRef,
-    expireAssertionRefSec: Second = this.defaultDurationAssertionRefSec
-  ) {
-    return pipe(
-      TE.tryCatch(
-        () =>
-          this.redisClientSelector
-            .selectOne(RedisClientMode.FAST)
-            .setEx(
-              `${lollipopDataPrefix}${user.fiscal_code}`,
-              expireAssertionRefSec,
-              assertionRef
-            ),
-        E.toError
-      ),
-      this.singleStringReplyAsync,
-      this.falsyResponseToErrorAsync(new Error("Error setting user key"))
-    )();
-  }
-
-  /**
-   * {@inheritDoc}
-   */
   public async delLollipopDataForUser(fiscalCode: FiscalCode) {
     return pipe(
       TE.tryCatch(
@@ -832,37 +615,6 @@ export default class RedisSessionStorage
       ),
       A.sequence(TE.ApplicativePar)
     );
-  }
-
-  private sIsMember(key: string, member: string) {
-    const redis_client = this.redisClientSelector.selectOne(
-      RedisClientMode.FAST
-    );
-    return redis_client.sIsMember.bind(redis_client)(key, member);
-  }
-
-  private ttl(key: string) {
-    const redis_client = this.redisClientSelector.selectOne(
-      RedisClientMode.FAST
-    );
-    return redis_client.ttl.bind(redis_client)(key);
-  }
-
-  /**
-   * Return the session token remaining time to live in seconds
-   *
-   * @param token
-   */
-  private async getSessionTtl(
-    token: SessionToken
-  ): Promise<Either<Error, number>> {
-    // Returns the key ttl in seconds
-    // -2 if the key doesn't exist or -1 if the key has no expire
-    // @see https://redis.io/commands/ttl
-    return TE.tryCatch(
-      () => this.ttl(`${sessionKeyPrefix}${token}`),
-      E.toError
-    )();
   }
 
   /**

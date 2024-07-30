@@ -80,12 +80,6 @@ export const CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS: number = parseInt(
   10
 );
 
-// LolliPoP protocol configuration params
-export const DEFAULT_LOLLIPOP_ASSERTION_REF_DURATION = (3600 *
-  24 *
-  365 *
-  2) as Second; // 2y default assertionRef duration on redis cache
-
 // IP(s) or CIDR(s) allowed for notification
 export const ALLOW_NOTIFY_IP_SOURCE_RANGE = pipe(
   process.env.ALLOW_NOTIFY_IP_SOURCE_RANGE,

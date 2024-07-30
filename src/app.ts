@@ -33,7 +33,6 @@ import {
   BONUS_API_CLIENT,
   CGN_API_CLIENT,
   CGN_OPERATOR_SEARCH_API_CLIENT,
-  DEFAULT_LOLLIPOP_ASSERTION_REF_DURATION,
   ENV,
   EUCOVIDCERT_API_CLIENT,
   FF_BONUS_ENABLED,
@@ -201,10 +200,7 @@ export async function newApp({
   );
 
   // Create the Session Storage service
-  const SESSION_STORAGE = new RedisSessionStorage(
-    REDIS_CLIENT_SELECTOR,
-    DEFAULT_LOLLIPOP_ASSERTION_REF_DURATION
-  );
+  const SESSION_STORAGE = new RedisSessionStorage(REDIS_CLIENT_SELECTOR);
   // Setup Passport.
   // Add the strategy to authenticate proxy clients.
   passport.use(

@@ -20,7 +20,6 @@ import {
   mockWalletToken,
 } from "../../__mocks__/user_mock";
 import { MessageSubject } from "../../../generated/notifications/MessageSubject";
-import { Second } from "@pagopa/ts-commons/lib/units";
 import { mockRedisClientSelector } from "../../__mocks__/redis";
 
 const aTimestamp = 1518010929530;
@@ -108,11 +107,7 @@ const badRequestErrorResponse = {
 jest.mock("../../services/notificationService");
 jest.mock("../../services/redisSessionStorage");
 
-const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
-const redisSessionStorage = new RedisSessionStorage(
-  mockRedisClientSelector,
-  aDefaultLollipopAssertionRefDurationSec
-);
+const redisSessionStorage = new RedisSessionStorage(mockRedisClientSelector);
 
 const mockUserHasActiveSessionsOrLV =
   (redisSessionStorage.userHasActiveSessionsOrLV = jest.fn());

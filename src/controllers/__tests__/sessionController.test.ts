@@ -6,7 +6,6 @@ import RedisSessionStorage from "../../services/redisSessionStorage";
 import { mockedUser } from "../../__mocks__/user_mock";
 import SessionController from "../sessionController";
 import * as E from "fp-ts/lib/Either";
-import { Second } from "@pagopa/ts-commons/lib/units";
 import {
   mockExists,
   mockGet,
@@ -15,16 +14,12 @@ import {
   mockSrem,
 } from "../../__mocks__/redis";
 
-const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
 mockSmembers.mockImplementation((_) =>
   Promise.resolve([`SESSIONINFO-${mockedUser.session_token}`])
 );
 
 const controller = new SessionController(
-  new RedisSessionStorage(
-    mockRedisClientSelector,
-    aDefaultLollipopAssertionRefDurationSec
-  )
+  new RedisSessionStorage(mockRedisClientSelector)
 );
 
 const res = mockRes();
