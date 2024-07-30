@@ -17,10 +17,6 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-const mockTelemetryClient = {
-  trackEvent: jest.fn(),
-} as unknown as appInsights.TelemetryClient;
-
 const service = new LollipopService("", "");
 
 describe("LollipopService#revokePreviousAssertionRef", () => {
@@ -32,8 +28,6 @@ describe("LollipopService#revokePreviousAssertionRef", () => {
     const expectedMessage: RevokeAssertionRefInfo = {
       assertion_ref: anAssertionRef,
     };
-
-    expect(mockTelemetryClient.trackEvent).not.toHaveBeenCalled();
 
     mockSendMessage.mockResolvedValueOnce("any");
     const response = await service.revokePreviousAssertionRef(anAssertionRef);
@@ -50,8 +44,6 @@ describe("LollipopService#revokePreviousAssertionRef", () => {
     const expectedMessage: RevokeAssertionRefInfo = {
       assertion_ref: anAssertionRef,
     };
-
-    expect(mockTelemetryClient.trackEvent).not.toHaveBeenCalled();
 
     mockSendMessage.mockRejectedValueOnce(new Error("Error"));
     await expect(
