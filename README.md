@@ -48,7 +48,7 @@ This project is part of the Italian Digital Citizenship initiative, see the
 
 The `io-app` application will authenticate using the APIs exposed by the service `Session Manager` in [IO Auth monorepo](https://github.com/pagopa/io-auth-n-identity-domain).
 
-Once the token is obtained can be used to call autenthicated APIs of this repository.
+Once the token is obtained it can be used to call authenticated APIs of this repository.
 
 ### Token authentication
 
