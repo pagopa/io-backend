@@ -17,7 +17,7 @@ export type StrategyDoneFunction = (
 /**
  * This method invokes Passport Strategy done function
  * with proper parameters depending on the response of
- * methods getBySessionToken or getByWalletToken.
+ * methods getBySessionToken.
  */
 export function fulfill(
   errorOrUser: Either<Error, Option<User>>,
