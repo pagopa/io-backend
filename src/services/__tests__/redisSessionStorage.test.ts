@@ -17,7 +17,7 @@ import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SessionInfo } from "../../../generated/backend/SessionInfo";
 import { SessionsList } from "../../../generated/backend/SessionsList";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
-import { MyPortalToken, SessionToken, WalletToken } from "../../types/token";
+import { MyPortalToken, SessionToken } from "../../types/token";
 import { User, UserV5 } from "../../types/user";
 import RedisSessionStorage from "../redisSessionStorage";
 import {
