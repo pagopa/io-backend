@@ -8,7 +8,7 @@ import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { AssertionRef as BackendAssertionRef } from "../../generated/backend/AssertionRef";
-import { MyPortalToken, SessionToken, WalletToken } from "../types/token";
+import { MyPortalToken, SessionToken } from "../types/token";
 import { User } from "../types/user";
 import { LollipopData } from "../types/assertionRef";
 import { ActiveSessionInfo } from "../utils/fastLogin";
