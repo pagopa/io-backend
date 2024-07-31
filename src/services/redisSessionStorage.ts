@@ -97,29 +97,6 @@ export default class RedisSessionStorage
   /**
    * {@inheritDoc}
    */
-  public async getByWalletToken(
-    token: WalletToken
-  ): Promise<Either<Error, Option<User>>> {
-    const errorOrSession = await this.loadSessionByToken(
-      walletKeyPrefix,
-      token
-    );
-
-    if (E.isLeft(errorOrSession)) {
-      if (errorOrSession.left === sessionNotFoundError) {
-        return E.right(O.none);
-      }
-      return E.left(errorOrSession.left);
-    }
-
-    const user = errorOrSession.right;
-
-    return E.right(O.some(user));
-  }
-
-  /**
-   * {@inheritDoc}
-   */
   public async getByMyPortalToken(
     token: MyPortalToken
   ): Promise<Either<Error, Option<User>>> {

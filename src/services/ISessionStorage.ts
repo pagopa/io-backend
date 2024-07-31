@@ -22,13 +22,6 @@ export interface ISessionStorage {
   ) => Promise<Either<Error, Option<User>>>;
 
   /**
-   * Retrieves a value from the cache using the wallet token.
-   */
-  readonly getByWalletToken: (
-    token: WalletToken
-  ) => Promise<Either<Error, Option<User>>>;
-
-  /**
    * Retrieves a value from the cache using the myportal token.
    */
   readonly getByMyPortalToken: (

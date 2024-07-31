@@ -118,7 +118,6 @@ microservice-chart:
     API_KEY: 'funcapp-KEY-APPBACKEND'
     BONUS_API_KEY: 'funcbonus-KEY-APPBACKEND'
     CGN_API_KEY: 'funccgn-KEY-APPBACKEND'
-    IOLOGIN_TEST_USERS: 'appbackend-IOLOGIN-TEST-USERS'
     IO_SIGN_API_KEY: 'funciosign-KEY-APPBACKEND'
     CGN_OPERATOR_SEARCH_API_KEY: 'funccgnoperatorsearch-KEY-PROD-APPBACKEND'
     EUCOVIDCERT_API_KEY: 'funceucovidcert-KEY-APPBACKEND'
