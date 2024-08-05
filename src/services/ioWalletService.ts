@@ -39,6 +39,10 @@ import { WalletAttestationView } from "../../generated/io-wallet-api/WalletAttes
 const unprocessableContentError = "Unprocessable Content";
 const invalidRequest = "Your request didn't validate";
 
+// TODO SIW-1482
+const conflictErrorTitle = "Conflict";
+const conflictErrorDetail = "There has been a conflict";
+
 export default class IoWalletService {
   constructor(
     private readonly ioWalletApiClient: ReturnType<IoWalletAPIClient>,
@@ -127,6 +131,12 @@ export default class IoWalletService {
         switch (response.status) {
           case 204:
             return ResponseSuccessNoContent();
+          case 409:
+            return ResponseErrorGeneric(
+              response.status,
+              conflictErrorTitle,
+              conflictErrorDetail
+            );
           case 422:
             return ResponseErrorGeneric(
               response.status,
@@ -177,6 +187,12 @@ export default class IoWalletService {
             return ResponseErrorNotFound(
               "Not Found",
               "Wallet instance not found"
+            );
+          case 409:
+            return ResponseErrorGeneric(
+              response.status,
+              conflictErrorTitle,
+              conflictErrorDetail
             );
           case 422:
             return ResponseErrorGeneric(
