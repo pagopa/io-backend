@@ -1,0 +1,49 @@
+<!--
+    IMPORTANT:
+    - Policy elements can appear only within the <inbound>, <outbound>, <backend> section elements.
+    - To apply a policy to the incoming request (before it is forwarded to the backend service), place a corresponding policy element within the <inbound> section element.
+    - To apply a policy to the outgoing response (before it is sent back to the caller), place a corresponding policy element within the <outbound> section element.
+    - To add a policy, place the cursor at the desired insertion point and select a policy from the sidebar.
+    - To remove a policy, delete the corresponding policy statement from the policy document.
+    - Position the <base> element within a section element to inherit all policies from the corresponding section element in the enclosing scope.
+    - Remove the <base> element to prevent inheriting policies from the corresponding section element in the enclosing scope.
+    - Policies are applied in the order of their appearance, from the top down.
+    - Comments within policy elements are not supported and may disappear. Place your comments between policy elements or at a higher level scope.
+-->
+<policies>
+    <inbound>
+        <base />
+        <!-- https://docs.microsoft.com/en-us/dotnet/api/system.random.next?view=net-6.0#system-random-next(system-int32-system-int32) -->
+        <set-variable name="urlId" value="@{
+            Random rnd = new Random();
+            int urlId = rnd.Next(1, 3);
+            return urlId.ToString();
+        }" />
+        <choose>
+            <when condition="@(context.Variables.GetValueOrDefault<string>("urlId").Equals("1"))">
+                <set-backend-service base-url="https://io-p-app-appbackendl1.azurewebsites.net" />
+            </when>
+            <when condition="@(context.Variables.GetValueOrDefault<string>("urlId").Equals("2"))">
+                <set-backend-service base-url="https://io-p-app-appbackendl2.azurewebsites.net" />
+            </when>
+            <otherwise>
+                <return-response>
+                    <set-status code="500" reason="InternalServerError" />
+                    <set-header name="Microsoft-Azure-Api-Management-Correlation-Id" exists-action="override">
+                        <value>@{return Guid.NewGuid().ToString();}</value>
+                    </set-header>
+                    <set-body>A gateway-related error occurred while processing the request.</set-body>
+                </return-response>
+            </otherwise>
+        </choose>
+    </inbound>
+    <outbound>
+        <base />
+    </outbound>
+    <backend>
+        <base />
+    </backend>
+    <on-error>
+        <base />
+    </on-error>
+</policies>
