@@ -637,7 +637,7 @@ export const TRIAL_SYSTEM_API_BASE_PATH = getRequiredENVVar(
   "TRIAL_SYSTEM_API_BASE_PATH"
 );
 export const TRIAL_SYSTEM_API_KEY = getRequiredENVVar("TRIAL_SYSTEM_APIM_KEY");
-export const TRIAL_SYSTEM_API_URL = getRequiredENVVar("TRIAL_SYSTEM_API_URL");
+export const TRIAL_SYSTEM_API_URL = getRequiredENVVar("TRIAL_SYSTEM_APIM_URL");
 
 export const TRIAL_SYSTEM_CLIENT = TrialSystemAPIClient(
   TRIAL_SYSTEM_API_KEY,

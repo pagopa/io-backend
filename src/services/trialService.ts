@@ -69,7 +69,7 @@ export default class TrialService {
               (resBody) =>
                 ResponseSuccessRedirectToResource(
                   resBody,
-                  `/manage/api/v1/trials/${trialId}/subscriptions`,
+                  `/api/v1/trials/${trialId}/subscriptions`,
                   resBody
                 )
             );
