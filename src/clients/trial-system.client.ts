@@ -8,7 +8,7 @@ export function TrialSystemAPIClient(
   fetchApi: typeof fetch = nodeFetch as any as typeof fetch
 ): Client<"ApiKeyAuth"> {
   return createClient<"ApiKeyAuth">({
-    basePath: "",
+    basePath: "/manage/api/v1",
     baseUrl,
     fetchApi,
     withDefaults: (op) => (params) =>
