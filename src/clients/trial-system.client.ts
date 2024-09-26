@@ -4,11 +4,12 @@ import { Client, createClient } from "../../generated/trial-system-api/client";
 export function TrialSystemAPIClient(
   token: string,
   baseUrl: string,
+  basePath: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fetchApi: typeof fetch = nodeFetch as any as typeof fetch
 ): Client<"ApiKeyAuth"> {
   return createClient<"ApiKeyAuth">({
-    basePath: "/manage/api/v1",
+    basePath,
     baseUrl,
     fetchApi,
     withDefaults: (op) => (params) =>
