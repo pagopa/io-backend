@@ -20,6 +20,8 @@ paths:
                 $ref: "#/components/schemas/NonceDetailView"
         "500":
           $ref: "#/components/responses/Unexpected"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
 
   /wallet-instances:
     post:
@@ -44,6 +46,8 @@ paths:
           $ref: "#/components/responses/UnprocessableContent"
         "500":
           $ref: "#/components/responses/Unexpected"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
 
   /token:
     description: This is a token endpoint (as defined in RFC 7523 section 4)
@@ -68,13 +72,38 @@ paths:
         "403":
           $ref: "#/components/responses/Forbidden"
         "404":
-          $ref: "#/components/responses/Forbidden"
+          $ref: "#/components/responses/NotFound"
         "409":
           $ref: "#/components/responses/Conflict"
         "422":
           $ref: "#/components/responses/UnprocessableContent"
         "500":
           $ref: "#/components/responses/Unexpected"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /wallet-instances/current/status:
+    put:
+      summary: Revoke current Wallet Instance
+      operationId: setCurrentWalletInstanceStatus
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetCurrentWalletInstanceStatusBody"
+      responses:
+        "204":
+          description: Wallet Instance status successfully set
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "422":
+          $ref: "#/components/responses/UnprocessableContent"
+        "500":
+          $ref: "#/components/responses/Unexpected"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
 
 components:
   securitySchemes:
@@ -121,6 +150,13 @@ components:
 
     Unexpected:
       description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetail"
+
+    ServiceUnavailable:
+      description: Service Unavailable
       content:
         application/json:
           schema:
@@ -178,6 +214,16 @@ components:
       required:
         - grant_type
         - assertion
+
+    SetCurrentWalletInstanceStatusBody:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: ["REVOKED"]
+      required:
+        - status
+
         
     ProblemDetail:
       type: object

@@ -1,3 +1,5 @@
+/* eslint-disable sonarjs/no-identical-functions */
+// TODO SIW-1706
 /**
  * This controller handles the IO_WALLET requests from the
  * app by forwarding the call to the API system.
@@ -14,6 +16,7 @@ import {
   IResponseErrorGeneric,
   IResponseErrorInternal,
   IResponseErrorNotFound,
+  IResponseErrorServiceUnavailable,
   IResponseErrorValidation,
   IResponseSuccessJson,
   IResponseSuccessNoContent,
@@ -21,6 +24,7 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 
 import { pipe } from "fp-ts/lib/function";
+import { Errors } from "io-ts";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { UserDetailView } from "../../generated/io-wallet-api/UserDetailView";
@@ -32,10 +36,17 @@ import { CreateWalletInstanceBody } from "../../generated/io-wallet-api/CreateWa
 import { CreateWalletAttestationBody } from "../../generated/io-wallet-api/CreateWalletAttestationBody";
 import { WalletAttestationView } from "../../generated/io-wallet-api/WalletAttestationView";
 import { FF_IO_WALLET_TRIAL_ENABLED } from "../config";
+import { SetCurrentWalletInstanceStatusBody } from "../../generated/io-wallet/SetCurrentWalletInstanceStatusBody";
 
 const toErrorRetrievingTheUserId = ResponseErrorInternal(
   "Error retrieving the user id"
 );
+
+const toValidationError = (errors: Errors) =>
+  ResponseErrorInternal(
+    // TODO SIW-1706 replace with ResponseErrorValidation
+    `Error validating the request body: ${readableReport(errors)}`
+  );
 
 export default class IoWalletController {
   constructor(private readonly ioWalletService: IoWalletService) {}
@@ -44,7 +55,9 @@ export default class IoWalletController {
    * Get nonce
    */
   public readonly getNonce = (): Promise<
-    IResponseErrorInternal | IResponseSuccessJson<NonceDetailView>
+    | IResponseErrorInternal
+    | IResponseSuccessJson<NonceDetailView>
+    | IResponseErrorServiceUnavailable
   > => this.ioWalletService.getNonce();
 
   /**
@@ -58,6 +71,7 @@ export default class IoWalletController {
     | IResponseErrorValidation
     | IResponseSuccessNoContent
     | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorServiceUnavailable
   > =>
     withUserFromRequest(req, async (user) =>
       pipe(
@@ -65,11 +79,7 @@ export default class IoWalletController {
           body: pipe(
             req.body,
             CreateWalletInstanceBody.decode,
-            E.mapLeft((errors) =>
-              ResponseErrorInternal(
-                `Error validating the request body: ${readableReport(errors)}`
-              )
-            ),
+            E.mapLeft(toValidationError),
             TE.fromEither
           ),
           userId: this.getAllowedUserId(user.fiscal_code),
@@ -102,6 +112,7 @@ export default class IoWalletController {
     | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessJson<WalletAttestationView>
     | IResponseErrorNotFound
+    | IResponseErrorServiceUnavailable
   > =>
     withUserFromRequest(req, async (user) =>
       pipe(
@@ -109,9 +120,7 @@ export default class IoWalletController {
           body: pipe(
             req.body,
             CreateWalletAttestationBody.decode,
-            E.mapLeft(() =>
-              ResponseErrorInternal("Error validating the request body")
-            ),
+            E.mapLeft(toValidationError),
             TE.fromEither
           ),
           userId: this.getAllowedUserId(user.fiscal_code),
@@ -121,6 +130,40 @@ export default class IoWalletController {
             assertion,
             grant_type,
             userId
+          )
+        ),
+        TE.toUnion
+      )()
+    );
+
+  /**
+   * Update current Wallet Instance status.
+   */
+  public readonly setCurrentWalletInstanceStatus = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorGeneric
+    | IResponseSuccessNoContent
+    | IResponseErrorServiceUnavailable
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+  > =>
+    withUserFromRequest(req, async (user) =>
+      pipe(
+        this.ensureFiscalCodeIsAllowed(user.fiscal_code),
+        TE.chainW(() =>
+          pipe(
+            req.body,
+            SetCurrentWalletInstanceStatusBody.decode,
+            E.mapLeft(toValidationError),
+            TE.fromEither
+          )
+        ),
+        TE.map(({ status }) =>
+          this.ioWalletService.setCurrentWalletInstanceStatus(
+            status,
+            user.fiscal_code
           )
         ),
         TE.toUnion
@@ -163,6 +206,20 @@ export default class IoWalletController {
           )
         )
       : TE.right(undefined);
+
+  // TODO SIW-1706
+  private readonly ensureFiscalCodeIsAllowed = (fiscalCode: FiscalCode) =>
+    pipe(
+      fiscalCode,
+      NonEmptyString.decode,
+      TE.fromEither,
+      TE.chainW(this.ensureUserIsAllowed),
+      TE.mapLeft(() =>
+        getResponseErrorForbiddenNotAuthorized(
+          "Not authorized to perform this action"
+        )
+      )
+    );
 
   private readonly getAllowedUserId = (fiscalCode: FiscalCode) =>
     pipe(

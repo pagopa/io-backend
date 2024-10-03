@@ -9,11 +9,13 @@ import {
   IResponseErrorGeneric,
   IResponseErrorInternal,
   IResponseErrorNotFound,
+  IResponseErrorServiceUnavailable,
   IResponseSuccessJson,
   IResponseSuccessNoContent,
   ResponseErrorGeneric,
   ResponseErrorInternal,
   ResponseErrorNotFound,
+  ResponseErrorServiceTemporarilyUnavailable,
   ResponseSuccessJson,
   ResponseSuccessNoContent,
 } from "@pagopa/ts-commons/lib/responses";
@@ -35,6 +37,7 @@ import { IO_WALLET_TRIAL_ID } from "../config";
 import { TrialSystemAPIClient } from "../clients/trial-system.client";
 import { Subscription } from "../../generated/trial-system-api/Subscription";
 import { WalletAttestationView } from "../../generated/io-wallet-api/WalletAttestationView";
+import { SetWalletInstanceStatusWithFiscalCodeData } from "../../generated/io-wallet-api/SetWalletInstanceStatusWithFiscalCodeData";
 
 const unprocessableContentError = "Unprocessable Content";
 const invalidRequest = "Your request didn't validate";
@@ -42,6 +45,8 @@ const invalidRequest = "Your request didn't validate";
 // TODO SIW-1482
 const conflictErrorTitle = "Conflict";
 const conflictErrorDetail = "There has been a conflict";
+
+const serviceUnavailableDetail = "Service Unavailable. Please try again later";
 
 export default class IoWalletService {
   constructor(
@@ -60,6 +65,7 @@ export default class IoWalletService {
     | IResponseErrorInternal
     | IResponseErrorGeneric
     | IResponseSuccessJson<UserDetailView>
+    | IResponseErrorServiceUnavailable
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.ioWalletApiClient.getUserByFiscalCode({
@@ -79,6 +85,11 @@ export default class IoWalletService {
             return ResponseErrorInternal(
               `Internal server error | ${response.value}`
             );
+          case 503:
+            return ResponseErrorServiceTemporarilyUnavailable(
+              serviceUnavailableDetail,
+              "10"
+            );
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
@@ -89,7 +100,9 @@ export default class IoWalletService {
    * Get a nonce.
    */
   public readonly getNonce = (): Promise<
-    IResponseErrorInternal | IResponseSuccessJson<NonceDetailView>
+    | IResponseErrorInternal
+    | IResponseSuccessJson<NonceDetailView>
+    | IResponseErrorServiceUnavailable
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.ioWalletApiClient.getNonce({});
@@ -100,6 +113,11 @@ export default class IoWalletService {
           case 500:
             return ResponseErrorInternal(
               `Internal server error | ${response.value}`
+            );
+          case 503:
+            return ResponseErrorServiceTemporarilyUnavailable(
+              serviceUnavailableDetail,
+              "10"
             );
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
@@ -116,7 +134,10 @@ export default class IoWalletService {
     key_attestation: NonEmptyString,
     userId: Id
   ): Promise<
-    IResponseErrorInternal | IResponseErrorGeneric | IResponseSuccessNoContent
+    | IResponseErrorInternal
+    | IResponseErrorGeneric
+    | IResponseSuccessNoContent
+    | IResponseErrorServiceUnavailable
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.ioWalletApiClient.createWalletInstance({
@@ -147,6 +168,11 @@ export default class IoWalletService {
             return ResponseErrorInternal(
               `Internal server error | ${response.value}`
             );
+          case 503:
+            return ResponseErrorServiceTemporarilyUnavailable(
+              serviceUnavailableDetail,
+              "10"
+            );
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
@@ -166,6 +192,7 @@ export default class IoWalletService {
     | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorNotFound
     | IResponseSuccessJson<WalletAttestationView>
+    | IResponseErrorServiceUnavailable
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.ioWalletApiClient.createWalletAttestation({
@@ -203,6 +230,53 @@ export default class IoWalletService {
           case 500:
             return ResponseErrorInternal(
               `Internal server error | ${response.value}`
+            );
+          case 503:
+            return ResponseErrorServiceTemporarilyUnavailable(
+              serviceUnavailableDetail,
+              "10"
+            );
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
+  /**
+   * Update current Wallet Instance status.
+   */
+  public readonly setCurrentWalletInstanceStatus = (
+    status: SetWalletInstanceStatusWithFiscalCodeData["status"],
+    fiscal_code: SetWalletInstanceStatusWithFiscalCodeData["fiscal_code"]
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorGeneric
+    | IResponseSuccessNoContent
+    | IResponseErrorServiceUnavailable
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated =
+        await this.ioWalletApiClient.setCurrentWalletInstanceStatus({
+          body: { fiscal_code, status },
+        });
+      return withValidatedOrInternalError(validated, (response) => {
+        switch (response.status) {
+          case 204:
+            return ResponseSuccessNoContent();
+          case 422:
+            return ResponseErrorGeneric(
+              response.status,
+              unprocessableContentError,
+              invalidRequest
+            );
+          case 500:
+            return ResponseErrorInternal(
+              `Internal server error | ${response.value}`
+            );
+          case 503:
+            return ResponseErrorServiceTemporarilyUnavailable(
+              serviceUnavailableDetail,
+              "10"
             );
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
