@@ -1,3 +1,5 @@
+/* eslint-disable sonarjs/no-identical-functions */
+// TODO SIW-1706
 /**
  * This controller handles the IO_WALLET requests from the
  * app by forwarding the call to the API system.
@@ -34,12 +36,54 @@ import { CreateWalletAttestationBody } from "../../generated/io-wallet-api/Creat
 import { WalletAttestationView } from "../../generated/io-wallet-api/WalletAttestationView";
 import { FF_IO_WALLET_TRIAL_ENABLED } from "../config";
 import { SetCurrentWalletInstanceStatusBody } from "../../generated/io-wallet/SetCurrentWalletInstanceStatusBody";
+import { Errors } from "io-ts";
 
 const toErrorRetrievingTheUserId = ResponseErrorInternal(
   "Error retrieving the user id"
 );
 
+const toValidationError = (errors: Errors) =>
+  ResponseErrorInternal(
+    `Error validating the request body: ${readableReport(errors)}`
+  );
+
 export default class IoWalletController {
+  private readonly ensureUserIsAllowed = (
+    userId: NonEmptyString
+  ): TE.TaskEither<Error, void> =>
+    FF_IO_WALLET_TRIAL_ENABLED
+      ? pipe(
+          TE.tryCatch(
+            () => this.ioWalletService.getSubscription(userId),
+            E.toError
+          ),
+          // if a successful response with state != "ACTIVE" or an error is returned, return left
+          TE.chain((response) =>
+            response.kind === "IResponseSuccessJson" &&
+            response.value.state === "ACTIVE"
+              ? TE.right(undefined)
+              : TE.left(new Error())
+          )
+        )
+      : TE.right(undefined);
+
+  // TODO SIW-1706
+  private readonly ensureFiscalCodeIsAllowed: (
+    fiscalCode: FiscalCode
+  ) => TE.TaskEither<
+    IResponseErrorInternal | IResponseErrorForbiddenNotAuthorized,
+    void
+  > = flow(
+    NonEmptyString.decode,
+    TE.fromEither,
+    TE.chainW(this.ensureUserIsAllowed),
+    TE.mapLeft(() =>
+      getResponseErrorForbiddenNotAuthorized(
+        "Not authorized to perform this action"
+      )
+    )
+  );
+
   constructor(private readonly ioWalletService: IoWalletService) {}
 
   /**
@@ -70,11 +114,7 @@ export default class IoWalletController {
           body: pipe(
             req.body,
             CreateWalletInstanceBody.decode,
-            E.mapLeft((errors) =>
-              ResponseErrorInternal(
-                `Error validating the request body: ${readableReport(errors)}`
-              )
-            ),
+            E.mapLeft(toValidationError),
             TE.fromEither
           ),
           userId: this.getAllowedUserId(user.fiscal_code),
@@ -115,9 +155,7 @@ export default class IoWalletController {
           body: pipe(
             req.body,
             CreateWalletAttestationBody.decode,
-            E.mapLeft(() =>
-              ResponseErrorInternal("Error validating the request body")
-            ),
+            E.mapLeft(toValidationError),
             TE.fromEither
           ),
           userId: this.getAllowedUserId(user.fiscal_code),
@@ -152,11 +190,7 @@ export default class IoWalletController {
           body: pipe(
             req.body,
             SetCurrentWalletInstanceStatusBody.decode,
-            E.mapLeft((errors) =>
-              ResponseErrorInternal(
-                `Error validating the request body: ${readableReport(errors)}`
-              )
-            ),
+            E.mapLeft(toValidationError),
             TE.fromEither
           ),
           fiscalCode: this.ensureFiscalCodeIsAllowed(user.fiscal_code),
@@ -189,25 +223,6 @@ export default class IoWalletController {
       )
     );
 
-  private readonly ensureUserIsAllowed = (
-    userId: NonEmptyString
-  ): TE.TaskEither<Error, void> =>
-    FF_IO_WALLET_TRIAL_ENABLED
-      ? pipe(
-          TE.tryCatch(
-            () => this.ioWalletService.getSubscription(userId),
-            E.toError
-          ),
-          // if a successful response with state != "ACTIVE" or an error is returned, return left
-          TE.chain((response) =>
-            response.kind === "IResponseSuccessJson" &&
-            response.value.state === "ACTIVE"
-              ? TE.right(undefined)
-              : TE.left(new Error())
-          )
-        )
-      : TE.right(undefined);
-
   private readonly getAllowedUserId = (fiscalCode: FiscalCode) =>
     pipe(
       fiscalCode,
@@ -227,21 +242,4 @@ export default class IoWalletController {
       ),
       TE.map((response) => response.value.id)
     );
-
-  // TODO SIW-1706
-  private readonly ensureFiscalCodeIsAllowed: (
-    fiscalCode: FiscalCode
-  ) => TE.TaskEither<
-    IResponseErrorInternal | IResponseErrorForbiddenNotAuthorized,
-    void
-  > = flow(
-    NonEmptyString.decode,
-    TE.fromEither,
-    TE.chainW(this.ensureUserIsAllowed),
-    TE.mapLeft(() =>
-      getResponseErrorForbiddenNotAuthorized(
-        "Not authorized to perform this action"
-      )
-    )
-  );
 }

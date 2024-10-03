@@ -257,7 +257,7 @@ export default class IoWalletService {
     withCatchAsInternalError(async () => {
       const validated =
         await this.ioWalletApiClient.setCurrentWalletInstanceStatus({
-          body: { status, fiscal_code },
+          body: { fiscal_code, status },
         });
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
