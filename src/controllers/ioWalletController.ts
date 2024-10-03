@@ -44,6 +44,7 @@ const toErrorRetrievingTheUserId = ResponseErrorInternal(
 
 const toValidationError = (errors: Errors) =>
   ResponseErrorInternal(
+    // TODO SIW-1706 replace with ResponseErrorValidation
     `Error validating the request body: ${readableReport(errors)}`
   );
 
