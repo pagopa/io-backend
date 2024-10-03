@@ -93,6 +93,7 @@ export default class ServicesController {
   /**
    * Get visible services
    *
+   * @deprecated
    * @param _
    * @returns
    */

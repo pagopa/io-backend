@@ -941,7 +941,10 @@ function registerAPIRoutes(
   app.get(
     `${basePath}/services`,
     bearerSessionTokenAuth,
-    toExpressHandler(servicesController.getVisibleServices, servicesController)
+    toExpressHandler(
+      (_) => Promise.resolve(ResponseSuccessJson({ items: [] })),
+      servicesController
+    )
   );
 
   app.put(
