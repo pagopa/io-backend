@@ -82,6 +82,25 @@ paths:
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
 
+  /wallet-instances/current/status:
+    put:
+      summary: Revoke current Wallet Instance
+      operationId: setCurrentWalletInstanceStatus
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetCurrentWalletInstanceStatusBody"
+      responses:
+        "204":
+          description: Wallet Instance status successfully set
+        "422":
+          $ref: "#/components/responses/UnprocessableContent"
+        "500":
+          $ref: "#/components/responses/Unexpected"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
 components:
   securitySchemes:
     Bearer:
@@ -191,6 +210,10 @@ components:
       required:
         - grant_type
         - assertion
+
+    SetCurrentWalletInstanceStatusBody:
+      type: string
+      enum: ["REVOKED"]
         
     ProblemDetail:
       type: object
