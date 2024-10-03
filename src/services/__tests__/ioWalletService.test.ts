@@ -1,6 +1,6 @@
 import * as t from "io-ts";
 import IoWalletService from "../ioWalletService";
-import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { Grant_typeEnum } from "../../../generated/io-wallet-api/CreateWalletAttestationBody";
 import { TrialSystemAPIClient } from "../../clients/trial-system.client";
 import { SubscriptionStateEnum } from "../../../generated/trial-system-api/SubscriptionState";
@@ -89,93 +89,6 @@ const trialSystemApi = {
   createSubscription: mockCreateSubscription,
   getSubscription: mockGetSubscription,
 } as unknown as ReturnType<TrialSystemAPIClient>;
-
-const aFiscalCode = "GRBGPP87L04L741X" as FiscalCode;
-
-describe("IoWalletService#getUserByFiscalCode", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("should make the correct api call", async () => {
-    const service = new IoWalletService(api, trialSystemApi);
-
-    await service.getUserByFiscalCode(aFiscalCode);
-
-    expect(mockGetUserByFiscalCode).toHaveBeenCalledWith({
-      body: {
-        fiscal_code: aFiscalCode,
-      },
-    });
-  });
-
-  it("should handle a success response", async () => {
-    const service = new IoWalletService(api, trialSystemApi);
-
-    const res = await service.getUserByFiscalCode(aFiscalCode);
-
-    expect(res).toMatchObject({
-      kind: "IResponseSuccessJson",
-    });
-  });
-
-  it("should handle an internal error when the API client returns 422", async () => {
-    mockGetUserByFiscalCode.mockImplementationOnce(() =>
-      t.success({ status: 422 })
-    );
-
-    const service = new IoWalletService(api, trialSystemApi);
-
-    const res = await service.getUserByFiscalCode(aFiscalCode);
-
-    expect(res).toMatchObject({
-      kind: "IResponseErrorGeneric",
-    });
-  });
-
-  it("should handle an internal error when the API client returns 500", async () => {
-    const aGenericProblem = {};
-    mockGetUserByFiscalCode.mockImplementationOnce(() =>
-      t.success({ status: 500, value: aGenericProblem })
-    );
-
-    const service = new IoWalletService(api, trialSystemApi);
-
-    const res = await service.getUserByFiscalCode(aFiscalCode);
-
-    expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
-    });
-  });
-
-  it("should handle an internal error when the API client returns a code not specified in spec", async () => {
-    const aGenericProblem = {};
-    mockGetUserByFiscalCode.mockImplementationOnce(() =>
-      t.success({ status: 599, value: aGenericProblem })
-    );
-
-    const service = new IoWalletService(api, trialSystemApi);
-
-    const res = await service.getUserByFiscalCode(aFiscalCode);
-
-    expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
-    });
-  });
-
-  it("should return an error if the api call throws an error", async () => {
-    mockGetUserByFiscalCode.mockImplementationOnce(() => {
-      throw new Error();
-    });
-    const service = new IoWalletService(api, trialSystemApi);
-
-    const res = await service.getUserByFiscalCode(aFiscalCode);
-
-    expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
-    });
-  });
-});
 
 describe("IoWalletService#getNonce", () => {
   beforeEach(() => {

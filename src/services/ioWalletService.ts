@@ -18,8 +18,8 @@ import {
   ResponseSuccessNoContent,
 } from "@pagopa/ts-commons/lib/responses";
 
-import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { UserDetailView } from "generated/io-wallet-api/UserDetailView";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+
 import { NonceDetailView } from "generated/io-wallet-api/NonceDetailView";
 import { Id } from "generated/io-wallet-api/Id";
 import { Grant_typeEnum } from "generated/io-wallet-api/CreateWalletAttestationBody";
@@ -50,40 +50,6 @@ export default class IoWalletService {
       typeof TrialSystemAPIClient
     >
   ) {}
-
-  /**
-   * Get the Wallet User id.
-   */
-  public readonly getUserByFiscalCode = (
-    fiscalCode: FiscalCode
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorGeneric
-    | IResponseSuccessJson<UserDetailView>
-  > =>
-    withCatchAsInternalError(async () => {
-      const validated = await this.ioWalletApiClient.getUserByFiscalCode({
-        body: { fiscal_code: fiscalCode },
-      });
-      return withValidatedOrInternalError(validated, (response) => {
-        switch (response.status) {
-          case 200:
-            return ResponseSuccessJson(response.value);
-          case 422:
-            return ResponseErrorGeneric(
-              response.status,
-              unprocessableContentError,
-              invalidRequest
-            );
-          case 500:
-            return ResponseErrorInternal(
-              `Internal server error | ${response.value}`
-            );
-          default:
-            return ResponseErrorStatusNotDefinedInSpec(response);
-        }
-      });
-    });
 
   /**
    * Get a nonce.

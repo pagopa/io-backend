@@ -23,7 +23,6 @@ import {
 import { pipe } from "fp-ts/lib/function";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import { UserDetailView } from "../../generated/io-wallet-api/UserDetailView";
 import IoWalletService from "../services/ioWalletService";
 
 import { NonceDetailView } from "../../generated/io-wallet-api/NonceDetailView";
@@ -32,10 +31,6 @@ import { CreateWalletInstanceBody } from "../../generated/io-wallet-api/CreateWa
 import { CreateWalletAttestationBody } from "../../generated/io-wallet-api/CreateWalletAttestationBody";
 import { WalletAttestationView } from "../../generated/io-wallet-api/WalletAttestationView";
 import { FF_IO_WALLET_TRIAL_ENABLED } from "../config";
-
-const toErrorRetrievingTheUserId = ResponseErrorInternal(
-  "Error retrieving the user id"
-);
 
 export default class IoWalletController {
   constructor(private readonly ioWalletService: IoWalletService) {}
@@ -127,27 +122,9 @@ export default class IoWalletController {
       )()
     );
 
-  private readonly retrieveUserId = (fiscalCode: FiscalCode) =>
-    pipe(
-      TE.tryCatch(
-        () => this.ioWalletService.getUserByFiscalCode(fiscalCode),
-        E.toError
-      ),
-      TE.chain(
-        TE.fromPredicate(
-          (r): r is IResponseSuccessJson<UserDetailView> =>
-            r.kind === "IResponseSuccessJson",
-          (e) =>
-            new Error(
-              `An error occurred while retrieving the User id. | ${e.detail}`
-            )
-        )
-      )
-    );
-
   private readonly ensureUserIsAllowed = (
     userId: NonEmptyString
-  ): TE.TaskEither<Error, void> =>
+  ): TE.TaskEither<Error, NonEmptyString> =>
     FF_IO_WALLET_TRIAL_ENABLED
       ? pipe(
           TE.tryCatch(
@@ -158,13 +135,18 @@ export default class IoWalletController {
           TE.chain((response) =>
             response.kind === "IResponseSuccessJson" &&
             response.value.state === "ACTIVE"
-              ? TE.right(undefined)
+              ? TE.right(userId)
               : TE.left(new Error())
           )
         )
-      : TE.right(undefined);
+      : TE.right(userId);
 
-  private readonly getAllowedUserId = (fiscalCode: FiscalCode) =>
+  private readonly getAllowedUserId = (
+    fiscalCode: FiscalCode
+  ): TE.TaskEither<
+    IResponseErrorInternal | IResponseErrorForbiddenNotAuthorized,
+    NonEmptyString
+  > =>
     pipe(
       fiscalCode,
       NonEmptyString.decode,
@@ -174,13 +156,6 @@ export default class IoWalletController {
         getResponseErrorForbiddenNotAuthorized(
           "Not authorized to perform this action"
         )
-      ),
-      TE.chainW(() =>
-        pipe(
-          this.retrieveUserId(fiscalCode),
-          TE.mapLeft(() => toErrorRetrievingTheUserId)
-        )
-      ),
-      TE.map((response) => response.value.id)
+      )
     );
 }
