@@ -14,6 +14,7 @@ import {
   IResponseErrorGeneric,
   IResponseErrorInternal,
   IResponseErrorNotFound,
+  IResponseErrorServiceUnavailable,
   IResponseErrorValidation,
   IResponseSuccessJson,
   IResponseSuccessNoContent,
@@ -44,7 +45,9 @@ export default class IoWalletController {
    * Get nonce
    */
   public readonly getNonce = (): Promise<
-    IResponseErrorInternal | IResponseSuccessJson<NonceDetailView>
+    | IResponseErrorInternal
+    | IResponseSuccessJson<NonceDetailView>
+    | IResponseErrorServiceUnavailable
   > => this.ioWalletService.getNonce();
 
   /**
@@ -58,6 +61,7 @@ export default class IoWalletController {
     | IResponseErrorValidation
     | IResponseSuccessNoContent
     | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorServiceUnavailable
   > =>
     withUserFromRequest(req, async (user) =>
       pipe(
@@ -102,6 +106,7 @@ export default class IoWalletController {
     | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessJson<WalletAttestationView>
     | IResponseErrorNotFound
+    | IResponseErrorServiceUnavailable
   > =>
     withUserFromRequest(req, async (user) =>
       pipe(

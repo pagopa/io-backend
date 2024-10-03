@@ -9,11 +9,13 @@ import {
   IResponseErrorGeneric,
   IResponseErrorInternal,
   IResponseErrorNotFound,
+  IResponseErrorServiceUnavailable,
   IResponseSuccessJson,
   IResponseSuccessNoContent,
   ResponseErrorGeneric,
   ResponseErrorInternal,
   ResponseErrorNotFound,
+  ResponseErrorServiceTemporarilyUnavailable,
   ResponseSuccessJson,
   ResponseSuccessNoContent,
 } from "@pagopa/ts-commons/lib/responses";
@@ -43,6 +45,8 @@ const invalidRequest = "Your request didn't validate";
 const conflictErrorTitle = "Conflict";
 const conflictErrorDetail = "There has been a conflict";
 
+const serviceUnavailableDetail = "Service Unavailable. Please try again later";
+
 export default class IoWalletService {
   constructor(
     private readonly ioWalletApiClient: ReturnType<IoWalletAPIClient>,
@@ -60,6 +64,7 @@ export default class IoWalletService {
     | IResponseErrorInternal
     | IResponseErrorGeneric
     | IResponseSuccessJson<UserDetailView>
+    | IResponseErrorServiceUnavailable
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.ioWalletApiClient.getUserByFiscalCode({
@@ -79,6 +84,11 @@ export default class IoWalletService {
             return ResponseErrorInternal(
               `Internal server error | ${response.value}`
             );
+          case 503:
+            return ResponseErrorServiceTemporarilyUnavailable(
+              serviceUnavailableDetail,
+              "10"
+            );
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
@@ -89,7 +99,9 @@ export default class IoWalletService {
    * Get a nonce.
    */
   public readonly getNonce = (): Promise<
-    IResponseErrorInternal | IResponseSuccessJson<NonceDetailView>
+    | IResponseErrorInternal
+    | IResponseSuccessJson<NonceDetailView>
+    | IResponseErrorServiceUnavailable
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.ioWalletApiClient.getNonce({});
@@ -100,6 +112,11 @@ export default class IoWalletService {
           case 500:
             return ResponseErrorInternal(
               `Internal server error | ${response.value}`
+            );
+          case 503:
+            return ResponseErrorServiceTemporarilyUnavailable(
+              serviceUnavailableDetail,
+              "10"
             );
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
@@ -116,7 +133,10 @@ export default class IoWalletService {
     key_attestation: NonEmptyString,
     userId: Id
   ): Promise<
-    IResponseErrorInternal | IResponseErrorGeneric | IResponseSuccessNoContent
+    | IResponseErrorInternal
+    | IResponseErrorGeneric
+    | IResponseSuccessNoContent
+    | IResponseErrorServiceUnavailable
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.ioWalletApiClient.createWalletInstance({
@@ -147,6 +167,11 @@ export default class IoWalletService {
             return ResponseErrorInternal(
               `Internal server error | ${response.value}`
             );
+          case 503:
+            return ResponseErrorServiceTemporarilyUnavailable(
+              serviceUnavailableDetail,
+              "10"
+            );
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
@@ -166,6 +191,7 @@ export default class IoWalletService {
     | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorNotFound
     | IResponseSuccessJson<WalletAttestationView>
+    | IResponseErrorServiceUnavailable
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.ioWalletApiClient.createWalletAttestation({
@@ -203,6 +229,11 @@ export default class IoWalletService {
           case 500:
             return ResponseErrorInternal(
               `Internal server error | ${response.value}`
+            );
+          case 503:
+            return ResponseErrorServiceTemporarilyUnavailable(
+              serviceUnavailableDetail,
+              "10"
             );
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
