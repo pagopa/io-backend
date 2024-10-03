@@ -21,7 +21,7 @@ import {
   ResponseErrorInternal,
 } from "@pagopa/ts-commons/lib/responses";
 
-import { pipe } from "fp-ts/lib/function";
+import { flow, pipe } from "fp-ts/lib/function";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { UserDetailView } from "../../generated/io-wallet-api/UserDetailView";
@@ -33,6 +33,7 @@ import { CreateWalletInstanceBody } from "../../generated/io-wallet-api/CreateWa
 import { CreateWalletAttestationBody } from "../../generated/io-wallet-api/CreateWalletAttestationBody";
 import { WalletAttestationView } from "../../generated/io-wallet-api/WalletAttestationView";
 import { FF_IO_WALLET_TRIAL_ENABLED } from "../config";
+import { SetCurrentWalletInstanceStatusBody } from "../../generated/io-wallet/SetCurrentWalletInstanceStatusBody";
 
 const toErrorRetrievingTheUserId = ResponseErrorInternal(
   "Error retrieving the user id"
@@ -132,6 +133,44 @@ export default class IoWalletController {
       )()
     );
 
+  /**
+   * Update current Wallet Instance status.
+   */
+  public readonly setCurrentWalletInstanceStatus = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorGeneric
+    | IResponseSuccessNoContent
+    | IResponseErrorServiceUnavailable
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+  > =>
+    withUserFromRequest(req, async (user) =>
+      pipe(
+        sequenceS(TE.ApplyPar)({
+          body: pipe(
+            req.body,
+            SetCurrentWalletInstanceStatusBody.decode,
+            E.mapLeft((errors) =>
+              ResponseErrorInternal(
+                `Error validating the request body: ${readableReport(errors)}`
+              )
+            ),
+            TE.fromEither
+          ),
+          fiscalCode: this.ensureFiscalCodeIsAllowed(user.fiscal_code),
+        }),
+        TE.map(({ body: { status } }) =>
+          this.ioWalletService.setCurrentWalletInstanceStatus(
+            status,
+            user.fiscal_code
+          )
+        ),
+        TE.toUnion
+      )()
+    );
+
   private readonly retrieveUserId = (fiscalCode: FiscalCode) =>
     pipe(
       TE.tryCatch(
@@ -188,4 +227,21 @@ export default class IoWalletController {
       ),
       TE.map((response) => response.value.id)
     );
+
+  // TODO SIW-1706
+  private readonly ensureFiscalCodeIsAllowed: (
+    fiscalCode: FiscalCode
+  ) => TE.TaskEither<
+    IResponseErrorInternal | IResponseErrorForbiddenNotAuthorized,
+    void
+  > = flow(
+    NonEmptyString.decode,
+    TE.fromEither,
+    TE.chainW(this.ensureUserIsAllowed),
+    TE.mapLeft(() =>
+      getResponseErrorForbiddenNotAuthorized(
+        "Not authorized to perform this action"
+      )
+    )
+  );
 }

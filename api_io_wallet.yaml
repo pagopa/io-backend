@@ -72,7 +72,7 @@ paths:
         "403":
           $ref: "#/components/responses/Forbidden"
         "404":
-          $ref: "#/components/responses/Forbidden"
+          $ref: "#/components/responses/NotFound"
         "409":
           $ref: "#/components/responses/Conflict"
         "422":
@@ -94,6 +94,10 @@ paths:
       responses:
         "204":
           description: Wallet Instance status successfully set
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "422":
           $ref: "#/components/responses/UnprocessableContent"
         "500":
@@ -212,8 +216,14 @@ components:
         - assertion
 
     SetCurrentWalletInstanceStatusBody:
-      type: string
-      enum: ["REVOKED"]
+      type: object
+      properties:
+        status:
+          type: string
+          enum: ["REVOKED"]
+      required:
+        - status
+
         
     ProblemDetail:
       type: object
