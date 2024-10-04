@@ -21,9 +21,7 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { UserDetailView } from "generated/io-wallet-api/UserDetailView";
 import { NonceDetailView } from "generated/io-wallet-api/NonceDetailView";
-import { Id } from "generated/io-wallet-api/Id";
 import { Grant_typeEnum } from "generated/io-wallet-api/CreateWalletAttestationBody";
 import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
@@ -55,46 +53,6 @@ export default class IoWalletService {
       typeof TrialSystemAPIClient
     >
   ) {}
-
-  /**
-   * Get the Wallet User id.
-   */
-  public readonly getUserByFiscalCode = (
-    fiscalCode: FiscalCode
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorGeneric
-    | IResponseSuccessJson<UserDetailView>
-    | IResponseErrorServiceUnavailable
-  > =>
-    withCatchAsInternalError(async () => {
-      const validated = await this.ioWalletApiClient.getUserByFiscalCode({
-        body: { fiscal_code: fiscalCode },
-      });
-      return withValidatedOrInternalError(validated, (response) => {
-        switch (response.status) {
-          case 200:
-            return ResponseSuccessJson(response.value);
-          case 422:
-            return ResponseErrorGeneric(
-              response.status,
-              unprocessableContentError,
-              invalidRequest
-            );
-          case 500:
-            return ResponseErrorInternal(
-              `Internal server error | ${response.value}`
-            );
-          case 503:
-            return ResponseErrorServiceTemporarilyUnavailable(
-              serviceUnavailableDetail,
-              "10"
-            );
-          default:
-            return ResponseErrorStatusNotDefinedInSpec(response);
-        }
-      });
-    });
 
   /**
    * Get a nonce.
@@ -132,7 +90,7 @@ export default class IoWalletService {
     challenge: NonEmptyString,
     hardware_key_tag: NonEmptyString,
     key_attestation: NonEmptyString,
-    userId: Id
+    fiscal_code: FiscalCode // TODO
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorGeneric
@@ -145,8 +103,8 @@ export default class IoWalletService {
           challenge,
           hardware_key_tag,
           key_attestation,
+          fiscal_code,
         },
-        "x-iowallet-user-id": userId,
       });
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
@@ -185,7 +143,7 @@ export default class IoWalletService {
   public readonly createWalletAttestation = (
     assertion: NonEmptyString,
     grant_type: Grant_typeEnum,
-    userId: Id
+    fiscal_code: FiscalCode
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorGeneric
@@ -199,8 +157,8 @@ export default class IoWalletService {
         body: {
           assertion,
           grant_type,
+          fiscal_code,
         },
-        "x-iowallet-user-id": userId,
       });
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {

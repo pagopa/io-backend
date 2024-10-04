@@ -101,91 +101,6 @@ const trialSystemApi = {
 
 const aFiscalCode = "GRBGPP87L04L741X" as FiscalCode;
 
-describe("IoWalletService#getUserByFiscalCode", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("should make the correct api call", async () => {
-    const service = new IoWalletService(api, trialSystemApi);
-
-    await service.getUserByFiscalCode(aFiscalCode);
-
-    expect(mockGetUserByFiscalCode).toHaveBeenCalledWith({
-      body: {
-        fiscal_code: aFiscalCode,
-      },
-    });
-  });
-
-  it("should handle a success response", async () => {
-    const service = new IoWalletService(api, trialSystemApi);
-
-    const res = await service.getUserByFiscalCode(aFiscalCode);
-
-    expect(res).toMatchObject({
-      kind: "IResponseSuccessJson",
-    });
-  });
-
-  it("should handle an internal error when the API client returns 422", async () => {
-    mockGetUserByFiscalCode.mockImplementationOnce(() =>
-      t.success({ status: 422 })
-    );
-
-    const service = new IoWalletService(api, trialSystemApi);
-
-    const res = await service.getUserByFiscalCode(aFiscalCode);
-
-    expect(res).toMatchObject({
-      kind: "IResponseErrorGeneric",
-    });
-  });
-
-  it("should handle an internal error when the API client returns 500", async () => {
-    const aGenericProblem = {};
-    mockGetUserByFiscalCode.mockImplementationOnce(() =>
-      t.success({ status: 500, value: aGenericProblem })
-    );
-
-    const service = new IoWalletService(api, trialSystemApi);
-
-    const res = await service.getUserByFiscalCode(aFiscalCode);
-
-    expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
-    });
-  });
-
-  it("should handle an internal error when the API client returns a code not specified in spec", async () => {
-    const aGenericProblem = {};
-    mockGetUserByFiscalCode.mockImplementationOnce(() =>
-      t.success({ status: 599, value: aGenericProblem })
-    );
-
-    const service = new IoWalletService(api, trialSystemApi);
-
-    const res = await service.getUserByFiscalCode(aFiscalCode);
-
-    expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
-    });
-  });
-
-  it("should return an error if the api call throws an error", async () => {
-    mockGetUserByFiscalCode.mockImplementationOnce(() => {
-      throw new Error();
-    });
-    const service = new IoWalletService(api, trialSystemApi);
-
-    const res = await service.getUserByFiscalCode(aFiscalCode);
-
-    expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
-    });
-  });
-});
-
 describe("IoWalletService#getNonce", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -265,7 +180,7 @@ describe("IoWalletService#createWalletInstance", () => {
       "challenge" as NonEmptyString,
       "hardware_key_tag" as NonEmptyString,
       "key_attestation" as NonEmptyString,
-      "userId"
+      aFiscalCode
     );
 
     expect(mockCreateWalletInstance).toHaveBeenCalledWith({
@@ -285,7 +200,7 @@ describe("IoWalletService#createWalletInstance", () => {
       "challenge" as NonEmptyString,
       "hardware_key_tag" as NonEmptyString,
       "key_attestation" as NonEmptyString,
-      "userId"
+      aFiscalCode
     );
 
     expect(res).toMatchObject({
@@ -304,7 +219,7 @@ describe("IoWalletService#createWalletInstance", () => {
       "challenge" as NonEmptyString,
       "hardware_key_tag" as NonEmptyString,
       "key_attestation" as NonEmptyString,
-      "userId"
+      aFiscalCode
     );
 
     expect(res).toMatchObject({
@@ -324,7 +239,7 @@ describe("IoWalletService#createWalletInstance", () => {
       "challenge" as NonEmptyString,
       "hardware_key_tag" as NonEmptyString,
       "key_attestation" as NonEmptyString,
-      "userId"
+      aFiscalCode
     );
 
     expect(res).toMatchObject({
@@ -344,7 +259,7 @@ describe("IoWalletService#createWalletInstance", () => {
       "challenge" as NonEmptyString,
       "hardware_key_tag" as NonEmptyString,
       "key_attestation" as NonEmptyString,
-      "userId"
+      aFiscalCode
     );
 
     expect(res).toMatchObject({
@@ -362,7 +277,7 @@ describe("IoWalletService#createWalletInstance", () => {
       "challenge" as NonEmptyString,
       "hardware_key_tag" as NonEmptyString,
       "key_attestation" as NonEmptyString,
-      "userId"
+      aFiscalCode
     );
 
     expect(res).toMatchObject({
@@ -385,7 +300,7 @@ describe("IoWalletService#createWalletAttestation", () => {
     await service.createWalletAttestation(
       "assertion" as NonEmptyString,
       grant_type,
-      "userId"
+      aFiscalCode
     );
 
     expect(mockCreateWalletAttestation).toHaveBeenCalledWith({
@@ -403,7 +318,7 @@ describe("IoWalletService#createWalletAttestation", () => {
     const res = await service.createWalletAttestation(
       "assertion" as NonEmptyString,
       grant_type,
-      "userId"
+      aFiscalCode
     );
 
     expect(res).toMatchObject({
@@ -421,7 +336,7 @@ describe("IoWalletService#createWalletAttestation", () => {
     const res = await service.createWalletAttestation(
       "assertion" as NonEmptyString,
       grant_type,
-      "userId"
+      aFiscalCode
     );
 
     expect(res).toMatchObject({
@@ -440,7 +355,7 @@ describe("IoWalletService#createWalletAttestation", () => {
     const res = await service.createWalletAttestation(
       "assertion" as NonEmptyString,
       grant_type,
-      "userId"
+      aFiscalCode
     );
 
     expect(res).toMatchObject({
@@ -459,7 +374,7 @@ describe("IoWalletService#createWalletAttestation", () => {
     const res = await service.createWalletAttestation(
       "assertion" as NonEmptyString,
       grant_type,
-      "userId"
+      aFiscalCode
     );
 
     expect(res).toMatchObject({
@@ -476,7 +391,7 @@ describe("IoWalletService#createWalletAttestation", () => {
     const res = await service.createWalletAttestation(
       "assertion" as NonEmptyString,
       grant_type,
-      "userId"
+      aFiscalCode
     );
 
     expect(res).toMatchObject({
