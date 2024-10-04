@@ -90,7 +90,7 @@ export default class IoWalletService {
     challenge: NonEmptyString,
     hardware_key_tag: NonEmptyString,
     key_attestation: NonEmptyString,
-    fiscal_code: FiscalCode // TODO
+    fiscal_code: FiscalCode
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorGeneric
