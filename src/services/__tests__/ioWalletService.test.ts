@@ -177,8 +177,8 @@ describe("IoWalletService#createWalletInstance", () => {
         challenge: "challenge",
         key_attestation: "key_attestation",
         hardware_key_tag: "hardware_key_tag",
+        fiscal_code: aFiscalCode,
       },
-      "x-iowallet-user-id": "userId",
     });
   });
 
@@ -296,8 +296,8 @@ describe("IoWalletService#createWalletAttestation", () => {
       body: {
         grant_type,
         assertion: "assertion",
+        fiscal_code: aFiscalCode,
       },
-      "x-iowallet-user-id": "userId",
     });
   });
 
