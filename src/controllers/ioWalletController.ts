@@ -26,11 +26,11 @@ import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import IoWalletService from "../services/ioWalletService";
 
-import { NonceDetailView } from "../../generated/io-wallet-api/NonceDetailView";
+import { NonceDetailView } from "../../generated/io-wallet/NonceDetailView";
 import { withUserFromRequest } from "../types/user";
-import { CreateWalletInstanceBody } from "../../generated/io-wallet-api/CreateWalletInstanceBody";
-import { CreateWalletAttestationBody } from "../../generated/io-wallet-api/CreateWalletAttestationBody";
-import { WalletAttestationView } from "../../generated/io-wallet-api/WalletAttestationView";
+import { CreateWalletInstanceBody } from "../../generated/io-wallet/CreateWalletInstanceBody";
+import { CreateWalletAttestationBody } from "../../generated/io-wallet/CreateWalletAttestationBody";
+import { WalletAttestationView } from "../../generated/io-wallet/WalletAttestationView";
 import { FF_IO_WALLET_TRIAL_ENABLED } from "../config";
 import { SetCurrentWalletInstanceStatusBody } from "../../generated/io-wallet/SetCurrentWalletInstanceStatusBody";
 
