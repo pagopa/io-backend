@@ -101,9 +101,9 @@ export default class IoWalletService {
       const validated = await this.ioWalletApiClient.createWalletInstance({
         body: {
           challenge,
+          fiscal_code,
           hardware_key_tag,
           key_attestation,
-          fiscal_code,
         },
       });
       return withValidatedOrInternalError(validated, (response) => {
@@ -156,8 +156,8 @@ export default class IoWalletService {
       const validated = await this.ioWalletApiClient.createWalletAttestation({
         body: {
           assertion,
-          grant_type,
           fiscal_code,
+          grant_type,
         },
       });
       return withValidatedOrInternalError(validated, (response) => {
