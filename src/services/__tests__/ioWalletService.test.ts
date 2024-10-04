@@ -9,22 +9,12 @@ import { StatusEnum } from "../../../generated/io-wallet-api/SetWalletInstanceSt
 
 const mockGetEntityConfiguration = jest.fn();
 const mockGetNonce = jest.fn();
-const mockGetUserByFiscalCode = jest.fn();
 const mockCreateWalletInstance = jest.fn();
 const mockCreateWalletAttestation = jest.fn();
 const mockHealthCheck = jest.fn();
 const mockGetCurrentWalletInstanceStatus = jest.fn();
 const mockSetWalletInstanceStatus = jest.fn();
 const mockSetCurrentWalletInstanceStatus = jest.fn();
-
-mockGetUserByFiscalCode.mockImplementation(() =>
-  t.success({
-    status: 200,
-    value: {
-      id: "000000000000",
-    },
-  })
-);
 
 mockGetNonce.mockImplementation(() =>
   t.success({
@@ -71,7 +61,6 @@ mockSetCurrentWalletInstanceStatus.mockImplementation(() =>
 const api = {
   getEntityConfiguration: mockGetEntityConfiguration,
   getNonce: mockGetNonce,
-  getUserByFiscalCode: mockGetUserByFiscalCode,
   createWalletInstance: mockCreateWalletInstance,
   createWalletAttestation: mockCreateWalletAttestation,
   healthCheck: mockHealthCheck,
