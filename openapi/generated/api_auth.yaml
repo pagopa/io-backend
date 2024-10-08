@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 14.3.5
+  version: 14.3.6
   title: Authentication API
   description: Collection of endpoints to interact with user's auth session.
 host: localhost

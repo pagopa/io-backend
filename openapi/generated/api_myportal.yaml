@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 14.3.5
+  version: 14.3.6
   title: MyPortal API
   description: MyPortal API for user authentication.
 host: localhost
