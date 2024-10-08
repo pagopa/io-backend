@@ -161,6 +161,9 @@ export default class FunctionsAppService {
       );
     });
 
+  /**
+   * @deprecated
+   */
   public readonly getVisibleServices = (): Promise<
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
