@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 14.3.4
+  version: 14.3.5
   title: Trial System API
 host: localhost
 basePath: /api/v1
