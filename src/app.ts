@@ -42,7 +42,6 @@ import {
   FF_EUCOVIDCERT_ENABLED,
   FF_IO_SIGN_ENABLED,
   FF_IO_WALLET_ENABLED,
-  FF_MIT_VOUCHER_ENABLED,
   FF_ROUTING_PUSH_NOTIF,
   FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST,
   FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX,
@@ -89,7 +88,6 @@ import CgnOperatorSearchController from "./controllers/cgnOperatorSearchControll
 import EUCovidCertController from "./controllers/eucovidcertController";
 import { firstLollipopSign } from "./controllers/firstLollipopConsumerController";
 import IoSignController from "./controllers/ioSignController";
-import MitVoucherController from "./controllers/mitVoucherController";
 import {
   getPNActivationController,
   upsertPNActivationController,
@@ -164,7 +162,6 @@ export interface IAppFactoryParameters {
   readonly IoSignAPIBasePath: string;
   readonly IoWalletAPIBasePath: string;
   readonly EUCovidCertBasePath: string;
-  readonly MitVoucherBasePath: string;
   readonly ServicesAppBackendBasePath: string;
   readonly TrialSystemBasePath: string;
 }
@@ -185,7 +182,6 @@ export async function newApp({
   IoWalletAPIBasePath,
   CGNOperatorSearchAPIBasePath,
   EUCovidCertBasePath,
-  MitVoucherBasePath,
   ServicesAppBackendBasePath,
   TrialSystemBasePath,
 }: IAppFactoryParameters): Promise<Express> {
@@ -531,15 +527,6 @@ export async function newApp({
           );
         }
 
-        if (FF_MIT_VOUCHER_ENABLED) {
-          // eslint-disable-next-line @typescript-eslint/no-use-before-define
-          registerMitVoucherAPIRoutes(
-            app,
-            MitVoucherBasePath,
-            TOKEN_SERVICE,
-            authMiddlewares.bearerSession
-          );
-        }
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         registerMyPortalRoutes(
           app,
@@ -717,27 +704,6 @@ function registerEUCovidCertAPIRoutes(
     toExpressHandler(
       eucovidCertController.getEUCovidCertificate,
       eucovidCertController
-    )
-  );
-}
-
-function registerMitVoucherAPIRoutes(
-  app: Express,
-  basePath: string,
-  tokenService: TokenService,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any
-): void {
-  const mitVoucherController: MitVoucherController = new MitVoucherController(
-    tokenService
-  );
-
-  app.get(
-    `${basePath}/token`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      mitVoucherController.getMitVoucherToken,
-      mitVoucherController
     )
   );
 }
