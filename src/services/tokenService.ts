@@ -38,38 +38,6 @@ export default class TokenService {
   }
 
   /**
-   * Generates a new support token containing the logged user's fiscalCode.
-   *
-   * @param privateKey: The RSA's private key used to sign this JWT token
-   * @param fiscalCode: The logged user's FiscalCode
-   * @param tokenTtl: Token Time To live (expressed in seconds)
-   * @param issuer: The Token issuer
-   */
-  public getJwtSupportToken(
-    privateKey: NonEmptyString,
-    fiscalCode: FiscalCode,
-    tokenTtl: Second,
-    issuer: NonEmptyString
-  ): TaskEither<Error, string> {
-    return pipe(
-      TE.taskify<Error, string>((cb) =>
-        jwt.sign(
-          { fiscalCode },
-          privateKey,
-          {
-            algorithm: "RS256",
-            expiresIn: `${tokenTtl} seconds`,
-            issuer,
-            jwtid: ulid(),
-          },
-          cb
-        )
-      )(),
-      TE.mapLeft(E.toError)
-    );
-  }
-
-  /**
    * Generates a new zendesk support token containing the logged user's fiscalCode and email address.
    *
    * @param secret: The shared secret used to sign this JWT token

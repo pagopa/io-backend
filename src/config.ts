@@ -401,44 +401,6 @@ export const FF_IO_SIGN_ENABLED = process.env.FF_IO_SIGN_ENABLED === "1";
 export const FF_EUCOVIDCERT_ENABLED =
   process.env.FF_EUCOVIDCERT_ENABLED === "1";
 
-// Support Token
-export const JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY = pipe(
-  process.env.JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY,
-  NonEmptyString.decode,
-  E.getOrElseW((errs) => {
-    log.error(
-      `Missing or invalid JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY environment variable: ${readableReport(
-        errs
-      )}`
-    );
-    return process.exit(1);
-  })
-);
-export const JWT_SUPPORT_TOKEN_ISSUER = pipe(
-  process.env.JWT_SUPPORT_TOKEN_ISSUER,
-  NonEmptyString.decode,
-  E.getOrElseW((errs) => {
-    log.error(
-      `Missing or invalid JWT_SUPPORT_TOKEN_ISSUER environment variable: ${readableReport(
-        errs
-      )}`
-    );
-    return process.exit(1);
-  })
-);
-
-const DEFAULT_JWT_SUPPORT_TOKEN_EXPIRATION = 604800 as Second;
-export const JWT_SUPPORT_TOKEN_EXPIRATION: Second = pipe(
-  process.env.JWT_SUPPORT_TOKEN_EXPIRATION,
-  IntegerFromString.decode,
-  E.getOrElseW(() => DEFAULT_JWT_SUPPORT_TOKEN_EXPIRATION)
-) as Second;
-
-log.info(
-  "JWT support token expiration set to %s seconds",
-  JWT_SUPPORT_TOKEN_EXPIRATION
-);
-
 export const TEST_CGN_FISCAL_CODES = pipe(
   process.env.TEST_CGN_FISCAL_CODES || "",
   CommaSeparatedListOf(FiscalCode).decode,
