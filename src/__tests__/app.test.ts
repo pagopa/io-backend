@@ -65,7 +65,6 @@ const aMyPortalBasePath = "/myportal/api/v1";
 const aCgnAPIBasePath = "/api/v1/cgn";
 const aCgnOperatorSearchAPIBasePath = "/api/v1/cgn-operator-search";
 const aEuCovidCertAPIBasePath = "/api/v1/eucovidcert";
-const aMitVoucherBasePath = "/api/v1/mitvoucher/auth";
 const aIoSignAPIBasePath = "/api/v1/sign";
 const aServicesAppBackendBasePath = "/api/v2";
 const aTrialSystemBasePath = "/trials/api/v1";
@@ -83,7 +82,6 @@ describe("Success app start", () => {
       EUCovidCertBasePath: aEuCovidCertAPIBasePath,
       IoSignAPIBasePath: aIoSignAPIBasePath,
       IoWalletAPIBasePath: aIoWalletAPIBasePath,
-      MitVoucherBasePath: aMitVoucherBasePath,
       MyPortalBasePath: aMyPortalBasePath,
       ServicesAppBackendBasePath: aServicesAppBackendBasePath,
       TrialSystemBasePath: aTrialSystemBasePath,
@@ -181,7 +179,6 @@ describe("Failure app start", () => {
         EUCovidCertBasePath: aEuCovidCertAPIBasePath,
         IoSignAPIBasePath: aIoSignAPIBasePath,
         IoWalletAPIBasePath: aIoWalletAPIBasePath,
-        MitVoucherBasePath: aMitVoucherBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         ServicesAppBackendBasePath: aServicesAppBackendBasePath,
         TrialSystemBasePath: aTrialSystemBasePath,

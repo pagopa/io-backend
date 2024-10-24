@@ -322,10 +322,6 @@ export const PN_ADDRESS_BOOK_CLIENT_SELECTOR: O.Option<
   E.toUnion
 );
 
-export const MIT_VOUCHER_API_BASE_PATH = getRequiredENVVar(
-  "MIT_VOUCHER_API_BASE_PATH"
-);
-
 // HTTPs-only fetch with optional keepalive agent
 // @see https://github.com/pagopa/io-ts-commons/blob/master/src/agent.ts#L10
 const simpleHttpsApiFetch = agent.getHttpsFetch(process.env);
@@ -405,9 +401,6 @@ export const FF_IO_SIGN_ENABLED = process.env.FF_IO_SIGN_ENABLED === "1";
 export const FF_EUCOVIDCERT_ENABLED =
   process.env.FF_EUCOVIDCERT_ENABLED === "1";
 
-export const FF_MIT_VOUCHER_ENABLED =
-  process.env.FF_MIT_VOUCHER_ENABLED === "1";
-
 // Support Token
 export const JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY = pipe(
   process.env.JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY,
@@ -444,57 +437,6 @@ export const JWT_SUPPORT_TOKEN_EXPIRATION: Second = pipe(
 log.info(
   "JWT support token expiration set to %s seconds",
   JWT_SUPPORT_TOKEN_EXPIRATION
-);
-
-// Mit  Voucher Token
-export const JWT_MIT_VOUCHER_TOKEN_PRIVATE_ES_KEY = pipe(
-  process.env.JWT_MIT_VOUCHER_TOKEN_PRIVATE_ES_KEY,
-  NonEmptyString.decode,
-  E.getOrElseW((errs) => {
-    log.error(
-      `Missing or invalid JWT_MIT_VOUCHER_TOKEN_PRIVATE_ES_KEY environment variable: ${readableReport(
-        errs
-      )}`
-    );
-    return process.exit(1);
-  })
-);
-export const JWT_MIT_VOUCHER_TOKEN_ISSUER = pipe(
-  process.env.JWT_MIT_VOUCHER_TOKEN_ISSUER,
-  NonEmptyString.decode,
-  E.getOrElseW((errs) => {
-    log.error(
-      `Missing or invalid JWT_MIT_VOUCHER_TOKEN_ISSUER environment variable: ${readableReport(
-        errs
-      )}`
-    );
-    return process.exit(1);
-  })
-);
-
-const DEFAULT_JWT_MIT_VOUCHER_TOKEN_EXPIRATION = 600 as Second;
-export const JWT_MIT_VOUCHER_TOKEN_EXPIRATION: Second = pipe(
-  process.env.JWT_MIT_VOUCHER_TOKEN_EXPIRATION,
-  IntegerFromString.decode,
-  E.getOrElseW(() => DEFAULT_JWT_MIT_VOUCHER_TOKEN_EXPIRATION)
-) as Second;
-
-log.info(
-  "JWT Mit Voucher expiration set to %s seconds",
-  JWT_MIT_VOUCHER_TOKEN_EXPIRATION
-);
-
-export const JWT_MIT_VOUCHER_TOKEN_AUDIENCE = pipe(
-  process.env.JWT_MIT_VOUCHER_TOKEN_AUDIENCE,
-  NonEmptyString.decode,
-  E.getOrElseW((errs) => {
-    log.error(
-      `Missing or invalid JWT_MIT_VOUCHER_TOKEN_AUDIENCE environment variable: ${readableReport(
-        errs
-      )}`
-    );
-    return process.exit(1);
-  })
 );
 
 export const TEST_CGN_FISCAL_CODES = pipe(
