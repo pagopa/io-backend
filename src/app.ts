@@ -117,7 +117,6 @@ import ProfileService from "./services/profileService";
 import RedisSessionStorage from "./services/redisSessionStorage";
 import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import ServicesAppBackendService from "./services/servicesAppBackendService";
-import TokenService from "./services/tokenService";
 import UserDataProcessingService from "./services/userDataProcessingService";
 import bearerMyPortalTokenStrategy from "./strategies/bearerMyPortalTokenStrategy";
 import bearerSessionTokenStrategy from "./strategies/bearerSessionTokenStrategy";
@@ -307,9 +306,6 @@ export async function newApp({
   return pipe(
     TE.tryCatch(
       async () => {
-        // Ceate the Token Service
-        const TOKEN_SERVICE = new TokenService();
-
         // Create the profile service
         const tableClient = TableClient.fromConnectionString(
           LOCKED_PROFILES_STORAGE_CONNECTION_STRING,

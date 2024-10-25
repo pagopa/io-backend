@@ -17,10 +17,9 @@ import {
   setFetchTimeout,
   toFetch,
 } from "@pagopa/ts-commons/lib/fetch";
-import { IntegerFromString } from "@pagopa/ts-commons/lib/numbers";
 import { NonEmptyString, Ulid } from "@pagopa/ts-commons/lib/strings";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
-import { Millisecond, Second } from "@pagopa/ts-commons/lib/units";
+import { Millisecond } from "@pagopa/ts-commons/lib/units";
 import { pipe } from "fp-ts/lib/function";
 import { CgnAPIClient } from "./clients/cgn";
 import { log } from "./utils/logger";
