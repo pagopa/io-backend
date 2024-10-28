@@ -149,7 +149,7 @@ mockGetDiscountBucketCode.mockImplementation(() =>
 const api = {
   getPublishedProductCategories: mockGetPublishedProductCategories,
   getMerchant: mockGetMerchant,
-  Search: mockSearch,
+  search: mockSearch,
   getOfflineMerchants: mockGetOfflineMerchants,
   getOnlineMerchants: mockGetOnlineMerchants,
   getDiscountBucketCode: mockGetDiscountBucketCode

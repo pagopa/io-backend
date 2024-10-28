@@ -90,7 +90,7 @@ export default class CgnService {
     searchRequest: SearchRequest
   ): Promise<ServiceResponses<SearchResult>> =>
     withCatchAsInternalError(async () => {
-      const validated = await this.cgnOperatorSearchApiClient.Search({
+      const validated = await this.cgnOperatorSearchApiClient.search({
         body: searchRequest,
       });
 
