@@ -31,7 +31,7 @@ paths:
 
   "/search":
     post:
-      operationId: Search
+      operationId: search
       summary: Search merchants or discounts
       description: |
         List of merchants and discounts with the token in name and/or description
