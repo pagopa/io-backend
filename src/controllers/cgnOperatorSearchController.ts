@@ -20,6 +20,7 @@ import * as E from "fp-ts/Either";
 import { DiscountBucketCode } from "generated/io-cgn-operator-search-api/DiscountBucketCode";
 import { Card } from "generated/cgn/Card";
 import { pipe } from "fp-ts/lib/function";
+import { SearchResult } from "generated/io-cgn-operator-search-api/SearchResult";
 import { Merchant } from "../../generated/cgn-operator-search/Merchant";
 import { OfflineMerchants } from "../../generated/cgn-operator-search/OfflineMerchants";
 import { OnlineMerchants } from "../../generated/cgn-operator-search/OnlineMerchants";
@@ -31,7 +32,6 @@ import { SearchRequest } from "../../generated/io-cgn-operator-search-api/Search
 import CgnOperatorSearchService from "../services/cgnOperatorSearchService";
 import { User, withUserFromRequest } from "../types/user";
 import { withValidatedOrValidationError } from "../utils/responses";
-import { SearchResult } from "generated/io-cgn-operator-search-api/SearchResult";
 
 export default class CgnOperatorSearchController {
   constructor(
