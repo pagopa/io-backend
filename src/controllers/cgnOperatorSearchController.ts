@@ -27,9 +27,11 @@ import { GetPublishedCategoriesParameters } from "../../generated/parameters/Get
 import { PublishedProductCategoriesResult } from "../../generated/cgn-operator-search/PublishedProductCategoriesResult";
 import { OfflineMerchantSearchRequest } from "../../generated/io-cgn-operator-search-api/OfflineMerchantSearchRequest";
 import { OnlineMerchantSearchRequest } from "../../generated/io-cgn-operator-search-api/OnlineMerchantSearchRequest";
+import { SearchRequest } from "../../generated/io-cgn-operator-search-api/SearchRequest";
 import CgnOperatorSearchService from "../services/cgnOperatorSearchService";
 import { User, withUserFromRequest } from "../types/user";
 import { withValidatedOrValidationError } from "../utils/responses";
+import { SearchResult } from "generated/io-cgn-operator-search-api/SearchResult";
 
 export default class CgnOperatorSearchController {
   constructor(
@@ -79,6 +81,24 @@ export default class CgnOperatorSearchController {
         (merchantId) => this.cgnOperatorSearchService.getMerchant(merchantId)
       );
     });
+
+  /**
+   * Search CGN merchants/discounts that matches with search criteria
+   */
+  public readonly search = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorValidation
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<SearchResult>
+  > =>
+    withUserFromRequest(req, async (_) =>
+      withValidatedOrValidationError(
+        SearchRequest.decode(req.body),
+        (searchRequest) => this.cgnOperatorSearchService.search(searchRequest)
+      )
+    );
 
   /**
    * Get an array of CGN online merchants that matches with search criteria

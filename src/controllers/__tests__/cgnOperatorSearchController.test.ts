@@ -29,11 +29,13 @@ import {
 } from "@pagopa/io-functions-cgn-sdk/CardExpired";
 import { DiscountBucketCode } from "../../../generated/io-cgn-operator-search-api/DiscountBucketCode";
 import { SupportTypeEnum } from "../../../generated/cgn-operator-search/SupportType";
+import { SearchRequest } from "../../../generated/io-cgn-operator-search-api/SearchRequest";
 
 const anAPIKey = "";
 
 const mockGetPublishedProductCategories = jest.fn();
 const mockGetMerchant = jest.fn();
+const mockSearch = jest.fn();
 const mockGetOnlineMerchants = jest.fn();
 const mockGetOfflineMerchants = jest.fn();
 const mockGetDiscountBucketCode = jest.fn();
@@ -43,6 +45,7 @@ jest.mock("../../services/cgnOperatorSearchService", () => {
     default: jest.fn().mockImplementation(() => ({
       getPublishedProductCategories: mockGetPublishedProductCategories,
       getMerchant: mockGetMerchant,
+      search: mockSearch,
       getOnlineMerchants: mockGetOnlineMerchants,
       getOfflineMerchants: mockGetOfflineMerchants,
       getDiscountBucketCode: mockGetDiscountBucketCode,
@@ -113,6 +116,12 @@ const aMerchant: Merchant = {
   ],
   supportType: SupportTypeEnum.EMAILADDRESS,
   supportValue: "-" as NonEmptyString,
+};
+
+const aSearchRequest: SearchRequest = {
+  token: "aMerchantName" as NonEmptyString,
+  page: 0 as NonNegativeInteger,
+  pageSize: 100,
 };
 
 const anOnlineMerchantSearchRequest: OnlineMerchantSearchRequest = {
@@ -345,6 +354,59 @@ describe("CgnOperatorController#getMerchant", () => {
 
     // service method is not called
     expect(mockGetMerchant).not.toBeCalled();
+    // http output is correct
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
+  });
+});
+
+describe("CgnOperatorController#search", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct service method call", async () => {
+    const req = {
+      ...mockReq({ body: aSearchRequest }),
+      user: mockedUser,
+    };
+
+    await controller.search(req);
+
+    expect(mockSearch).toHaveBeenCalledWith(aSearchRequest);
+  });
+
+  it("should call search method on the CgnOperatorSearchService with valid values", async () => {
+    const req = {
+      ...mockReq({ body: aSearchRequest }),
+      user: mockedUser,
+    };
+
+    mockSearch.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(aSearchResponse))
+    );
+
+    const response = await controller.search(req);
+
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: aSearchResponse,
+    });
+  });
+
+  it("should not call search method on the CgnOperatorSearchService with empty user", async () => {
+    const req = {
+      ...mockReq({ body: aSearchRequest }),
+      user: undefined,
+    };
+    const res = mockRes();
+
+    const response = await controller.search(req);
+
+    response.apply(res);
+
+    // service method is not called
+    expect(mockSearch).not.toBeCalled();
     // http output is correct
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });

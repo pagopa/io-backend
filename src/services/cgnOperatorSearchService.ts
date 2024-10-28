@@ -29,6 +29,8 @@ import { OnlineMerchantSearchRequest } from "../../generated/io-cgn-operator-sea
 import { OnlineMerchants } from "../../generated/cgn-operator-search/OnlineMerchants";
 import { OfflineMerchantSearchRequest } from "../../generated/io-cgn-operator-search-api/OfflineMerchantSearchRequest";
 import { OfflineMerchants } from "../../generated/cgn-operator-search/OfflineMerchants";
+import { SearchRequest } from "generated/io-cgn-operator-search-api/SearchRequest";
+import { SearchResult } from "generated/io-cgn-operator-search-api/SearchResult";
 
 type ClientResponses<T> =
   | IResponseType<200, T>
@@ -78,6 +80,24 @@ export default class CgnService {
 
       return withValidatedOrInternalError(validated, (response) =>
         this.mapResponse<Merchant>(response as ClientResponses<Merchant>)
+      );
+    });
+
+  /**
+   * Search CGN merchants/discounts that matches with search criteria
+   */
+  public readonly search = (
+    searchRequest: SearchRequest
+  ): Promise<ServiceResponses<SearchResult>> =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.cgnOperatorSearchApiClient.Search({
+        body: searchRequest,
+      });
+
+      return withValidatedOrInternalError(validated, (response) =>
+        this.mapResponse<SearchResult>(
+          response as ClientResponses<SearchResult>
+        )
       );
     });
 
