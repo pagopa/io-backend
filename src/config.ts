@@ -17,10 +17,9 @@ import {
   setFetchTimeout,
   toFetch,
 } from "@pagopa/ts-commons/lib/fetch";
-import { IntegerFromString } from "@pagopa/ts-commons/lib/numbers";
 import { NonEmptyString, Ulid } from "@pagopa/ts-commons/lib/strings";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
-import { Millisecond, Second } from "@pagopa/ts-commons/lib/units";
+import { Millisecond } from "@pagopa/ts-commons/lib/units";
 import { pipe } from "fp-ts/lib/function";
 import { CgnAPIClient } from "./clients/cgn";
 import { log } from "./utils/logger";
@@ -400,44 +399,6 @@ export const FF_CGN_ENABLED = process.env.FF_CGN_ENABLED === "1";
 export const FF_IO_SIGN_ENABLED = process.env.FF_IO_SIGN_ENABLED === "1";
 export const FF_EUCOVIDCERT_ENABLED =
   process.env.FF_EUCOVIDCERT_ENABLED === "1";
-
-// Support Token
-export const JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY = pipe(
-  process.env.JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY,
-  NonEmptyString.decode,
-  E.getOrElseW((errs) => {
-    log.error(
-      `Missing or invalid JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY environment variable: ${readableReport(
-        errs
-      )}`
-    );
-    return process.exit(1);
-  })
-);
-export const JWT_SUPPORT_TOKEN_ISSUER = pipe(
-  process.env.JWT_SUPPORT_TOKEN_ISSUER,
-  NonEmptyString.decode,
-  E.getOrElseW((errs) => {
-    log.error(
-      `Missing or invalid JWT_SUPPORT_TOKEN_ISSUER environment variable: ${readableReport(
-        errs
-      )}`
-    );
-    return process.exit(1);
-  })
-);
-
-const DEFAULT_JWT_SUPPORT_TOKEN_EXPIRATION = 604800 as Second;
-export const JWT_SUPPORT_TOKEN_EXPIRATION: Second = pipe(
-  process.env.JWT_SUPPORT_TOKEN_EXPIRATION,
-  IntegerFromString.decode,
-  E.getOrElseW(() => DEFAULT_JWT_SUPPORT_TOKEN_EXPIRATION)
-) as Second;
-
-log.info(
-  "JWT support token expiration set to %s seconds",
-  JWT_SUPPORT_TOKEN_EXPIRATION
-);
 
 export const TEST_CGN_FISCAL_CODES = pipe(
   process.env.TEST_CGN_FISCAL_CODES || "",

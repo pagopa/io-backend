@@ -74,14 +74,6 @@ const anInvalidUser: User = {
   fiscal_code: anInvalidFiscalCode,
 };
 
-const mockGetNewToken = jest.fn();
-jest.mock("../../services/tokenService", () => {
-  return {
-    default: jest.fn().mockImplementation(() => ({
-      getNewToken: mockGetNewToken,
-    })),
-  };
-});
 mockSetEx.mockImplementation((_, __, ___) => Promise.resolve("OK"));
 mockGet.mockImplementation((_) => Promise.resolve(JSON.stringify(aValidUser)));
 mockDel.mockImplementation((_) => Promise.resolve(1));

@@ -95,7 +95,6 @@ import {
 import ServicesAppBackendController from "./controllers/serviceAppBackendController";
 import SessionLockController from "./controllers/sessionLockController";
 import { getUserForMyPortal } from "./controllers/ssoController";
-import SupportController from "./controllers/supportController";
 import UserDataProcessingController from "./controllers/userDataProcessingController";
 import { ISessionStorage } from "./services/ISessionStorage";
 import AuthenticationLockService from "./services/authenticationLockService";
@@ -118,7 +117,6 @@ import ProfileService from "./services/profileService";
 import RedisSessionStorage from "./services/redisSessionStorage";
 import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import ServicesAppBackendService from "./services/servicesAppBackendService";
-import TokenService from "./services/tokenService";
 import UserDataProcessingService from "./services/userDataProcessingService";
 import bearerMyPortalTokenStrategy from "./strategies/bearerMyPortalTokenStrategy";
 import bearerSessionTokenStrategy from "./strategies/bearerSessionTokenStrategy";
@@ -308,9 +306,6 @@ export async function newApp({
   return pipe(
     TE.tryCatch(
       async () => {
-        // Ceate the Token Service
-        const TOKEN_SERVICE = new TokenService();
-
         // Create the profile service
         const tableClient = TableClient.fromConnectionString(
           LOCKED_PROFILES_STORAGE_CONNECTION_STRING,
@@ -460,7 +455,6 @@ export async function newApp({
           PAGOPA_PROXY_SERVICE,
           USER_METADATA_STORAGE,
           USER_DATA_PROCESSING_SERVICE,
-          TOKEN_SERVICE,
           authMiddlewares.bearerSession,
           LOLLIPOP_API_CLIENT
         );
@@ -723,7 +717,6 @@ function registerAPIRoutes(
   pagoPaProxyService: PagoPAProxyService,
   userMetadataStorage: RedisUserMetadataStorage,
   userDataProcessingService: UserDataProcessingService,
-  tokenService: TokenService,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bearerSessionTokenAuth: any,
   lollipopClient: ReturnType<typeof LollipopApiClient>
@@ -761,10 +754,6 @@ function registerAPIRoutes(
 
   const userDataProcessingController: UserDataProcessingController =
     new UserDataProcessingController(userDataProcessingService);
-
-  const supportController: SupportController = new SupportController(
-    tokenService
-  );
 
   app.get(
     `${basePath}/profile`,
@@ -961,12 +950,6 @@ function registerAPIRoutes(
       pagoPAProxyController.getActivationStatus,
       pagoPAProxyController
     )
-  );
-
-  app.get(
-    `${basePath}/token/support`,
-    bearerSessionTokenAuth,
-    toExpressHandler(supportController.getSupportToken, supportController)
   );
 }
 
