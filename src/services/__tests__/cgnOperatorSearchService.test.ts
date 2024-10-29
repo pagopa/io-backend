@@ -14,9 +14,11 @@ import { GetPublishedCategoriesParameters } from "../../../generated/parameters/
 import { CgnOperatorSearchAPIClient } from "../../clients/cgn-operator-search";
 import CgnOperatorSearchService from "../cgnOperatorSearchService";
 import { pipe } from "fp-ts/lib/function";
+import { SearchRequest } from "../../../generated/io-cgn-operator-search-api/SearchRequest";
 
 const mockGetPublishedProductCategories = jest.fn();
 const mockGetMerchant = jest.fn();
+const mockSearch = jest.fn();
 const mockGetOfflineMerchants = jest.fn();
 const mockGetOnlineMerchants = jest.fn();
 const mockGetDiscountBucketCode = jest.fn();
@@ -75,6 +77,17 @@ const aDiscountModelList = [
   aDiscountModelWithLandingPage
 ];
 
+const anExpectedSearchResponse = {
+  items: [
+    {
+      id: aMerchantProfileWithStaticDiscountTypeModel.agreement_fk,
+      name: aMerchantProfileWithStaticDiscountTypeModel.name,
+      description: aMerchantProfileWithStaticDiscountTypeModel.description,
+      new_discounts: true
+    },
+  ],
+};
+
 const anExpectedResponse = {
   description: aMerchantProfileWithStaticDiscountTypeModel.description,
   name: aMerchantProfileWithStaticDiscountTypeModel.name,
@@ -117,6 +130,10 @@ mockGetMerchant.mockImplementation(() =>
   t.success({ status: 200, value: anExpectedResponse })
 );
 
+mockSearch.mockImplementation(() =>
+  t.success({ status: 200, value: anExpectedSearchResponse })
+);
+
 mockGetOfflineMerchants.mockImplementation(() =>
   t.success({ status: 200, value: anApiResult })
 );
@@ -132,6 +149,7 @@ mockGetDiscountBucketCode.mockImplementation(() =>
 const api = {
   getPublishedProductCategories: mockGetPublishedProductCategories,
   getMerchant: mockGetMerchant,
+  search: mockSearch,
   getOfflineMerchants: mockGetOfflineMerchants,
   getOnlineMerchants: mockGetOnlineMerchants,
   getDiscountBucketCode: mockGetDiscountBucketCode
@@ -139,6 +157,12 @@ const api = {
 
 const aMerchantId = "aMerchantId" as NonEmptyString;
 const anApiResult = { items: [anExpectedResponse] };
+
+const aSearchRequest: SearchRequest = {
+  token: "aMerchantName" as NonEmptyString,
+  page: 0 as NonNegativeInteger,
+  pageSize: 100,
+};
 
 const anOnlineMerchantSearchRequest: OnlineMerchantSearchRequest = {
   merchantName: "aMerchantName" as NonEmptyString,
@@ -314,6 +338,77 @@ describe("CgnOperatorSearchService#getMerchant", () => {
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal"
+    });
+  });
+});
+
+describe("CgnOperatorSearchService#search", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct api call", async () => {
+    const service = new CgnOperatorSearchService(api);
+
+    await service.search(aSearchRequest);
+
+    expect(mockSearch).toHaveBeenCalledWith({
+      body: aSearchRequest,
+    });
+  });
+
+  it("should handle a success response", async () => {
+    const service = new CgnOperatorSearchService(api);
+
+    const res = await service.search(aSearchRequest);
+
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+    });
+
+    expect(res.kind === "IResponseSuccessJson" && res.value).toMatchObject(
+      anExpectedSearchResponse
+    );
+  });
+
+  it("should handle an internal error response", async () => {
+    const aGenericProblem = {};
+    mockSearch.mockImplementationOnce(() =>
+      t.success({ status: 500, value: aGenericProblem })
+    );
+
+    const service = new CgnOperatorSearchService(api);
+
+    const res = await service.search(aSearchRequest);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal",
+    });
+  });
+
+  it("should return an error for unhandled response status code", async () => {
+    mockSearch.mockImplementationOnce(() =>
+      t.success({ status: 123 })
+    );
+    const service = new CgnOperatorSearchService(api);
+
+    const res = await service.search(aSearchRequest);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal",
+    });
+  });
+
+  it("should return an error if the api call thows", async () => {
+    mockSearch.mockImplementationOnce(() => {
+      throw new Error();
+    });
+    const service = new CgnOperatorSearchService(api);
+
+    const res = await service.search(anOnlineMerchantSearchRequest);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal",
     });
   });
 });

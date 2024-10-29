@@ -28,6 +28,32 @@ paths:
           description: Service unavailable.
           schema:
             $ref: '#/definitions/ProblemJson'
+  /search:
+    post:
+      operationId: search
+      summary: Search merchants or discounts
+      description: >
+        List of merchants and discounts with the token in name and/or
+        description
+      parameters:
+        - in: body
+          name: body
+          required: false
+          schema:
+            $ref: '#/definitions/SearchRequest'
+      responses:
+        '200':
+          description: List of merchants/discounts for the given query parameters
+          schema:
+            $ref: '#/definitions/SearchResult'
+        '400':
+          description: Bad request.
+        '401':
+          description: Login expired.
+        '500':
+          description: Service unavailable.
+          schema:
+            $ref: '#/definitions/ProblemJson'
   /online-merchants:
     post:
       operationId: getOnlineMerchants
@@ -306,6 +332,34 @@ definitions:
           - alphabetic
         default: distance
         description: Ordering type, by distance or alphabetical
+  SearchResult:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: array
+        items:
+          $ref: '#/definitions/SearchItem'
+  SearchItem:
+    type: object
+    required:
+      - id
+      - name
+      - description
+      - newDiscounts
+    properties:
+      id:
+        type: string
+        minLength: 1
+      name:
+        type: string
+        minLength: 1
+      description:
+        type: string
+        minLength: 1
+      newDiscounts:
+        type: boolean
   OnlineMerchants:
     type: object
     required:
@@ -342,6 +396,25 @@ definitions:
         $ref: '#/definitions/DiscountCodeType'
       newDiscounts:
         type: boolean
+  SearchRequest:
+    type: object
+    properties:
+      token:
+        type: string
+        description: >-
+          Text used for searching merchants/discounts by their name and
+          description
+        minLength: 1
+      page:
+        type: integer
+        description: page of result
+        default: 0
+        minimum: 0
+      pageSize:
+        type: integer
+        description: elements per page
+        default: 100
+        minimum: 1
   OnlineMerchantSearchRequest:
     type: object
     properties:

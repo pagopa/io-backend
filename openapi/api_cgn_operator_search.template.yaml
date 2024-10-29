@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: 12.0.1
+  version: 15.0.0
   title: Carta Giovani Nazionale Operator Search API
 host: localhost
 basePath: /api/v1/cgn/operator-search
@@ -28,6 +28,31 @@ paths:
           description: Service unavailable.
           schema:
             $ref: "#/definitions/ProblemJson"
+  "/search":
+    post:
+      operationId: search
+      summary: Search merchants or discounts
+      description: |
+        List of merchants and discounts with the token in name and/or description
+      parameters:
+        - in: body
+          name: body
+          required: false
+          schema:
+            $ref: '#/definitions/SearchRequest'
+      responses:
+        "200":
+          description: List of merchants/discounts for the given query parameters
+          schema:
+            $ref: "#/definitions/SearchResult"
+        "400":
+          description: Bad request.
+        "401":
+          description: Login expired.
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson" 
   "/online-merchants":
     post:
       operationId: getOnlineMerchants
@@ -151,10 +176,16 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v3.1.0/openapi/index.yaml#/definitions/OfflineMerchant"
   OfflineMerchantSearchRequest:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v3.1.0/openapi/index.yaml#/definitions/OfflineMerchantSearchRequest"
+  SearchResult:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.2.1/apps/search-func/openapi/index.yaml#/definitions/SearchResult"
+  SearchItem:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.2.1/apps/search-func/openapi/index.yaml#/definitions/SearchItem"
   OnlineMerchants:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v3.1.0/openapi/index.yaml#/definitions/OnlineMerchants"
   OnlineMerchant:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v3.1.0/openapi/index.yaml#/definitions/OnlineMerchant"
+  SearchRequest:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.2.1/apps/search-func/openapi/index.yaml#/definitions/SearchRequest"
   OnlineMerchantSearchRequest:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v3.1.0/openapi/index.yaml#/definitions/OnlineMerchantSearchRequest"
   Discount:

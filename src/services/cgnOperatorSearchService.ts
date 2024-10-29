@@ -17,6 +17,8 @@ import { IResponseType } from "@pagopa/ts-commons/lib/requests";
 import { DiscountBucketCode } from "generated/io-cgn-operator-search-api/DiscountBucketCode";
 import { PublishedProductCategoriesResult } from "generated/io-cgn-operator-search-api/PublishedProductCategoriesResult";
 import { GetPublishedCategoriesParameters } from "generated/parameters/GetPublishedCategoriesParameters";
+import { SearchRequest } from "generated/io-cgn-operator-search-api/SearchRequest";
+import { SearchResult } from "generated/io-cgn-operator-search-api/SearchResult";
 import { Merchant } from "../../generated/cgn-operator-search/Merchant";
 import {
   ResponseErrorStatusNotDefinedInSpec,
@@ -78,6 +80,24 @@ export default class CgnService {
 
       return withValidatedOrInternalError(validated, (response) =>
         this.mapResponse<Merchant>(response as ClientResponses<Merchant>)
+      );
+    });
+
+  /**
+   * Search CGN merchants/discounts that matches with search criteria
+   */
+  public readonly search = (
+    searchRequest: SearchRequest
+  ): Promise<ServiceResponses<SearchResult>> =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.cgnOperatorSearchApiClient.search({
+        body: searchRequest,
+      });
+
+      return withValidatedOrInternalError(validated, (response) =>
+        this.mapResponse<SearchResult>(
+          response as ClientResponses<SearchResult>
+        )
       );
     });
 

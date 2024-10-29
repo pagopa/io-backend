@@ -20,6 +20,7 @@ import * as E from "fp-ts/Either";
 import { DiscountBucketCode } from "generated/io-cgn-operator-search-api/DiscountBucketCode";
 import { Card } from "generated/cgn/Card";
 import { pipe } from "fp-ts/lib/function";
+import { SearchResult } from "generated/io-cgn-operator-search-api/SearchResult";
 import { Merchant } from "../../generated/cgn-operator-search/Merchant";
 import { OfflineMerchants } from "../../generated/cgn-operator-search/OfflineMerchants";
 import { OnlineMerchants } from "../../generated/cgn-operator-search/OnlineMerchants";
@@ -27,6 +28,7 @@ import { GetPublishedCategoriesParameters } from "../../generated/parameters/Get
 import { PublishedProductCategoriesResult } from "../../generated/cgn-operator-search/PublishedProductCategoriesResult";
 import { OfflineMerchantSearchRequest } from "../../generated/io-cgn-operator-search-api/OfflineMerchantSearchRequest";
 import { OnlineMerchantSearchRequest } from "../../generated/io-cgn-operator-search-api/OnlineMerchantSearchRequest";
+import { SearchRequest } from "../../generated/io-cgn-operator-search-api/SearchRequest";
 import CgnOperatorSearchService from "../services/cgnOperatorSearchService";
 import { User, withUserFromRequest } from "../types/user";
 import { withValidatedOrValidationError } from "../utils/responses";
@@ -79,6 +81,24 @@ export default class CgnOperatorSearchController {
         (merchantId) => this.cgnOperatorSearchService.getMerchant(merchantId)
       );
     });
+
+  /**
+   * Search CGN merchants/discounts that matches with search criteria
+   */
+  public readonly search = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorValidation
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<SearchResult>
+  > =>
+    withUserFromRequest(req, async (_) =>
+      withValidatedOrValidationError(
+        SearchRequest.decode(req.body),
+        (searchRequest) => this.cgnOperatorSearchService.search(searchRequest)
+      )
+    );
 
   /**
    * Get an array of CGN online merchants that matches with search criteria
