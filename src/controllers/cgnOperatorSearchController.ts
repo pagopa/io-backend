@@ -21,6 +21,7 @@ import { DiscountBucketCode } from "generated/io-cgn-operator-search-api/Discoun
 import { Card } from "generated/cgn/Card";
 import { pipe } from "fp-ts/lib/function";
 import { SearchResult } from "generated/io-cgn-operator-search-api/SearchResult";
+import { CountResult } from "generated/io-cgn-operator-search-api/CountResult";
 import { Merchant } from "../../generated/cgn-operator-search/Merchant";
 import { OfflineMerchants } from "../../generated/cgn-operator-search/OfflineMerchants";
 import { OnlineMerchants } from "../../generated/cgn-operator-search/OnlineMerchants";
@@ -81,6 +82,21 @@ export default class CgnOperatorSearchController {
         (merchantId) => this.cgnOperatorSearchService.getMerchant(merchantId)
       );
     });
+
+  /**
+   * Count CGN merchants/discounts
+   */
+  public readonly count = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorValidation
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<CountResult>
+  > =>
+    withUserFromRequest(req, async (_) =>
+      this.cgnOperatorSearchService.count()
+    );
 
   /**
    * Search CGN merchants/discounts that matches with search criteria

@@ -31,6 +31,7 @@ import { OnlineMerchantSearchRequest } from "../../generated/io-cgn-operator-sea
 import { OnlineMerchants } from "../../generated/cgn-operator-search/OnlineMerchants";
 import { OfflineMerchantSearchRequest } from "../../generated/io-cgn-operator-search-api/OfflineMerchantSearchRequest";
 import { OfflineMerchants } from "../../generated/cgn-operator-search/OfflineMerchants";
+import { CountResult } from "generated/io-cgn-operator-search-api/CountResult";
 
 type ClientResponses<T> =
   | IResponseType<200, T>
@@ -80,6 +81,18 @@ export default class CgnService {
 
       return withValidatedOrInternalError(validated, (response) =>
         this.mapResponse<Merchant>(response as ClientResponses<Merchant>)
+      );
+    });
+
+  /**
+   * Count CGN merchants/discounts
+   */
+  public readonly count = (): Promise<ServiceResponses<CountResult>> =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.cgnOperatorSearchApiClient.count({});
+
+      return withValidatedOrInternalError(validated, (response) =>
+        this.mapResponse<CountResult>(response as ClientResponses<CountResult>)
       );
     });
 

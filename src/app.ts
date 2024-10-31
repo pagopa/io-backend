@@ -1186,6 +1186,12 @@ function registerCgnOperatorSearchAPIRoutes(
     toExpressHandler(cgnOperatorController.getMerchant, cgnOperatorController)
   );
 
+  app.get(
+    `${basePath}/count`,
+    bearerSessionTokenAuth,
+    toExpressHandler(cgnOperatorController.count, cgnOperatorController)
+  );
+
   app.post(
     `${basePath}/search`,
     bearerSessionTokenAuth,
