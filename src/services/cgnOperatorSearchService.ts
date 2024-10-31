@@ -19,6 +19,7 @@ import { PublishedProductCategoriesResult } from "generated/io-cgn-operator-sear
 import { GetPublishedCategoriesParameters } from "generated/parameters/GetPublishedCategoriesParameters";
 import { SearchRequest } from "generated/io-cgn-operator-search-api/SearchRequest";
 import { SearchResult } from "generated/io-cgn-operator-search-api/SearchResult";
+import { CountResult } from "generated/io-cgn-operator-search-api/CountResult";
 import { Merchant } from "../../generated/cgn-operator-search/Merchant";
 import {
   ResponseErrorStatusNotDefinedInSpec,
@@ -31,7 +32,6 @@ import { OnlineMerchantSearchRequest } from "../../generated/io-cgn-operator-sea
 import { OnlineMerchants } from "../../generated/cgn-operator-search/OnlineMerchants";
 import { OfflineMerchantSearchRequest } from "../../generated/io-cgn-operator-search-api/OfflineMerchantSearchRequest";
 import { OfflineMerchants } from "../../generated/cgn-operator-search/OfflineMerchants";
-import { CountResult } from "generated/io-cgn-operator-search-api/CountResult";
 
 type ClientResponses<T> =
   | IResponseType<200, T>
