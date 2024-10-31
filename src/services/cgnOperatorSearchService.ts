@@ -19,6 +19,7 @@ import { PublishedProductCategoriesResult } from "generated/io-cgn-operator-sear
 import { GetPublishedCategoriesParameters } from "generated/parameters/GetPublishedCategoriesParameters";
 import { SearchRequest } from "generated/io-cgn-operator-search-api/SearchRequest";
 import { SearchResult } from "generated/io-cgn-operator-search-api/SearchResult";
+import { CountResult } from "generated/io-cgn-operator-search-api/CountResult";
 import { Merchant } from "../../generated/cgn-operator-search/Merchant";
 import {
   ResponseErrorStatusNotDefinedInSpec,
@@ -80,6 +81,18 @@ export default class CgnService {
 
       return withValidatedOrInternalError(validated, (response) =>
         this.mapResponse<Merchant>(response as ClientResponses<Merchant>)
+      );
+    });
+
+  /**
+   * Count CGN merchants/discounts
+   */
+  public readonly count = (): Promise<ServiceResponses<CountResult>> =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.cgnOperatorSearchApiClient.count({});
+
+      return withValidatedOrInternalError(validated, (response) =>
+        this.mapResponse<CountResult>(response as ClientResponses<CountResult>)
       );
     });
 

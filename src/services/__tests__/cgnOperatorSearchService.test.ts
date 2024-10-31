@@ -1,4 +1,4 @@
-import * as O from "fp-ts/Option"
+import * as O from "fp-ts/Option";
 import * as t from "io-ts";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -6,7 +6,7 @@ import { withoutUndefinedValues } from "@pagopa/ts-commons/lib/types";
 import { DiscountCodeTypeEnum } from "../../../generated/io-cgn-operator-search-api/DiscountCodeType";
 import {
   OfflineMerchantSearchRequest,
-  OrderingEnum
+  OrderingEnum,
 } from "../../../generated/io-cgn-operator-search-api/OfflineMerchantSearchRequest";
 import { OnlineMerchantSearchRequest } from "../../../generated/io-cgn-operator-search-api/OnlineMerchantSearchRequest";
 import { ProductCategoryEnum } from "../../../generated/io-cgn-operator-search-api/ProductCategory";
@@ -18,6 +18,7 @@ import { SearchRequest } from "../../../generated/io-cgn-operator-search-api/Sea
 
 const mockGetPublishedProductCategories = jest.fn();
 const mockGetMerchant = jest.fn();
+const mockCount = jest.fn();
 const mockSearch = jest.fn();
 const mockGetOfflineMerchants = jest.fn();
 const mockGetOnlineMerchants = jest.fn();
@@ -31,19 +32,19 @@ const aMerchantProfileWithStaticDiscountTypeModel = {
   name: "PagoPa",
   profile_k: 123,
   website_url: "https://pagopa.it",
-  discount_code_type: "static"
+  discount_code_type: "static",
 };
 
 const anAddress = {
   full_address: "la rue 17, 1231, roma (rm)",
   latitude: 1,
-  longitude: 2
+  longitude: 2,
 };
 const anAddressModelList = [anAddress, { ...anAddress, city: "milano" }];
 
 const productCategories = [
   ProductCategoryEnum.cultureAndEntertainment,
-  ProductCategoryEnum.learning
+  ProductCategoryEnum.learning,
 ];
 
 const aDiscountModelWithStaticCode = {
@@ -56,7 +57,7 @@ const aDiscountModelWithStaticCode = {
   start_date: new Date("2020-01-01"),
   static_code: "xxx",
   landing_page_url: undefined,
-  landing_page_referrer: undefined
+  landing_page_referrer: undefined,
 };
 
 const aDiscountModelWithLandingPage = {
@@ -69,13 +70,17 @@ const aDiscountModelWithLandingPage = {
   start_date: new Date("2020-01-01"),
   static_code: undefined,
   landing_page_url: "xxx",
-  landing_page_referrer: "xxx"
+  landing_page_referrer: "xxx",
 };
 
 const aDiscountModelList = [
   aDiscountModelWithStaticCode,
-  aDiscountModelWithLandingPage
+  aDiscountModelWithLandingPage,
 ];
+
+const anExpectedCountResponse = {
+  count: 5,
+};
 
 const anExpectedSearchResponse = {
   items: [
@@ -83,7 +88,7 @@ const anExpectedSearchResponse = {
       id: aMerchantProfileWithStaticDiscountTypeModel.agreement_fk,
       name: aMerchantProfileWithStaticDiscountTypeModel.name,
       description: aMerchantProfileWithStaticDiscountTypeModel.description,
-      new_discounts: true
+      new_discounts: true,
     },
   ],
 };
@@ -95,12 +100,12 @@ const anExpectedResponse = {
   imageUrl: `/${aMerchantProfileWithStaticDiscountTypeModel.image_url}`,
   websiteUrl: aMerchantProfileWithStaticDiscountTypeModel.website_url,
   discountCodeType: DiscountCodeTypeEnum.static,
-  addresses: anAddressModelList.map(address => ({
+  addresses: anAddressModelList.map((address) => ({
     full_address: address.full_address,
     latitude: address.latitude,
-    longitude: address.longitude
+    longitude: address.longitude,
   })),
-  discounts: aDiscountModelList.map(discount =>
+  discounts: aDiscountModelList.map((discount) =>
     withoutUndefinedValues({
       condition: pipe(discount.condition, O.fromNullable, O.toUndefined),
       description: pipe(discount.description, O.fromNullable, O.toUndefined),
@@ -111,15 +116,15 @@ const anExpectedResponse = {
       staticCode: discount.static_code,
       landingPageUrl: discount.landing_page_url,
       landingPageReferrer: discount.landing_page_referrer,
-      productCategories: productCategories
+      productCategories: productCategories,
     })
-  )
+  ),
 };
 
 const aDiscountId = "a_discount_id" as NonEmptyString;
 
 const anExpectedBucketCodeResponse = {
-  code: "asdfgh"
+  code: "asdfgh",
 };
 
 mockGetPublishedProductCategories.mockImplementation(() =>
@@ -128,6 +133,10 @@ mockGetPublishedProductCategories.mockImplementation(() =>
 
 mockGetMerchant.mockImplementation(() =>
   t.success({ status: 200, value: anExpectedResponse })
+);
+
+mockCount.mockImplementation(() =>
+  t.success({ status: 200, value: anExpectedCountResponse })
 );
 
 mockSearch.mockImplementation(() =>
@@ -149,10 +158,11 @@ mockGetDiscountBucketCode.mockImplementation(() =>
 const api = {
   getPublishedProductCategories: mockGetPublishedProductCategories,
   getMerchant: mockGetMerchant,
+  count: mockCount,
   search: mockSearch,
   getOfflineMerchants: mockGetOfflineMerchants,
   getOnlineMerchants: mockGetOnlineMerchants,
-  getDiscountBucketCode: mockGetDiscountBucketCode
+  getDiscountBucketCode: mockGetDiscountBucketCode,
 } as ReturnType<CgnOperatorSearchAPIClient>;
 
 const aMerchantId = "aMerchantId" as NonEmptyString;
@@ -167,7 +177,7 @@ const aSearchRequest: SearchRequest = {
 const anOnlineMerchantSearchRequest: OnlineMerchantSearchRequest = {
   merchantName: "aMerchantName" as NonEmptyString,
   page: 0 as NonNegativeInteger,
-  productCategories: [ProductCategoryEnum.cultureAndEntertainment]
+  productCategories: [ProductCategoryEnum.cultureAndEntertainment],
 };
 
 const anOfflineMerchantSearchRequest: OfflineMerchantSearchRequest = {
@@ -177,20 +187,20 @@ const anOfflineMerchantSearchRequest: OfflineMerchantSearchRequest = {
   ordering: OrderingEnum.distance,
   userCoordinates: {
     latitude: 34.56,
-    longitude: 45.89
+    longitude: 45.89,
   },
   boundingBox: {
     coordinates: {
       latitude: 34.56,
-      longitude: 45.89
+      longitude: 45.89,
     },
     deltaLatitude: 6,
-    deltaLongitude: 8
-  }
+    deltaLongitude: 8,
+  },
 };
 
 const params = {
-  count_new_discounts: true
+  count_new_discounts: true,
 } as GetPublishedCategoriesParameters;
 
 describe("CgnOperatorSearchService#getPublishedProductCategories", () => {
@@ -212,7 +222,7 @@ describe("CgnOperatorSearchService#getPublishedProductCategories", () => {
     const res = await service.getPublishedProductCategories(params);
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessJson"
+      kind: "IResponseSuccessJson",
     });
 
     expect(res.kind === "IResponseSuccessJson" && res.value).toMatchObject(
@@ -231,7 +241,7 @@ describe("CgnOperatorSearchService#getPublishedProductCategories", () => {
     const res = await service.getPublishedProductCategories(params);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -244,7 +254,7 @@ describe("CgnOperatorSearchService#getPublishedProductCategories", () => {
     const res = await service.getPublishedProductCategories(params);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -257,7 +267,7 @@ describe("CgnOperatorSearchService#getPublishedProductCategories", () => {
     const res = await service.getPublishedProductCategories(params);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 });
@@ -273,7 +283,7 @@ describe("CgnOperatorSearchService#getMerchant", () => {
     await service.getMerchant(aMerchantId);
 
     expect(mockGetMerchant).toHaveBeenCalledWith({
-      merchantId: aMerchantId
+      merchantId: aMerchantId,
     });
   });
 
@@ -283,7 +293,7 @@ describe("CgnOperatorSearchService#getMerchant", () => {
     const res = await service.getMerchant(aMerchantId);
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessJson"
+      kind: "IResponseSuccessJson",
     });
     expect(res.kind === "IResponseSuccessJson" && res.value).toMatchObject(
       anExpectedResponse
@@ -298,7 +308,7 @@ describe("CgnOperatorSearchService#getMerchant", () => {
     const res = await service.getMerchant(aMerchantId);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorNotFound"
+      kind: "IResponseErrorNotFound",
     });
   });
 
@@ -313,7 +323,7 @@ describe("CgnOperatorSearchService#getMerchant", () => {
     const res = await service.getMerchant(aMerchantId);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -324,7 +334,7 @@ describe("CgnOperatorSearchService#getMerchant", () => {
     const res = await service.getMerchant(aMerchantId);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -337,7 +347,74 @@ describe("CgnOperatorSearchService#getMerchant", () => {
     const res = await service.getMerchant(aMerchantId);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
+    });
+  });
+});
+
+describe("CgnOperatorSearchService#count", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct api call", async () => {
+    const service = new CgnOperatorSearchService(api);
+
+    await service.count();
+
+    expect(mockCount).toHaveBeenCalledWith({});
+  });
+
+  it("should handle a success response", async () => {
+    const service = new CgnOperatorSearchService(api);
+
+    const res = await service.count();
+
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+    });
+
+    expect(res.kind === "IResponseSuccessJson" && res.value).toMatchObject(
+      anExpectedCountResponse
+    );
+  });
+
+  it("should handle an internal error response", async () => {
+    const aGenericProblem = {};
+    mockCount.mockImplementationOnce(() =>
+      t.success({ status: 500, value: aGenericProblem })
+    );
+
+    const service = new CgnOperatorSearchService(api);
+
+    const res = await service.count();
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal",
+    });
+  });
+
+  it("should return an error for unhandled response status code", async () => {
+    mockCount.mockImplementationOnce(() => t.success({ status: 123 }));
+    const service = new CgnOperatorSearchService(api);
+
+    const res = await service.count();
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal",
+    });
+  });
+
+  it("should return an error if the api call throws", async () => {
+    mockCount.mockImplementationOnce(() => {
+      throw new Error();
+    });
+    const service = new CgnOperatorSearchService(api);
+
+    const res = await service.count();
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal",
     });
   });
 });
@@ -387,9 +464,7 @@ describe("CgnOperatorSearchService#search", () => {
   });
 
   it("should return an error for unhandled response status code", async () => {
-    mockSearch.mockImplementationOnce(() =>
-      t.success({ status: 123 })
-    );
+    mockSearch.mockImplementationOnce(() => t.success({ status: 123 }));
     const service = new CgnOperatorSearchService(api);
 
     const res = await service.search(aSearchRequest);
@@ -424,7 +499,7 @@ describe("CgnOperatorSearchService#getOnlineMerchants", () => {
     await service.getOnlineMerchants(anOnlineMerchantSearchRequest);
 
     expect(mockGetOnlineMerchants).toHaveBeenCalledWith({
-      body: anOnlineMerchantSearchRequest
+      body: anOnlineMerchantSearchRequest,
     });
   });
 
@@ -434,7 +509,7 @@ describe("CgnOperatorSearchService#getOnlineMerchants", () => {
     const res = await service.getOnlineMerchants(anOnlineMerchantSearchRequest);
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessJson"
+      kind: "IResponseSuccessJson",
     });
 
     expect(res.kind === "IResponseSuccessJson" && res.value).toMatchObject(
@@ -453,7 +528,7 @@ describe("CgnOperatorSearchService#getOnlineMerchants", () => {
     const res = await service.getOnlineMerchants(anOnlineMerchantSearchRequest);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -466,7 +541,7 @@ describe("CgnOperatorSearchService#getOnlineMerchants", () => {
     const res = await service.getOnlineMerchants(anOnlineMerchantSearchRequest);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -479,7 +554,7 @@ describe("CgnOperatorSearchService#getOnlineMerchants", () => {
     const res = await service.getOnlineMerchants(anOnlineMerchantSearchRequest);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 });
@@ -495,7 +570,7 @@ describe("CgnOperatorSearchService#getOfflineMerchants", () => {
     await service.getOfflineMerchants(anOfflineMerchantSearchRequest);
 
     expect(mockGetOfflineMerchants).toHaveBeenCalledWith({
-      body: anOfflineMerchantSearchRequest
+      body: anOfflineMerchantSearchRequest,
     });
   });
 
@@ -507,7 +582,7 @@ describe("CgnOperatorSearchService#getOfflineMerchants", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessJson"
+      kind: "IResponseSuccessJson",
     });
 
     expect(res.kind === "IResponseSuccessJson" && res.value).toMatchObject(
@@ -528,7 +603,7 @@ describe("CgnOperatorSearchService#getOfflineMerchants", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -543,7 +618,7 @@ describe("CgnOperatorSearchService#getOfflineMerchants", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -558,7 +633,7 @@ describe("CgnOperatorSearchService#getOfflineMerchants", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 });
@@ -574,7 +649,7 @@ describe("CgnOperatorSearchService#getDiscountBucketCode", () => {
     await service.getDiscountBucketCode(aDiscountId);
 
     expect(mockGetDiscountBucketCode).toHaveBeenCalledWith({
-      discountId: aDiscountId
+      discountId: aDiscountId,
     });
   });
 
@@ -584,7 +659,7 @@ describe("CgnOperatorSearchService#getDiscountBucketCode", () => {
     const res = await service.getDiscountBucketCode(aDiscountId);
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessJson"
+      kind: "IResponseSuccessJson",
     });
     expect(res.kind === "IResponseSuccessJson" && res.value).toMatchObject(
       anExpectedBucketCodeResponse
@@ -601,7 +676,7 @@ describe("CgnOperatorSearchService#getDiscountBucketCode", () => {
     const res = await service.getDiscountBucketCode(aDiscountId);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorNotFound"
+      kind: "IResponseErrorNotFound",
     });
   });
 
@@ -616,7 +691,7 @@ describe("CgnOperatorSearchService#getDiscountBucketCode", () => {
     const res = await service.getDiscountBucketCode(aDiscountId);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -629,7 +704,7 @@ describe("CgnOperatorSearchService#getDiscountBucketCode", () => {
     const res = await service.getDiscountBucketCode(aDiscountId);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -642,7 +717,7 @@ describe("CgnOperatorSearchService#getDiscountBucketCode", () => {
     const res = await service.getDiscountBucketCode(aDiscountId);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 });
