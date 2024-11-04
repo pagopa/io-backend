@@ -35,6 +35,7 @@ const anAPIKey = "";
 
 const mockGetPublishedProductCategories = jest.fn();
 const mockGetMerchant = jest.fn();
+const mockCount = jest.fn();
 const mockSearch = jest.fn();
 const mockGetOnlineMerchants = jest.fn();
 const mockGetOfflineMerchants = jest.fn();
@@ -45,6 +46,7 @@ jest.mock("../../services/cgnOperatorSearchService", () => {
     default: jest.fn().mockImplementation(() => ({
       getPublishedProductCategories: mockGetPublishedProductCategories,
       getMerchant: mockGetMerchant,
+      count: mockCount,
       search: mockSearch,
       getOnlineMerchants: mockGetOnlineMerchants,
       getOfflineMerchants: mockGetOfflineMerchants,
@@ -151,6 +153,7 @@ const anOfflineMerchantSearchRequest: OfflineMerchantSearchRequest = {
   },
 };
 
+const aCountResponse = { count: 5 };
 const aSearchResponse = { items: [] };
 
 const clientCgn = CgnAPIClient(anAPIKey, "", "");
@@ -354,6 +357,59 @@ describe("CgnOperatorController#getMerchant", () => {
 
     // service method is not called
     expect(mockGetMerchant).not.toBeCalled();
+    // http output is correct
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
+  });
+});
+
+describe("CgnOperatorController#count", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct service method call", async () => {
+    const req = {
+      ...mockReq({}),
+      user: mockedUser,
+    };
+
+    await controller.count(req);
+
+    expect(mockCount).toHaveBeenCalled();
+  });
+
+  it("should call count method on the CgnOperatorSearchService with valid values", async () => {
+    const req = {
+      ...mockReq({}),
+      user: mockedUser,
+    };
+
+    mockCount.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(aCountResponse))
+    );
+
+    const response = await controller.count(req);
+
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: aCountResponse,
+    });
+  });
+
+  it("should not call count method on the CgnOperatorSearchService with empty user", async () => {
+    const req = {
+      ...mockReq({ }),
+      user: undefined,
+    };
+    const res = mockRes();
+
+    const response = await controller.count(req);
+
+    response.apply(res);
+
+    // service method is not called
+    expect(mockCount).not.toBeCalled();
     // http output is correct
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
