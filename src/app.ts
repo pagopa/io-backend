@@ -41,6 +41,7 @@ import {
   FF_ENABLE_SESSION_ENDPOINTS,
   FF_EUCOVIDCERT_ENABLED,
   FF_IO_SIGN_ENABLED,
+  FF_IO_FIMS_ENABLED,
   FF_IO_WALLET_ENABLED,
   FF_ROUTING_PUSH_NOTIF,
   FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST,
@@ -48,6 +49,7 @@ import {
   FF_TRIAL_SYSTEM_ENABLED,
   FIRST_LOLLIPOP_CONSUMER_CLIENT,
   IO_SIGN_API_CLIENT,
+  IO_FIMS_API_CLIENT,
   IO_SIGN_SERVICE_ID,
   IO_WALLET_API_CLIENT,
   LOCKED_PROFILES_STORAGE_CONNECTION_STRING,
@@ -104,6 +106,7 @@ import CgnService from "./services/cgnService";
 import EUCovidCertService from "./services/eucovidcertService";
 import FunctionsAppService from "./services/functionAppService";
 import IoSignService from "./services/ioSignService";
+import IoFimsService from "./services/fimsService";
 import LollipopService from "./services/lollipopService";
 import NewMessagesService from "./services/newMessagesService";
 import NotificationService from "./services/notificationService";
@@ -139,6 +142,7 @@ import TrialService from "./services/trialService";
 import TrialController from "./controllers/trialController";
 import IoWalletController from "./controllers/ioWalletController";
 import IoWalletService from "./services/ioWalletService";
+import IoFimsController from "./controllers/fimsController";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -158,6 +162,7 @@ export interface IAppFactoryParameters {
   readonly CGNAPIBasePath: string;
   readonly CGNOperatorSearchAPIBasePath: string;
   readonly IoSignAPIBasePath: string;
+  readonly IoFimsAPIBasePath: string;
   readonly IoWalletAPIBasePath: string;
   readonly EUCovidCertBasePath: string;
   readonly ServicesAppBackendBasePath: string;
@@ -177,6 +182,7 @@ export async function newApp({
   MyPortalBasePath,
   CGNAPIBasePath,
   IoSignAPIBasePath,
+  IoFimsAPIBasePath,
   IoWalletAPIBasePath,
   CGNOperatorSearchAPIBasePath,
   EUCovidCertBasePath,
@@ -324,6 +330,9 @@ export async function newApp({
 
         // Create the io sign
         const IO_SIGN_SERVICE = new IoSignService(IO_SIGN_API_CLIENT);
+
+        // Create the io fims service
+        const IO_FIMS_SERVICE = new IoFimsService(IO_FIMS_API_CLIENT);
 
         // Create the cgn operator search service
         const CGN_OPERATOR_SEARCH_SERVICE = new CgnOperatorSearchService(
@@ -508,6 +517,17 @@ export async function newApp({
             authMiddlewares.bearerSession,
             LOLLIPOP_API_CLIENT,
             SESSION_STORAGE
+          );
+        }
+
+        if (FF_IO_FIMS_ENABLED) {
+          // eslint-disable-next-line @typescript-eslint/no-use-before-define
+          registerIoFimsAPIRoutes(
+            app,
+            IoFimsAPIBasePath,
+            IO_FIMS_SERVICE,
+            PROFILE_SERVICE,
+            authMiddlewares.bearerSession
           );
         }
 
@@ -1157,6 +1177,32 @@ function registerIoSignAPIRoutes(
     `${basePath}/signature-requests/:id`,
     bearerSessionTokenAuth,
     toExpressHandler(ioSignController.getSignatureRequest, ioSignController)
+  );
+}
+
+function registerIoFimsAPIRoutes(
+  app: Express,
+  basePath: string,
+  ioFimsService: IoFimsService,
+  profileService: ProfileService,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  bearerSessionTokenAuth: any
+): void {
+  const ioFimsController: IoFimsController = new IoFimsController(
+    ioFimsService,
+    profileService
+  );
+
+  app.get(
+    `${basePath}/accesses`,
+    bearerSessionTokenAuth,
+    toExpressHandler(ioFimsController.getAccessHistory, ioFimsController)
+  );
+
+  app.post(
+    `${basePath}/export-requests`,
+    bearerSessionTokenAuth,
+    toExpressHandler(ioFimsController.requestExport, ioFimsController)
   );
 }
 

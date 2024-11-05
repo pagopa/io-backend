@@ -46,6 +46,7 @@ import { LollipopApiClient } from "./clients/lollipop";
 import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
 import { TrialSystemAPIClient } from "./clients/trial-system.client";
 import { IoWalletAPIClient } from "./clients/io-wallet";
+import { IoFimsAPIClient } from "./clients/io-fims";
 
 // Without this, the environment variables loaded by dotenv aren't available in
 // this file.
@@ -184,6 +185,16 @@ export const IO_SIGN_API_CLIENT = IoSignAPIClient(
   IO_SIGN_API_KEY,
   IO_SIGN_API_URL,
   IO_SIGN_API_BASE_PATH,
+  httpOrHttpsApiFetch
+);
+
+export const IO_FIMS_API_KEY = getRequiredENVVar("IO_FIMS_API_KEY");
+export const IO_FIMS_API_URL = getRequiredENVVar("IO_FIMS_API_URL");
+export const IO_FIMS_API_BASE_PATH = getRequiredENVVar("IO_FIMS_API_BASE_PATH");
+export const IO_FIMS_API_CLIENT = IoFimsAPIClient(
+  IO_FIMS_API_KEY,
+  IO_FIMS_API_URL,
+  IO_FIMS_API_BASE_PATH,
   httpOrHttpsApiFetch
 );
 
@@ -397,6 +408,7 @@ export const DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE = 5;
 export const FF_BONUS_ENABLED = process.env.FF_BONUS_ENABLED === "1";
 export const FF_CGN_ENABLED = process.env.FF_CGN_ENABLED === "1";
 export const FF_IO_SIGN_ENABLED = process.env.FF_IO_SIGN_ENABLED === "1";
+export const FF_IO_FIMS_ENABLED = process.env.FF_IO_FIMS_ENABLED === "1";
 export const FF_EUCOVIDCERT_ENABLED =
   process.env.FF_EUCOVIDCERT_ENABLED === "1";
 
