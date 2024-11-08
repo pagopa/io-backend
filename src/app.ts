@@ -64,6 +64,7 @@ import {
   PN_ADDRESS_BOOK_CLIENT_SELECTOR,
   PUSH_NOTIFICATIONS_QUEUE_NAME,
   PUSH_NOTIFICATIONS_STORAGE_CONNECTION_STRING,
+  ROOT_REDIRECT_URL,
   SERVICES_APP_BACKEND_CLIENT,
   TEST_CGN_FISCAL_CODES,
   TRIAL_SYSTEM_CLIENT,
@@ -1315,6 +1316,10 @@ function registerPublicRoutes(app: Express): void {
     "min_app_version_pagopa",
     VersionPerPlatform
   );
+
+  app.get("/", (_, res) => {
+    res.redirect(ROOT_REDIRECT_URL.href);
+  });
 
   app.get("/info", (_, res) => {
     const serverInfo: ServerInfo = {

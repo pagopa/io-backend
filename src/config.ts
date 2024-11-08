@@ -10,7 +10,7 @@ import { agent } from "@pagopa/ts-commons";
 
 import { getNodeEnvironmentFromProcessEnv } from "@pagopa/ts-commons/lib/environment";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import { UrlFromString } from "@pagopa/ts-commons/lib/url";
+import { HttpsUrlFromString, UrlFromString } from "@pagopa/ts-commons/lib/url";
 
 import {
   AbortableFetch,
@@ -369,6 +369,31 @@ export const PUSH_NOTIFICATIONS_STORAGE_CONNECTION_STRING = getRequiredENVVar(
 );
 export const PUSH_NOTIFICATIONS_QUEUE_NAME = getRequiredENVVar(
   "PUSH_NOTIFICATIONS_QUEUE_NAME"
+);
+
+// Root redirect
+const DEFAULT_ROOT_REDIRECT_URL = pipe(
+  "https://io.italia.it",
+  HttpsUrlFromString.decode,
+  E.getOrElseW((errs) => {
+    log.error(
+      `Invalid DEFAULT_ROOT_REDIRECT_URL variable: ${readableReport(errs)}`
+    );
+    return process.exit(1);
+  })
+);
+
+export const ROOT_REDIRECT_URL = pipe(
+  process.env.ROOT_REDIRECT_URL,
+  HttpsUrlFromString.decode,
+  E.getOrElse((errs) => {
+    log.warn(
+      `Missing or invalid ROOT_REDIRECT_URL variable, defaulting to "${
+        DEFAULT_ROOT_REDIRECT_URL.href
+      }": ${readableReport(errs)}`
+    );
+    return DEFAULT_ROOT_REDIRECT_URL;
+  })
 );
 
 // Needed to verify if a profile has been locked
