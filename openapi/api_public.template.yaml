@@ -8,6 +8,21 @@ basePath: /
 schemes:
   - https
 paths:
+  "/":
+      x-swagger-router-controller: ServerInfoController
+      get:
+        operationId: Redirect
+        summary: Redirect
+        description: |
+          Redirects to a specific URL.
+  
+        responses:
+          "302":
+            description: HTTP Redirect.
+            headers:
+              Location:
+                description: URL where the client is being redirected.
+                type: string
   "/info":
     x-swagger-router-controller: ServerInfoController
     get:
