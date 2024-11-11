@@ -106,7 +106,8 @@ describe("Success app start", () => {
     // test case: https forced. Already set: it trust the proxy and accept the header: X-Forwarded-Proto.
     it("should respond 200 if forwarded from an HTTPS connection", () => {
       return request(app)
-        .get("/")
+        // Using "/info" instead of "/" since the latter returns a redirect 
+        .get("/info")
         .set(X_FORWARDED_PROTO_HEADER, "https")
         .expect(200);
     });
@@ -140,6 +141,16 @@ describe("Success app start", () => {
         .expect(401);
     });
   });*/
+
+  describe("GET /", () => {
+    it("Get root redirect", async () => {
+      const response = await request(app)
+        .get("/")
+        .set(X_FORWARDED_PROTO_HEADER, "https")
+        .expect(302);
+      expect(E.isRight(ServerInfo.decode(response.body)));
+    });
+  });
 
   describe("GET /info", () => {
     it("Get info and verify ServerInfo format", async () => {

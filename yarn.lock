@@ -1037,10 +1037,10 @@
     fp-ts "^2.10.5"
     io-ts "^2.2.16"
 
-"@pagopa/openapi-codegen-ts@^13.1.0":
-  version "13.1.0"
-  resolved "https://registry.yarnpkg.com/@pagopa/openapi-codegen-ts/-/openapi-codegen-ts-13.1.0.tgz#b5dca49eec448474f2639516d05f42e78eab0a1c"
-  integrity sha512-VKXkZtIGzklWgRK/GzsmefnHW9Mc9j0tukDxgRz4T3BfKXX0xoy5t0Es6AygRmg2WhF998wSVoQZF/9yhSgEZA==
+"@pagopa/openapi-codegen-ts@^14.0.0":
+  version "14.0.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/openapi-codegen-ts/-/openapi-codegen-ts-14.0.0.tgz#06ed67ec4259323820005d8e05ceb4ad8b2acb53"
+  integrity sha512-xnyC3I5gBuR3zeaXVyYP3Tcl2CEpB8NP9vJmEqWUY4tdAfj4HeREQgZ+gKinevZ+4CIlQljPo60IclB8rXHiag==
   dependencies:
     "@pagopa/ts-commons" "^10.15.0"
     fs-extra "^6.0.0"
