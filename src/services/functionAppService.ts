@@ -19,13 +19,13 @@ import {
 import * as E from "fp-ts/Either";
 
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
-import { APIClient } from "src/clients/api";
 import { PromiseType } from "@pagopa/ts-commons/lib/types";
 import { UpsertServicePreference } from "generated/backend/UpsertServicePreference";
-import { PaginatedServiceTupleCollection } from "../../generated/backend/PaginatedServiceTupleCollection";
-import { ServicePublic } from "../../generated/backend/ServicePublic";
+import { APIClient } from "src/clients/api";
 import { ServicePreference } from "../../generated/backend/ServicePreference";
+import { ServicePublic } from "../../generated/backend/ServicePublic";
 
+import { PathTraversalSafePathParam } from "../../generated/backend/PathTraversalSafePathParam";
 import {
   ResponseErrorStatusNotDefinedInSpec,
   ResponseErrorUnexpectedAuthProblem,
@@ -33,7 +33,6 @@ import {
   withCatchAsInternalError,
   withValidatedOrInternalError,
 } from "../utils/responses";
-import { PathTraversalSafePathParam } from "../../generated/backend/PathTraversalSafePathParam";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
 type RightOf<T extends E.Either<unknown, unknown>> = T extends E.Right<infer R>
@@ -158,31 +157,6 @@ export default class FunctionsAppService {
       return withValidatedOrInternalError(
         validated,
         handleGetServicePreferencesResponse
-      );
-    });
-
-  /**
-   * @deprecated
-   */
-  public readonly getVisibleServices = (): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorTooManyRequests
-    | IResponseSuccessJson<PaginatedServiceTupleCollection>
-  > =>
-    withCatchAsInternalError(async () => {
-      const client = this.apiClient.getClient();
-
-      const validated = await client.getVisibleServices({});
-
-      return withValidatedOrInternalError(validated, (response) =>
-        response.status === 200
-          ? withValidatedOrInternalError(
-              PaginatedServiceTupleCollection.decode(response.value),
-              ResponseSuccessJson
-            )
-          : response.status === 429
-          ? ResponseErrorTooManyRequests()
-          : unhandledResponseStatus(response.status)
       );
     });
 }

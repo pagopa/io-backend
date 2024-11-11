@@ -3,22 +3,21 @@
  * forwarding the call to the API system.
  */
 
-import * as express from "express";
 import {
+  IResponseErrorConflict,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
   IResponseErrorValidation,
   IResponseSuccessJson,
-  IResponseErrorConflict,
 } from "@pagopa/ts-commons/lib/responses";
+import * as express from "express";
 import { PathTraversalSafePathParam } from "../../generated/backend/PathTraversalSafePathParam";
 import { withUserFromRequest } from "../../src/types/user";
 import { withValidatedOrValidationError } from "../../src/utils/responses";
 
-import { PaginatedServiceTupleCollection } from "../../generated/backend/PaginatedServiceTupleCollection";
-import { ServicePublic } from "../../generated/backend/ServicePublic";
 import { ServicePreference } from "../../generated/backend/ServicePreference";
+import { ServicePublic } from "../../generated/backend/ServicePublic";
 import { UpsertServicePreference } from "../../generated/backend/UpsertServicePreference";
 
 import FunctionsAppService from "../services/functionAppService";
@@ -89,19 +88,4 @@ export default class ServicesController {
           )
       )
     );
-
-  /**
-   * Get visible services
-   *
-   * @deprecated
-   * @param _
-   * @returns
-   */
-  public readonly getVisibleServices = (
-    _: express.Request
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorTooManyRequests
-    | IResponseSuccessJson<PaginatedServiceTupleCollection>
-  > => this.fnAppService.getVisibleServices();
 }
