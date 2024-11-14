@@ -33,6 +33,7 @@ import { CreateWalletAttestationBody } from "../../generated/io-wallet/CreateWal
 import { WalletAttestationView } from "../../generated/io-wallet/WalletAttestationView";
 import { FF_IO_WALLET_TRIAL_ENABLED } from "../config";
 import { SetCurrentWalletInstanceStatusBody } from "../../generated/io-wallet/SetCurrentWalletInstanceStatusBody";
+import { WalletInstanceData } from "generated/io-wallet/WalletInstanceData";
 
 const toValidationError = (errors: Errors) =>
   ResponseErrorValidation(
@@ -153,6 +154,30 @@ export default class IoWalletController {
             status,
             user.fiscal_code
           )
+        ),
+        TE.toUnion
+      )()
+    );
+
+  /**
+   * Get current Wallet Instance status.
+   */
+  public readonly getCurrentWalletInstanceStatus = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseSuccessJson<WalletInstanceData>
+    | IResponseErrorNotFound
+    | IResponseErrorInternal
+    | IResponseErrorServiceUnavailable
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+  > =>
+    withUserFromRequest(req, async (user) =>
+      pipe(
+        this.ensureFiscalCodeIsAllowed(user.fiscal_code),
+        TE.map(() =>
+          this.ioWalletService.getCurrentWalletInstanceStatus(user.fiscal_code)
         ),
         TE.toUnion
       )()
