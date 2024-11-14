@@ -36,7 +36,7 @@ import { TrialSystemAPIClient } from "../clients/trial-system.client";
 import { Subscription } from "../../generated/trial-system-api/Subscription";
 import { WalletAttestationView } from "../../generated/io-wallet-api/WalletAttestationView";
 import { SetWalletInstanceStatusWithFiscalCodeData } from "../../generated/io-wallet-api/SetWalletInstanceStatusWithFiscalCodeData";
-import { WalletData } from "../../generated/io-wallet-api/WalletData";
+import { WalletInstanceData } from "../../generated/io-wallet-api/WalletInstanceData";
 
 const unprocessableContentError = "Unprocessable Content";
 const invalidRequest = "Your request didn't validate";
@@ -246,19 +246,20 @@ export default class IoWalletService {
   /**
    * Get current Wallet Instance status.
    */
-  public readonly getCurrentWalletInstanceStatus = (
+  public readonly getWalletInstanceStatus = (
+    id: NonEmptyString,
     fiscal_code: FiscalCode
   ): Promise<
-    | IResponseSuccessJson<WalletData>
+    | IResponseSuccessJson<WalletInstanceData>
     | IResponseErrorNotFound
     | IResponseErrorInternal
     | IResponseErrorServiceUnavailable
   > =>
     withCatchAsInternalError(async () => {
-      const validated =
-        await this.ioWalletApiClient.getCurrentWalletInstanceStatus({
-          "fiscal-code": fiscal_code,
-        });
+      const validated = await this.ioWalletApiClient.getWalletInstanceStatus({
+        id,
+        "fiscal-code": fiscal_code,
+      });
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
           case 200:

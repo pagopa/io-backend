@@ -83,9 +83,32 @@ paths:
           $ref: "#/components/responses/ServiceUnavailable"
 
   /wallet-instances/current/status:
+    put:
+      summary: Revoke current Wallet Instance
+      operationId: setCurrentWalletInstanceStatus
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetWalletInstanceStatusBody"
+      responses:
+        "204":
+          description: Wallet Instance status successfully set
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "422":
+          $ref: "#/components/responses/UnprocessableContent"
+        "500":
+          $ref: "#/components/responses/Unexpected"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /wallet-instances/{id}/status:
     get:
-      summary: Retrieve the current Wallet Instance status
-      operationId: getCurrentWalletInstanceStatus
+      summary: Retrieve a Wallet Instance status
+      operationId: getWalletInstanceStatus
       responses:
         "200":
           description: Wallet Instance status successfully retrieved
@@ -100,13 +123,13 @@ paths:
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
     put:
-      summary: Revoke current Wallet Instance
-      operationId: setCurrentWalletInstanceStatus
+      summary: Revoke a Wallet Instance
+      operationId: setWalletInstanceStatus
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/SetCurrentWalletInstanceStatusBody"
+              $ref: "#/components/schemas/SetWalletInstanceStatusBody"
       responses:
         "204":
           description: Wallet Instance status successfully set
@@ -231,7 +254,7 @@ components:
         - grant_type
         - assertion
 
-    SetCurrentWalletInstanceStatusBody:
+    SetWalletInstanceStatusBody:
       type: object
       properties:
         status:
@@ -249,9 +272,20 @@ components:
           type: string
         is_revoked:
           type: boolean
+        revocation_reason:
+          $ref: "#/components/schemas/RevocationReason"
       required:
         - id
         - is_revoked
+
+    RevocationReason:
+      type: string
+      enum:
+        [
+          "CERTIFICATE_REVOKED_BY_ISSUER",
+          "NEW_WALLET_INSTANCE_CREATED",
+          "REVOKED_BY_USER",
+        ]
         
     ProblemDetail:
       type: object

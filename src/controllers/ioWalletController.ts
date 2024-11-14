@@ -32,7 +32,7 @@ import { CreateWalletInstanceBody } from "../../generated/io-wallet/CreateWallet
 import { CreateWalletAttestationBody } from "../../generated/io-wallet/CreateWalletAttestationBody";
 import { WalletAttestationView } from "../../generated/io-wallet/WalletAttestationView";
 import { FF_IO_WALLET_TRIAL_ENABLED } from "../config";
-import { SetCurrentWalletInstanceStatusBody } from "../../generated/io-wallet/SetCurrentWalletInstanceStatusBody";
+import { SetWalletInstanceStatusBody } from "../../generated/io-wallet/SetWalletInstanceStatusBody";
 import { WalletInstanceData } from "../../generated/io-wallet/WalletInstanceData";
 
 const toValidationError = (errors: Errors) =>
@@ -144,7 +144,7 @@ export default class IoWalletController {
         TE.chainW(() =>
           pipe(
             req.body,
-            SetCurrentWalletInstanceStatusBody.decode,
+            SetWalletInstanceStatusBody.decode,
             E.mapLeft(toValidationError),
             TE.fromEither
           )
@@ -162,7 +162,7 @@ export default class IoWalletController {
   /**
    * Get current Wallet Instance status.
    */
-  public readonly getCurrentWalletInstanceStatus = (
+  public readonly getWalletInstanceStatus = (
     req: express.Request
   ): Promise<
     | IResponseErrorInternal
@@ -176,12 +176,58 @@ export default class IoWalletController {
     withUserFromRequest(req, async (user) =>
       pipe(
         this.ensureFiscalCodeIsAllowed(user.fiscal_code),
-        TE.map(() =>
-          this.ioWalletService.getCurrentWalletInstanceStatus(user.fiscal_code)
+        TE.chainW(() =>
+          pipe(
+            NonEmptyString.decode(req.params.walletInstanceId),
+            E.mapLeft(toValidationError),
+            TE.fromEither
+          )
+        ),
+        TE.map((walletInstanceId) =>
+          this.ioWalletService.getWalletInstanceStatus(
+            walletInstanceId,
+            user.fiscal_code
+          )
         ),
         TE.toUnion
       )()
     );
+
+  public readonly getWalletInstanceStatus1 = (req: express.Request) =>
+    withUserFromRequest(req, async (user) =>
+      pipe(
+        this.ensureFiscalCodeIsAllowed(user.fiscal_code),
+        TE.chainW(() =>
+          pipe(
+            NonEmptyString.decode(req.params.walletInstanceId),
+            TE.fromEither
+          )
+        ),
+        TE.map((walletInstanceId) =>
+          this.ioWalletService.getWalletInstanceStatus(
+            walletInstanceId,
+            user.fiscal_code
+          )
+        ),
+        TE.toUnion
+      )()
+    );
+
+  // withUserFromRequest(req, async (user) =>
+  //   pipe(
+  //     this.ensureFiscalCodeIsAllowed(user.fiscal_code),
+  //     TE.chain(() =>
+  //       withValidatedOrValidationError(
+  //         NonEmptyString.decode(req.params.walletInstanceId),
+  //         (walletInstanceId) =>
+  //           this.ioWalletService.getWalletInstanceStatus(
+  //             walletInstanceId,
+  //             user.fiscal_code
+  //           )
+  //       )
+  //     )
+  //   )
+  // );
 
   private readonly ensureUserIsAllowed = (
     userId: NonEmptyString

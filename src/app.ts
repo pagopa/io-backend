@@ -1477,13 +1477,15 @@ function registerIoWalletAPIRoutes(
   );
 
   app.get(
-    `${basePath}/wallet-instances/current/status`,
+    `${basePath}/wallet-instances/:walletInstanceId/status`,
     bearerSessionTokenAuth,
     toExpressHandler(
-      ioWalletController.getCurrentWalletInstanceStatus,
+      ioWalletController.getWalletInstanceStatus,
       ioWalletController
     )
   );
+
+  // aggiungo put `${basePath}/wallet-instances/:walletInstanceId/status`,
 }
 
 export default defaultModule;
