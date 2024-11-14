@@ -36,7 +36,7 @@ import { TrialSystemAPIClient } from "../clients/trial-system.client";
 import { Subscription } from "../../generated/trial-system-api/Subscription";
 import { WalletAttestationView } from "../../generated/io-wallet-api/WalletAttestationView";
 import { SetWalletInstanceStatusWithFiscalCodeData } from "../../generated/io-wallet-api/SetWalletInstanceStatusWithFiscalCodeData";
-import { WalletData } from "generated/io-wallet-api/WalletData";
+import { WalletData } from "../../generated/io-wallet-api/WalletData";
 
 const unprocessableContentError = "Unprocessable Content";
 const invalidRequest = "Your request didn't validate";
@@ -263,19 +263,13 @@ export default class IoWalletService {
         switch (response.status) {
           case 200:
             return ResponseSuccessJson(response.value);
-          case 400:
-            return ResponseErrorInternal(
-              `Internal server error | ${response.value}`
-            );
           case 404:
             return ResponseErrorNotFound(
               "Not Found",
               "Wallet instance not found"
             );
+          case 400:
           case 422:
-            return ResponseErrorInternal(
-              `Internal server error | ${response.value}`
-            );
           case 500:
             return ResponseErrorInternal(
               `Internal server error | ${response.value}`
