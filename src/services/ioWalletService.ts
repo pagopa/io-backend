@@ -249,7 +249,6 @@ export default class IoWalletService {
   public readonly getCurrentWalletInstanceStatus = (
     fiscal_code: FiscalCode
   ): Promise<
-    | IResponseErrorInternal
     | IResponseSuccessJson<WalletData>
     | IResponseErrorNotFound
     | IResponseErrorInternal

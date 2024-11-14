@@ -33,7 +33,7 @@ import { CreateWalletAttestationBody } from "../../generated/io-wallet/CreateWal
 import { WalletAttestationView } from "../../generated/io-wallet/WalletAttestationView";
 import { FF_IO_WALLET_TRIAL_ENABLED } from "../config";
 import { SetCurrentWalletInstanceStatusBody } from "../../generated/io-wallet/SetCurrentWalletInstanceStatusBody";
-import { WalletInstanceData } from "generated/io-wallet/WalletInstanceData";
+import { WalletInstanceData } from "../../generated/io-wallet/WalletInstanceData";
 
 const toValidationError = (errors: Errors) =>
   ResponseErrorValidation(
