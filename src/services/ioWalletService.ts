@@ -36,6 +36,7 @@ import { TrialSystemAPIClient } from "../clients/trial-system.client";
 import { Subscription } from "../../generated/trial-system-api/Subscription";
 import { WalletAttestationView } from "../../generated/io-wallet-api/WalletAttestationView";
 import { SetWalletInstanceStatusWithFiscalCodeData } from "../../generated/io-wallet-api/SetWalletInstanceStatusWithFiscalCodeData";
+import { WalletData } from "../../generated/io-wallet-api/WalletData";
 
 const unprocessableContentError = "Unprocessable Content";
 const invalidRequest = "Your request didn't validate";
@@ -227,6 +228,48 @@ export default class IoWalletService {
               unprocessableContentError,
               invalidRequest
             );
+          case 500:
+            return ResponseErrorInternal(
+              `Internal server error | ${response.value}`
+            );
+          case 503:
+            return ResponseErrorServiceTemporarilyUnavailable(
+              serviceUnavailableDetail,
+              "10"
+            );
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
+  /**
+   * Get current Wallet Instance status.
+   */
+  public readonly getCurrentWalletInstanceStatus = (
+    fiscal_code: FiscalCode
+  ): Promise<
+    | IResponseSuccessJson<WalletData>
+    | IResponseErrorNotFound
+    | IResponseErrorInternal
+    | IResponseErrorServiceUnavailable
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated =
+        await this.ioWalletApiClient.getCurrentWalletInstanceStatus({
+          "fiscal-code": fiscal_code,
+        });
+      return withValidatedOrInternalError(validated, (response) => {
+        switch (response.status) {
+          case 200:
+            return ResponseSuccessJson(response.value);
+          case 404:
+            return ResponseErrorNotFound(
+              "Not Found",
+              "Wallet instance not found"
+            );
+          case 400:
+          case 422:
           case 500:
             return ResponseErrorInternal(
               `Internal server error | ${response.value}`

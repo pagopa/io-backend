@@ -83,6 +83,22 @@ paths:
           $ref: "#/components/responses/ServiceUnavailable"
 
   /wallet-instances/current/status:
+    get:
+      summary: Retrieve the current Wallet Instance status
+      operationId: getCurrentWalletInstanceStatus
+      responses:
+        "200":
+          description: Wallet Instance status successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletInstanceData"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/Unexpected"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
     put:
       summary: Revoke current Wallet Instance
       operationId: setCurrentWalletInstanceStatus
@@ -224,6 +240,18 @@ components:
       required:
         - status
 
+    WalletInstanceData:
+      description: |-
+        Describes the status of the wallet.
+      type: object
+      properties:
+        id:
+          type: string
+        is_revoked:
+          type: boolean
+      required:
+        - id
+        - is_revoked
         
     ProblemDetail:
       type: object
