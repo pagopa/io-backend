@@ -215,8 +215,8 @@ export default class IoWalletService {
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.ioWalletApiClient.setWalletInstanceStatus({
-        id,
         body: { fiscal_code, status },
+        id,
       });
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
@@ -295,8 +295,8 @@ export default class IoWalletService {
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.ioWalletApiClient.getWalletInstanceStatus({
-        id,
         "fiscal-code": fiscal_code,
+        id,
       });
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
