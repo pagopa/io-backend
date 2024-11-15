@@ -193,42 +193,6 @@ export default class IoWalletController {
       )()
     );
 
-  public readonly getWalletInstanceStatus1 = (req: express.Request) =>
-    withUserFromRequest(req, async (user) =>
-      pipe(
-        this.ensureFiscalCodeIsAllowed(user.fiscal_code),
-        TE.chainW(() =>
-          pipe(
-            NonEmptyString.decode(req.params.walletInstanceId),
-            TE.fromEither
-          )
-        ),
-        TE.map((walletInstanceId) =>
-          this.ioWalletService.getWalletInstanceStatus(
-            walletInstanceId,
-            user.fiscal_code
-          )
-        ),
-        TE.toUnion
-      )()
-    );
-
-  // withUserFromRequest(req, async (user) =>
-  //   pipe(
-  //     this.ensureFiscalCodeIsAllowed(user.fiscal_code),
-  //     TE.chain(() =>
-  //       withValidatedOrValidationError(
-  //         NonEmptyString.decode(req.params.walletInstanceId),
-  //         (walletInstanceId) =>
-  //           this.ioWalletService.getWalletInstanceStatus(
-  //             walletInstanceId,
-  //             user.fiscal_code
-  //           )
-  //       )
-  //     )
-  //   )
-  // );
-
   private readonly ensureUserIsAllowed = (
     userId: NonEmptyString
   ): TE.TaskEither<Error, void> =>
