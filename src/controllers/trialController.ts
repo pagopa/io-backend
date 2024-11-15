@@ -12,6 +12,7 @@ import {
   IResponseSuccessAccepted,
   IResponseSuccessJson,
   IResponseSuccessRedirectToResource,
+  ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -21,6 +22,8 @@ import { withUserFromRequest } from "../types/user";
 
 import { withValidatedOrValidationError } from "../utils/responses";
 import { Subscription } from "../../generated/trial-system/Subscription";
+import { FF_IO_WALLET_TRIAL_ENABLED, IO_WALLET_TRIAL_ID } from "src/config";
+import { SubscriptionStateEnum } from "generated/trial-system/SubscriptionState";
 
 export default class TrialController {
   // eslint-disable-next-line max-params
@@ -59,10 +62,18 @@ export default class TrialController {
       withValidatedOrValidationError(
         TrialId.decode(req.params.trialId),
         (trialId) =>
-          withValidatedOrValidationError(
-            NonEmptyString.decode(user.fiscal_code),
-            (userId) => this.trialService.getSubscription(userId, trialId)
-          )
+          FF_IO_WALLET_TRIAL_ENABLED && trialId === IO_WALLET_TRIAL_ID
+            ? withValidatedOrValidationError(
+                NonEmptyString.decode(user.fiscal_code),
+                (userId) => this.trialService.getSubscription(userId, trialId)
+              )
+            : Promise.resolve(
+                ResponseSuccessJson({
+                  trialId,
+                  state: SubscriptionStateEnum["ACTIVE"],
+                  createdAt: new Date(),
+                })
+              )
       )
     );
 }
