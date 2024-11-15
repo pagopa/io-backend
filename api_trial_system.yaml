@@ -31,7 +31,8 @@ paths:
         '401':
           description: Authorization error.
         '404':
-          description: Resource not found.
+          description: |
+            Not Found. This occurs when the specified user is not listed under the trial.
         '429':
           description: Too may requests.
         '500':
@@ -44,13 +45,15 @@ paths:
       description: Subscribe the authenticated user to the given trial.
       responses:
         '201':
-          description: Success.
+          description: |
+            Created: the request has been processed and the user has been registered for the trial.
           schema:
             $ref: '#/definitions/Subscription'
         '202':
-          description: >-
-            The request has been accepted for processing, but the processing has
-            not been completed.
+          description: |
+            Accepted: the request has been received, but the user may not yet be subscribed to the trial.
+            The server will process the request asynchronously.
+            Resubmitting the same request may result in a `409 Conflict` error.
         '400':
           description: Validation error.
           schema:
@@ -131,6 +134,13 @@ definitions:
           activate the user if any slot for the trial is available.
       - ACTIVE: The user has the access to the specified trial.
       - DISABLED: The user does not have the access to the specified trial.
+
+      When a user subscribes a trial, the subscription is in the `SUBSCRIBED` state
+      If the user wants to unsubscribe, the state changes to `UNSUBSCRIBED`.
+      When the trial is going to be activated (by the Trial Manager, the owner of the trial), then the state of the
+      selected `SUBSCRIBED` users becomes `ACTIVE`.
+      The Trial Manager can change the state of any user, within its own subscription,
+      to any state (e.g. can disable a subscription setting the state to `DISABLED`).
     enum:
       - UNSUBSCRIBED
       - SUBSCRIBED
