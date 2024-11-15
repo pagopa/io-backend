@@ -106,6 +106,12 @@ paths:
           $ref: "#/components/responses/ServiceUnavailable"
 
   /wallet-instances/{id}/status:
+    parameters:
+    - in: path
+      name: id
+      required: true
+      schema:
+        type: string
     get:
       summary: Retrieve a Wallet Instance status
       operationId: getWalletInstanceStatus
