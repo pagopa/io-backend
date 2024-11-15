@@ -211,7 +211,6 @@ export default class IoWalletController {
     | IResponseErrorInternal
     | IResponseSuccessJson<WalletInstanceData>
     | IResponseErrorNotFound
-    | IResponseErrorInternal
     | IResponseErrorServiceUnavailable
     | IResponseErrorValidation
     | IResponseErrorForbiddenNotAuthorized
