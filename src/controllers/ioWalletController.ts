@@ -21,6 +21,7 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 
 import { pipe } from "fp-ts/lib/function";
+import { sequenceS } from "fp-ts/lib/Apply";
 import { Errors } from "io-ts";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
@@ -118,6 +119,48 @@ export default class IoWalletController {
           this.ioWalletService.createWalletAttestation(
             assertion,
             grant_type,
+            user.fiscal_code
+          )
+        ),
+        TE.toUnion
+      )()
+    );
+
+  /**
+   * Update current Wallet Instance status.
+   */
+  public readonly setWalletInstanceStatus = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseSuccessNoContent
+    | IResponseErrorServiceUnavailable
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+  > =>
+    withUserFromRequest(req, async (user) =>
+      pipe(
+        this.ensureFiscalCodeIsAllowed(user.fiscal_code),
+        TE.chainW(() =>
+          pipe(
+            sequenceS(E.Apply)({
+              body: pipe(
+                req.body,
+                SetWalletInstanceStatusBody.decode,
+                E.mapLeft(toValidationError)
+              ),
+              id: pipe(
+                NonEmptyString.decode(req.params.walletInstanceId),
+                E.mapLeft(toValidationError)
+              ),
+            }),
+            TE.fromEither
+          )
+        ),
+        TE.map(({ id, body: { status } }) =>
+          this.ioWalletService.setWalletInstanceStatus(
+            id,
+            status,
             user.fiscal_code
           )
         ),

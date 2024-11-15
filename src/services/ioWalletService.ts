@@ -204,6 +204,44 @@ export default class IoWalletService {
   /**
    * Update current Wallet Instance status.
    */
+  public readonly setWalletInstanceStatus = (
+    id: NonEmptyString,
+    status: SetWalletInstanceStatusWithFiscalCodeData["status"],
+    fiscal_code: SetWalletInstanceStatusWithFiscalCodeData["fiscal_code"]
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseSuccessNoContent
+    | IResponseErrorServiceUnavailable
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.ioWalletApiClient.setWalletInstanceStatus({
+        id,
+        body: { fiscal_code, status },
+      });
+      return withValidatedOrInternalError(validated, (response) => {
+        switch (response.status) {
+          case 204:
+            return ResponseSuccessNoContent();
+          case 400:
+          case 422:
+          case 500:
+            return ResponseErrorInternal(
+              `Internal server error | ${response.value}`
+            );
+          case 503:
+            return ResponseErrorServiceTemporarilyUnavailable(
+              serviceUnavailableDetail,
+              "10"
+            );
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
+  /**
+   * Update current Wallet Instance status.
+   */
   public readonly setCurrentWalletInstanceStatus = (
     status: SetWalletInstanceStatusWithFiscalCodeData["status"],
     fiscal_code: SetWalletInstanceStatusWithFiscalCodeData["fiscal_code"]

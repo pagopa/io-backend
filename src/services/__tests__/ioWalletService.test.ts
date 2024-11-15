@@ -12,6 +12,7 @@ const mockGetNonce = jest.fn();
 const mockCreateWalletInstance = jest.fn();
 const mockCreateWalletAttestation = jest.fn();
 const mockHealthCheck = jest.fn();
+const mockGetWalletInstanceStatus = jest.fn();
 const mockGetCurrentWalletInstanceStatus = jest.fn();
 const mockSetWalletInstanceStatus = jest.fn();
 const mockSetCurrentWalletInstanceStatus = jest.fn();
@@ -39,10 +40,13 @@ mockCreateWalletAttestation.mockImplementation(() =>
   })
 );
 
-mockGetCurrentWalletInstanceStatus.mockImplementation(() =>
+mockGetWalletInstanceStatus.mockImplementation(() =>
   t.success({
     status: 200,
-    value: "value",
+    value: {
+      id: "foo",
+      is_revoked: "false",
+    },
   })
 );
 
@@ -58,22 +62,13 @@ mockSetCurrentWalletInstanceStatus.mockImplementation(() =>
   })
 );
 
-mockGetCurrentWalletInstanceStatus.mockImplementation(() =>
-  t.success({
-    status: 200,
-    value: {
-      id: "foo",
-      is_revoked: "false",
-    },
-  })
-);
-
 const api = {
   getEntityConfiguration: mockGetEntityConfiguration,
   getNonce: mockGetNonce,
   createWalletInstance: mockCreateWalletInstance,
   createWalletAttestation: mockCreateWalletAttestation,
   healthCheck: mockHealthCheck,
+  getWalletInstanceStatus: mockGetWalletInstanceStatus,
   getCurrentWalletInstanceStatus: mockGetCurrentWalletInstanceStatus,
   setWalletInstanceStatus: mockSetWalletInstanceStatus,
   setCurrentWalletInstanceStatus: mockSetCurrentWalletInstanceStatus,
@@ -99,6 +94,8 @@ const trialSystemApi = {
 } as unknown as ReturnType<TrialSystemAPIClient>;
 
 const aFiscalCode = "GRBGPP87L04L741X" as FiscalCode;
+
+const aId = "id" as NonEmptyString;
 
 describe("IoWalletService#getNonce", () => {
   beforeEach(() => {
@@ -520,7 +517,7 @@ describe("IoWalletService#setCurrentWalletInstanceStatus", () => {
   });
 });
 
-describe("IoWalletService#getCurrentWalletInstanceStatus", () => {
+describe("IoWalletService#getWalletInstanceStatus", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -528,9 +525,10 @@ describe("IoWalletService#getCurrentWalletInstanceStatus", () => {
   it("should make the correct api call", async () => {
     const service = new IoWalletService(api, trialSystemApi);
 
-    await service.getCurrentWalletInstanceStatus(aFiscalCode);
+    await service.getWalletInstanceStatus(aId, aFiscalCode);
 
-    expect(mockGetCurrentWalletInstanceStatus).toHaveBeenCalledWith({
+    expect(mockGetWalletInstanceStatus).toHaveBeenCalledWith({
+      id: aId,
       "fiscal-code": aFiscalCode,
     });
   });
@@ -538,7 +536,7 @@ describe("IoWalletService#getCurrentWalletInstanceStatus", () => {
   it("should handle a success response", async () => {
     const service = new IoWalletService(api, trialSystemApi);
 
-    const res = await service.getCurrentWalletInstanceStatus(aFiscalCode);
+    const res = await service.getWalletInstanceStatus(aId, aFiscalCode);
 
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
@@ -546,13 +544,13 @@ describe("IoWalletService#getCurrentWalletInstanceStatus", () => {
   });
 
   it("should handle an internal error when the API client returns 400", async () => {
-    mockGetCurrentWalletInstanceStatus.mockImplementationOnce(() =>
+    mockGetWalletInstanceStatus.mockImplementationOnce(() =>
       t.success({ status: 400 })
     );
 
     const service = new IoWalletService(api, trialSystemApi);
 
-    const res = await service.getCurrentWalletInstanceStatus(aFiscalCode);
+    const res = await service.getWalletInstanceStatus(aId, aFiscalCode);
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal",
@@ -560,13 +558,13 @@ describe("IoWalletService#getCurrentWalletInstanceStatus", () => {
   });
 
   it("should handle a not found error when the API client returns 404", async () => {
-    mockGetCurrentWalletInstanceStatus.mockImplementationOnce(() =>
+    mockGetWalletInstanceStatus.mockImplementationOnce(() =>
       t.success({ status: 404 })
     );
 
     const service = new IoWalletService(api, trialSystemApi);
 
-    const res = await service.getCurrentWalletInstanceStatus(aFiscalCode);
+    const res = await service.getWalletInstanceStatus(aId, aFiscalCode);
 
     expect(res).toMatchObject({
       kind: "IResponseErrorNotFound",
@@ -574,13 +572,13 @@ describe("IoWalletService#getCurrentWalletInstanceStatus", () => {
   });
 
   it("should handle an internal error when the API client returns 422", async () => {
-    mockGetCurrentWalletInstanceStatus.mockImplementationOnce(() =>
+    mockGetWalletInstanceStatus.mockImplementationOnce(() =>
       t.success({ status: 422 })
     );
 
     const service = new IoWalletService(api, trialSystemApi);
 
-    const res = await service.getCurrentWalletInstanceStatus(aFiscalCode);
+    const res = await service.getWalletInstanceStatus(aId, aFiscalCode);
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal",
@@ -589,13 +587,13 @@ describe("IoWalletService#getCurrentWalletInstanceStatus", () => {
 
   it("should handle an internal error when the API client returns 500", async () => {
     const aGenericProblem = {};
-    mockGetCurrentWalletInstanceStatus.mockImplementationOnce(() =>
+    mockGetWalletInstanceStatus.mockImplementationOnce(() =>
       t.success({ status: 500, value: aGenericProblem })
     );
 
     const service = new IoWalletService(api, trialSystemApi);
 
-    const res = await service.getCurrentWalletInstanceStatus(aFiscalCode);
+    const res = await service.getWalletInstanceStatus(aId, aFiscalCode);
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal",
@@ -604,13 +602,13 @@ describe("IoWalletService#getCurrentWalletInstanceStatus", () => {
 
   it("should handle a service unavailable error when the API client returns 503", async () => {
     const aGenericProblem = {};
-    mockGetCurrentWalletInstanceStatus.mockImplementationOnce(() =>
+    mockGetWalletInstanceStatus.mockImplementationOnce(() =>
       t.success({ status: 503, value: aGenericProblem })
     );
 
     const service = new IoWalletService(api, trialSystemApi);
 
-    const res = await service.getCurrentWalletInstanceStatus(aFiscalCode);
+    const res = await service.getWalletInstanceStatus(aId, aFiscalCode);
 
     expect(res).toMatchObject({
       kind: "IResponseErrorServiceUnavailable",
@@ -619,13 +617,13 @@ describe("IoWalletService#getCurrentWalletInstanceStatus", () => {
 
   it("should handle an internal error when the API client returns a code not specified in spec", async () => {
     const aGenericProblem = {};
-    mockGetCurrentWalletInstanceStatus.mockImplementationOnce(() =>
+    mockGetWalletInstanceStatus.mockImplementationOnce(() =>
       t.success({ status: 599, value: aGenericProblem })
     );
 
     const service = new IoWalletService(api, trialSystemApi);
 
-    const res = await service.getCurrentWalletInstanceStatus(aFiscalCode);
+    const res = await service.getWalletInstanceStatus(aId, aFiscalCode);
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal",
@@ -633,12 +631,12 @@ describe("IoWalletService#getCurrentWalletInstanceStatus", () => {
   });
 
   it("should return an error if the api call throws an error", async () => {
-    mockGetCurrentWalletInstanceStatus.mockImplementationOnce(() => {
+    mockGetWalletInstanceStatus.mockImplementationOnce(() => {
       throw new Error();
     });
     const service = new IoWalletService(api, trialSystemApi);
 
-    const res = await service.getCurrentWalletInstanceStatus(aFiscalCode);
+    const res = await service.getWalletInstanceStatus(aId, aFiscalCode);
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal",

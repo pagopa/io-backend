@@ -1467,6 +1467,7 @@ function registerIoWalletAPIRoutes(
     )
   );
 
+  // TODO SIW-1843
   app.put(
     `${basePath}/wallet-instances/current/status`,
     bearerSessionTokenAuth,
@@ -1485,7 +1486,14 @@ function registerIoWalletAPIRoutes(
     )
   );
 
-  // aggiungo put `${basePath}/wallet-instances/:walletInstanceId/status`,
+  app.put(
+    `${basePath}/wallet-instances/:walletInstanceId/status`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      ioWalletController.setWalletInstanceStatus,
+      ioWalletController
+    )
+  );
 }
 
 export default defaultModule;
