@@ -65,7 +65,7 @@ export default class TrialController {
       withValidatedOrValidationError(
         TrialId.decode(req.params.trialId),
         (trialId) =>
-          FF_IO_WALLET_TRIAL_ENABLED && trialId === IO_WALLET_TRIAL_ID
+          trialId !== IO_WALLET_TRIAL_ID || FF_IO_WALLET_TRIAL_ENABLED
             ? withValidatedOrValidationError(
                 NonEmptyString.decode(user.fiscal_code),
                 (userId) => this.trialService.getSubscription(userId, trialId)
