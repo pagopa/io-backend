@@ -1,7 +1,10 @@
 /* tslint:disable:no-any */
 /* tslint:disable:no-object-mutation */
 
-import { ResponseSuccessAccepted, ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
+import {
+  ResponseSuccessAccepted,
+  ResponseSuccessJson,
+} from "@pagopa/ts-commons/lib/responses";
 
 import mockReq from "../../__mocks__/request";
 import { mockedUser } from "../../__mocks__/user_mock";
@@ -9,7 +12,7 @@ import TrialController from "../trialController";
 import TrialService from "../../services/trialService";
 import { SubscriptionStateEnum } from "../../../generated/trial-system/SubscriptionState";
 
-const aTrialId: string = "trial-id";
+const aTrialId: string = "IO_WALLET_TRIAL_ID";
 const nowDate = new Date();
 
 const aValidSubscription = {
@@ -22,7 +25,7 @@ const mockGetSubscription = jest.fn();
 
 const trialServiceMock = {
   createSubscription: mockCreateSubscription,
-  getSubscription: mockGetSubscription
+  getSubscription: mockGetSubscription,
 } as any as TrialService;
 
 describe("trialController#createTrialSubscription", () => {
@@ -43,10 +46,13 @@ describe("trialController#createTrialSubscription", () => {
 
     const response = await controller.createTrialSubscription(req);
 
-    expect(mockCreateSubscription).toHaveBeenCalledWith(mockedUser.fiscal_code, aTrialId);
+    expect(mockCreateSubscription).toHaveBeenCalledWith(
+      mockedUser.fiscal_code,
+      aTrialId
+    );
     expect(response).toEqual({
       apply: expect.any(Function),
-      kind: "IResponseSuccessAccepted"
+      kind: "IResponseSuccessAccepted",
     });
   });
 
@@ -63,7 +69,7 @@ describe("trialController#createTrialSubscription", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseErrorValidation",
-      detail: expect.stringContaining("Bad request")
+      detail: expect.stringContaining("Bad request"),
     });
   });
 });
@@ -86,11 +92,14 @@ describe("trialController#getTrialSubscription", () => {
 
     const response = await controller.getTrialSubscription(req);
 
-    expect(mockGetSubscription).toHaveBeenCalledWith(mockedUser.fiscal_code, aTrialId);
+    expect(mockGetSubscription).toHaveBeenCalledWith(
+      mockedUser.fiscal_code,
+      aTrialId
+    );
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: aValidSubscription
+      value: aValidSubscription,
     });
   });
 
@@ -107,7 +116,7 @@ describe("trialController#getTrialSubscription", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseErrorValidation",
-      detail: expect.stringContaining("Bad request")
+      detail: expect.stringContaining("Bad request"),
     });
   });
 });
