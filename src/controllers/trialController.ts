@@ -17,13 +17,13 @@ import {
 
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import TrialService from "src/services/trialService";
+import { FF_IO_WALLET_TRIAL_ENABLED, IO_WALLET_TRIAL_ID } from "src/config";
 import { TrialId } from "../../generated/trial-system-api/TrialId";
 import { withUserFromRequest } from "../types/user";
 
 import { withValidatedOrValidationError } from "../utils/responses";
 import { Subscription } from "../../generated/trial-system/Subscription";
-import { FF_IO_WALLET_TRIAL_ENABLED, IO_WALLET_TRIAL_ID } from "src/config";
-import { SubscriptionStateEnum } from "generated/trial-system/SubscriptionState";
+import { SubscriptionStateEnum } from "../../generated/trial-system/SubscriptionState";
 
 export default class TrialController {
   // eslint-disable-next-line max-params
@@ -69,9 +69,9 @@ export default class TrialController {
               )
             : Promise.resolve(
                 ResponseSuccessJson({
-                  trialId,
-                  state: SubscriptionStateEnum["ACTIVE"],
                   createdAt: new Date(),
+                  state: SubscriptionStateEnum.ACTIVE,
+                  trialId,
                 })
               )
       )
