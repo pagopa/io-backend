@@ -238,32 +238,32 @@ export default class IoWalletController {
   private readonly ensureUserIsAllowed = (
     userId: NonEmptyString
   ): TE.TaskEither<Error, void> =>
+    pipe(
+      TE.tryCatch(
+        () => this.ioWalletService.getSubscription(userId),
+        E.toError
+      ),
+      // if a successful response with state != "ACTIVE" or an error is returned, return left
+      TE.chain((response) =>
+        response.kind === "IResponseSuccessJson" &&
+        response.value.state === "ACTIVE"
+          ? TE.right(undefined)
+          : TE.left(new Error())
+      )
+    );
+
+  private readonly ensureFiscalCodeIsAllowed = (fiscalCode: FiscalCode) =>
     FF_IO_WALLET_TRIAL_ENABLED
       ? pipe(
-          TE.tryCatch(
-            () => this.ioWalletService.getSubscription(userId),
-            E.toError
-          ),
-          // if a successful response with state != "ACTIVE" or an error is returned, return left
-          TE.chain((response) =>
-            response.kind === "IResponseSuccessJson" &&
-            response.value.state === "ACTIVE"
-              ? TE.right(undefined)
-              : TE.left(new Error())
+          fiscalCode,
+          NonEmptyString.decode,
+          TE.fromEither,
+          TE.chainW(this.ensureUserIsAllowed),
+          TE.mapLeft(() =>
+            getResponseErrorForbiddenNotAuthorized(
+              "Not authorized to perform this action"
+            )
           )
         )
       : TE.right(undefined);
-
-  private readonly ensureFiscalCodeIsAllowed = (fiscalCode: FiscalCode) =>
-    pipe(
-      fiscalCode,
-      NonEmptyString.decode,
-      TE.fromEither,
-      TE.chainW(this.ensureUserIsAllowed),
-      TE.mapLeft(() =>
-        getResponseErrorForbiddenNotAuthorized(
-          "Not authorized to perform this action"
-        )
-      )
-    );
 }
