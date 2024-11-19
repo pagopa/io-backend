@@ -12,15 +12,21 @@ import {
   IResponseSuccessAccepted,
   IResponseSuccessJson,
   IResponseSuccessRedirectToResource,
+  ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import TrialService from "src/services/trialService";
+import {
+  FF_IO_WALLET_TRIAL_ENABLED,
+  IO_WALLET_TRIAL_ID,
+} from "../../src/config";
 import { TrialId } from "../../generated/trial-system-api/TrialId";
 import { withUserFromRequest } from "../types/user";
 
 import { withValidatedOrValidationError } from "../utils/responses";
 import { Subscription } from "../../generated/trial-system/Subscription";
+import { SubscriptionStateEnum } from "../../generated/trial-system/SubscriptionState";
 
 export default class TrialController {
   // eslint-disable-next-line max-params
@@ -59,10 +65,19 @@ export default class TrialController {
       withValidatedOrValidationError(
         TrialId.decode(req.params.trialId),
         (trialId) =>
-          withValidatedOrValidationError(
-            NonEmptyString.decode(user.fiscal_code),
-            (userId) => this.trialService.getSubscription(userId, trialId)
-          )
+          // if the trialId is not the one from the wallet, the trial system is always called; otherwise, we check the value of FF_IO_WALLET_TRIAL_ENABLED
+          trialId !== IO_WALLET_TRIAL_ID || FF_IO_WALLET_TRIAL_ENABLED
+            ? withValidatedOrValidationError(
+                NonEmptyString.decode(user.fiscal_code),
+                (userId) => this.trialService.getSubscription(userId, trialId)
+              )
+            : Promise.resolve(
+                ResponseSuccessJson({
+                  createdAt: new Date(),
+                  state: SubscriptionStateEnum.ACTIVE,
+                  trialId,
+                })
+              )
       )
     );
 }
