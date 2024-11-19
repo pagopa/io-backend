@@ -65,6 +65,7 @@ export default class TrialController {
       withValidatedOrValidationError(
         TrialId.decode(req.params.trialId),
         (trialId) =>
+          // if the trialId is not the one from the wallet, the trial system is always called; otherwise, we check the value of FF_IO_WALLET_TRIAL_ENABLED
           trialId !== IO_WALLET_TRIAL_ID || FF_IO_WALLET_TRIAL_ENABLED
             ? withValidatedOrValidationError(
                 NonEmptyString.decode(user.fiscal_code),
