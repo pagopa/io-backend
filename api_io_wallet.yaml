@@ -83,22 +83,6 @@ paths:
           $ref: "#/components/responses/ServiceUnavailable"
 
   /wallet-instances/current/status:
-    get:
-      summary: Retrieve the current Wallet Instance status
-      operationId: getCurrentWalletInstanceStatus
-      responses:
-        "200":
-          description: Wallet Instance status successfully retrieved
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/WalletInstanceData"
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "500":
-          $ref: "#/components/responses/Unexpected"
-        "503":
-          $ref: "#/components/responses/ServiceUnavailable"
     put:
       summary: Revoke current Wallet Instance
       operationId: setCurrentWalletInstanceStatus
@@ -106,7 +90,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/SetCurrentWalletInstanceStatusBody"
+              $ref: "#/components/schemas/SetWalletInstanceStatusBody"
       responses:
         "204":
           description: Wallet Instance status successfully set
@@ -116,6 +100,53 @@ paths:
           $ref: "#/components/responses/Forbidden"
         "422":
           $ref: "#/components/responses/UnprocessableContent"
+        "500":
+          $ref: "#/components/responses/Unexpected"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /wallet-instances/{id}/status:
+    parameters:
+    - in: path
+      name: id
+      required: true
+      schema:
+        type: string
+    get:
+      summary: Retrieve a Wallet Instance status
+      operationId: getWalletInstanceStatus
+      responses:
+        "200":
+          description: Wallet Instance status successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletInstanceData"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/Unexpected"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+    put:
+      summary: Revoke a Wallet Instance
+      operationId: setWalletInstanceStatus
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetWalletInstanceStatusBody"
+      responses:
+        "204":
+          description: Wallet Instance status successfully set
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "500":
           $ref: "#/components/responses/Unexpected"
         "503":
@@ -231,7 +262,7 @@ components:
         - grant_type
         - assertion
 
-    SetCurrentWalletInstanceStatusBody:
+    SetWalletInstanceStatusBody:
       type: object
       properties:
         status:
@@ -249,9 +280,20 @@ components:
           type: string
         is_revoked:
           type: boolean
+        revocation_reason:
+          $ref: "#/components/schemas/RevocationReason"
       required:
         - id
         - is_revoked
+
+    RevocationReason:
+      type: string
+      enum:
+        [
+          "CERTIFICATE_REVOKED_BY_ISSUER",
+          "NEW_WALLET_INSTANCE_CREATED",
+          "REVOKED_BY_USER",
+        ]
         
     ProblemDetail:
       type: object
