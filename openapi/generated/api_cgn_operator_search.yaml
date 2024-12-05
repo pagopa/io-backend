@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 16.7.0
+  version: 15.0.0
   title: Carta Giovani Nazionale Operator Search API
 host: localhost
 basePath: /api/v1/cgn/operator-search
@@ -336,7 +336,7 @@ definitions:
       pageSize:
         type: integer
         description: elements per page
-        default: 100
+        default: 200
         minimum: 1
       userCoordinates:
         $ref: '#/definitions/Coordinates'
@@ -439,7 +439,7 @@ definitions:
       pageSize:
         type: integer
         description: elements per page
-        default: 100
+        default: 200
         minimum: 1
   OnlineMerchantSearchRequest:
     type: object
@@ -461,7 +461,7 @@ definitions:
       pageSize:
         type: integer
         description: elements per page
-        default: 100
+        default: 200
         minimum: 1
   Discount:
     type: object
