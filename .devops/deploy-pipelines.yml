@@ -32,9 +32,6 @@ parameters:
       appbackendl2:
         appname: io-p-app-appbackendl2
         rg: io-p-rg-linux
-      appbackendl3:
-        appname: io-p-app-appbackendl3
-        rg: io-p-rg-linux
       appbackendli:
         appname: io-p-app-appbackendli
         rg: io-p-rg-linux
