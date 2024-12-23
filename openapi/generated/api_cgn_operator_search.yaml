@@ -316,6 +316,8 @@ definitions:
         minimum: 0
       newDiscounts:
         type: boolean
+      numberOfNewDiscounts:
+        type: number
   OfflineMerchantSearchRequest:
     type: object
     properties:
@@ -422,6 +424,8 @@ definitions:
         $ref: '#/definitions/DiscountCodeType'
       newDiscounts:
         type: boolean
+      numberOfNewDiscounts:
+        type: number
   SearchRequest:
     type: object
     properties:
