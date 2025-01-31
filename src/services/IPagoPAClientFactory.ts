@@ -13,6 +13,6 @@ export interface IPagoPAClientFactoryInterface {
    * Retrieves a configured instance of the API client.
    */
   readonly getClient: (
-    environment: PagoPAEnvironment
+    environment: PagoPAEnvironment,
   ) => ReturnType<PagoPAClient>;
 }

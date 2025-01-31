@@ -1,12 +1,13 @@
-import * as redis from "redis";
-import * as E from "fp-ts/lib/Either";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import * as E from "fp-ts/lib/Either";
 import { Either } from "fp-ts/lib/Either";
-import * as TE from "fp-ts/lib/TaskEither";
-import * as O from "fp-ts/lib/Option";
 import { parse } from "fp-ts/lib/Json";
+import * as O from "fp-ts/lib/Option";
+import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
+import * as redis from "redis";
+
 import { UserMetadata } from "../../generated/backend/UserMetadata";
 import { User } from "../types/user";
 import { log } from "../utils/logger";
@@ -26,9 +27,70 @@ export default class RedisUserMetadataStorage
   implements IUserMetadataStorage
 {
   constructor(
-    private readonly redisClient: redis.RedisClientType | redis.RedisClusterType
+    private readonly redisClient:
+      | redis.RedisClientType
+      | redis.RedisClusterType,
   ) {
     super();
+  }
+
+  private loadUserMetadataByFiscalCode(
+    fiscalCode: string,
+  ): Promise<Either<Error, UserMetadata>> {
+    return pipe(
+      TE.tryCatch(
+        () => this.redisClient.get(`${userMetadataPrefix}${fiscalCode}`),
+        () => new Error("REDIS CLIENT ERROR"),
+      ),
+      TE.chain(
+        flow(
+          O.fromNullable,
+          TE.fromOption(() => metadataNotFoundError),
+        ),
+      ),
+      TE.chain(
+        flow(
+          parse,
+          E.mapLeft(() => new Error("Unable to parse the user metadata json")),
+          TE.fromEither,
+          TE.chain(
+            flow(
+              UserMetadata.decode,
+              TE.fromEither,
+              TE.mapLeft((err) => {
+                log.error(
+                  "Unable to decode the user metadata: %s",
+                  errorsToReadableMessages(err).join("|"),
+                );
+                return new Error("Unable to decode the user metadata");
+              }),
+            ),
+          ),
+        ),
+      ),
+    )();
+  }
+
+  /**
+   * Delete all user metdata
+   *
+   * {@inheritDoc}
+   */
+  public del(fiscalCode: FiscalCode): Promise<Either<Error, true>> {
+    return pipe(
+      TE.tryCatch(() => {
+        log.info(`Deleting metadata for ${fiscalCode}`);
+        return this.redisClient.del(`${userMetadataPrefix}${fiscalCode}`);
+      }, E.toError),
+      TE.map<number, true>(() => true),
+    )();
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public async get(user: User): Promise<Either<Error, UserMetadata>> {
+    return this.loadUserMetadataByFiscalCode(user.fiscal_code);
   }
 
   /**
@@ -39,10 +101,10 @@ export default class RedisUserMetadataStorage
    */
   public async set(
     user: User,
-    payload: UserMetadata
+    payload: UserMetadata,
   ): Promise<Either<Error, boolean>> {
     const getUserMetadataResult = await this.loadUserMetadataByFiscalCode(
-      user.fiscal_code
+      user.fiscal_code,
     );
     if (
       E.isRight(getUserMetadataResult) &&
@@ -61,70 +123,11 @@ export default class RedisUserMetadataStorage
         () =>
           this.redisClient.set(
             `${userMetadataPrefix}${user.fiscal_code}`,
-            JSON.stringify(payload)
+            JSON.stringify(payload),
           ),
-        E.toError
+        E.toError,
       ),
-      this.singleStringReplyAsync
-    )();
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public async get(user: User): Promise<Either<Error, UserMetadata>> {
-    return this.loadUserMetadataByFiscalCode(user.fiscal_code);
-  }
-
-  /**
-   * Delete all user metdata
-   *
-   * {@inheritDoc}
-   */
-  public del(fiscalCode: FiscalCode): Promise<Either<Error, true>> {
-    return pipe(
-      TE.tryCatch(() => {
-        log.info(`Deleting metadata for ${fiscalCode}`);
-        return this.redisClient.del(`${userMetadataPrefix}${fiscalCode}`);
-      }, E.toError),
-      TE.map<number, true>(() => true)
-    )();
-  }
-
-  private loadUserMetadataByFiscalCode(
-    fiscalCode: string
-  ): Promise<Either<Error, UserMetadata>> {
-    return pipe(
-      TE.tryCatch(
-        () => this.redisClient.get(`${userMetadataPrefix}${fiscalCode}`),
-        () => new Error("REDIS CLIENT ERROR")
-      ),
-      TE.chain(
-        flow(
-          O.fromNullable,
-          TE.fromOption(() => metadataNotFoundError)
-        )
-      ),
-      TE.chain(
-        flow(
-          parse,
-          E.mapLeft(() => new Error("Unable to parse the user metadata json")),
-          TE.fromEither,
-          TE.chain(
-            flow(
-              UserMetadata.decode,
-              TE.fromEither,
-              TE.mapLeft((err) => {
-                log.error(
-                  "Unable to decode the user metadata: %s",
-                  errorsToReadableMessages(err).join("|")
-                );
-                return new Error("Unable to decode the user metadata");
-              })
-            )
-          )
-        )
-      )
+      this.singleStringReplyAsync,
     )();
   }
 }

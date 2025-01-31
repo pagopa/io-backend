@@ -3,10 +3,6 @@
  * app by forwarding the call to the API system.
  */
 
-import * as express from "express";
-import * as TE from "fp-ts/TaskEither";
-import * as t from "io-ts";
-
 import {
   IResponseErrorConflict,
   IResponseErrorInternal,
@@ -15,18 +11,17 @@ import {
   IResponseSuccessJson,
   ResponseErrorInternal,
 } from "@pagopa/ts-commons/lib/responses";
-
-import { pipe } from "fp-ts/lib/function";
 import { EmailString, FiscalCode } from "@pagopa/ts-commons/lib/strings";
-
+import * as express from "express";
+import * as TE from "fp-ts/TaskEither";
+import { pipe } from "fp-ts/lib/function";
 import { AccessHistoryPage } from "generated/io-fims/AccessHistoryPage";
 import { ExportRequest } from "generated/io-fims/ExportRequest";
+import * as t from "io-ts";
 
 import IoFimsService from "../services/fimsService";
-
-import { withUserFromRequest } from "../types/user";
 import ProfileService from "../services/profileService";
-
+import { withUserFromRequest } from "../types/user";
 import { profileWithEmailValidatedOrError } from "../utils/profile";
 
 const responseErrorInternal = (reason: string) => (e: Error) =>
@@ -43,14 +38,14 @@ const responseErrorInternal = (reason: string) => (e: Error) =>
 const getAccessHistory = (
   ioFimsService: IoFimsService,
   fiscalCode: FiscalCode,
-  page?: string
+  page?: string,
 ) =>
   pipe(
     TE.tryCatch(
       () => ioFimsService.getAccessHistory(fiscalCode, page),
-      () => new Error("Error while fetching the access history")
+      () => new Error("Error while fetching the access history"),
     ),
-    TE.mapLeft(responseErrorInternal("Fetching error"))
+    TE.mapLeft(responseErrorInternal("Fetching error")),
   );
 
 /**
@@ -64,28 +59,17 @@ const getAccessHistory = (
 const requestExport = (
   ioFimsService: IoFimsService,
   fiscalCode: FiscalCode,
-  email: EmailString
+  email: EmailString,
 ) =>
   pipe(
     TE.tryCatch(
       () => ioFimsService.requestExport(fiscalCode, email),
-      () => new Error("Error while requesting the export")
+      () => new Error("Error while requesting the export"),
     ),
-    TE.mapLeft(responseErrorInternal("Error while requesting the export"))
+    TE.mapLeft(responseErrorInternal("Error while requesting the export")),
   );
 
 export default class IoFimsController {
-  /**
-   * Constructs an instance of IoFimsController.
-   *
-   * @param ioFimsService - The service responsible for FIMS operations.
-   * @param profileService - The service responsible for profile operations.
-   */
-  constructor(
-    private readonly ioFimsService: IoFimsService,
-    private readonly profileService: ProfileService
-  ) {}
-
   /**
    * Retrieves the access history for a user.
    *
@@ -96,10 +80,10 @@ export default class IoFimsController {
    * - `IResponseSuccessJson<AccessHistoryPage>` if the access history is successfully retrieved.
    */
   public readonly getAccessHistory = (
-    req: express.Request
+    req: express.Request,
   ): Promise<
-    | IResponseErrorValidation
     | IResponseErrorInternal
+    | IResponseErrorValidation
     | IResponseSuccessJson<AccessHistoryPage>
   > =>
     withUserFromRequest(req, async (user) =>
@@ -108,10 +92,10 @@ export default class IoFimsController {
         TE.fromEither,
         TE.altW(() => TE.right(undefined)),
         TE.flatMap((page) =>
-          getAccessHistory(this.ioFimsService, user.fiscal_code, page)
+          getAccessHistory(this.ioFimsService, user.fiscal_code, page),
         ),
-        TE.toUnion
-      )()
+        TE.toUnion,
+      )(),
     );
 
   /**
@@ -126,11 +110,11 @@ export default class IoFimsController {
    * - `IResponseSuccessAccepted<ExportRequest>` if the export request is accepted.
    */
   public readonly requestExport = (
-    req: express.Request
+    req: express.Request,
   ): Promise<
-    | IResponseErrorValidation
     | IResponseErrorConflict
     | IResponseErrorInternal
+    | IResponseErrorValidation
     | IResponseSuccessAccepted<ExportRequest>
   > =>
     withUserFromRequest(req, async (user) =>
@@ -138,13 +122,24 @@ export default class IoFimsController {
         profileWithEmailValidatedOrError(this.profileService, user),
         TE.mapLeft(
           responseErrorInternal(
-            "Error retrieving a user profile with validated email address"
-          )
+            "Error retrieving a user profile with validated email address",
+          ),
         ),
         TE.flatMap((profile) =>
-          requestExport(this.ioFimsService, profile.fiscal_code, profile.email)
+          requestExport(this.ioFimsService, profile.fiscal_code, profile.email),
         ),
-        TE.toUnion
-      )()
+        TE.toUnion,
+      )(),
     );
+
+  /**
+   * Constructs an instance of IoFimsController.
+   *
+   * @param ioFimsService - The service responsible for FIMS operations.
+   * @param profileService - The service responsible for profile operations.
+   */
+  constructor(
+    private readonly ioFimsService: IoFimsService,
+    private readonly profileService: ProfileService,
+  ) {}
 }

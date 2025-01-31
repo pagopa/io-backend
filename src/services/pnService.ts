@@ -1,13 +1,13 @@
+import { FiscalCode } from "../../generated/backend/FiscalCode";
 import { IoCourtesyDigitalAddressActivation } from "../../generated/piattaforma-notifiche-courtesy/IoCourtesyDigitalAddressActivation";
 import { PNClientFactory, PNEnvironment } from "../clients/pn-clients";
-import { FiscalCode } from "../../generated/backend/FiscalCode";
 
 const upsertPnActivationService =
   (PnAddressBookIOClientSelector: ReturnType<typeof PNClientFactory>) =>
   (
     pnEnvironment: PNEnvironment,
     fiscalCode: FiscalCode,
-    activationStatusPayload: IoCourtesyDigitalAddressActivation
+    activationStatusPayload: IoCourtesyDigitalAddressActivation,
   ) =>
     PnAddressBookIOClientSelector(pnEnvironment).setCourtesyAddressIo({
       body: activationStatusPayload,
@@ -22,7 +22,7 @@ const getPnActivationService =
     });
 
 export const PNService = (
-  PnAddressBookIOClientSelector: ReturnType<typeof PNClientFactory>
+  PnAddressBookIOClientSelector: ReturnType<typeof PNClientFactory>,
 ) => ({
   getPnActivation: getPnActivationService(PnAddressBookIOClientSelector),
   upsertPnActivation: upsertPnActivationService(PnAddressBookIOClientSelector),

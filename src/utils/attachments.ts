@@ -1,10 +1,11 @@
 import * as A from "fp-ts/lib/Array";
-import { pipe } from "fp-ts/lib/function";
 import * as T from "fp-ts/lib/Task";
 import { Task } from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
+import { pipe } from "fp-ts/lib/function";
 import { MessageAttachment } from "generated/backend/MessageAttachment";
 import { PrescriptionData } from "generated/backend/PrescriptionData";
+
 import { toBarcode } from "./barcode";
 
 const MIME_TYPES = {
@@ -27,7 +28,7 @@ const toBarcodeAttachments = (name: string, value: string) =>
       { content: barcodes.svg, mime_type: MIME_TYPES.svg, name },
     ]),
     TE.mapLeft(() => []),
-    TE.toUnion
+    TE.toUnion,
   );
 
 /**
@@ -36,17 +37,17 @@ const toBarcodeAttachments = (name: string, value: string) =>
  * the rendered barcode (svg and png) for each field.
  */
 export function getPrescriptionAttachments(
-  prescriptionData: PrescriptionData
-): Task<ReadonlyArray<MessageAttachment>> {
+  prescriptionData: PrescriptionData,
+): Task<readonly MessageAttachment[]> {
   return pipe(
     A.sequence(T.ApplicativePar)([
       toBarcodeAttachments("iup", prescriptionData.iup),
       toBarcodeAttachments("nre", prescriptionData.nre),
       toBarcodeAttachments(
         "prescriber_fiscal_code",
-        prescriptionData.prescriber_fiscal_code as string
+        prescriptionData.prescriber_fiscal_code as string,
       ),
     ]),
-    T.map(A.flatten)
+    T.map(A.flatten),
   );
 }

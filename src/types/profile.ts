@@ -2,7 +2,7 @@
  * This file contains the ProfileWithEmail and ProfileWithoutEmail models and
  * some functions to validate and convert type to and from them.
  */
-import * as O from "fp-ts/lib/Option";
+import { ExtendedProfile } from "@pagopa/io-functions-app-sdk/ExtendedProfile";
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
@@ -10,10 +10,10 @@ import {
   IResponseSuccessJson,
   ResponseErrorInternal,
 } from "@pagopa/ts-commons/lib/responses";
+import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
-import { ExtendedProfile } from "@pagopa/io-functions-app-sdk/ExtendedProfile";
-import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 
+import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 import { formatDate } from "../utils/date";
 import { User } from "./user";
 
@@ -22,7 +22,7 @@ import { User } from "./user";
  */
 export const toInitializedProfile = (
   profile: ExtendedProfile,
-  user: User
+  user: User,
 ): InitializedProfile => ({
   accepted_tos_version: profile.accepted_tos_version,
   blocked_inbox_or_channels: profile.blocked_inbox_or_channels,
@@ -37,7 +37,7 @@ export const toInitializedProfile = (
   is_email_already_taken: profile.is_email_already_taken,
   is_email_enabled: pipe(
     O.fromNullable(profile.is_email_enabled),
-    O.getOrElseW(() => true)
+    O.getOrElseW(() => true),
   ),
   is_email_validated: profile.is_email_validated,
   is_inbox_enabled: profile.is_inbox_enabled,
@@ -58,9 +58,9 @@ export const profileMissingErrorResponse =
 export const notFoundProfileToInternalServerError = (
   getProfileResponse:
     | IResponseErrorInternal
-    | IResponseErrorTooManyRequests
     | IResponseErrorNotFound
-    | IResponseSuccessJson<InitializedProfile>
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessJson<InitializedProfile>,
 ) =>
   getProfileResponse.kind === "IResponseErrorNotFound"
     ? profileMissingErrorResponse

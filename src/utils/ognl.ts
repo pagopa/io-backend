@@ -1,7 +1,7 @@
-import { pipe } from "fp-ts/function";
-import * as R from "fp-ts/Record";
-import * as t from "io-ts";
 import * as E from "fp-ts/Either";
+import * as R from "fp-ts/Record";
+import { pipe } from "fp-ts/function";
+import * as t from "io-ts";
 
 /**
  * Porting of lodash "set" function.
@@ -14,31 +14,29 @@ import * as E from "fp-ts/Either";
 // eslint-disable-next-line @typescript-eslint/ban-types
 export const set = <T extends object>(
   obj: T,
-  path: string | ReadonlyArray<string>,
+  path: readonly string[] | string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  value: any
+  value: any,
 ): T => {
   if (Object(obj) !== obj) {
     return obj;
   } // When obj is not an object
   // If not yet an array, get the keys from the string-path
-  const splittedpath: ReadonlyArray<string> = !Array.isArray(path)
+  const splittedpath: readonly string[] = !Array.isArray(path)
     ? path.toString().match(/[^.[\]]+/g) || []
     : path;
-  // eslint-disable-next-line functional/immutable-data
+
   splittedpath.slice(0, -1).reduce(
     (
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       a: any,
       c,
-      _i
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      _i,
     ) =>
       // Iterate all of them except the last one
-      Object(a[c]) === a[c]
-        ? a[c]
-        : // eslint-disable-next-line functional/immutable-data
-          (a[c] = {}),
-    obj
+      Object(a[c]) === a[c] ? a[c] : (a[c] = {}),
+    obj,
   )[splittedpath[splittedpath.length - 1]] = value;
   return obj;
 };
@@ -53,7 +51,7 @@ export const set = <T extends object>(
  */
 export const nestifyPrefixedType = (
   env: Record<string, unknown>,
-  prefix: string
+  prefix: string,
 ): Record<string, unknown> =>
   pipe(
     env,
@@ -61,11 +59,11 @@ export const nestifyPrefixedType = (
     R.reduceWithIndex({}, (k, b, a) =>
       set(
         b,
-        // eslint-disable-next-line functional/immutable-data
+
         k.split("_").splice(1).join("."),
-        a
-      )
-    )
+        a,
+      ),
+    ),
   );
 
 const isRecordOfString = (i: unknown): i is Record<string, unknown> =>
@@ -74,14 +72,13 @@ const isRecordOfString = (i: unknown): i is Record<string, unknown> =>
   !Object.keys(i).some((property) => typeof property !== "string");
 
 const createNotRecordOfStringErrorL =
-  (input: unknown, context: t.Context) => (): t.Errors =>
-    [
-      {
-        context,
-        message: "input is not a valid record of string",
-        value: input,
-      },
-    ];
+  (input: unknown, context: t.Context) => (): t.Errors => [
+    {
+      context,
+      message: "input is not a valid record of string",
+      value: input,
+    },
+  ];
 
 /**
  * Create a io-ts decoder for the input type.
@@ -94,7 +91,7 @@ const createNotRecordOfStringErrorL =
  */
 export const ognlTypeFor = <T>(
   type: t.Mixed,
-  prefix: string
+  prefix: string,
 ): t.Type<T, T, unknown> =>
   new t.Type<T, T, unknown>(
     "OGNL",
@@ -104,11 +101,11 @@ export const ognlTypeFor = <T>(
         input,
         E.fromPredicate(
           isRecordOfString,
-          createNotRecordOfStringErrorL(input, context)
+          createNotRecordOfStringErrorL(input, context),
         ),
         E.chainW((inputRecord) =>
-          type.validate(nestifyPrefixedType(inputRecord, prefix), context)
-        )
+          type.validate(nestifyPrefixedType(inputRecord, prefix), context),
+        ),
       ),
-    t.identity
+    t.identity,
   );

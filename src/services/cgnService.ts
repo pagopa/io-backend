@@ -2,6 +2,12 @@
  * This service interactsnwith the Bonus API
  */
 
+import { Card } from "@pagopa/io-functions-cgn-sdk/Card";
+import { CgnActivationDetail } from "@pagopa/io-functions-cgn-sdk/CgnActivationDetail";
+import { EycaActivationDetail } from "@pagopa/io-functions-cgn-sdk/EycaActivationDetail";
+import { EycaCard } from "@pagopa/io-functions-cgn-sdk/EycaCard";
+import { InstanceId } from "@pagopa/io-functions-cgn-sdk/InstanceId";
+import { Otp } from "@pagopa/io-functions-cgn-sdk/Otp";
 import {
   IResponseErrorConflict,
   IResponseErrorForbiddenNotAuthorized,
@@ -19,37 +25,96 @@ import {
   ResponseSuccessJson,
   ResponseSuccessRedirectToResource,
 } from "@pagopa/ts-commons/lib/responses";
-
 import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
-import { EycaActivationDetail } from "@pagopa/io-functions-cgn-sdk/EycaActivationDetail";
-import { EycaCard } from "@pagopa/io-functions-cgn-sdk/EycaCard";
-import { InstanceId } from "@pagopa/io-functions-cgn-sdk/InstanceId";
-import { CgnActivationDetail } from "@pagopa/io-functions-cgn-sdk/CgnActivationDetail";
-import { Card } from "@pagopa/io-functions-cgn-sdk/Card";
-import { Otp } from "@pagopa/io-functions-cgn-sdk/Otp";
+
 import { CgnAPIClient } from "../../src/clients/cgn";
 import { User } from "../types/user";
+import { readableProblem } from "../utils/errorsFormatter";
 import {
   ResponseErrorStatusNotDefinedInSpec,
   ResponseErrorUnexpectedAuthProblem,
   withCatchAsInternalError,
   withValidatedOrInternalError,
 } from "../utils/responses";
-import { readableProblem } from "../utils/errorsFormatter";
 export default class CgnService {
-  constructor(private readonly cgnApiClient: ReturnType<CgnAPIClient>) {}
+  /**
+   * generate a CGN OTP
+   */
+  public readonly generateOtp = (
+    user: User,
+  ): Promise<
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseSuccessJson<Otp>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.cgnApiClient.generateOtp({
+        fiscalcode: user.fiscal_code,
+      });
+
+      return withValidatedOrInternalError(validated, (response) => {
+        switch (response.status) {
+          case 200:
+            return ResponseSuccessJson(response.value);
+          case 401:
+            return ResponseErrorUnexpectedAuthProblem();
+          case 403:
+            return ResponseErrorForbiddenNotAuthorized;
+          case 500:
+            return ResponseErrorInternal(readableProblem(response.value));
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
+  /**
+   * Get CGN activation status details for the logged user.
+   */
+  public readonly getCgnActivation = (
+    user: User,
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseErrorValidation
+    | IResponseSuccessJson<CgnActivationDetail>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.cgnApiClient.getCgnActivation({
+        fiscalcode: user.fiscal_code,
+      });
+
+      return withValidatedOrInternalError(validated, (response) => {
+        switch (response.status) {
+          case 200:
+            return ResponseSuccessJson(response.value);
+          case 401:
+            return ResponseErrorUnexpectedAuthProblem();
+          case 404:
+            return ResponseErrorNotFound(
+              "Not Found",
+              "No User CGN activation found",
+            );
+          case 500:
+            return ResponseErrorInternal(readableProblem(response.value));
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
 
   /**
    * Get the current CGN Status related to the user.
    */
   public readonly getCgnStatus = (
-    user: User
+    user: User,
   ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorValidation
-    | IResponseErrorNotFound
     | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseErrorValidation
     | IResponseSuccessJson<Card>
   > =>
     withCatchAsInternalError(async () => {
@@ -74,16 +139,51 @@ export default class CgnService {
     });
 
   /**
+   * Get EYCA's activation status detail for the logged user.
+   */
+  public readonly getEycaActivation = (
+    user: User,
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseErrorValidation
+    | IResponseSuccessJson<EycaActivationDetail>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.cgnApiClient.getEycaActivation({
+        fiscalcode: user.fiscal_code,
+      });
+
+      return withValidatedOrInternalError(validated, (response) => {
+        switch (response.status) {
+          case 200:
+            return ResponseSuccessJson(response.value);
+          case 401:
+            return ResponseErrorUnexpectedAuthProblem();
+          case 404:
+            return ResponseErrorNotFound(
+              "Not Found",
+              "No EYCA Card activation found",
+            );
+          case 500:
+            return ResponseErrorInternal(readableProblem(response.value));
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
+  /**
    * Get the current Eyca Card Status related to the user.
    */
   public readonly getEycaStatus = (
-    user: User
+    user: User,
   ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorValidation
-    | IResponseErrorNotFound
-    | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorConflict
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseErrorValidation
     | IResponseSuccessJson<EycaCard>
   > =>
     withCatchAsInternalError(async () => {
@@ -103,7 +203,7 @@ export default class CgnService {
             return ResponseErrorNotFound("Not Found", "Eyca Card not found");
           case 409:
             return ResponseErrorConflict(
-              "EYCA Card is missing while citizen is eligible to obtain it or a CGN is already activated"
+              "EYCA Card is missing while citizen is eligible to obtain it or a CGN is already activated",
             );
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));
@@ -117,14 +217,14 @@ export default class CgnService {
    * Start a CGN activation process for the logged user.
    */
   public readonly startCgnActivation = (
-    user: User
+    user: User,
   ): Promise<
+    | IResponseErrorConflict
+    | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorInternal
     | IResponseErrorValidation
-    | IResponseErrorForbiddenNotAuthorized
-    | IResponseErrorConflict
-    | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
     | IResponseSuccessAccepted
+    | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.cgnApiClient.startCgnActivation({
@@ -139,92 +239,9 @@ export default class CgnService {
               pipe(
                 response.headers.Location,
                 O.fromNullable,
-                O.getOrElse(() => "/api/v1/cgn/activation")
+                O.getOrElse(() => "/api/v1/cgn/activation"),
               ),
-              response.value
-            );
-          case 202:
-            return ResponseSuccessAccepted();
-          case 401:
-            return ResponseErrorUnexpectedAuthProblem();
-          case 403:
-            return ResponseErrorForbiddenNotAuthorized;
-          case 409:
-            return ResponseErrorConflict(
-              "Cannot start a new CGN activation because the CGN is already active, revoked or expired"
-            );
-          case 500:
-            return ResponseErrorInternal(readableProblem(response.value));
-          default:
-            return ResponseErrorStatusNotDefinedInSpec(response);
-        }
-      });
-    });
-
-  /**
-   * Get CGN activation status details for the logged user.
-   */
-  public readonly getCgnActivation = (
-    user: User
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorValidation
-    | IResponseErrorNotFound
-    | IResponseSuccessJson<CgnActivationDetail>
-  > =>
-    withCatchAsInternalError(async () => {
-      const validated = await this.cgnApiClient.getCgnActivation({
-        fiscalcode: user.fiscal_code,
-      });
-
-      return withValidatedOrInternalError(validated, (response) => {
-        switch (response.status) {
-          case 200:
-            return ResponseSuccessJson(response.value);
-          case 401:
-            return ResponseErrorUnexpectedAuthProblem();
-          case 404:
-            return ResponseErrorNotFound(
-              "Not Found",
-              "No User CGN activation found"
-            );
-          case 500:
-            return ResponseErrorInternal(readableProblem(response.value));
-          default:
-            return ResponseErrorStatusNotDefinedInSpec(response);
-        }
-      });
-    });
-
-  /**
-   * Start an EYCA activation for the logged user.
-   */
-  public readonly startEycaActivation = (
-    user: User
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorValidation
-    | IResponseErrorForbiddenNotAuthorized
-    | IResponseErrorConflict
-    | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
-    | IResponseSuccessAccepted
-  > =>
-    withCatchAsInternalError(async () => {
-      const validated = await this.cgnApiClient.startEycaActivation({
-        fiscalcode: user.fiscal_code,
-      });
-
-      return withValidatedOrInternalError(validated, (response) => {
-        switch (response.status) {
-          case 201:
-            return ResponseSuccessRedirectToResource(
               response.value,
-              pipe(
-                response.headers.Location,
-                O.fromNullable,
-                O.getOrElse(() => "/api/v1/cgn/eyca/activation")
-              ),
-              response.value
             );
           case 202:
             return ResponseSuccessAccepted();
@@ -234,42 +251,7 @@ export default class CgnService {
             return ResponseErrorForbiddenNotAuthorized;
           case 409:
             return ResponseErrorConflict(
-              "Cannot start a new EYCA activation because EYCA card is already active, revoked or expired"
-            );
-          case 500:
-            return ResponseErrorInternal(readableProblem(response.value));
-          default:
-            return ResponseErrorStatusNotDefinedInSpec(response);
-        }
-      });
-    });
-
-  /**
-   * Get EYCA's activation status detail for the logged user.
-   */
-  public readonly getEycaActivation = (
-    user: User
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorValidation
-    | IResponseErrorNotFound
-    | IResponseSuccessJson<EycaActivationDetail>
-  > =>
-    withCatchAsInternalError(async () => {
-      const validated = await this.cgnApiClient.getEycaActivation({
-        fiscalcode: user.fiscal_code,
-      });
-
-      return withValidatedOrInternalError(validated, (response) => {
-        switch (response.status) {
-          case 200:
-            return ResponseSuccessJson(response.value);
-          case 401:
-            return ResponseErrorUnexpectedAuthProblem();
-          case 404:
-            return ResponseErrorNotFound(
-              "Not Found",
-              "No EYCA Card activation found"
+              "Cannot start a new CGN activation because the CGN is already active, revoked or expired",
             );
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));
@@ -283,14 +265,14 @@ export default class CgnService {
    * Start a CGN unsubscription process for the logged user.
    */
   public readonly startCgnUnsubscription = (
-    user: User
+    user: User,
   ): Promise<
+    | IResponseErrorConflict
+    | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorInternal
     | IResponseErrorValidation
-    | IResponseErrorForbiddenNotAuthorized
-    | IResponseErrorConflict
-    | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
     | IResponseSuccessAccepted
+    | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.cgnApiClient.startCgnUnsubscription({
@@ -305,9 +287,9 @@ export default class CgnService {
               pipe(
                 response.headers.Location,
                 O.fromNullable,
-                O.getOrElse(() => "/api/v1/cgn/delete")
+                O.getOrElse(() => "/api/v1/cgn/delete"),
               ),
-              response.value
+              response.value,
             );
           case 202:
             return ResponseSuccessAccepted();
@@ -317,7 +299,7 @@ export default class CgnService {
             return ResponseErrorForbiddenNotAuthorized;
           case 409:
             return ResponseErrorConflict(
-              "Cannot start a new CGN unsubscription"
+              "Cannot start a new CGN unsubscription",
             );
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));
@@ -328,29 +310,45 @@ export default class CgnService {
     });
 
   /**
-   * generate a CGN OTP
+   * Start an EYCA activation for the logged user.
    */
-  public readonly generateOtp = (
-    user: User
+  public readonly startEycaActivation = (
+    user: User,
   ): Promise<
+    | IResponseErrorConflict
+    | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorInternal
     | IResponseErrorValidation
-    | IResponseErrorForbiddenNotAuthorized
-    | IResponseSuccessJson<Otp>
+    | IResponseSuccessAccepted
+    | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
   > =>
     withCatchAsInternalError(async () => {
-      const validated = await this.cgnApiClient.generateOtp({
+      const validated = await this.cgnApiClient.startEycaActivation({
         fiscalcode: user.fiscal_code,
       });
 
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
-          case 200:
-            return ResponseSuccessJson(response.value);
+          case 201:
+            return ResponseSuccessRedirectToResource(
+              response.value,
+              pipe(
+                response.headers.Location,
+                O.fromNullable,
+                O.getOrElse(() => "/api/v1/cgn/eyca/activation"),
+              ),
+              response.value,
+            );
+          case 202:
+            return ResponseSuccessAccepted();
           case 401:
             return ResponseErrorUnexpectedAuthProblem();
           case 403:
             return ResponseErrorForbiddenNotAuthorized;
+          case 409:
+            return ResponseErrorConflict(
+              "Cannot start a new EYCA activation because EYCA card is already active, revoked or expired",
+            );
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));
           default:
@@ -358,4 +356,6 @@ export default class CgnService {
         }
       });
     });
+
+  constructor(private readonly cgnApiClient: ReturnType<CgnAPIClient>) {}
 }

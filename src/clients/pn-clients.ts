@@ -1,6 +1,6 @@
-import nodeFetch from "node-fetch";
 import { ValidUrl } from "@pagopa/ts-commons/lib/url";
-import { stripTrailingSlashIfPresent } from "../utils/url";
+import nodeFetch from "node-fetch";
+
 import {
   Client,
   createClient,
@@ -9,11 +9,12 @@ import {
   Client as AddressBookClient,
   createClient as createAddressBookClient,
 } from "../../generated/piattaforma-notifiche-courtesy/client";
+import { stripTrailingSlashIfPresent } from "../utils/url";
 
 export function PnAPIClient(
   baseUrl: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fetchApi: typeof fetch = nodeFetch as any as typeof fetch
+  fetchApi: typeof fetch = nodeFetch as any as typeof fetch,
 ): Client {
   return createClient({
     baseUrl,
@@ -31,7 +32,7 @@ export const PnAddressBookIOClient = (
   baseUrl: string,
   apiKey: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fetchApi: typeof fetch = nodeFetch as any as typeof fetch
+  fetchApi: typeof fetch = nodeFetch as any as typeof fetch,
 ): AddressBookClient<"ApiKeyAuth"> =>
   createAddressBookClient({
     basePath: "",
@@ -49,9 +50,9 @@ export type PnAddressBookIOClient = typeof PnAddressBookIOClient;
  * Available PN environments
  */
 export enum PNEnvironment {
+  DEV = "DEV",
   PRODUCTION = "PRODUCTION",
   UAT = "UAT",
-  DEV = "DEV",
 }
 
 /**
@@ -64,7 +65,7 @@ export const PNClientFactory =
     pnApiUrlUAT: ValidUrl,
     pnApiKeyUAT: string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    fetchApi: typeof fetch = nodeFetch as any as typeof fetch
+    fetchApi: typeof fetch = nodeFetch as any as typeof fetch,
   ) =>
   (pnEnvironment: PNEnvironment) => {
     switch (pnEnvironment) {
@@ -72,13 +73,13 @@ export const PNClientFactory =
         return PnAddressBookIOClient(
           stripTrailingSlashIfPresent(pnApiUrlProd),
           pnApiKeyProd,
-          fetchApi
+          fetchApi,
         );
       case PNEnvironment.UAT:
         return PnAddressBookIOClient(
           stripTrailingSlashIfPresent(pnApiUrlUAT),
           pnApiKeyUAT,
-          fetchApi
+          fetchApi,
         );
       default:
         throw new Error("Unimplemented PN Environment");

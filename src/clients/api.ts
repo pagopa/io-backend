@@ -1,10 +1,10 @@
-import nodeFetch from "node-fetch";
 import { Client, createClient } from "@pagopa/io-functions-app-sdk/client";
+import nodeFetch from "node-fetch";
 
 export function APIClient(
   baseUrl: string,
   token: string,
-  fetchApi: typeof fetch = nodeFetch as unknown as typeof fetch // TODO: customize fetch with timeout
+  fetchApi: typeof fetch = nodeFetch as unknown as typeof fetch, // TODO: customize fetch with timeout
 ): Client<"SubscriptionKey"> {
   return createClient<"SubscriptionKey">({
     basePath: "",

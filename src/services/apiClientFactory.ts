@@ -15,7 +15,7 @@ export default class ApiClientFactory implements IApiClientFactoryInterface {
     apiKey: string,
     apiUrl: string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    fetchApi: typeof fetch = nodeFetch as any
+    fetchApi: typeof fetch = nodeFetch as any,
   ) {
     this.apiClient = APIClient(apiUrl, apiKey, fetchApi);
   }

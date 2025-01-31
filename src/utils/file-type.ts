@@ -1,9 +1,9 @@
-import { pipe } from "fp-ts/lib/function";
-import * as RS from "fp-ts/ReadonlySet";
-import { match } from "ts-pattern";
 import * as EQ from "fp-ts/Eq";
+import * as RS from "fp-ts/ReadonlySet";
+import { pipe } from "fp-ts/lib/function";
+import { match } from "ts-pattern";
 
-export type FileType = "pdf" | "any";
+export type FileType = "any" | "pdf";
 
 /**
  * Verify if the input buffer contains a PDF using the magic number in the first bytes (see https://en.wikipedia.org/wiki/Magic_number_(programming)#Magic_numbers_in_files)
@@ -16,6 +16,7 @@ export const isPdf = (data: Buffer) => data.toString("binary", 0, 4) === "%PDF";
 /**
  * Allow any file type
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const isAny = (_: Buffer) => true;
 
 export const typeToCheck = (type: FileType) =>
@@ -28,7 +29,7 @@ export const typeToCheck = (type: FileType) =>
  * Compare two functions: will return true if the functions have the same body
  */
 export const eqFunction: EQ.Eq<ReturnType<typeof typeToCheck>> = EQ.fromEquals(
-  (f1, f2) => f1.toString() === f2.toString()
+  (f1, f2) => f1.toString() === f2.toString(),
 );
 
 /**
@@ -42,5 +43,5 @@ export const getIsFileTypeForTypes =
     pipe(
       types,
       RS.map(eqFunction)(typeToCheck),
-      RS.some((is) => is(data))
+      RS.some((is) => is(data)),
     );

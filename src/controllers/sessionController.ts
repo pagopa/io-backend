@@ -2,7 +2,6 @@
  * This controller returns data about the current user session
  */
 
-import * as express from "express";
 import {
   IResponseErrorInternal,
   IResponseErrorValidation,
@@ -10,16 +9,16 @@ import {
   ResponseErrorInternal,
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
+import * as express from "express";
 import * as E from "fp-ts/lib/Either";
+
 import { SessionsList } from "../../generated/backend/SessionsList";
 import RedisSessionStorage from "../services/redisSessionStorage";
 import { withUserFromRequest } from "../types/user";
 
 export default class SessionController {
-  constructor(private readonly sessionStorage: RedisSessionStorage) {}
-
   public readonly listSessions = (
-    req: express.Request
+    req: express.Request,
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
@@ -35,4 +34,6 @@ export default class SessionController {
       }
       return ResponseSuccessJson<SessionsList>(sessionsList.right);
     });
+
+  constructor(private readonly sessionStorage: RedisSessionStorage) {}
 }

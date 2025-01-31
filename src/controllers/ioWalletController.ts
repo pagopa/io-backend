@@ -3,12 +3,8 @@
  * app by forwarding the call to the API system.
  */
 
-import * as express from "express";
-import * as TE from "fp-ts/TaskEither";
-import * as E from "fp-ts/Either";
-
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import {
-  getResponseErrorForbiddenNotAuthorized,
   IResponseErrorForbiddenNotAuthorized,
   IResponseErrorGeneric,
   IResponseErrorInternal,
@@ -18,91 +14,78 @@ import {
   IResponseSuccessJson,
   IResponseSuccessNoContent,
   ResponseErrorValidation,
+  getResponseErrorForbiddenNotAuthorized,
 } from "@pagopa/ts-commons/lib/responses";
-
-import { pipe } from "fp-ts/lib/function";
-import { sequenceS } from "fp-ts/lib/Apply";
-import { Errors } from "io-ts";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import IoWalletService from "../services/ioWalletService";
+import * as express from "express";
+import * as E from "fp-ts/Either";
+import * as TE from "fp-ts/TaskEither";
+import { sequenceS } from "fp-ts/lib/Apply";
+import { pipe } from "fp-ts/lib/function";
+import { Errors } from "io-ts";
 
-import { NonceDetailView } from "../../generated/io-wallet/NonceDetailView";
-import { withUserFromRequest } from "../types/user";
-import { CreateWalletInstanceBody } from "../../generated/io-wallet/CreateWalletInstanceBody";
 import { CreateWalletAttestationBody } from "../../generated/io-wallet/CreateWalletAttestationBody";
-import { WalletAttestationView } from "../../generated/io-wallet/WalletAttestationView";
-import { FF_IO_WALLET_TRIAL_ENABLED } from "../config";
+import { CreateWalletInstanceBody } from "../../generated/io-wallet/CreateWalletInstanceBody";
+import { NonceDetailView } from "../../generated/io-wallet/NonceDetailView";
 import { SetWalletInstanceStatusBody } from "../../generated/io-wallet/SetWalletInstanceStatusBody";
+import { WalletAttestationView } from "../../generated/io-wallet/WalletAttestationView";
 import { WalletInstanceData } from "../../generated/io-wallet/WalletInstanceData";
+import { FF_IO_WALLET_TRIAL_ENABLED } from "../config";
+import IoWalletService from "../services/ioWalletService";
+import { withUserFromRequest } from "../types/user";
 
 const toValidationError = (errors: Errors) =>
   ResponseErrorValidation(
     "Bad request",
-    `Error validating the request body: ${readableReport(errors)}`
+    `Error validating the request body: ${readableReport(errors)}`,
   );
 
 export default class IoWalletController {
-  constructor(private readonly ioWalletService: IoWalletService) {}
+  private readonly ensureFiscalCodeIsAllowed = (fiscalCode: FiscalCode) =>
+    FF_IO_WALLET_TRIAL_ENABLED
+      ? pipe(
+          fiscalCode,
+          NonEmptyString.decode,
+          TE.fromEither,
+          TE.chainW(this.ensureUserIsAllowed),
+          TE.mapLeft(() =>
+            getResponseErrorForbiddenNotAuthorized(
+              "Not authorized to perform this action",
+            ),
+          ),
+        )
+      : TE.right(undefined);
 
-  /**
-   * Get nonce
-   */
-  public readonly getNonce = (): Promise<
-    | IResponseErrorInternal
-    | IResponseSuccessJson<NonceDetailView>
-    | IResponseErrorServiceUnavailable
-  > => this.ioWalletService.getNonce();
-
-  /**
-   * Create a Wallet Instance
-   */
-  public readonly createWalletInstance = (
-    req: express.Request
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorGeneric
-    | IResponseErrorValidation
-    | IResponseSuccessNoContent
-    | IResponseErrorForbiddenNotAuthorized
-    | IResponseErrorServiceUnavailable
-  > =>
-    withUserFromRequest(req, async (user) =>
-      pipe(
-        this.ensureFiscalCodeIsAllowed(user.fiscal_code),
-        TE.chainW(() =>
-          pipe(
-            req.body,
-            CreateWalletInstanceBody.decode,
-            E.mapLeft(toValidationError),
-            TE.fromEither
-          )
-        ),
-        TE.map(({ challenge, key_attestation, hardware_key_tag }) =>
-          this.ioWalletService.createWalletInstance(
-            challenge,
-            hardware_key_tag,
-            key_attestation,
-            user.fiscal_code
-          )
-        ),
-        TE.toUnion
-      )()
+  private readonly ensureUserIsAllowed = (
+    userId: NonEmptyString,
+  ): TE.TaskEither<Error, void> =>
+    pipe(
+      TE.tryCatch(
+        () => this.ioWalletService.getSubscription(userId),
+        E.toError,
+      ),
+      // if a successful response with state != "ACTIVE" or an error is returned, return left
+      TE.chain((response) =>
+        response.kind === "IResponseSuccessJson" &&
+        response.value.state === "ACTIVE"
+          ? TE.right(undefined)
+          : TE.left(new Error()),
+      ),
     );
 
   /**
    * Create a Wallet Attestation
    */
   public readonly createWalletAttestation = (
-    req: express.Request
+    req: express.Request,
   ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorGeneric
-    | IResponseErrorValidation
     | IResponseErrorForbiddenNotAuthorized
-    | IResponseSuccessJson<WalletAttestationView>
+    | IResponseErrorGeneric
+    | IResponseErrorInternal
     | IResponseErrorNotFound
     | IResponseErrorServiceUnavailable
+    | IResponseErrorValidation
+    | IResponseSuccessJson<WalletAttestationView>
   > =>
     withUserFromRequest(req, async (user) =>
       pipe(
@@ -112,31 +95,143 @@ export default class IoWalletController {
             req.body,
             CreateWalletAttestationBody.decode,
             E.mapLeft(toValidationError),
-            TE.fromEither
-          )
+            TE.fromEither,
+          ),
         ),
-        TE.map(({ grant_type, assertion }) =>
+        TE.map(({ assertion, grant_type }) =>
           this.ioWalletService.createWalletAttestation(
             assertion,
             grant_type,
-            user.fiscal_code
-          )
+            user.fiscal_code,
+          ),
         ),
-        TE.toUnion
-      )()
+        TE.toUnion,
+      )(),
+    );
+
+  /**
+   * Create a Wallet Instance
+   */
+  public readonly createWalletInstance = (
+    req: express.Request,
+  ): Promise<
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorGeneric
+    | IResponseErrorInternal
+    | IResponseErrorServiceUnavailable
+    | IResponseErrorValidation
+    | IResponseSuccessNoContent
+  > =>
+    withUserFromRequest(req, async (user) =>
+      pipe(
+        this.ensureFiscalCodeIsAllowed(user.fiscal_code),
+        TE.chainW(() =>
+          pipe(
+            req.body,
+            CreateWalletInstanceBody.decode,
+            E.mapLeft(toValidationError),
+            TE.fromEither,
+          ),
+        ),
+        TE.map(({ challenge, hardware_key_tag, key_attestation }) =>
+          this.ioWalletService.createWalletInstance(
+            challenge,
+            hardware_key_tag,
+            key_attestation,
+            user.fiscal_code,
+          ),
+        ),
+        TE.toUnion,
+      )(),
+    );
+
+  /**
+   * Get nonce
+   */
+  public readonly getNonce = (): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorServiceUnavailable
+    | IResponseSuccessJson<NonceDetailView>
+  > => this.ioWalletService.getNonce();
+
+  /**
+   * Get current Wallet Instance status.
+   */
+  public readonly getWalletInstanceStatus = (
+    req: express.Request,
+  ): Promise<
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseErrorServiceUnavailable
+    | IResponseErrorValidation
+    | IResponseSuccessJson<WalletInstanceData>
+  > =>
+    withUserFromRequest(req, async (user) =>
+      pipe(
+        this.ensureFiscalCodeIsAllowed(user.fiscal_code),
+        TE.chainW(() =>
+          pipe(
+            NonEmptyString.decode(req.params.walletInstanceId),
+            E.mapLeft(toValidationError),
+            TE.fromEither,
+          ),
+        ),
+        TE.map((walletInstanceId) =>
+          this.ioWalletService.getWalletInstanceStatus(
+            walletInstanceId,
+            user.fiscal_code,
+          ),
+        ),
+        TE.toUnion,
+      )(),
+    );
+
+  /**
+   * Update current Wallet Instance status.
+   */
+  public readonly setCurrentWalletInstanceStatus = (
+    req: express.Request,
+  ): Promise<
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorGeneric
+    | IResponseErrorInternal
+    | IResponseErrorServiceUnavailable
+    | IResponseErrorValidation
+    | IResponseSuccessNoContent
+  > =>
+    withUserFromRequest(req, async (user) =>
+      pipe(
+        this.ensureFiscalCodeIsAllowed(user.fiscal_code),
+        TE.chainW(() =>
+          pipe(
+            req.body,
+            SetWalletInstanceStatusBody.decode,
+            E.mapLeft(toValidationError),
+            TE.fromEither,
+          ),
+        ),
+        TE.map(({ status }) =>
+          this.ioWalletService.setCurrentWalletInstanceStatus(
+            status,
+            user.fiscal_code,
+          ),
+        ),
+        TE.toUnion,
+      )(),
     );
 
   /**
    * Update current Wallet Instance status.
    */
   public readonly setWalletInstanceStatus = (
-    req: express.Request
+    req: express.Request,
   ): Promise<
+    | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorInternal
-    | IResponseSuccessNoContent
     | IResponseErrorServiceUnavailable
     | IResponseErrorValidation
-    | IResponseErrorForbiddenNotAuthorized
+    | IResponseSuccessNoContent
   > =>
     withUserFromRequest(req, async (user) =>
       pipe(
@@ -147,123 +242,26 @@ export default class IoWalletController {
               body: pipe(
                 req.body,
                 SetWalletInstanceStatusBody.decode,
-                E.mapLeft(toValidationError)
+                E.mapLeft(toValidationError),
               ),
               id: pipe(
                 NonEmptyString.decode(req.params.walletInstanceId),
-                E.mapLeft(toValidationError)
+                E.mapLeft(toValidationError),
               ),
             }),
-            TE.fromEither
-          )
+            TE.fromEither,
+          ),
         ),
-        TE.map(({ id, body: { status } }) =>
+        TE.map(({ body: { status }, id }) =>
           this.ioWalletService.setWalletInstanceStatus(
             id,
             status,
-            user.fiscal_code
-          )
+            user.fiscal_code,
+          ),
         ),
-        TE.toUnion
-      )()
+        TE.toUnion,
+      )(),
     );
 
-  /**
-   * Update current Wallet Instance status.
-   */
-  public readonly setCurrentWalletInstanceStatus = (
-    req: express.Request
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorGeneric
-    | IResponseSuccessNoContent
-    | IResponseErrorServiceUnavailable
-    | IResponseErrorValidation
-    | IResponseErrorForbiddenNotAuthorized
-  > =>
-    withUserFromRequest(req, async (user) =>
-      pipe(
-        this.ensureFiscalCodeIsAllowed(user.fiscal_code),
-        TE.chainW(() =>
-          pipe(
-            req.body,
-            SetWalletInstanceStatusBody.decode,
-            E.mapLeft(toValidationError),
-            TE.fromEither
-          )
-        ),
-        TE.map(({ status }) =>
-          this.ioWalletService.setCurrentWalletInstanceStatus(
-            status,
-            user.fiscal_code
-          )
-        ),
-        TE.toUnion
-      )()
-    );
-
-  /**
-   * Get current Wallet Instance status.
-   */
-  public readonly getWalletInstanceStatus = (
-    req: express.Request
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseSuccessJson<WalletInstanceData>
-    | IResponseErrorNotFound
-    | IResponseErrorServiceUnavailable
-    | IResponseErrorValidation
-    | IResponseErrorForbiddenNotAuthorized
-  > =>
-    withUserFromRequest(req, async (user) =>
-      pipe(
-        this.ensureFiscalCodeIsAllowed(user.fiscal_code),
-        TE.chainW(() =>
-          pipe(
-            NonEmptyString.decode(req.params.walletInstanceId),
-            E.mapLeft(toValidationError),
-            TE.fromEither
-          )
-        ),
-        TE.map((walletInstanceId) =>
-          this.ioWalletService.getWalletInstanceStatus(
-            walletInstanceId,
-            user.fiscal_code
-          )
-        ),
-        TE.toUnion
-      )()
-    );
-
-  private readonly ensureUserIsAllowed = (
-    userId: NonEmptyString
-  ): TE.TaskEither<Error, void> =>
-    pipe(
-      TE.tryCatch(
-        () => this.ioWalletService.getSubscription(userId),
-        E.toError
-      ),
-      // if a successful response with state != "ACTIVE" or an error is returned, return left
-      TE.chain((response) =>
-        response.kind === "IResponseSuccessJson" &&
-        response.value.state === "ACTIVE"
-          ? TE.right(undefined)
-          : TE.left(new Error())
-      )
-    );
-
-  private readonly ensureFiscalCodeIsAllowed = (fiscalCode: FiscalCode) =>
-    FF_IO_WALLET_TRIAL_ENABLED
-      ? pipe(
-          fiscalCode,
-          NonEmptyString.decode,
-          TE.fromEither,
-          TE.chainW(this.ensureUserIsAllowed),
-          TE.mapLeft(() =>
-            getResponseErrorForbiddenNotAuthorized(
-              "Not authorized to perform this action"
-            )
-          )
-        )
-      : TE.right(undefined);
+  constructor(private readonly ioWalletService: IoWalletService) {}
 }

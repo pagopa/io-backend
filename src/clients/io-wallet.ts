@@ -2,14 +2,14 @@ import { Client, createClient } from "../../generated/io-wallet-api/client";
 
 type Fetch = (
   input: RequestInfo | URL,
-  init?: RequestInit | undefined
+  init?: RequestInit | undefined,
 ) => Promise<Response>;
 
 export function IoWalletAPIClient(
   token: string,
   basePath: string,
   baseUrl: string,
-  fetchApi: Fetch
+  fetchApi: Fetch,
 ): Client<"FunctionsKey"> {
   return createClient<"FunctionsKey">({
     basePath,

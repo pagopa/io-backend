@@ -1,14 +1,8 @@
-import * as express from "express";
-import { PaymentFaultEnum } from "generated/pagopa-proxy/PaymentFault";
-import { PaymentFaultV2Enum } from "generated/pagopa-proxy/PaymentFaultV2";
-import { PaymentProblemJson } from "generated/pagopa-proxy/PaymentProblemJson";
-import * as t from "io-ts";
-import * as E from "fp-ts/lib/Either";
-import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import {
   IWithinRangeIntegerTag,
   WithinRangeInteger,
 } from "@pagopa/ts-commons/lib/numbers";
+import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import {
   HttpStatusCodeEnum,
   IResponse,
@@ -19,8 +13,15 @@ import {
   ResponseErrorNotFound,
   ResponseErrorValidation,
 } from "@pagopa/ts-commons/lib/responses";
+import * as express from "express";
 import * as TE from "fp-ts/TaskEither";
+import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
+import { PaymentFaultEnum } from "generated/pagopa-proxy/PaymentFault";
+import { PaymentFaultV2Enum } from "generated/pagopa-proxy/PaymentFaultV2";
+import { PaymentProblemJson } from "generated/pagopa-proxy/PaymentProblemJson";
+import * as t from "io-ts";
+
 import { errorsToError } from "./errorsFormatter";
 
 /**
@@ -46,7 +47,7 @@ export function ResponseNoContent(): IResponseNoContent {
  */
 export const ResponseErrorDismissed = ResponseErrorNotFound(
   "Expired resource",
-  "The resource you asked for is no longer available"
+  "The resource you asked for is no longer available",
 );
 
 /**
@@ -54,8 +55,8 @@ export const ResponseErrorDismissed = ResponseErrorNotFound(
  */
 export const withCatchAsInternalError = <T>(
   f: () => Promise<T>,
-  message: string = "Exception while calling upstream API (likely a timeout)."
-): Promise<T | IResponseErrorInternal> =>
+  message = "Exception while calling upstream API (likely a timeout).",
+): Promise<IResponseErrorInternal | T> =>
   f().catch((_) => {
     // eslint-disable-next-line no-console
     console.error(_);
@@ -63,7 +64,7 @@ export const withCatchAsInternalError = <T>(
   });
 
 export const unhandledResponseStatus = (
-  status: number
+  status: number,
 ): IResponseErrorInternal =>
   ResponseErrorInternal(`unhandled API response status [${status}]`);
 
@@ -73,11 +74,11 @@ export const unhandledResponseStatus = (
  */
 export const withValidatedOrInternalError = <T, U>(
   validated: t.Validation<T>,
-  f: (p: T) => U
-): U | IResponseErrorInternal =>
+  f: (p: T) => U,
+): IResponseErrorInternal | U =>
   E.isLeft(validated)
     ? ResponseErrorInternal(
-        errorsToReadableMessages(validated.left).join(" / ")
+        errorsToReadableMessages(validated.left).join(" / "),
       )
     : f(validated.right);
 
@@ -87,12 +88,12 @@ export const withValidatedOrInternalError = <T, U>(
  */
 export const withValidatedOrValidationError = <T, U>(
   response: t.Validation<T>,
-  f: (p: T) => U
-): U | IResponseErrorValidation =>
+  f: (p: T) => U,
+): IResponseErrorValidation | U =>
   E.isLeft(response)
     ? ResponseErrorValidation(
         "Bad request",
-        errorsToReadableMessages(response.left).join(" / ")
+        errorsToReadableMessages(response.left).join(" / "),
       )
     : f(response.right);
 
@@ -108,7 +109,7 @@ export interface IResponseErrorUnauthorizedForLegalReasons
  */
 export function ResponseErrorUnauthorizedForLegalReasons(
   title: string,
-  detail: string
+  detail: string,
 ): IResponseErrorUnauthorizedForLegalReasons {
   return {
     ...ResponseErrorGeneric(HttpStatusCodeEnum.HTTP_STATUS_451, title, detail),
@@ -130,13 +131,13 @@ export interface IResponseErrorUnauthorized
  * Returns an unauthorized error response with status code 401.
  */
 export function ResponseErrorUnauthorized(
-  detail: string
+  detail: string,
 ): IResponseErrorUnauthorized {
   return {
     ...ResponseErrorGeneric(
       HttpStatusCodeEnum.HTTP_STATUS_401,
       "Unauthorized",
-      detail
+      detail,
     ),
     ...{
       detail: `Unauthorized: ${detail}`,
@@ -168,7 +169,7 @@ export type IResponsePaymentInternalError = IResponse<"IResponseErrorInternal">;
  */
 export const ResponsePaymentError = (
   detail: PaymentFaultEnum,
-  detailV2: PaymentFaultV2Enum
+  detailV2: PaymentFaultV2Enum,
 ): IResponsePaymentInternalError => {
   const problem: PaymentProblemJson = {
     detail,
@@ -200,7 +201,7 @@ export interface IResponseSuccessOctet<T>
  * @param o The object to return to the client
  */
 export const ResponseSuccessOctet = (
-  o: Buffer
+  o: Buffer,
 ): IResponseSuccessOctet<typeof o> => ({
   apply: (res) =>
     res
@@ -212,12 +213,12 @@ export const ResponseSuccessOctet = (
 });
 
 export const wrapValidationWithInternalError: <A>(
-  fa: t.Validation<A>
+  fa: t.Validation<A>,
 ) => TE.TaskEither<IResponseErrorInternal, A> = (fa) =>
   pipe(
     TE.fromEither(fa),
     TE.mapLeft(errorsToError),
-    TE.mapLeft((e) => ResponseErrorInternal(e.message))
+    TE.mapLeft((e) => ResponseErrorInternal(e.message)),
   );
 
 /**
@@ -231,12 +232,12 @@ export interface IResponseErrorNotImplemented
  * Returns a Not Implemented error response with status code 501.
  */
 export const ResponseErrorNotImplemented = (
-  detail: string
+  detail: string,
 ): IResponseErrorNotImplemented => ({
   ...ResponseErrorGeneric(
     HttpStatusCodeEnum.HTTP_STATUS_501,
     "Not Implemented",
-    detail
+    detail,
   ),
   ...{
     detail: `Not Implemented: ${detail}`,
@@ -255,12 +256,12 @@ export interface IResponseErrorUnsupportedMediaType
  * Returns an `Unsupported Media Type` error response with status code 415.
  */
 export const ResponseErrorUnsupportedMediaType = (
-  detail: string
+  detail: string,
 ): IResponseErrorUnsupportedMediaType => ({
   ...ResponseErrorGeneric(
     HttpStatusCodeEnum.HTTP_STATUS_415,
     "Unsupported Media Type",
-    detail
+    detail,
   ),
   ...{
     detail,

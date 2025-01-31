@@ -2,50 +2,47 @@
  * This service retrieves messages from the API system using an API client.
  */
 import {
+  IResponseErrorConflict,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
-  ResponseErrorNotFound,
-  ResponseErrorInternal,
-  ResponseErrorValidation,
   IResponseSuccessAccepted,
-  IResponseSuccessRedirectToResource,
-  ResponseSuccessRedirectToResource,
-  ResponseSuccessAccepted,
-  ResponseErrorConflict,
-  IResponseErrorConflict,
   IResponseSuccessJson,
+  IResponseSuccessRedirectToResource,
+  ResponseErrorConflict,
+  ResponseErrorInternal,
+  ResponseErrorNotFound,
+  ResponseErrorValidation,
+  ResponseSuccessAccepted,
   ResponseSuccessJson,
+  ResponseSuccessRedirectToResource,
 } from "@pagopa/ts-commons/lib/responses";
-import { TrialSystemAPIClient } from "src/clients/trial-system.client";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
+import { pipe } from "fp-ts/lib/function";
+import { TrialSystemAPIClient } from "src/clients/trial-system.client";
+
+import { Subscription } from "../../generated/trial-system/Subscription";
+import { TrialId } from "../../generated/trial-system-api/TrialId";
 import {
   ResponseErrorStatusNotDefinedInSpec,
   ResponseErrorUnexpectedAuthProblem,
   withCatchAsInternalError,
   withValidatedOrInternalError,
 } from "../utils/responses";
-import { TrialId } from "../../generated/trial-system-api/TrialId";
-import { Subscription } from "../../generated/trial-system/Subscription";
 
 export default class TrialService {
-  constructor(
-    private readonly apiClient: ReturnType<typeof TrialSystemAPIClient>
-  ) {}
-
   /**
    * Subscribe a user to a specific trial.
    */
   public readonly createSubscription = async (
     userId: NonEmptyString,
-    trialId: TrialId
+    trialId: TrialId,
   ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorValidation
-    | IResponseErrorNotFound
     | IResponseErrorConflict
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseErrorValidation
     | IResponseSuccessAccepted
     | IResponseSuccessRedirectToResource<Subscription, Subscription>
   > =>
@@ -70,8 +67,8 @@ export default class TrialService {
                 ResponseSuccessRedirectToResource(
                   resBody,
                   `/api/v1/trials/${trialId}/subscriptions`,
-                  resBody
-                )
+                  resBody,
+                ),
             );
           case 202:
             return ResponseSuccessAccepted();
@@ -81,8 +78,8 @@ export default class TrialService {
               pipe(
                 response.value.detail,
                 O.fromNullable,
-                O.getOrElse(() => "Malformed request")
-              )
+                O.getOrElse(() => "Malformed request"),
+              ),
             );
           case 401:
             return ResponseErrorUnexpectedAuthProblem();
@@ -95,8 +92,8 @@ export default class TrialService {
               pipe(
                 response.value.detail,
                 O.fromNullable,
-                O.getOrElse(() => "Cannot create subscription")
-              )
+                O.getOrElse(() => "Cannot create subscription"),
+              ),
             );
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
@@ -109,7 +106,7 @@ export default class TrialService {
    */
   public readonly getSubscription = async (
     userId: NonEmptyString,
-    trialId: TrialId
+    trialId: TrialId,
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorNotFound
@@ -130,7 +127,7 @@ export default class TrialService {
                 state: response.value.state,
                 trialId: response.value.trialId,
               },
-              ResponseSuccessJson
+              ResponseSuccessJson,
             );
           case 401:
             return ResponseErrorUnexpectedAuthProblem();
@@ -141,12 +138,16 @@ export default class TrialService {
               pipe(
                 response.value.detail,
                 O.fromNullable,
-                O.getOrElse(() => "Cannot get subscription")
-              )
+                O.getOrElse(() => "Cannot get subscription"),
+              ),
             );
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
       });
     });
+
+  constructor(
+    private readonly apiClient: ReturnType<typeof TrialSystemAPIClient>,
+  ) {}
 }
