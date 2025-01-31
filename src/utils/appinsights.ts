@@ -1,19 +1,20 @@
-import * as appInsights from "applicationinsights";
-import {
-  ApplicationInsightsConfig,
-  initAppInsights as startAppInsights,
-} from "@pagopa/ts-commons/lib/appinsights";
-import { eventLog } from "@pagopa/winston-ts";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { pipe } from "fp-ts/lib/function";
-import * as O from "fp-ts/lib/Option";
-import { Request } from "express";
-import * as E from "fp-ts/lib/Either";
 import {
   sha256,
   validateDigestHeader,
 } from "@pagopa/io-functions-commons/dist/src/utils/crypto";
+import {
+  ApplicationInsightsConfig,
+  initAppInsights as startAppInsights,
+} from "@pagopa/ts-commons/lib/appinsights";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { withoutUndefinedValues } from "@pagopa/ts-commons/lib/types";
+import { eventLog } from "@pagopa/winston-ts";
+import * as appInsights from "applicationinsights";
+import { Request } from "express";
+import * as E from "fp-ts/lib/Either";
+import * as O from "fp-ts/lib/Option";
+import { pipe } from "fp-ts/lib/function";
+
 import { LollipopLocalsType } from "../types/lollipop";
 import { toFiscalCodeHash } from "../types/notification";
 import { User } from "../types/user";
@@ -46,41 +47,37 @@ export function attachTrackingData(user: User): void {
 
   customProperties.setProperty(
     USER_TRACKING_ID_KEY,
-    toFiscalCodeHash(user.fiscal_code)
+    toFiscalCodeHash(user.fiscal_code),
   );
 
   if (user.session_tracking_id !== undefined) {
     customProperties.setProperty(
       SESSION_TRACKING_ID_KEY,
-      user.session_tracking_id
+      user.session_tracking_id,
     );
   }
 }
 
 export function sessionIdPreprocessor(
   envelope: appInsights.Contracts.Envelope,
-  context?: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    readonly [name: string]: any;
-  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  context?: Readonly<Record<string, any>>,
 ): boolean {
   if (context !== undefined) {
     try {
       const userTrackingId =
         context.correlationContext.customProperties.getProperty(
-          USER_TRACKING_ID_KEY
+          USER_TRACKING_ID_KEY,
         );
       if (userTrackingId !== undefined) {
-        // eslint-disable-next-line functional/immutable-data
         envelope.tags[appInsights.defaultClient.context.keys.userId] =
           userTrackingId;
       }
       const sessionTrackingId =
         context.correlationContext.customProperties.getProperty(
-          SESSION_TRACKING_ID_KEY
+          SESSION_TRACKING_ID_KEY,
         );
       if (sessionTrackingId !== undefined) {
-        // eslint-disable-next-line functional/immutable-data
         envelope.tags[appInsights.defaultClient.context.keys.sessionId] =
           sessionTrackingId;
       }
@@ -99,7 +96,7 @@ export enum StartupEventName {
 export const trackStartupTime = (
   telemetryClient: appInsights.TelemetryClient,
   type: StartupEventName,
-  timeMs: bigint
+  timeMs: bigint,
 ): void => {
   telemetryClient.trackEvent({
     name: type,
@@ -120,7 +117,7 @@ export const trackStartupTime = (
  */
 export function initAppInsights(
   instrumentationKey: string,
-  config: ApplicationInsightsConfig = {}
+  config: ApplicationInsightsConfig = {},
 ): appInsights.TelemetryClient {
   startAppInsights(instrumentationKey, config);
   appInsights.defaultClient.addTelemetryProcessor(sessionIdPreprocessor);
@@ -130,11 +127,11 @@ export function initAppInsights(
 export const LOLLIPOP_SIGN_EVENT_NAME = "lollipop.sign";
 
 export type LCResponseLogLollipop = (
-  lcResponse: E.Either<Error, { readonly status: number }>
+  lcResponse: E.Either<Error, { readonly status: number }>,
 ) => void;
 export type RequestLogLollipop = (
   lollipopParams: LollipopLocalsType,
-  req: Request
+  req: Request,
 ) => LCResponseLogLollipop;
 
 /**
@@ -151,10 +148,10 @@ export const logLollipopSignRequest =
   (lollipopConsumerId: NonEmptyString) =>
   <
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    T extends Exclude<Record<string, string>, LollipopLocalsType>
+    T extends Exclude<Record<string, string>, LollipopLocalsType>,
   >(
     lollipopParams: LollipopLocalsType & T,
-    req: Request
+    req: Request,
   ): LCResponseLogLollipop =>
   (lcResponse: E.Either<Error, { readonly status: number }>) => {
     pipe(
@@ -171,35 +168,35 @@ export const logLollipopSignRequest =
             pipe(
               E.tryCatch(
                 () => validateDigestHeader(contentDigest, lollipopParams.body),
-                E.toError
+                E.toError,
               ),
               E.fold(
                 () => false,
-                () => true
-              )
-            )
+                () => true,
+              ),
+            ),
           ),
-          O.toUndefined
+          O.toUndefined,
         ),
         // A string rapresenting the response from the LC.
         lc_response: pipe(
           lcResponse,
           E.map(JSON.stringify),
           E.mapLeft((err) => err.message),
-          E.toUnion
+          E.toUnion,
         ),
         lollipop_consumer_id: lollipopConsumerId,
         method: req.method,
         original_url: req.originalUrl,
         // The fiscal code will be sent hashed to the logs
         ["x-pagopa-lollipop-user-id"]: sha256(
-          lollipopHeadersWithoutBody["x-pagopa-lollipop-user-id"]
+          lollipopHeadersWithoutBody["x-pagopa-lollipop-user-id"],
         ),
       })),
       O.map(withoutUndefinedValues),
       eventLog.option.info((lollipopEventData) => [
         `Lollipop Request log`,
         lollipopEventData,
-      ])
+      ]),
     );
   };

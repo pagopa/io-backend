@@ -1,7 +1,7 @@
-import * as t from "io-ts";
 import { tag } from "@pagopa/ts-commons/lib/types";
-import { PecServerConfig } from "src/config";
 import * as TE from "fp-ts/TaskEither";
+import * as t from "io-ts";
+import { PecServerConfig } from "src/config";
 
 interface ISessionTokenTag {
   readonly kind: "SessionToken";
@@ -40,5 +40,5 @@ export const FIMSToken = tag<IFIMSTokenTag>()(t.string);
 export type FIMSToken = t.TypeOf<typeof FIMSToken>;
 
 export type PecBearerGeneratorT = (
-  config: PecServerConfig
+  config: PecServerConfig,
 ) => TE.TaskEither<Error, string>;

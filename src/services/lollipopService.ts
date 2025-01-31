@@ -1,5 +1,6 @@
 import { QueueClient, QueueSendMessageResponse } from "@azure/storage-queue";
 import { RevokeAssertionRefInfo } from "@pagopa/io-functions-commons/dist/src/entities/revoke_assertion_ref_info";
+
 import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
 import { base64EncodeObject } from "../utils/messages";
 
@@ -8,11 +9,11 @@ export default class LollipopService {
 
   constructor(
     private readonly queueStorageConnectionString: string,
-    private readonly queueName: string
+    private readonly queueName: string,
   ) {
     this.queueClient = new QueueClient(
       this.queueStorageConnectionString,
-      this.queueName
+      this.queueName,
     );
   }
 
@@ -23,7 +24,7 @@ export default class LollipopService {
    * @param assertionRef the pub key identifier
    */
   public revokePreviousAssertionRef(
-    assertionRef: AssertionRef
+    assertionRef: AssertionRef,
   ): Promise<QueueSendMessageResponse> {
     const revokeMessage = RevokeAssertionRefInfo.encode({
       assertion_ref: assertionRef,

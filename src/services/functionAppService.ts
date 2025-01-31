@@ -15,17 +15,15 @@ import {
   ResponseErrorValidation,
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
-
-import * as E from "fp-ts/Either";
-
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { PromiseType } from "@pagopa/ts-commons/lib/types";
+import * as E from "fp-ts/Either";
 import { UpsertServicePreference } from "generated/backend/UpsertServicePreference";
 import { APIClient } from "src/clients/api";
-import { ServicePreference } from "../../generated/backend/ServicePreference";
-import { ServicePublic } from "../../generated/backend/ServicePublic";
 
 import { PathTraversalSafePathParam } from "../../generated/backend/PathTraversalSafePathParam";
+import { ServicePreference } from "../../generated/backend/ServicePreference";
+import { ServicePublic } from "../../generated/backend/ServicePublic";
 import {
   ResponseErrorStatusNotDefinedInSpec,
   ResponseErrorUnexpectedAuthProblem,
@@ -35,14 +33,13 @@ import {
 } from "../utils/responses";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
-type RightOf<T extends E.Either<unknown, unknown>> = T extends E.Right<infer R>
-  ? R
-  : never;
+type RightOf<T extends E.Either<unknown, unknown>> =
+  T extends E.Right<infer R> ? R : never;
 
 const handleGetServicePreferencesResponse = (
   response: RightOf<
     PromiseType<ReturnType<ReturnType<APIClient>["getServicePreferences"]>>
-  >
+  >,
 ) => {
   switch (response.status) {
     case 200:
@@ -56,7 +53,7 @@ const handleGetServicePreferencesResponse = (
     case 409:
       return ResponseErrorConflict(
         response.value.detail ??
-          "The Profile is not in the correct preference mode"
+          "The Profile is not in the correct preference mode",
       );
     case 429:
       return ResponseErrorTooManyRequests();
@@ -68,13 +65,11 @@ const handleGetServicePreferencesResponse = (
 // ----------------------
 
 export default class FunctionsAppService {
-  constructor(private readonly apiClient: IApiClientFactoryInterface) {}
-
   /**
    * Retrieve all the information about the service that has sent a message.
    */
   public readonly getService = (
-    serviceId: string
+    serviceId: string,
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorNotFound
@@ -92,13 +87,13 @@ export default class FunctionsAppService {
         response.status === 200
           ? withValidatedOrInternalError(
               ServicePublic.decode(response.value),
-              ResponseSuccessJson
+              ResponseSuccessJson,
             )
           : response.status === 404
-          ? ResponseErrorNotFound("Not found", "Service not found")
-          : response.status === 429
-          ? ResponseErrorTooManyRequests()
-          : unhandledResponseStatus(response.status)
+            ? ResponseErrorNotFound("Not found", "Service not found")
+            : response.status === 429
+              ? ResponseErrorTooManyRequests()
+              : unhandledResponseStatus(response.status),
       );
     });
 
@@ -107,13 +102,13 @@ export default class FunctionsAppService {
    */
   public readonly getServicePreferences = (
     fiscalCode: FiscalCode,
-    serviceId: PathTraversalSafePathParam
+    serviceId: PathTraversalSafePathParam,
   ): Promise<
+    | IResponseErrorConflict
     | IResponseErrorInternal
     | IResponseErrorNotFound
-    | IResponseErrorValidation
-    | IResponseErrorConflict
     | IResponseErrorTooManyRequests
+    | IResponseErrorValidation
     | IResponseSuccessJson<ServicePreference>
   > =>
     withCatchAsInternalError(async () => {
@@ -126,7 +121,7 @@ export default class FunctionsAppService {
 
       return withValidatedOrInternalError(
         validated,
-        handleGetServicePreferencesResponse
+        handleGetServicePreferencesResponse,
       );
     });
 
@@ -136,13 +131,13 @@ export default class FunctionsAppService {
   public readonly upsertServicePreferences = (
     fiscalCode: FiscalCode,
     serviceId: PathTraversalSafePathParam,
-    servicePreferences: UpsertServicePreference
+    servicePreferences: UpsertServicePreference,
   ): Promise<
+    | IResponseErrorConflict
     | IResponseErrorInternal
     | IResponseErrorNotFound
-    | IResponseErrorValidation
-    | IResponseErrorConflict
     | IResponseErrorTooManyRequests
+    | IResponseErrorValidation
     | IResponseSuccessJson<ServicePreference>
   > =>
     withCatchAsInternalError(async () => {
@@ -156,7 +151,9 @@ export default class FunctionsAppService {
 
       return withValidatedOrInternalError(
         validated,
-        handleGetServicePreferencesResponse
+        handleGetServicePreferencesResponse,
       );
     });
+
+  constructor(private readonly apiClient: IApiClientFactoryInterface) {}
 }

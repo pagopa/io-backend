@@ -1,7 +1,7 @@
 declare module "bwip-js" {
   export interface IFontLib {
-    lookup: (arg0: any) => any;
     getpaths: (arg0: any, arg1: any, arg2: number, arg3: number) => any;
+    lookup: (arg0: any) => any;
   }
 
   export const FontLib: IFontLib;
@@ -12,83 +12,83 @@ declare module "bwip-js" {
 
   export function toBuffer(
     opts: ToBufferOptions,
-    callback: (err: string | Error, png: Buffer) => void
+    callback: (err: Error | string, png: Buffer) => void,
   ): void;
 
   interface ToBufferOptions {
-    bcid: string;
-    text: string;
-
-    parse?: boolean;
-    parsefunc?: boolean;
-
-    height?: number;
-    width?: number;
-
-    scaleX?: number;
-    scaleY?: number;
-    scale?: number;
-
-    rotate?: "N" | "R" | "L" | "I";
-
-    paddingwidth?: number;
-    paddingheight?: number;
-    paddingleft?: number;
-    paddingright?: number;
-    paddingtop?: number;
-    paddingbottom?: number;
-
-    monochrome?: boolean;
-    alttext?: boolean;
-
-    includetext?: boolean;
-    textfont?: string;
-    textsize?: number;
-    textgaps?: number;
-
-    textxalign?:
-      | "offleft"
-      | "left"
-      | "center"
-      | "right"
-      | "offright"
-      | "justify";
-    textyalign?: "below" | "center" | "above";
-    textxoffset?: number;
-    textyoffset?: number;
-
-    showborder?: boolean;
-    borderwidth?: number;
-    borderleft?: number;
-    borderright?: number;
-    bordertop?: number;
-    boraderbottom?: number;
-
-    barcolor?: string;
-    backgroundcolor?: string;
-    bordercolor?: string;
-    textcolor?: string;
-
-    addontextxoffset?: number;
-    addontextyoffset?: number;
     addontextfont?: string;
     addontextsize?: number;
 
-    guardwhitespace?: boolean;
-    guardwidth?: number;
+    addontextxoffset?: number;
+    addontextyoffset?: number;
+
+    alttext?: boolean;
+    backgroundcolor?: string;
+
+    barcolor?: string;
+    bcid: string;
+    boraderbottom?: number;
+
+    bordercolor?: string;
+
+    borderleft?: number;
+    borderright?: number;
+    bordertop?: number;
+    borderwidth?: number;
     guardheight?: number;
     guardleftpos?: number;
-    guardrightpos?: number;
-    guardleftypos?: number;
-    guardrightypos?: number;
 
-    sizelimit?: number;
+    guardleftypos?: number;
+    guardrightpos?: number;
+
+    guardrightypos?: number;
+    guardwhitespace?: boolean;
+    guardwidth?: number;
+    height?: number;
 
     includecheck?: boolean;
     includecheckintext?: boolean;
-
+    includetext?: boolean;
     inkspread?: number;
+
     inkspreadh?: number;
     inkspreadv?: number;
+    monochrome?: boolean;
+    paddingbottom?: number;
+    paddingheight?: number;
+    paddingleft?: number;
+
+    paddingright?: number;
+    paddingtop?: number;
+    paddingwidth?: number;
+    parse?: boolean;
+
+    parsefunc?: boolean;
+    rotate?: "I" | "L" | "N" | "R";
+    scale?: number;
+    scaleX?: number;
+
+    scaleY?: number;
+    showborder?: boolean;
+    sizelimit?: number;
+    text: string;
+    textcolor?: string;
+    textfont?: string;
+    textgaps?: number;
+
+    textsize?: number;
+
+    textxalign?:
+      | "center"
+      | "justify"
+      | "left"
+      | "offleft"
+      | "offright"
+      | "right";
+    textxoffset?: number;
+
+    textyalign?: "above" | "below" | "center";
+    textyoffset?: number;
+    width?: number;
   }
 }

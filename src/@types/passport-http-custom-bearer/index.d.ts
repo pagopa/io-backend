@@ -3,61 +3,56 @@
  */
 
 declare module "passport-http-custom-bearer" {
-  import passport = require("passport");
   import express = require("express");
   import koa = require("koa");
+  import passport = require("passport");
 
   interface IStrategyOptions {
     bodyName?: string;
     headerName?: string;
-    queryName?: string;
-    scope?: string | Array<string> | undefined;
-    realm?: string | undefined;
     passReqToCallback?: boolean | undefined;
+    queryName?: string;
+    realm?: string | undefined;
+    scope?: string | string[] | undefined;
   }
   interface IVerifyOptions {
     message?: string | undefined;
-    scope: string | Array<string>;
+    scope: string | string[];
   }
 
-  interface VerifyFunction {
-    (
-      token: string,
-      done: (error: any, user?: any, options?: IVerifyOptions | string) => void
-    ): void;
-  }
+  type VerifyFunction = (
+    token: string,
+    done: (error: any, user?: any, options?: IVerifyOptions | string) => void,
+  ) => void;
 
   interface IKoaContextContainer {
     ctx: koa.Context;
   }
-  type KoaPassportExpressRequestMock = Partial<express.Request> &
-    IKoaContextContainer;
+  type KoaPassportExpressRequestMock = IKoaContextContainer &
+    Partial<express.Request>;
 
-  interface VerifyFunctionWithRequest {
-    (
-      req: express.Request,
-      token: string,
-      done: (error: any, user?: any, options?: IVerifyOptions | string) => void
-    ): void;
-  }
-  interface VerifyFunctionWithContext {
-    (
-      req: KoaPassportExpressRequestMock,
-      token: string,
-      done: (error: any, user?: any, options?: IVerifyOptions | string) => void
-    ): void;
-  }
+  type VerifyFunctionWithRequest = (
+    req: express.Request,
+    token: string,
+    done: (error: any, user?: any, options?: IVerifyOptions | string) => void,
+  ) => void;
+  type VerifyFunctionWithContext = (
+    req: KoaPassportExpressRequestMock,
+    token: string,
+    done: (error: any, user?: any, options?: IVerifyOptions | string) => void,
+  ) => void;
 
   type VerifyFunctions =
     | VerifyFunction
-    | VerifyFunctionWithRequest
-    | VerifyFunctionWithContext;
+    | VerifyFunctionWithContext
+    | VerifyFunctionWithRequest;
 
   class Strategy<T extends VerifyFunctions> implements passport.Strategy {
-    constructor(verify: VerifyFunction);
-    constructor(options: IStrategyOptions, verify: T);
-
     name: string;
+    constructor(verify: VerifyFunction);
+
+    constructor(options: IStrategyOptions, verify: T);
+    // eslint-disable-next-line @typescript-eslint/ban-types
     authenticate(req: express.Request, options?: Object): void;
   }
 }

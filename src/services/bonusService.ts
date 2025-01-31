@@ -14,16 +14,17 @@ import {
   ResponseSuccessAccepted,
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
+import { pipe } from "fp-ts/lib/function";
 import { BonusActivationWithQrCode } from "generated/bonus/BonusActivationWithQrCode";
 import { PaginatedBonusActivationsCollection } from "generated/io-bonus-api/PaginatedBonusActivationsCollection";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { pipe } from "fp-ts/lib/function";
+
 import { EligibilityCheck } from "../../generated/io-bonus-api/EligibilityCheck";
 import { InstanceId } from "../../generated/io-bonus-api/InstanceId";
-
 import { BonusAPIClient } from "../clients/bonus";
 import { User } from "../types/user";
+import { readableProblem } from "../utils/errorsFormatter";
 import { withQrcode } from "../utils/qrcode";
 import {
   ResponseErrorStatusNotDefinedInSpec,
@@ -31,21 +32,34 @@ import {
   withCatchAsInternalError,
   withValidatedOrInternalError,
 } from "../utils/responses";
-import { readableProblem } from "../utils/errorsFormatter";
 
 export default class BonusService {
-  constructor(private readonly bonusApiClient: ReturnType<BonusAPIClient>) {}
+  /**
+   * Get all IDs of the bonus activations requested by
+   * the authenticated user or by any between his family member
+   *
+   */
+  public readonly getAllBonusActivations = (
+    _: User,
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseSuccessJson<PaginatedBonusActivationsCollection>
+  > =>
+    // According to the removal of the vacation bonus from APP-IO, this API will always return an empty array
+    Promise.resolve(
+      ResponseSuccessJson({ items: [] } as PaginatedBonusActivationsCollection),
+    );
 
   /**
    * Retrieve the status of an eligibility check previously started
    */
   public readonly getBonusEligibilityCheck = (
-    user: User
+    user: User,
   ): Promise<
-    | IResponseErrorInternal
-    | IResponseSuccessAccepted
-    | IResponseErrorNotFound
     | IResponseErrorGone
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseSuccessAccepted
     | IResponseSuccessJson<EligibilityCheck>
   > =>
     withCatchAsInternalError(async () => {
@@ -64,7 +78,7 @@ export default class BonusService {
           case 404:
             return ResponseErrorNotFound(
               "EligibilityCheck not found",
-              `Could not find an eligibility check for fiscal code ${user.fiscal_code}`
+              `Could not find an eligibility check for fiscal code ${user.fiscal_code}`,
             );
           case 410:
             return ResponseErrorGone("EligibilityCheck expired");
@@ -81,11 +95,11 @@ export default class BonusService {
    */
   public readonly getLatestBonusActivationById = (
     user: User,
-    bonusId: NonEmptyString
+    bonusId: NonEmptyString,
   ): Promise<
     | IResponseErrorInternal
-    | IResponseSuccessAccepted<InstanceId>
     | IResponseErrorNotFound
+    | IResponseSuccessAccepted<InstanceId>
     | IResponseSuccessJson<BonusActivationWithQrCode>
   > =>
     withCatchAsInternalError(async () => {
@@ -102,10 +116,10 @@ export default class BonusService {
               TE.map((bonus) => ResponseSuccessJson(bonus)),
               TE.mapLeft((err) =>
                 ResponseErrorInternal(
-                  `Cannot encode qrcode: ${JSON.stringify(err)}`
-                )
+                  `Cannot encode qrcode: ${JSON.stringify(err)}`,
+                ),
               ),
-              TE.toUnion
+              TE.toUnion,
             )();
           case 202:
             return ResponseSuccessAccepted();
@@ -114,7 +128,7 @@ export default class BonusService {
           case 404:
             return ResponseErrorNotFound(
               "BonusActivation not found",
-              `Could not find a bonus activation for fiscal code: ${user.fiscal_code} and bonus id ${bonusId}`
+              `Could not find a bonus activation for fiscal code: ${user.fiscal_code} and bonus id ${bonusId}`,
             );
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));
@@ -124,19 +138,5 @@ export default class BonusService {
       });
     });
 
-  /**
-   * Get all IDs of the bonus activations requested by
-   * the authenticated user or by any between his family member
-   *
-   */
-  public readonly getAllBonusActivations = (
-    _: User
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseSuccessJson<PaginatedBonusActivationsCollection>
-  > =>
-    // According to the removal of the vacation bonus from APP-IO, this API will always return an empty array
-    Promise.resolve(
-      ResponseSuccessJson({ items: [] } as PaginatedBonusActivationsCollection)
-    );
+  constructor(private readonly bonusApiClient: ReturnType<BonusAPIClient>) {}
 }

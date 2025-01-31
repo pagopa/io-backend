@@ -1,4 +1,5 @@
 import nodeFetch from "node-fetch";
+
 import { Client, createClient } from "../../generated/io-fims-api/client";
 
 export function IoFimsAPIClient(
@@ -6,7 +7,7 @@ export function IoFimsAPIClient(
   baseUrl: string,
   basePath: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fetchApi: typeof fetch = nodeFetch as any as typeof fetch
+  fetchApi: typeof fetch = nodeFetch as any as typeof fetch,
 ): Client<"FunctionsKey"> {
   return createClient<"FunctionsKey">({
     basePath,

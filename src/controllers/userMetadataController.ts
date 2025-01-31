@@ -3,7 +3,6 @@
  * redis database through the user metadata storage service.
  */
 
-import * as express from "express";
 import {
   IResponseErrorConflict,
   IResponseErrorInternal,
@@ -13,9 +12,8 @@ import {
   ResponseErrorInternal,
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
-
+import * as express from "express";
 import * as E from "fp-ts/lib/Either";
-import { IResponseNoContent, ResponseNoContent } from "../utils/responses";
 
 import { UserMetadata } from "../../generated/backend/UserMetadata";
 import { IUserMetadataStorage } from "../services/IUserMetadataStorage";
@@ -24,19 +22,18 @@ import {
   metadataNotFoundError,
 } from "../services/redisUserMetadataStorage";
 import { withUserFromRequest } from "../types/user";
+import { IResponseNoContent, ResponseNoContent } from "../utils/responses";
 import { withValidatedOrValidationError } from "../utils/responses";
 
 export default class UserMetadataController {
-  constructor(private readonly userMetadataStorage: IUserMetadataStorage) {}
-
   /**
    * Returns the metadata for the current authenticated user.
    */
   public readonly getMetadata = (
-    req: express.Request
+    req: express.Request,
   ): Promise<
-    | IResponseErrorValidation
     | IResponseErrorInternal
+    | IResponseErrorValidation
     | IResponseNoContent
     | IResponseSuccessJson<UserMetadata>
   > =>
@@ -58,11 +55,11 @@ export default class UserMetadataController {
    * Story https://www.pivotaltracker.com/story/show/167064659
    */
   public readonly upsertMetadata = (
-    req: express.Request
+    req: express.Request,
   ): Promise<
     | IResponseErrorConflict
-    | IResponseErrorValidation
     | IResponseErrorInternal
+    | IResponseErrorValidation
     | IResponseSuccessJson<UserMetadata>
   > =>
     withUserFromRequest(req, async (user) =>
@@ -71,7 +68,7 @@ export default class UserMetadataController {
         async (metadata) => {
           const setMetadataResponse = await this.userMetadataStorage.set(
             user,
-            metadata
+            metadata,
           );
           if (E.isLeft(setMetadataResponse)) {
             if (setMetadataResponse.left === invalidVersionNumberError) {
@@ -80,7 +77,9 @@ export default class UserMetadataController {
             return ResponseErrorInternal(setMetadataResponse.left.message);
           }
           return ResponseSuccessJson(metadata);
-        }
-      )
+        },
+      ),
     );
+
+  constructor(private readonly userMetadataStorage: IUserMetadataStorage) {}
 }

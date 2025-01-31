@@ -14,14 +14,11 @@ import {
   ResponseSuccessAccepted,
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
-
 import { EmailString, FiscalCode } from "@pagopa/ts-commons/lib/strings";
-
 import { AccessHistoryPage } from "generated/io-fims-api/AccessHistoryPage";
 import { ExportRequest } from "generated/io-fims-api/ExportRequest";
 
 import { IoFimsAPIClient } from "../clients/io-fims";
-
 import {
   ResponseErrorStatusNotDefinedInSpec,
   withCatchAsInternalError,
@@ -31,11 +28,9 @@ import {
 const invalidRequest = "Invalid request";
 
 export default class FimsService {
-  constructor(private readonly ioFimsApiClient: ReturnType<IoFimsAPIClient>) {}
-
   public readonly getAccessHistory = (
     fiscalCode: FiscalCode,
-    page?: string
+    page?: string,
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
@@ -53,11 +48,11 @@ export default class FimsService {
           case 422:
             return ResponseErrorValidation(
               invalidRequest,
-              `An error occurred while validating the request body | ${response.value}`
+              `An error occurred while validating the request body | ${response.value}`,
             );
           case 500:
             return ResponseErrorInternal(
-              `Internal server error | ${response.value}`
+              `Internal server error | ${response.value}`,
             );
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
@@ -67,10 +62,10 @@ export default class FimsService {
 
   public readonly requestExport = (
     fiscalCode: FiscalCode,
-    email: EmailString
+    email: EmailString,
   ): Promise<
-    | IResponseErrorInternal
     | IResponseErrorConflict
+    | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseSuccessAccepted<ExportRequest>
   > =>
@@ -90,15 +85,17 @@ export default class FimsService {
           case 422:
             return ResponseErrorValidation(
               invalidRequest,
-              `An error occurred while validating the request body | ${response.value}`
+              `An error occurred while validating the request body | ${response.value}`,
             );
           case 500:
             return ResponseErrorInternal(
-              `Internal server error | ${response.value}`
+              `Internal server error | ${response.value}`,
             );
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
       });
     });
+
+  constructor(private readonly ioFimsApiClient: ReturnType<IoFimsAPIClient>) {}
 }

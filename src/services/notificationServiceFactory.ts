@@ -3,12 +3,11 @@ import * as B from "fp-ts/boolean";
 import { flow } from "fp-ts/lib/function";
 
 import { FiscalCode } from "../../generated/io-bonus-api/FiscalCode";
+import { toFiscalCodeHash } from "../types/notification";
 import {
   FeatureFlag,
   getIsUserEligibleForNewFeature,
 } from "../utils/featureFlag";
-import { toFiscalCodeHash } from "../types/notification";
-
 import NotificationService from "./notificationService";
 
 /**
@@ -17,7 +16,7 @@ import NotificationService from "./notificationService";
  * @returns
  */
 const getIsUserACanaryTestUser = (
-  regex: string
+  regex: string,
 ): ((sha: NonEmptyString) => boolean) => {
   const regExp = new RegExp(regex);
   return (sha: NonEmptyString): boolean => regExp.test(sha);
@@ -26,35 +25,35 @@ const getIsUserACanaryTestUser = (
 // ------------------------------------------
 
 export type NotificationServiceFactory = (
-  fiscalCode: FiscalCode
+  fiscalCode: FiscalCode,
 ) => NotificationService;
 
 export const getNotificationServiceFactory: (
   oldNotificationService: NotificationService,
   newNotificationService: NotificationService,
-  betaTesters: ReadonlyArray<FiscalCode>,
+  betaTesters: readonly FiscalCode[],
   canaryTestUserRegex: NonEmptyString,
-  ff: FeatureFlag
+  ff: FeatureFlag,
 ) => NotificationServiceFactory = (
   oldNotificationService,
   newNotificationService,
   betaTesters,
   canaryTestUserRegex,
-  ff
+  ff,
 ) => {
   const isUserACanaryTestUser = getIsUserACanaryTestUser(canaryTestUserRegex);
 
   const isUserEligible = getIsUserEligibleForNewFeature<FiscalCode>(
     (cf) => betaTesters.includes(cf),
     (cf) => isUserACanaryTestUser(toFiscalCodeHash(cf)),
-    ff
+    ff,
   );
 
   return flow(
     isUserEligible,
     B.fold(
       () => oldNotificationService,
-      () => newNotificationService
-    )
+      () => newNotificationService,
+    ),
   );
 };
