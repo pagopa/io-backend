@@ -27,7 +27,7 @@ export const withBonusIdFromRequest = async <T>(
   f: (bonusId: NonEmptyString) => Promise<T>,
 ): Promise<IResponseErrorValidation | T> =>
   withValidatedOrValidationError(
-    NonEmptyString.decode(req.params["bonus_id"]),
+    NonEmptyString.decode(req.param("bonus_id")),
     f,
   );
 
