@@ -1,6 +1,6 @@
-import { FiscalCode } from "@pagopa/io-functions-app-sdk/FiscalCode";
+
 import * as t from "io-ts";
-import { NonEmptyString, PatternString } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString, PatternString } from "@pagopa/ts-commons/lib/strings";
 import * as express from "express";
 import {
   IResponseErrorValidation,
