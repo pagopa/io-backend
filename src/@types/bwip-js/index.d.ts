@@ -1,6 +1,8 @@
 declare module "bwip-js" {
   export interface IFontLib {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     getpaths: (arg0: any, arg1: any, arg2: number, arg3: number) => any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     lookup: (arg0: any) => any;
   }
 
@@ -8,6 +10,7 @@ declare module "bwip-js" {
 
   export function fixupOptions(opts: ToBufferOptions): void;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export function render(opts: ToBufferOptions, drawing: any): string;
 
   export function toBuffer(

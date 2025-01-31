@@ -22,6 +22,7 @@ declare module "passport-http-custom-bearer" {
 
   type VerifyFunction = (
     token: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     done: (error: any, user?: any, options?: IVerifyOptions | string) => void,
   ) => void;
 
@@ -34,11 +35,13 @@ declare module "passport-http-custom-bearer" {
   type VerifyFunctionWithRequest = (
     req: express.Request,
     token: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     done: (error: any, user?: any, options?: IVerifyOptions | string) => void,
   ) => void;
   type VerifyFunctionWithContext = (
     req: KoaPassportExpressRequestMock,
     token: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     done: (error: any, user?: any, options?: IVerifyOptions | string) => void,
   ) => void;
 

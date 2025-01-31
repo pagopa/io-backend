@@ -14,6 +14,7 @@ interface IVerifyOptions {
 
 type VerifyFunction = (
   token: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   done: (error: any, user?: any, options?: IVerifyOptions) => void,
 ) => void;
 
