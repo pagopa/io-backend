@@ -167,6 +167,7 @@ export default class NewMessagesService {
                 case 500:
                   return ResponseErrorInternal(ERROR_MESSAGE_500);
                 case 503:
+                  // eslint-disable-next-line no-case-declarations
                   const retryAfter = response.headers["Retry-After"] ?? "10";
                   return ResponseErrorServiceTemporarilyUnavailable(
                     ERROR_MESSAGE_503,

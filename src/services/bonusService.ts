@@ -40,6 +40,7 @@ export default class BonusService {
    *
    */
   public readonly getAllBonusActivations = (
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _: User,
   ): Promise<
     | IResponseErrorInternal

@@ -32,14 +32,14 @@ export const getUserIdentity: (
     pipe(
       user,
       UserIdentity.decode,
-      E.mapLeft((_) =>
+      E.mapLeft(() =>
         ResponseErrorInternal("Unexpected User Identity data format."),
       ),
       E.map((_) =>
         pipe(
           _,
           exactUserIdentityDecode,
-          E.mapLeft((_1) => ResponseErrorInternal("Exact decode failed.")),
+          E.mapLeft(() => ResponseErrorInternal("Exact decode failed.")),
           E.map(ResponseSuccessJson),
           E.toUnion,
         ),

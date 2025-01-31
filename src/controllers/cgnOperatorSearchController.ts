@@ -76,9 +76,7 @@ export default class CgnOperatorSearchController {
     | IResponseErrorValidation
     | IResponseSuccessJson<CountResult>
   > =>
-    withUserFromRequest(req, async (_) =>
-      this.cgnOperatorSearchService.count(),
-    );
+    withUserFromRequest(req, async () => this.cgnOperatorSearchService.count());
 
   /**
    * Get a discount bucket code by discount identifier.
@@ -141,7 +139,7 @@ export default class CgnOperatorSearchController {
     | IResponseErrorValidation
     | IResponseSuccessJson<OfflineMerchants>
   > =>
-    withUserFromRequest(req, async (_) =>
+    withUserFromRequest(req, async () =>
       withValidatedOrValidationError(
         OfflineMerchantSearchRequest.decode(req.body),
         (offlineSearchRequest) =>
@@ -163,7 +161,7 @@ export default class CgnOperatorSearchController {
     | IResponseErrorValidation
     | IResponseSuccessJson<OnlineMerchants>
   > =>
-    withUserFromRequest(req, async (_) =>
+    withUserFromRequest(req, async () =>
       withValidatedOrValidationError(
         OnlineMerchantSearchRequest.decode(req.body),
         (onlineSearchRequest) =>
@@ -182,7 +180,7 @@ export default class CgnOperatorSearchController {
     | IResponseErrorValidation
     | IResponseSuccessJson<PublishedProductCategoriesResult>
   > =>
-    withUserFromRequest(req, async (_) =>
+    withUserFromRequest(req, async () =>
       withValidatedOrValidationError(
         GetPublishedCategoriesParameters.decode(req.query),
         (params) =>
@@ -201,7 +199,7 @@ export default class CgnOperatorSearchController {
     | IResponseErrorValidation
     | IResponseSuccessJson<SearchResult>
   > =>
-    withUserFromRequest(req, async (_) =>
+    withUserFromRequest(req, async () =>
       withValidatedOrValidationError(
         SearchRequest.decode(req.body),
         (searchRequest) => this.cgnOperatorSearchService.search(searchRequest),

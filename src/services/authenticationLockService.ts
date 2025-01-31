@@ -88,9 +88,9 @@ export default class AuthenticationLockService {
 
             rowKey: unlockCode,
           }),
-        (_) => new Error("Something went wrong creating the record"),
+        () => new Error("Something went wrong creating the record"),
       ),
-      TE.map((_) => true as const),
+      TE.map(() => true as const),
     );
 
   /**

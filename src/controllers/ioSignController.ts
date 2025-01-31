@@ -265,7 +265,7 @@ export default class IoSignController {
             req.params.id,
             Id.decode,
             TE.fromEither,
-            TE.mapLeft((_) =>
+            TE.mapLeft(() =>
               ResponseErrorInternal(
                 `Error validating the signature request id`,
               ),

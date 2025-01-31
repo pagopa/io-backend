@@ -521,7 +521,7 @@ export const PN_CONFIGURATION_ID = pipe(
 export const FF_ROUTING_PUSH_NOTIF = pipe(
   process.env.FF_ROUTING_PUSH_NOTIF,
   FeatureFlag.decode,
-  E.getOrElse((_) => FeatureFlagEnum.NONE),
+  E.getOrElse(() => FeatureFlagEnum.NONE),
 );
 
 export const FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST = pipe(
@@ -539,7 +539,7 @@ export const FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST = pipe(
 export const FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX = pipe(
   process.env.FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX,
   NonEmptyString.decode,
-  E.getOrElse((_) => "XYZ" as NonEmptyString),
+  E.getOrElse(() => "XYZ" as NonEmptyString),
 );
 
 // UNIQUE EMAIL ENFORCEMENT variables

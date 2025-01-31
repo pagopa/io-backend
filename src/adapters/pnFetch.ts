@@ -196,7 +196,7 @@ export const redirectPrecondition =
           ThirdPartyPreconditionUrl.decode,
           E.mapLeft(errorsToError),
           TE.fromEither,
-          eventLog.taskEither.info((_) => [
+          eventLog.taskEither.info(() => [
             `pn.precondition.call`,
             {
               locals: lollipopLocals
@@ -253,7 +253,7 @@ export const redirectMessages =
           ThirdPartyMessagesUrl.decode,
           E.mapLeft(errorsToError),
           TE.fromEither,
-          eventLog.taskEither.info((_) => [
+          eventLog.taskEither.info(() => [
             `pn.notification.call`,
             {
               locals: lollipopLocals
@@ -397,6 +397,7 @@ export const redirectAttachment =
           ThirdPartyAttachmentUrl.decode,
           E.mapLeft(errorsToError),
           TE.fromEither,
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           TE.chain(([_id, getAttachmentUrl]) =>
             match(getAttachmentUrl)
               .when(
@@ -459,7 +460,7 @@ export const redirectAttachment =
                   ),
                 ),
               ),
-              E.getOrElse((_) =>
+              E.getOrElse(() =>
                 pipe(
                   attachment.retryAfter,
                   t.number.decode,
