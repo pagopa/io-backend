@@ -12,7 +12,7 @@
   "description": "IO app and web backend",
   "main": "index.js",
   "engines": {
-    "node": "20.18.2"
+    "node": "20.17.0"
   },
   "scripts": {
     "watch": "tsc -w",

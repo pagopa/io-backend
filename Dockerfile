@@ -1,4 +1,4 @@
-FROM node:20.18.2 as builder
+FROM node:20.17.0 as builder
 
 WORKDIR /usr/src/app
 
@@ -7,7 +7,7 @@ COPY / /usr/src/app/
 RUN yarn install \
   && yarn predeploy
 
-FROM node:20.18.2-alpine
+FROM node:20.17.0-alpine
 LABEL maintainer="https://pagopa.gov.it"
 
 # Install major CA certificates to cover
