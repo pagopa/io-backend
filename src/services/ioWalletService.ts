@@ -58,13 +58,17 @@ export default class IoWalletService {
   /**
    * Get a nonce.
    */
-  public readonly getNonce = (): Promise<
+  public readonly getNonce = (
+    fiscal_code: string
+  ): Promise<
     | IResponseErrorInternal
     | IResponseSuccessJson<NonceDetailView>
     | IResponseErrorServiceUnavailable
   > =>
     withCatchAsInternalError(async () => {
-      const validated = await this.ioWalletApiClient.getNonce({});
+      const validated = await this.ioWalletApiClient.getNonce({
+        body: { fiscal_code },
+      });
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
           case 200:

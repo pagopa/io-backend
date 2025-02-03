@@ -48,11 +48,18 @@ export default class IoWalletController {
   /**
    * Get nonce
    */
-  public readonly getNonce = (): Promise<
+  public readonly getNonce = (
+    req: express.Request
+  ): Promise<
     | IResponseErrorInternal
+    | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessJson<NonceDetailView>
     | IResponseErrorServiceUnavailable
-  > => this.ioWalletService.getNonce();
+    | IResponseErrorValidation
+  > =>
+    withUserFromRequest(req, async (user) =>
+      this.ioWalletService.getNonce(user.fiscal_code)
+    );
 
   /**
    * Create a Wallet Instance

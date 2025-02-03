@@ -105,7 +105,7 @@ describe("IoWalletService#getNonce", () => {
   it("should make the correct api call", async () => {
     const service = new IoWalletService(api, trialSystemApi);
 
-    await service.getNonce();
+    await service.getNonce("a_fiscal_code");
 
     expect(mockGetNonce).toHaveBeenCalledWith({});
   });
@@ -113,7 +113,7 @@ describe("IoWalletService#getNonce", () => {
   it("should handle a success response", async () => {
     const service = new IoWalletService(api, trialSystemApi);
 
-    const res = await service.getNonce();
+    const res = await service.getNonce("a_fiscal_code");
 
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
@@ -128,7 +128,7 @@ describe("IoWalletService#getNonce", () => {
 
     const service = new IoWalletService(api, trialSystemApi);
 
-    const res = await service.getNonce();
+    const res = await service.getNonce("a_fiscal_code");
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal",
@@ -143,7 +143,7 @@ describe("IoWalletService#getNonce", () => {
 
     const service = new IoWalletService(api, trialSystemApi);
 
-    const res = await service.getNonce();
+    const res = await service.getNonce("a_fiscal_code");
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal",
@@ -156,7 +156,7 @@ describe("IoWalletService#getNonce", () => {
     });
     const service = new IoWalletService(api, trialSystemApi);
 
-    const res = await service.getNonce();
+    const res = await service.getNonce("a_fiscal_code");
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal",
