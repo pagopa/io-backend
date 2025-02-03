@@ -3,6 +3,7 @@
  * app by forwarding the call to the API system.
  */
 
+import * as express from "express";
 import {
   IResponseErrorGone,
   IResponseErrorInternal,
@@ -11,12 +12,11 @@ import {
   IResponseSuccessAccepted,
   IResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as express from "express";
+
 import { BonusActivationWithQrCode } from "generated/bonus/BonusActivationWithQrCode";
 import { PaginatedBonusActivationsCollection } from "generated/io-bonus-api/PaginatedBonusActivationsCollection";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import BonusService from "src/services/bonusService";
-
 import { EligibilityCheck } from "../../generated/io-bonus-api/EligibilityCheck";
 import { InstanceId } from "../../generated/io-bonus-api/InstanceId";
 import { withUserFromRequest } from "../types/user";
@@ -24,28 +24,15 @@ import { withValidatedOrValidationError } from "../utils/responses";
 
 export const withBonusIdFromRequest = async <T>(
   req: express.Request,
-  f: (bonusId: NonEmptyString) => Promise<T>,
+  f: (bonusId: NonEmptyString) => Promise<T>
 ): Promise<IResponseErrorValidation | T> =>
   withValidatedOrValidationError(
     NonEmptyString.decode(req.param("bonus_id")),
-    f,
+    f
   );
 
 export default class BonusController {
-  /**
-   * Get all IDs of the bonus activations requested by
-   * the authenticated user or by any between his family member
-   */
-  public readonly getAllBonusActivations = (
-    req: express.Request,
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorValidation
-    | IResponseSuccessJson<PaginatedBonusActivationsCollection>
-  > =>
-    withUserFromRequest(req, (user) =>
-      this.bonusService.getAllBonusActivations(user),
-    );
+  constructor(private readonly bonusService: BonusService) {}
 
   /**
    * Starts a request for a bonus for the current user.
@@ -53,17 +40,17 @@ export default class BonusController {
    *
    */
   public readonly getBonusEligibilityCheck = (
-    req: express.Request,
+    req: express.Request
   ): Promise<
-    | IResponseErrorGone
-    | IResponseErrorInternal
-    | IResponseErrorNotFound
     | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseErrorInternal
     | IResponseSuccessAccepted
+    | IResponseErrorGone
     | IResponseSuccessJson<EligibilityCheck>
   > =>
     withUserFromRequest(req, (user) =>
-      this.bonusService.getBonusEligibilityCheck(user),
+      this.bonusService.getBonusEligibilityCheck(user)
     );
 
   /**
@@ -72,19 +59,32 @@ export default class BonusController {
    *
    */
   public readonly getLatestBonusActivationById = (
-    req: express.Request,
+    req: express.Request
   ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorNotFound
     | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseErrorInternal
     | IResponseSuccessAccepted<InstanceId>
     | IResponseSuccessJson<BonusActivationWithQrCode>
   > =>
     withUserFromRequest(req, (user) =>
       withBonusIdFromRequest(req, (bonusId) =>
-        this.bonusService.getLatestBonusActivationById(user, bonusId),
-      ),
+        this.bonusService.getLatestBonusActivationById(user, bonusId)
+      )
     );
 
-  constructor(private readonly bonusService: BonusService) {}
+  /**
+   * Get all IDs of the bonus activations requested by
+   * the authenticated user or by any between his family member
+   */
+  public readonly getAllBonusActivations = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorValidation
+    | IResponseErrorInternal
+    | IResponseSuccessJson<PaginatedBonusActivationsCollection>
+  > =>
+    withUserFromRequest(req, (user) =>
+      this.bonusService.getAllBonusActivations(user)
+    );
 }

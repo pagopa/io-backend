@@ -1,7 +1,9 @@
 /* eslint-disable sort-keys */
 
-import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as t from "io-ts";
+
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+
 import { BooleanFromString, JsonFromString, withFallback } from "io-ts-types";
 
 export const ClientCert = t.interface({
@@ -12,9 +14,9 @@ export const ClientCert = t.interface({
 
 export type ApiKeyAuthenticationConfig = t.TypeOf<typeof AuthenticationConfig>;
 export const ApiKeyAuthenticationConfig = t.interface({
-  header_key_name: NonEmptyString,
-  key: NonEmptyString,
   type: t.literal("API_KEY"),
+  key: NonEmptyString,
+  header_key_name: NonEmptyString,
 });
 
 export type AuthenticationConfig = t.TypeOf<typeof AuthenticationConfig>;
@@ -41,11 +43,11 @@ export const TestEnvironmentConfig = t.intersection([
 
 export type ThirdPartyConfigBase = t.TypeOf<typeof ThirdPartyConfigBase>;
 export const ThirdPartyConfigBase = t.interface({
-  disableLollipopFor: t.readonlyArray(FiscalCode),
-  isLollipopEnabled: BooleanFromString,
-  jsonSchema: NonEmptyString,
-  schemaKind: NonEmptyString,
   serviceId: NonEmptyString,
+  schemaKind: NonEmptyString,
+  jsonSchema: NonEmptyString,
+  isLollipopEnabled: BooleanFromString,
+  disableLollipopFor: t.readonlyArray(FiscalCode),
 });
 
 /**
@@ -76,6 +78,6 @@ export type ThirdPartyConfigListFromString = t.TypeOf<
 >;
 export const ThirdPartyConfigListFromString = withFallback(
   JsonFromString,
-  [],
+  []
 ).pipe(ThirdPartyConfigList);
 // ^^^ take [] as fallback if JSON.parse fails, but do not override ThirdPartyConfigList validation

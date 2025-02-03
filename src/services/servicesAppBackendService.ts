@@ -6,7 +6,6 @@ import {
   ResponseErrorNotFound,
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
-
 import { FeaturedServices } from "../../generated/services-app-backend/FeaturedServices";
 import { InstitutionServicesResource } from "../../generated/services-app-backend/InstitutionServicesResource";
 import { Institutions } from "../../generated/services-app-backend/Institutions";
@@ -22,11 +21,15 @@ import {
 
 // TODO: Aggiungere le altre operazioni del service
 export default class ServicesAppBackendService {
+  constructor(
+    private readonly apiClient: ReturnType<ServicesAppBackendAPIClient>
+  ) {}
+
   public readonly findInstitutions = (
     search?: string,
     scope?: ScopeType,
     limit?: number,
-    offset?: number,
+    offset?: number
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
@@ -44,9 +47,67 @@ export default class ServicesAppBackendService {
         response.status === 200
           ? withValidatedOrInternalError(
               InstitutionsResource.decode(response.value),
-              ResponseSuccessJson,
+              ResponseSuccessJson
             )
-          : unhandledResponseStatus(response.status),
+          : unhandledResponseStatus(response.status)
+      );
+    });
+
+  public readonly getServiceById = (
+    serviceId: string
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<ServiceDetails>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.apiClient.getServiceById({
+        serviceId,
+      });
+
+      return withValidatedOrInternalError(validated, (response) =>
+        response.status === 200
+          ? withValidatedOrInternalError(
+              ServiceDetails.decode(response.value),
+              ResponseSuccessJson
+            )
+          : response.status === 404
+          ? ResponseErrorNotFound("Not found", "Service not found")
+          : unhandledResponseStatus(response.status)
+      );
+    });
+
+  public readonly getFeaturedServices = (): Promise<
+    IResponseErrorInternal | IResponseSuccessJson<FeaturedServices>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.apiClient.getFeaturedServices({});
+
+      // TODO: sistemare i vari return
+      return withValidatedOrInternalError(validated, (response) =>
+        response.status === 200
+          ? withValidatedOrInternalError(
+              FeaturedServices.decode(response.value),
+              ResponseSuccessJson
+            )
+          : unhandledResponseStatus(response.status)
+      );
+    });
+
+  public readonly getFeaturedInstitutions = (): Promise<
+    IResponseErrorInternal | IResponseSuccessJson<Institutions>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.apiClient.getFeaturedInstitutions({});
+
+      // TODO: sistemare i vari return
+      return withValidatedOrInternalError(validated, (response) =>
+        response.status === 200
+          ? withValidatedOrInternalError(
+              Institutions.decode(response.value),
+              ResponseSuccessJson
+            )
+          : unhandledResponseStatus(response.status)
       );
     });
 
@@ -54,7 +115,7 @@ export default class ServicesAppBackendService {
     // TODO: fix institutionId type
     institutionId: string,
     limit?: number,
-    offset?: number,
+    offset?: number
   ): Promise<
     IResponseErrorInternal | IResponseSuccessJson<InstitutionServicesResource>
   > =>
@@ -70,71 +131,9 @@ export default class ServicesAppBackendService {
         response.status === 200
           ? withValidatedOrInternalError(
               InstitutionServicesResource.decode(response.value),
-              ResponseSuccessJson,
+              ResponseSuccessJson
             )
-          : unhandledResponseStatus(response.status),
+          : unhandledResponseStatus(response.status)
       );
     });
-
-  public readonly getFeaturedInstitutions = (): Promise<
-    IResponseErrorInternal | IResponseSuccessJson<Institutions>
-  > =>
-    withCatchAsInternalError(async () => {
-      const validated = await this.apiClient.getFeaturedInstitutions({});
-
-      // TODO: sistemare i vari return
-      return withValidatedOrInternalError(validated, (response) =>
-        response.status === 200
-          ? withValidatedOrInternalError(
-              Institutions.decode(response.value),
-              ResponseSuccessJson,
-            )
-          : unhandledResponseStatus(response.status),
-      );
-    });
-
-  public readonly getFeaturedServices = (): Promise<
-    IResponseErrorInternal | IResponseSuccessJson<FeaturedServices>
-  > =>
-    withCatchAsInternalError(async () => {
-      const validated = await this.apiClient.getFeaturedServices({});
-
-      // TODO: sistemare i vari return
-      return withValidatedOrInternalError(validated, (response) =>
-        response.status === 200
-          ? withValidatedOrInternalError(
-              FeaturedServices.decode(response.value),
-              ResponseSuccessJson,
-            )
-          : unhandledResponseStatus(response.status),
-      );
-    });
-
-  public readonly getServiceById = (
-    serviceId: string,
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorNotFound
-    | IResponseSuccessJson<ServiceDetails>
-  > =>
-    withCatchAsInternalError(async () => {
-      const validated = await this.apiClient.getServiceById({
-        serviceId,
-      });
-
-      return withValidatedOrInternalError(validated, (response) =>
-        response.status === 200
-          ? withValidatedOrInternalError(
-              ServiceDetails.decode(response.value),
-              ResponseSuccessJson,
-            )
-          : response.status === 404
-            ? ResponseErrorNotFound("Not found", "Service not found")
-            : unhandledResponseStatus(response.status),
-      );
-    });
-
-  constructor(
-    private readonly apiClient: ReturnType<ServicesAppBackendAPIClient>,
-  ) {}
 }

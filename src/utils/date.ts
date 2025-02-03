@@ -1,10 +1,10 @@
 import { PatternString } from "@pagopa/ts-commons/lib/strings";
 import { addYears, format, isAfter } from "date-fns";
-import * as E from "fp-ts/Either";
-import { Option, tryCatch } from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
+import { Option, tryCatch } from "fp-ts/lib/Option";
 import { FiscalCode } from "generated/backend/FiscalCode";
 import * as t from "io-ts";
+import * as E from "fp-ts/Either";
 
 /**
  * Returns a comparator of two dates that returns true if
@@ -16,7 +16,7 @@ export const isOlderThan = (years: number) => (dateOfBirth: Date, when: Date) =>
 export const isValidDate = (d: Date) =>
   d instanceof Date && !isNaN(d.getTime());
 
-const months: Readonly<Record<string, number>> = {
+const months: { readonly [k: string]: number } = {
   ["A"]: 1,
   ["B"]: 2,
   ["C"]: 3,
@@ -92,7 +92,7 @@ const isDate = (v: t.mixed): v is Date => v instanceof Date;
  *
  */
 const STRICT_UTC_ISO8601_FULL_REGEX = PatternString(
-  "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d(\\.\\d+)?[+-](\\d{2})\\:(\\d{2})$",
+  "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d(\\.\\d+)?[+-](\\d{2})\\:(\\d{2})$"
 );
 // 2021-12-22T10:56:03+01:00
 /**
@@ -111,9 +111,9 @@ export const StrictUTCISODateFromString = new t.Type<Date, string>(
           E.chain((s) => {
             const d = new Date(s);
             return isNaN(d.getTime()) ? t.failure(s, c) : t.success(d);
-          }),
+          })
         ),
-  (a) => a.toISOString(),
+  (a) => a.toISOString()
 );
 
 export type StrictUTCISODateFromString = t.TypeOf<

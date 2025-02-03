@@ -14,7 +14,6 @@ export type SuccessResponse = t.TypeOf<typeof SuccessResponse>;
 export const STRINGS_RECORD = t.record(t.string, t.string);
 export type STRINGS_RECORD = t.TypeOf<typeof STRINGS_RECORD>;
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function assertUnreachable(_: never): never {
   throw new Error("Unexpected type error");
 }
@@ -28,9 +27,9 @@ export const IoLoginHostUrl = PatternString("^(https?|iologin):");
  * @returns either a decode error or the array of decoded items
  */
 export const CommaSeparatedListOf = (decoder: t.Mixed) =>
-  new t.Type<readonly t.TypeOf<typeof decoder>[], string, unknown>(
+  new t.Type<ReadonlyArray<t.TypeOf<typeof decoder>>, string, unknown>(
     `CommaSeparatedListOf<${decoder.name}>`,
-    (value: unknown): value is readonly t.TypeOf<typeof decoder>[] =>
+    (value: unknown): value is ReadonlyArray<t.TypeOf<typeof decoder>> =>
       Array.isArray(value) && value.every((e) => decoder.is(e)),
     (input) =>
       t.readonlyArray(decoder).decode(
@@ -40,8 +39,8 @@ export const CommaSeparatedListOf = (decoder: t.Mixed) =>
               .map((e) => e.trim())
               .filter(Boolean)
           : !input
-            ? [] // fallback to empty array in case of empty input
-            : input, // it should not happen, but in case we let the decoder fail
+          ? [] // fallback to empty array in case of empty input
+          : input // it should not happen, but in case we let the decoder fail
       ),
-    String,
+    String
   );

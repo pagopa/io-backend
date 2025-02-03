@@ -3,9 +3,7 @@
  * app by forwarding the call to the API system.
  */
 
-import { CgnActivationDetail } from "@pagopa/io-functions-cgn-sdk/CgnActivationDetail";
-import { EycaActivationDetail } from "@pagopa/io-functions-cgn-sdk/EycaActivationDetail";
-import { EycaCard } from "@pagopa/io-functions-cgn-sdk/EycaCard";
+import * as express from "express";
 import {
   IResponseErrorConflict,
   IResponseErrorForbiddenNotAuthorized,
@@ -17,19 +15,21 @@ import {
   IResponseSuccessRedirectToResource,
   ResponseErrorForbiddenNotAuthorized,
 } from "@pagopa/ts-commons/lib/responses";
-import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
-import * as express from "express";
-import { Otp } from "generated/cgn/Otp";
 
+import { EycaActivationDetail } from "@pagopa/io-functions-cgn-sdk/EycaActivationDetail";
+import { EycaCard } from "@pagopa/io-functions-cgn-sdk/EycaCard";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import { Otp } from "generated/cgn/Otp";
+import { CgnActivationDetail } from "@pagopa/io-functions-cgn-sdk/CgnActivationDetail";
 import { Card } from "../../generated/cgn/Card";
-import { InstanceId } from "../../generated/cgn/InstanceId";
 import CgnService from "../../src/services/cgnService";
+import { InstanceId } from "../../generated/cgn/InstanceId";
 import { User, withUserFromRequest } from "../types/user";
 
 export const withAllowedUser = async <T>(
   user: User,
-  allowedFiscalCodes: readonly FiscalCode[],
-  f: (user: User) => Promise<T>,
+  allowedFiscalCodes: ReadonlyArray<FiscalCode>,
+  f: (user: User) => Promise<T>
 ) =>
   allowedFiscalCodes.length === 0 ||
   allowedFiscalCodes.includes(user.fiscal_code)
@@ -37,171 +37,171 @@ export const withAllowedUser = async <T>(
     : ResponseErrorForbiddenNotAuthorized;
 
 export default class CgnController {
-  /**
-   * Generate a CGN OTP for the current user.
-   */
-  public readonly generateOtp = (
-    req: express.Request,
-  ): Promise<
-    | IResponseErrorForbiddenNotAuthorized
-    | IResponseErrorInternal
-    | IResponseErrorValidation
-    | IResponseSuccessJson<Otp>
-  > =>
-    withUserFromRequest(req, (user) =>
-      withAllowedUser(
-        user,
-        this.allowedFiscalCodes,
-        this.cgnService.generateOtp,
-      ),
-    );
-
-  /**
-   * Get Cgn activation's process status for the current user.
-   */
-  public readonly getCgnActivation = (
-    req: express.Request,
-  ): Promise<
-    | IResponseErrorForbiddenNotAuthorized
-    | IResponseErrorInternal
-    | IResponseErrorNotFound
-    | IResponseErrorValidation
-    | IResponseSuccessJson<CgnActivationDetail>
-  > =>
-    withUserFromRequest(req, (user) =>
-      withAllowedUser(
-        user,
-        this.allowedFiscalCodes,
-        this.cgnService.getCgnActivation,
-      ),
-    );
+  constructor(
+    private readonly cgnService: CgnService,
+    private readonly allowedFiscalCodes: ReadonlyArray<FiscalCode>
+  ) {}
 
   /**
    * Get the Cgn status for the current user.
    */
   public readonly getCgnStatus = (
-    req: express.Request,
+    req: express.Request
   ): Promise<
-    | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorInternal
-    | IResponseErrorNotFound
     | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessJson<Card>
   > =>
     withUserFromRequest(req, (user) =>
       withAllowedUser(
         user,
         this.allowedFiscalCodes,
-        this.cgnService.getCgnStatus,
-      ),
-    );
-
-  /**
-   * Get EYCA card activation's process status for the current user.
-   */
-  public readonly getEycaActivation = (
-    req: express.Request,
-  ): Promise<
-    | IResponseErrorForbiddenNotAuthorized
-    | IResponseErrorInternal
-    | IResponseErrorNotFound
-    | IResponseErrorValidation
-    | IResponseSuccessJson<EycaActivationDetail>
-  > =>
-    withUserFromRequest(req, (user) =>
-      withAllowedUser(
-        user,
-        this.allowedFiscalCodes,
-        this.cgnService.getEycaActivation,
-      ),
+        this.cgnService.getCgnStatus
+      )
     );
 
   /**
    * Get the Eyca Card status for the current user.
    */
   public readonly getEycaStatus = (
-    req: express.Request,
+    req: express.Request
   ): Promise<
-    | IResponseErrorConflict
-    | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorInternal
-    | IResponseErrorNotFound
     | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorConflict
     | IResponseSuccessJson<EycaCard>
   > =>
     withUserFromRequest(req, (user) =>
       withAllowedUser(
         user,
         this.allowedFiscalCodes,
-        this.cgnService.getEycaStatus,
-      ),
+        this.cgnService.getEycaStatus
+      )
     );
 
   /**
    * Start a Cgn activation for the current user.
    */
   public readonly startCgnActivation = (
-    req: express.Request,
+    req: express.Request
   ): Promise<
-    | IResponseErrorConflict
-    | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorInternal
     | IResponseErrorValidation
-    | IResponseSuccessAccepted
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorConflict
     | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
+    | IResponseSuccessAccepted
   > =>
     withUserFromRequest(req, (user) =>
       withAllowedUser(
         user,
         this.allowedFiscalCodes,
-        this.cgnService.startCgnActivation,
-      ),
+        this.cgnService.startCgnActivation
+      )
     );
 
   /**
-   * Start a Cgn unsubscription for the current user.
+   * Get Cgn activation's process status for the current user.
    */
-  public readonly startCgnUnsubscription = (
-    req: express.Request,
+  public readonly getCgnActivation = (
+    req: express.Request
   ): Promise<
-    | IResponseErrorConflict
-    | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorInternal
     | IResponseErrorValidation
-    | IResponseSuccessAccepted
-    | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
+    | IResponseErrorNotFound
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseSuccessJson<CgnActivationDetail>
   > =>
     withUserFromRequest(req, (user) =>
       withAllowedUser(
         user,
         this.allowedFiscalCodes,
-        this.cgnService.startCgnUnsubscription,
-      ),
+        this.cgnService.getCgnActivation
+      )
+    );
+
+  /**
+   * Get EYCA card activation's process status for the current user.
+   */
+  public readonly getEycaActivation = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseSuccessJson<EycaActivationDetail>
+  > =>
+    withUserFromRequest(req, (user) =>
+      withAllowedUser(
+        user,
+        this.allowedFiscalCodes,
+        this.cgnService.getEycaActivation
+      )
     );
 
   /**
    * Start an EYCA activation for the current user.
    */
   public readonly startEycaActivation = (
-    req: express.Request,
+    req: express.Request
   ): Promise<
-    | IResponseErrorConflict
-    | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorInternal
     | IResponseErrorValidation
-    | IResponseSuccessAccepted
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorConflict
     | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
+    | IResponseSuccessAccepted
   > =>
     withUserFromRequest(req, (user) =>
       withAllowedUser(
         user,
         this.allowedFiscalCodes,
-        this.cgnService.startEycaActivation,
-      ),
+        this.cgnService.startEycaActivation
+      )
     );
 
-  constructor(
-    private readonly cgnService: CgnService,
-    private readonly allowedFiscalCodes: readonly FiscalCode[],
-  ) {}
+  /**
+   * Start a Cgn unsubscription for the current user.
+   */
+  public readonly startCgnUnsubscription = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorConflict
+    | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
+    | IResponseSuccessAccepted
+  > =>
+    withUserFromRequest(req, (user) =>
+      withAllowedUser(
+        user,
+        this.allowedFiscalCodes,
+        this.cgnService.startCgnUnsubscription
+      )
+    );
+
+  /**
+   * Generate a CGN OTP for the current user.
+   */
+  public readonly generateOtp = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseSuccessJson<Otp>
+  > =>
+    withUserFromRequest(req, (user) =>
+      withAllowedUser(
+        user,
+        this.allowedFiscalCodes,
+        this.cgnService.generateOtp
+      )
+    );
 }

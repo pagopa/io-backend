@@ -5,20 +5,18 @@
 declare module "passport-auth-token";
 
 interface IVerifyOptions {
-  readonly headerFields: readonly string[];
-  readonly optional: boolean;
-  readonly params: boolean;
+  readonly tokenFields: ReadonlyArray<string>;
+  readonly headerFields: ReadonlyArray<string>;
   readonly passReqToCallback: boolean;
-  readonly tokenFields: readonly string[];
+  readonly params: boolean;
+  readonly optional: boolean;
 }
 
 type VerifyFunction = (
   token: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  done: (error: any, user?: any, options?: IVerifyOptions) => void,
+  done: (error: any, user?: any, options?: IVerifyOptions) => void
 ) => void;
 
-// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 declare class Strategy {
   constructor(verify: VerifyFunction);
 }

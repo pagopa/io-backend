@@ -13,6 +13,7 @@ import { PaymentActivationsGetResponse } from "../../generated/backend/PaymentAc
 import { PaymentActivationsPostResponse } from "../../generated/backend/PaymentActivationsPostResponse";
 import { PaymentRequestsGetResponse } from "../../generated/backend/PaymentRequestsGetResponse";
 import { PaymentActivationsPostRequest } from "../../generated/pagopa-proxy/PaymentActivationsPostRequest";
+
 import {
   ResponsePaymentError,
   withCatchAsInternalError,
@@ -24,21 +25,61 @@ import {
 } from "./IPagoPAClientFactory";
 
 export default class PagoPAProxyService {
+  constructor(private readonly pagoPAClient: IPagoPAClientFactoryInterface) {}
+
+  /**
+   * Retrieve information about a payment.
+   */
+  public readonly getPaymentInfo = (
+    rptId: string,
+    isTest: boolean
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseSuccessJson<PaymentRequestsGetResponse>
+  > =>
+    withCatchAsInternalError(async () => {
+      const client = this.pagoPAClient.getClient(
+        isTest ? PagoPAEnvironment.TEST : PagoPAEnvironment.PRODUCTION
+      );
+      const validated = await client.getPaymentInfo({
+        rpt_id_from_string: rptId,
+      });
+      return withValidatedOrInternalError(validated, (response) =>
+        response.status === 200
+          ? withValidatedOrInternalError(
+              PaymentRequestsGetResponse.decode(response.value),
+              ResponseSuccessJson
+            )
+          : response.status === 400
+          ? ResponseErrorValidation(
+              // eslint-disable-next-line sonarjs/no-duplicate-string
+              response.value.title || "Bad request (upstream)",
+              // eslint-disable-next-line sonarjs/no-duplicate-string
+              response.value.detail || "Bad request response from upstream API"
+            )
+          : ResponsePaymentError(
+              response.value.detail,
+              response.value.detail_v2
+            )
+      );
+    });
+
   /**
    * Require a lock (activation) for a payment.
    */
   public readonly activatePayment = async (
     paymentActivationsPostRequest: PaymentActivationsPostRequest,
-    isTest: boolean,
+    isTest: boolean
   ): Promise<
     | IResponseErrorInternal
-    | IResponseErrorNotFound
     | IResponseErrorValidation
+    | IResponseErrorNotFound
     | IResponseSuccessJson<PaymentActivationsPostResponse>
   > =>
     withCatchAsInternalError(async () => {
       const client = this.pagoPAClient.getClient(
-        isTest ? PagoPAEnvironment.TEST : PagoPAEnvironment.PRODUCTION,
+        isTest ? PagoPAEnvironment.TEST : PagoPAEnvironment.PRODUCTION
       );
       const validated = await client.activatePayment({
         paymentActivationsPostRequest,
@@ -48,18 +89,17 @@ export default class PagoPAProxyService {
         response.status === 200
           ? withValidatedOrInternalError(
               PaymentActivationsPostResponse.decode(response.value),
-              ResponseSuccessJson,
+              ResponseSuccessJson
             )
           : response.status === 400
-            ? ResponseErrorValidation(
-                response.value.title || "Bad request (upstream)",
-                response.value.detail ||
-                  "Bad request response from upstream API",
-              )
-            : ResponsePaymentError(
-                response.value.detail,
-                response.value.detail_v2,
-              ),
+          ? ResponseErrorValidation(
+              response.value.title || "Bad request (upstream)",
+              response.value.detail || "Bad request response from upstream API"
+            )
+          : ResponsePaymentError(
+              response.value.detail,
+              response.value.detail_v2
+            )
       );
     });
 
@@ -68,16 +108,16 @@ export default class PagoPAProxyService {
    */
   public readonly getActivationStatus = (
     codiceContestoPagamento: string,
-    isTest: boolean,
+    isTest: boolean
   ): Promise<
     | IResponseErrorInternal
-    | IResponseErrorNotFound
     | IResponseErrorValidation
+    | IResponseErrorNotFound
     | IResponseSuccessJson<PaymentActivationsGetResponse>
   > =>
     withCatchAsInternalError(async () => {
       const client = this.pagoPAClient.getClient(
-        isTest ? PagoPAEnvironment.TEST : PagoPAEnvironment.PRODUCTION,
+        isTest ? PagoPAEnvironment.TEST : PagoPAEnvironment.PRODUCTION
       );
       const validated = await client.getActivationStatus({
         codice_contesto_pagamento: codiceContestoPagamento,
@@ -86,63 +126,22 @@ export default class PagoPAProxyService {
         response.status === 200
           ? withValidatedOrInternalError(
               PaymentActivationsGetResponse.decode(response.value),
-              ResponseSuccessJson,
+              ResponseSuccessJson
             )
           : response.status === 400
-            ? ResponseErrorValidation(
-                response.value.title || "Bad request (upstream)",
-                response.value.detail ||
-                  "Bad request response from upstream API",
-              )
-            : response.status === 404
-              ? ResponseErrorNotFound(
-                  response.value.title || "Not found (upstream)",
-                  response.value.detail || "Not found response from upstream",
-                )
-              : ResponseErrorInternal(
-                  response.value.detail ||
-                    "Internal server error response from upstream",
-                ),
-      );
-    });
-
-  /**
-   * Retrieve information about a payment.
-   */
-  public readonly getPaymentInfo = (
-    rptId: string,
-    isTest: boolean,
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorValidation
-    | IResponseSuccessJson<PaymentRequestsGetResponse>
-  > =>
-    withCatchAsInternalError(async () => {
-      const client = this.pagoPAClient.getClient(
-        isTest ? PagoPAEnvironment.TEST : PagoPAEnvironment.PRODUCTION,
-      );
-      const validated = await client.getPaymentInfo({
-        rpt_id_from_string: rptId,
-      });
-      return withValidatedOrInternalError(validated, (response) =>
-        response.status === 200
-          ? withValidatedOrInternalError(
-              PaymentRequestsGetResponse.decode(response.value),
-              ResponseSuccessJson,
+          ? ResponseErrorValidation(
+              response.value.title || "Bad request (upstream)",
+              response.value.detail || "Bad request response from upstream API"
             )
-          : response.status === 400
-            ? ResponseErrorValidation(
-                response.value.title || "Bad request (upstream)",
-
-                response.value.detail ||
-                  "Bad request response from upstream API",
-              )
-            : ResponsePaymentError(
-                response.value.detail,
-                response.value.detail_v2,
-              ),
+          : response.status === 404
+          ? ResponseErrorNotFound(
+              response.value.title || "Not found (upstream)",
+              response.value.detail || "Not found response from upstream"
+            )
+          : ResponseErrorInternal(
+              response.value.detail ||
+                "Internal server error response from upstream"
+            )
       );
     });
-
-  constructor(private readonly pagoPAClient: IPagoPAClientFactoryInterface) {}
 }

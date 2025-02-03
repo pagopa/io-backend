@@ -2,10 +2,9 @@ import * as bwipjs from "bwip-js";
 import { ToBufferOptions } from "bwip-js";
 import * as AP from "fp-ts/lib/Apply";
 import * as E from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/lib/TaskEither";
 import { TaskEither } from "fp-ts/lib/TaskEither";
-import { pipe } from "fp-ts/lib/function";
-
 import { BARCODE_ALGORITHM } from "../../src/config";
 import { DrawingSVG } from "./bwipjs-svg";
 
@@ -28,8 +27,7 @@ const toBufferSvg = (options: ToBufferOptions) =>
       const svg = bwipjs.render(opts, DrawingSVG(opts, bwipjs.FontLib));
       return Buffer.from(svg);
     },
-    (errs) =>
-      new Error(`Cannot generate svg barcode|${errs}`) as Error | string,
+    (errs) => new Error(`Cannot generate svg barcode|${errs}`) as Error | string
   );
 
 /**
@@ -43,7 +41,7 @@ const toBufferPng = TE.taskify(bwipjs.toBuffer);
  */
 export function toBarcode(
   text: string,
-  bcid = BARCODE_ALGORITHM,
+  bcid = BARCODE_ALGORITHM
 ): TaskEither<Error, IBarcodeOutput> {
   const options = {
     bcid,
@@ -60,16 +58,16 @@ export function toBarcode(
           E.left(
             typeof errorOrString === "string"
               ? new Error(errorOrString)
-              : errorOrString,
-          ),
+              : errorOrString
+          )
         ),
       (images) =>
         TE.fromEither(
           E.right({
             png: images.png.toString("base64"),
             svg: images.svg.toString("base64"),
-          }),
-        ),
-    ),
+          })
+        )
+    )
   );
 }

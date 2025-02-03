@@ -1,28 +1,28 @@
-import * as E from "fp-ts/Either";
-import * as O from "fp-ts/Option";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
+import * as E from "fp-ts/Either";
+import * as O from "fp-ts/Option";
 
-export type Encoder = (params: readonly string[]) => string;
+export type Encoder = (params: ReadonlyArray<string>) => string;
 
 const createSingleError =
-  (input: unknown, context: t.Context, errorMessage: string) =>
-  (): t.Errors => [
-    {
-      context,
-      message: errorMessage,
-      value: input,
-    },
-  ];
+  (input: unknown, context: t.Context, errorMessage: string) => (): t.Errors =>
+    [
+      {
+        context,
+        message: errorMessage,
+        value: input,
+      },
+    ];
 
-export type PathParams = t.Type<readonly string[], string, unknown>;
+export type PathParams = t.Type<ReadonlyArray<string>, string, unknown>;
 export const pathParamsFromUrl = (
   decodeTemplate: RegExp,
-  encodeTemplate: Encoder,
+  encodeTemplate: Encoder
 ): PathParams =>
-  new t.Type<readonly string[], string, unknown>(
+  new t.Type<ReadonlyArray<string>, string, unknown>(
     "pathParamsFromUrl",
-    (u: unknown): u is readonly string[] =>
+    (u: unknown): u is ReadonlyArray<string> =>
       Array.isArray(u) && u.every((value) => typeof value === "string"),
     (input, context) =>
       pipe(
@@ -34,9 +34,9 @@ export const pathParamsFromUrl = (
             createSingleError(
               input,
               context,
-              `input is not a valid ${decodeTemplate}`,
-            ),
-          ),
+              `input is not a valid ${decodeTemplate}`
+            )
+          )
         ),
         E.map((i) => decodeTemplate.exec(i)),
         E.map(O.fromNullable),
@@ -45,11 +45,11 @@ export const pathParamsFromUrl = (
             createSingleError(
               input,
               context,
-              `Should not be here: input is a valid decodeTemplate but its execution failed!`,
-            ),
-          ),
+              `Should not be here: input is a valid decodeTemplate but its execution failed!`
+            )
+          )
         ),
-        E.map((a) => a.slice(1)), // remove the first element because it is the path itself and just return params
+        E.map((a) => a.slice(1)) // remove the first element because it is the path itself and just return params
       ),
-    encodeTemplate,
+    encodeTemplate
   );

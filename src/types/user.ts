@@ -3,19 +3,20 @@
  * validate and convert type to and from them.
  */
 
-import { IResponseErrorValidation } from "@pagopa/ts-commons/lib/responses";
 import * as express from "express";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
-import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
+import { IResponseErrorValidation } from "@pagopa/ts-commons/lib/responses";
+
+import { pipe } from "fp-ts/lib/function";
+import { EmailAddress } from "../../generated/backend/EmailAddress";
+import { FiscalCode } from "../../generated/backend/FiscalCode";
+import { SpidLevel } from "../../generated/backend/SpidLevel";
 
 import { CieUserIdentity } from "../../generated/auth/CieUserIdentity";
 import { SpidUserIdentity } from "../../generated/auth/SpidUserIdentity";
 import { UserIdentity } from "../../generated/auth/UserIdentity";
-import { EmailAddress } from "../../generated/backend/EmailAddress";
-import { FiscalCode } from "../../generated/backend/FiscalCode";
-import { SpidLevel } from "../../generated/backend/SpidLevel";
 import { withValidatedOrValidationError } from "../utils/responses";
 import {
   BPDToken,
@@ -41,8 +42,8 @@ export const UserWithoutTokens = t.intersection([
   t.partial({
     nameID: t.string,
     nameIDFormat: t.string,
-    session_tracking_id: t.string, // unique ID used for tracking in appinsights
     sessionIndex: t.string,
+    session_tracking_id: t.string, // unique ID used for tracking in appinsights
     spid_email: EmailAddress,
     spid_idp: t.string,
   }),
@@ -102,13 +103,13 @@ export type User = t.TypeOf<typeof User>;
  * @param user
  */
 export function isSpidUserIdentity(
-  user: CieUserIdentity | SpidUserIdentity,
+  user: CieUserIdentity | SpidUserIdentity
 ): user is SpidUserIdentity {
   return (user as SpidUserIdentity).spid_email !== undefined;
 }
 
 export function exactUserIdentityDecode(
-  user: UserIdentity,
+  user: UserIdentity
 ): E.Either<t.Errors, UserIdentity> {
   return isSpidUserIdentity(user)
     ? t.exact(SpidUserIdentity.type).decode(user)
@@ -117,15 +118,15 @@ export function exactUserIdentityDecode(
 
 export const withUserFromRequest = async <T>(
   req: express.Request,
-  f: (user: User) => Promise<T>,
+  f: (user: User) => Promise<T>
 ): Promise<IResponseErrorValidation | T> =>
   withValidatedOrValidationError(User.decode(req.user), f);
 
 export const withOptionalUserFromRequest = async <T>(
   req: express.Request,
-  f: (user: O.Option<User>) => Promise<T>,
+  f: (user: O.Option<User>) => Promise<T>
 ): Promise<IResponseErrorValidation | T> =>
   withValidatedOrValidationError(
     req.user ? pipe(User.decode(req.user), E.map(O.some)) : E.right(O.none),
-    f,
+    f
   );

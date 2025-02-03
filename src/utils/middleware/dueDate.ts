@@ -1,6 +1,5 @@
-import { ResponseErrorNotFound } from "@pagopa/ts-commons/lib/responses";
 import { NextFunction, Request, Response } from "express";
-
+import { ResponseErrorNotFound } from "@pagopa/ts-commons/lib/responses";
 import { log } from "../logger";
 
 /**
@@ -11,7 +10,7 @@ import { log } from "../logger";
  * @param dueDate date until the resource is valid
  */
 export function dueDateMiddleware(
-  dueDate: Date,
+  dueDate: Date
 ): (req: Request, res: Response, next: NextFunction) => void {
   return (req, res, next) => {
     const now = new Date();
@@ -19,11 +18,11 @@ export function dueDateMiddleware(
       log.warn(
         `An ${req.method.toUpperCase()} ${
           req.path
-        } request has landed at ${now.toISOString()} although it was supposed to expire at ${dueDate.toISOString()}.`,
+        } request has landed at ${now.toISOString()} although it was supposed to expire at ${dueDate.toISOString()}.`
       );
       ResponseErrorNotFound(
         "Expired resource",
-        "The resource you asked for is no longer available",
+        "The resource you asked for is no longer available"
       ).apply(res);
     } else {
       next();

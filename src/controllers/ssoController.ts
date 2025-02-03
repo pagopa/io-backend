@@ -1,14 +1,13 @@
 /**
  * This controller handles requests made from MyPortal.
  */
+import { Request } from "express";
 import {
   IResponseErrorInternal,
   IResponseErrorValidation,
   IResponseSuccessJson,
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
-import { Request } from "express";
-
 import { MyPortalUser } from "../../generated/myportal/MyPortalUser";
 import { withUserFromRequest } from "../types/user";
 import { withValidatedOrInternalError } from "../utils/responses";
@@ -18,10 +17,10 @@ import { withValidatedOrInternalError } from "../utils/responses";
  * code.
  */
 export const getUserForMyPortal = (
-  req: Request,
+  req: Request
 ): Promise<
-  | IResponseErrorInternal
   | IResponseErrorValidation
+  | IResponseErrorInternal
   | IResponseSuccessJson<MyPortalUser>
 > =>
   withUserFromRequest(req, async (user) =>
@@ -31,6 +30,6 @@ export const getUserForMyPortal = (
         fiscal_code: user.fiscal_code,
         name: user.name,
       }),
-      (_) => ResponseSuccessJson(_),
-    ),
+      (_) => ResponseSuccessJson(_)
+    )
   );

@@ -1,5 +1,3 @@
-import { Certificate } from "@pagopa/io-functions-eucovidcerts-sdk/Certificate";
-import { PreferredLanguages } from "@pagopa/io-functions-eucovidcerts-sdk/PreferredLanguages";
 import {
   HttpStatusCodeEnum,
   IResponseErrorForbiddenNotAuthorized,
@@ -13,15 +11,18 @@ import {
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 
-import { EUCovidCertAPIClient } from "../clients/eucovidcert.client";
-import { User } from "../types/user";
+import { Certificate } from "@pagopa/io-functions-eucovidcerts-sdk/Certificate";
+import { PreferredLanguages } from "@pagopa/io-functions-eucovidcerts-sdk/PreferredLanguages";
 import { readableProblem } from "../utils/errorsFormatter";
+import { EUCovidCertAPIClient } from "../clients/eucovidcert.client";
+
 import {
   ResponseErrorStatusNotDefinedInSpec,
   ResponseErrorUnexpectedAuthProblem,
   withCatchAsInternalError,
   withValidatedOrInternalError,
 } from "../utils/responses";
+import { User } from "../types/user";
 
 /**
  * Returns a `504` `Gateway Timeout` error
@@ -33,7 +34,7 @@ export function ResponseGatewayTimeout(detail: string): IResponseErrorInternal {
     ...ResponseErrorGeneric(
       HttpStatusCodeEnum.HTTP_STATUS_504,
       "Gateway Timeout",
-      detail,
+      detail
     ),
     kind: "IResponseErrorInternal",
   };
@@ -45,31 +46,35 @@ export function ResponseGatewayTimeout(detail: string): IResponseErrorInternal {
  * @param detail The error message
  */
 export function ResponseErrorNotFound403(
-  detail: string,
+  detail: string
 ): IResponseErrorNotFound {
   return {
     ...ResponseErrorGeneric(
       HttpStatusCodeEnum.HTTP_STATUS_403,
       "Not Found",
-      detail,
+      detail
     ),
     kind: "IResponseErrorNotFound",
   };
 }
 
 export default class EUCovidCertService {
+  constructor(
+    private readonly eucovidCertApiClient: ReturnType<EUCovidCertAPIClient>
+  ) {}
+
   /**
    * Get the EU Covid Certificte Status related to the user and auth_code
    */
   public readonly getEUCovidCertificate = (
     user: User,
     auth_code: string,
-    preferred_languages?: PreferredLanguages,
+    preferred_languages?: PreferredLanguages
   ): Promise<
-    | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorInternal
-    | IResponseErrorNotFound
     | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessJson<Certificate>
   > =>
     withCatchAsInternalError(async () => {
@@ -88,13 +93,13 @@ export default class EUCovidCertService {
           case 400:
             return ResponseErrorValidation(
               "Bad Request",
-              "Payload has bad format",
+              "Payload has bad format"
             );
           case 401:
             return ResponseErrorUnexpectedAuthProblem();
           case 403:
             return ResponseErrorNotFound403(
-              "Access data provided are invalid or no Certificate has been emitted for the given Citizen",
+              "Access data provided are invalid or no Certificate has been emitted for the given Citizen"
             );
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));
@@ -105,8 +110,4 @@ export default class EUCovidCertService {
         }
       });
     });
-
-  constructor(
-    private readonly eucovidCertApiClient: ReturnType<EUCovidCertAPIClient>,
-  ) {}
 }

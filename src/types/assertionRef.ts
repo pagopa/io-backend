@@ -1,9 +1,10 @@
-import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
+import { pipe } from "fp-ts/lib/function";
 import { JsonFromString } from "io-ts-types";
 
-import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
 import { LoginType } from "../utils/fastLogin";
+
+import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
 
 // LollipopData
 export type LollipopData = t.TypeOf<typeof LollipopData>;
@@ -31,9 +32,9 @@ const LollipopDataFromCompact = new t.Type<
     pipe(
       val,
       (data) => ({ assertionRef: data.a, loginType: data.t }),
-      (data) => LollipopData.validate(data, _context),
+      (data) => LollipopData.validate(data, _context)
     ),
-  (val) => ({ a: val.assertionRef, t: val.loginType }),
+  (val) => ({ a: val.assertionRef, t: val.loginType })
 );
 
 // ---------------------

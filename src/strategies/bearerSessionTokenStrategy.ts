@@ -8,15 +8,14 @@ import { Either } from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { Option } from "fp-ts/lib/Option";
 import * as passport from "passport-http-bearer";
-
 import { ISessionStorage } from "../services/ISessionStorage";
 import { SessionToken } from "../types/token";
 import { User } from "../types/user";
-import { StrategyDoneFunction, fulfill } from "../utils/strategies";
+import { fulfill, StrategyDoneFunction } from "../utils/strategies";
 
 const bearerSessionTokenStrategy = (
   sessionStorage: ISessionStorage,
-  onValidUser?: (user: User) => void,
+  onValidUser?: (user: User) => void
 ): passport.Strategy<passport.VerifyFunctionWithRequest> => {
   const options = {
     passReqToCallback: true,
@@ -49,9 +48,9 @@ const bearerSessionTokenStrategy = (
             // The error is forwarded to the express error middleware
             done(e);
           }
-        },
+        }
       );
-    },
+    }
   );
 };
 

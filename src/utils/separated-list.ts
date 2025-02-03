@@ -11,9 +11,9 @@ import * as t from "io-ts";
  */
 export const GetArbitrarySeparatedListOf =
   (separator: string) => (decoder: t.Mixed) =>
-    new t.Type<readonly t.TypeOf<typeof decoder>[], string, unknown>(
+    new t.Type<ReadonlyArray<t.TypeOf<typeof decoder>>, string, unknown>(
       `ArbitrarySeparatedListOf<${decoder.name}>`,
-      (value: unknown): value is readonly t.TypeOf<typeof decoder>[] =>
+      (value: unknown): value is ReadonlyArray<t.TypeOf<typeof decoder>> =>
         Array.isArray(value) && value.every((e) => decoder.is(e)),
       (input) =>
         t.readonlyArray(decoder).decode(
@@ -23,10 +23,10 @@ export const GetArbitrarySeparatedListOf =
                 .map((e) => e.trim())
                 .filter(Boolean)
             : !input
-              ? [] // fallback to empty array in case of empty input
-              : input, // it should not happen, but in case we let the decoder fail
+            ? [] // fallback to empty array in case of empty input
+            : input // it should not happen, but in case we let the decoder fail
         ),
-      String,
+      String
     );
 
 export const CommaSeparatedListOf = GetArbitrarySeparatedListOf(",");

@@ -6,14 +6,13 @@ import * as express from "express";
 import { Either } from "fp-ts/lib/Either";
 import { Option } from "fp-ts/lib/Option";
 import * as passport from "passport-http-bearer";
-
 import { ISessionStorage } from "../services/ISessionStorage";
 import { MyPortalToken } from "../types/token";
 import { User } from "../types/user";
-import { StrategyDoneFunction, fulfill } from "../utils/strategies";
+import { fulfill, StrategyDoneFunction } from "../utils/strategies";
 
 const bearerMyPortalTokenStrategy = (
-  sessionStorage: ISessionStorage,
+  sessionStorage: ISessionStorage
 ): passport.Strategy<passport.VerifyFunctionWithRequest> => {
   const options = {
     passReqToCallback: true,
@@ -39,9 +38,9 @@ const bearerMyPortalTokenStrategy = (
             // The error is forwarded to the express error middleware
             done(e);
           }
-        },
+        }
       );
-    },
+    }
   );
 };
 

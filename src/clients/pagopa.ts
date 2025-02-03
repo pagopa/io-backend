@@ -1,11 +1,10 @@
 import nodeFetch from "node-fetch";
-
 import { Client, createClient } from "../../generated/pagopa-proxy/client";
 
 export function PagoPAClient(
   baseUrl: string,
   apiKey: string,
-  fetchApi: typeof fetch = nodeFetch as unknown as typeof fetch,
+  fetchApi: typeof fetch = nodeFetch as unknown as typeof fetch
 ): Client<"apiKeyHeader"> {
   return createClient<"apiKeyHeader">({
     basePath: "",

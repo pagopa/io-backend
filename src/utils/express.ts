@@ -1,24 +1,25 @@
+import * as express from "express";
 import {
   IResponse,
   ResponseErrorInternal,
 } from "@pagopa/ts-commons/lib/responses";
-import * as express from "express";
+import { flow, pipe } from "fp-ts/lib/function";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
-import { flow, pipe } from "fp-ts/lib/function";
 
 export type ExpressMiddleware = (
   req: express.Request,
   res: express.Response,
-  next: express.NextFunction,
+  next: express.NextFunction
 ) => void;
 
-export type ResLocals = {
-  body?: Buffer;
-
+export type ResLocals = Record<string, unknown> & {
+  // eslint-disable-next-line functional/prefer-readonly-type
   detail?: string;
-} & Record<string, unknown>;
+  // eslint-disable-next-line functional/prefer-readonly-type
+  body?: Buffer;
+};
 /**
  * Convenience method that transforms a function (handler),
  * which takes an express.Request as input and returns an IResponse,
@@ -26,13 +27,14 @@ export type ResLocals = {
  */
 export function toExpressHandler<T, P, L extends ResLocals>(
   handler: (req: express.Request, locals?: L) => Promise<IResponse<T>>,
-  object?: P,
+  object?: P
 ): (req: express.Request, res: express.Response<T, L>) => void {
-  return (req, res) =>
+  return (req, res): Promise<void | undefined> =>
     handler
       .call(object, req, res.locals)
       .catch(ResponseErrorInternal)
       .then((response) => {
+        // eslint-disable-next-line functional/immutable-data
         res.locals.detail = response.detail;
         response.apply(res);
       });
@@ -46,26 +48,27 @@ export function toExpressHandler<T, P, L extends ResLocals>(
  */
 export function toExpressMiddleware<T, P>(
   handler: (req: express.Request) => Promise<IResponse<T> | undefined>,
-  object?: P,
+  object?: P
 ): ExpressMiddleware {
   return (req, res, next): Promise<void> =>
     pipe(
       TE.tryCatch(
         () => handler.call(object, req),
-        flow(E.toError, (e) => ResponseErrorInternal(e.message)),
+        flow(E.toError, (e) => ResponseErrorInternal(e.message))
       ),
       TE.chainW(
         flow(
           O.fromNullable,
           O.map(TE.left),
-          O.getOrElseW(() => TE.right(next())),
-        ),
+          O.getOrElseW(() => TE.right(next()))
+        )
       ),
       TE.mapLeft((response) => {
+        // eslint-disable-next-line functional/immutable-data
         res.locals.detail = response.detail;
         response.apply(res);
       }),
-      TE.toUnion,
+      TE.toUnion
     )();
 }
 
@@ -73,9 +76,10 @@ export function toExpressMiddleware<T, P>(
  * An Express handler that always respond with the same response object
  */
 export function constantExpressHandler<T>(
-  response: IResponse<T>,
+  response: IResponse<T>
 ): (req: express.Request, res: express.Response) => void {
   return (_, res) => {
+    // eslint-disable-next-line functional/immutable-data
     res.locals.detail = response.detail;
     response.apply(res);
   };

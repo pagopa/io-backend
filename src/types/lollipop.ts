@@ -1,36 +1,32 @@
+
+import * as t from "io-ts";
+import { FiscalCode, NonEmptyString, PatternString } from "@pagopa/ts-commons/lib/strings";
+import * as express from "express";
 import {
   IResponseErrorValidation,
   ResponseErrorValidation,
 } from "@pagopa/ts-commons/lib/responses";
-import {
-  FiscalCode,
-  NonEmptyString,
-  PatternString,
-} from "@pagopa/ts-commons/lib/strings";
-import * as express from "express";
 import * as E from "fp-ts/Either";
-import * as O from "fp-ts/Option";
 import { pipe } from "fp-ts/lib/function";
-import * as t from "io-ts";
-
-import { AssertionRefSha256 } from "../../generated/backend/AssertionRefSha256";
-import { AssertionRefSha384 } from "../../generated/backend/AssertionRefSha384";
-import { AssertionRefSha512 } from "../../generated/backend/AssertionRefSha512";
-import { LollipopContentDigest } from "../../generated/lollipop/LollipopContentDigest";
-import { LollipopMethod } from "../../generated/lollipop/LollipopMethod";
-import { LollipopOriginalURL } from "../../generated/lollipop/LollipopOriginalURL";
-import { LollipopSignature } from "../../generated/lollipop/LollipopSignature";
-import { LollipopSignatureInput } from "../../generated/lollipop/LollipopSignatureInput";
-import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
-import { AssertionType } from "../../generated/lollipop-api/AssertionType";
+import * as O from "fp-ts/Option";
 import {
   JwkPubKeyHashAlgorithm,
   JwkPubKeyHashAlgorithmEnum,
 } from "../../generated/lollipop-api/JwkPubKeyHashAlgorithm";
-import { JwkPubKeyToken } from "../../generated/lollipop-api/JwkPubKeyToken";
-import LollipopService from "../services/lollipopService";
-import { ResLocals } from "../utils/express";
+import { AssertionRefSha256 } from "../../generated/backend/AssertionRefSha256";
+import { AssertionRefSha384 } from "../../generated/backend/AssertionRefSha384";
+import { AssertionRefSha512 } from "../../generated/backend/AssertionRefSha512";
 import { withValidatedOrValidationError } from "../utils/responses";
+import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
+import { AssertionType } from "../../generated/lollipop-api/AssertionType";
+import { JwkPubKeyToken } from "../../generated/lollipop-api/JwkPubKeyToken";
+import { ResLocals } from "../utils/express";
+import { LollipopMethod } from "../../generated/lollipop/LollipopMethod";
+import { LollipopOriginalURL } from "../../generated/lollipop/LollipopOriginalURL";
+import { LollipopSignature } from "../../generated/lollipop/LollipopSignature";
+import { LollipopContentDigest } from "../../generated/lollipop/LollipopContentDigest";
+import { LollipopSignatureInput } from "../../generated/lollipop/LollipopSignatureInput";
+import LollipopService from "../services/lollipopService";
 
 export interface LollipopParams {
   readonly isLollipopEnabled: boolean;
@@ -64,10 +60,10 @@ export const LollipopLocalsType = t.intersection([
 ]);
 export type LollipopLocalsType = t.TypeOf<typeof LollipopLocalsType>;
 
-type LollipopLocalsWithBody = {
+type LollipopLocalsWithBody = LollipopLocalsType & {
   readonly body: Buffer;
   readonly ["content-digest"]: LollipopContentDigest;
-} & LollipopLocalsType;
+};
 
 /**
  * Utility function that validate locals to check if all
@@ -78,13 +74,13 @@ type LollipopLocalsWithBody = {
  * @param locals express res.locals vars injected by toExpressHandler middleware
  */
 export const withLollipopLocals = <T extends ResLocals>(
-  locals?: T,
+  locals?: T
 ): E.Either<IResponseErrorValidation, LollipopLocalsType> =>
   pipe(
     locals,
     E.fromPredicate(LollipopLocalsType.is, () =>
-      ResponseErrorValidation("Bad request", "Error initializiang lollipop"),
-    ),
+      ResponseErrorValidation("Bad request", "Error initializiang lollipop")
+    )
   );
 
 /**
@@ -104,7 +100,7 @@ export const withLollipopLocals = <T extends ResLocals>(
  * @param locals locals validated by withLollipopLocals
  */
 export const withRequiredRawBody = (
-  locals?: LollipopLocalsType,
+  locals?: LollipopLocalsType
 ): E.Either<IResponseErrorValidation, LollipopLocalsWithBody> =>
   pipe(
     locals,
@@ -114,9 +110,9 @@ export const withRequiredRawBody = (
       () =>
         ResponseErrorValidation(
           "Bad request",
-          "Missing required body or content-digest",
-        ),
-    ),
+          "Missing required body or content-digest"
+        )
+    )
   );
 
 /**
@@ -130,11 +126,11 @@ export const withRequiredRawBody = (
  */
 export const withLollipopHeadersFromRequest = async <T>(
   req: express.Request,
-  f: (lollipopHeaders: LollipopRequiredHeaders) => Promise<T>,
+  f: (lollipopHeaders: LollipopRequiredHeaders) => Promise<T>
 ): Promise<IResponseErrorValidation | T> =>
   withValidatedOrValidationError(
     t.exact(LollipopRequiredHeaders).decode(req.headers),
-    f,
+    f
   );
 
 const Sha256Thumbprint = PatternString("^([A-Za-z0-9-_=]{1,44})$");
@@ -143,7 +139,7 @@ const Sha512Thumbprint = PatternString("^([A-Za-z0-9-_=]{1,88})$");
 
 export const Thumbprint = t.union(
   [Sha256Thumbprint, Sha384Thumbprint, Sha512Thumbprint],
-  "Thumbprint",
+  "Thumbprint"
 );
 
 export type Thumbprint = t.TypeOf<typeof Thumbprint>;
@@ -155,12 +151,12 @@ export const algoToAssertionRefSet = new Set([
 ]);
 
 export const getAlgoFromAssertionRef = (
-  assertionRef: AssertionRef,
+  assertionRef: AssertionRef
 ): JwkPubKeyHashAlgorithm =>
   pipe(
     Array.from(algoToAssertionRefSet),
     (ar) => ar.find((entry) => entry.type.is(assertionRef)),
     O.fromNullable,
     O.map((pubKeyHashAlgo) => pubKeyHashAlgo.algo),
-    O.getOrElseW(() => void 0 as never),
+    O.getOrElseW(() => void 0 as never)
   );

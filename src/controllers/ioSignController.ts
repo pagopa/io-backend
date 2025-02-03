@@ -3,7 +3,12 @@
  * app by forwarding the call to the API system.
  */
 
-import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
+import * as express from "express";
+import * as TE from "fp-ts/TaskEither";
+import * as E from "fp-ts/Either";
+import * as t from "io-ts";
+import { sequenceS } from "fp-ts/lib/Apply";
+
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
@@ -13,43 +18,42 @@ import {
   ResponseErrorInternal,
   ResponseErrorValidation,
 } from "@pagopa/ts-commons/lib/responses";
-import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as express from "express";
-import * as E from "fp-ts/Either";
-import * as TE from "fp-ts/TaskEither";
-import { sequenceS } from "fp-ts/lib/Apply";
-import { pipe } from "fp-ts/lib/function";
-import * as t from "io-ts";
-import { Errors } from "io-ts";
 
-import { CreateFilledDocument } from "../../generated/io-sign/CreateFilledDocument";
-import { CreateSignatureBody } from "../../generated/io-sign/CreateSignatureBody";
-import { FilledDocumentDetailView } from "../../generated/io-sign/FilledDocumentDetailView";
-import { Id } from "../../generated/io-sign/Id";
+import { pipe } from "fp-ts/lib/function";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
+import { Errors } from "io-ts";
+import {
+  withValidatedOrValidationError,
+  withCatchAsInternalError,
+} from "../utils/responses";
 import {
   IssuerEnvironment,
   IssuerEnvironmentEnum,
 } from "../../generated/io-sign/IssuerEnvironment";
+import IoSignService from "../services/ioSignService";
+import { ResLocals } from "../utils/express";
+import { LollipopLocalsType, withLollipopLocals } from "../types/lollipop";
+import { Id } from "../../generated/io-sign/Id";
 import { QtspClausesMetadataDetailView } from "../../generated/io-sign/QtspClausesMetadataDetailView";
 import { SignatureDetailView } from "../../generated/io-sign/SignatureDetailView";
 import { SignatureRequestDetailView } from "../../generated/io-sign/SignatureRequestDetailView";
-import { SignatureRequestList } from "../../generated/io-sign-api/SignatureRequestList";
 import { SignerDetailView } from "../../generated/io-sign-api/SignerDetailView";
-import IoSignService from "../services/ioSignService";
-import ProfileService from "../services/profileService";
-import { LollipopLocalsType, withLollipopLocals } from "../types/lollipop";
+import { SignatureRequestList } from "../../generated/io-sign-api/SignatureRequestList";
+import { FilledDocumentDetailView } from "../../generated/io-sign/FilledDocumentDetailView";
+
+import { CreateFilledDocument } from "../../generated/io-sign/CreateFilledDocument";
+import { CreateSignatureBody } from "../../generated/io-sign/CreateSignatureBody";
+
 import { withUserFromRequest } from "../types/user";
-import { ResLocals } from "../utils/express";
+import ProfileService from "../services/profileService";
+
 import { profileWithEmailValidatedOrError } from "../utils/profile";
-import {
-  withCatchAsInternalError,
-  withValidatedOrValidationError,
-} from "../utils/responses";
 
 const responseErrorValidation = (errs: Errors) =>
   ResponseErrorValidation(
     "Bad request",
-    errorsToReadableMessages(errs).join(" / "),
+    errorsToReadableMessages(errs).join(" / ")
   );
 
 export const IoSignLollipopLocalsType = t.intersection([
@@ -66,7 +70,7 @@ export type IoSignLollipopLocalsType = t.TypeOf<
 export const withIoSignCustomLollipopLocalsFromRequest =
   (req: express.Request) =>
   (
-    lollipopLocals: LollipopLocalsType,
+    lollipopLocals: LollipopLocalsType
   ): E.Either<IResponseErrorValidation, IoSignLollipopLocalsType> =>
     pipe(
       {
@@ -77,24 +81,24 @@ export const withIoSignCustomLollipopLocalsFromRequest =
           req.headers["x-pagopa-lollipop-custom-tos-challenge"],
       },
       IoSignLollipopLocalsType.decode,
-      E.mapLeft(responseErrorValidation),
+      E.mapLeft(responseErrorValidation)
     );
 
 const responseErrorInternal = (reason: string) => (e: Error) =>
   ResponseErrorInternal(`${reason} | ${e.message}`);
 
 const toErrorRetrievingTheSignerId = ResponseErrorInternal(
-  `Error retrieving the signer id for this user`,
+  `Error retrieving the signer id for this user`
 );
 
 export const retrieveSignerId = (
   ioSignService: IoSignService,
-  fiscalCode: FiscalCode,
+  fiscalCode: FiscalCode
 ) =>
   pipe(
     TE.tryCatch(
       () => ioSignService.getSignerByFiscalCode(fiscalCode),
-      E.toError,
+      E.toError
     ),
     TE.chain(
       TE.fromPredicate(
@@ -103,25 +107,30 @@ export const retrieveSignerId = (
         (e) =>
           e.kind === "IResponseErrorNotFound"
             ? new Error(
-                `Your profile is not enabled to use this service. | ${e.detail}`,
+                `Your profile is not enabled to use this service. | ${e.detail}`
               )
             : new Error(
-                `An error occurred while retrieving the signer id. | ${e.detail}`,
-              ),
-      ),
-    ),
+                `An error occurred while retrieving the signer id. | ${e.detail}`
+              )
+      )
+    )
   );
 export default class IoSignController {
+  constructor(
+    private readonly ioSignService: IoSignService,
+    private readonly profileService: ProfileService
+  ) {}
+
   /**
    * Given the url of a PDF document with empty fields,
    * fill in the PDF form and return the url of the filled document.
    */
   public readonly createFilledDocument = (
-    req: express.Request,
+    req: express.Request
   ): Promise<
     | IResponseErrorInternal
-    | IResponseErrorNotFound
     | IResponseErrorValidation
+    | IResponseErrorNotFound
     | IResponseSuccessRedirectToResource<
         FilledDocumentDetailView,
         FilledDocumentDetailView
@@ -138,30 +147,30 @@ export default class IoSignController {
             sequenceS(TE.ApplySeq)({
               signerId: pipe(
                 retrieveSignerId(this.ioSignService, user.fiscal_code),
-                TE.mapLeft(() => toErrorRetrievingTheSignerId),
+                TE.mapLeft(() => toErrorRetrievingTheSignerId)
               ),
               userProfile: pipe(
                 profileWithEmailValidatedOrError(this.profileService, user),
                 TE.mapLeft(
                   responseErrorInternal(
-                    "Error retrieving a user profile with validated email address",
-                  ),
-                ),
+                    "Error retrieving a user profile with validated email address"
+                  )
+                )
               ),
             }),
-            TE.map(({ signerId, userProfile }) =>
+            TE.map(({ userProfile, signerId }) =>
               this.ioSignService.createFilledDocument(
                 body.document_url,
                 userProfile.email,
                 user.family_name as NonEmptyString,
                 user.name as NonEmptyString,
-                signerId.value.id,
-              ),
-            ),
-          ),
+                signerId.value.id
+              )
+            )
+          )
         ),
-        TE.toUnion,
-      )(),
+        TE.toUnion
+      )()
     );
 
   /**
@@ -169,11 +178,11 @@ export default class IoSignController {
    */
   public readonly createSignature = async <T extends ResLocals>(
     req: express.Request,
-    locals?: T,
+    locals?: T
   ): Promise<
     | IResponseErrorInternal
-    | IResponseErrorNotFound
     | IResponseErrorValidation
+    | IResponseErrorNotFound
     | IResponseSuccessJson<SignatureDetailView>
   > =>
     withUserFromRequest(req, (user) =>
@@ -190,15 +199,15 @@ export default class IoSignController {
             sequenceS(TE.ApplySeq)({
               signerId: pipe(
                 retrieveSignerId(this.ioSignService, user.fiscal_code),
-                TE.mapLeft(() => toErrorRetrievingTheSignerId),
+                TE.mapLeft(() => toErrorRetrievingTheSignerId)
               ),
               userProfile: pipe(
                 profileWithEmailValidatedOrError(this.profileService, user),
                 TE.mapLeft(
                   responseErrorInternal(
-                    "Error retrieving a user profile with validated email address",
-                  ),
-                ),
+                    "Error retrieving a user profile with validated email address"
+                  )
+                )
               ),
             }),
             TE.chainW(({ signerId, userProfile }) =>
@@ -213,24 +222,80 @@ export default class IoSignController {
                     email: userProfile.email,
                   },
                   signerId: signerId.value.id,
-                })),
-              ),
+                }))
+              )
             ),
-            TE.map(({ body, signerId }) =>
+            TE.map(({ signerId, body }) =>
               this.ioSignService.createSignature(
                 ioSignLollipopLocals,
                 body,
-                signerId,
-              ),
-            ),
-          ),
+                signerId
+              )
+            )
+          )
         ),
-        TE.toUnion,
-      )(),
+        TE.toUnion
+      )()
+    );
+
+  /**
+   * Get a Signature Request from id
+   */
+  public readonly getSignatureRequest = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<SignatureRequestDetailView>
+  > =>
+    withUserFromRequest(req, async (user) =>
+      pipe(
+        sequenceS(TE.ApplyPar)({
+          signatureRequestId: pipe(
+            req.params.id,
+            Id.decode,
+            TE.fromEither,
+            TE.mapLeft((_) =>
+              ResponseErrorInternal(`Error validating the signature request id`)
+            )
+          ),
+          signerId: pipe(
+            retrieveSignerId(this.ioSignService, user.fiscal_code),
+            TE.mapLeft(() => toErrorRetrievingTheSignerId),
+            TE.map((response) => response.value.id)
+          ),
+        }),
+        TE.map(({ signerId, signatureRequestId: id }) =>
+          this.ioSignService.getSignatureRequest(id, signerId)
+        ),
+        TE.toUnion
+      )()
+    );
+
+  /**
+   * Get Signature Requests list from Signer
+   */
+  public readonly getSignatureRequests = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<SignatureRequestList>
+  > =>
+    withUserFromRequest(req, async (user) =>
+      pipe(
+        retrieveSignerId(this.ioSignService, user.fiscal_code),
+        TE.mapLeft(() => toErrorRetrievingTheSignerId),
+        TE.map((response) => response.value.id),
+        TE.map((signerId) => this.ioSignService.getSignatureRequests(signerId)),
+        TE.toUnion
+      )()
     );
 
   public readonly getQtspClausesMetadata = (
-    req: express.Request,
+    req: express.Request
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
@@ -241,72 +306,9 @@ export default class IoSignController {
         IssuerEnvironment.decode(
           "x-iosign-issuer-environment" in req.headers
             ? req.headers["x-iosign-issuer-environment"]
-            : IssuerEnvironmentEnum.TEST,
+            : IssuerEnvironmentEnum.TEST
         ),
-        this.ioSignService.getQtspClausesMetadata,
-      ),
+        this.ioSignService.getQtspClausesMetadata
+      )
     );
-
-  /**
-   * Get a Signature Request from id
-   */
-  public readonly getSignatureRequest = (
-    req: express.Request,
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorNotFound
-    | IResponseErrorValidation
-    | IResponseSuccessJson<SignatureRequestDetailView>
-  > =>
-    withUserFromRequest(req, async (user) =>
-      pipe(
-        sequenceS(TE.ApplyPar)({
-          signatureRequestId: pipe(
-            req.params.id,
-            Id.decode,
-            TE.fromEither,
-            TE.mapLeft(() =>
-              ResponseErrorInternal(
-                `Error validating the signature request id`,
-              ),
-            ),
-          ),
-          signerId: pipe(
-            retrieveSignerId(this.ioSignService, user.fiscal_code),
-            TE.mapLeft(() => toErrorRetrievingTheSignerId),
-            TE.map((response) => response.value.id),
-          ),
-        }),
-        TE.map(({ signatureRequestId: id, signerId }) =>
-          this.ioSignService.getSignatureRequest(id, signerId),
-        ),
-        TE.toUnion,
-      )(),
-    );
-
-  /**
-   * Get Signature Requests list from Signer
-   */
-  public readonly getSignatureRequests = (
-    req: express.Request,
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorNotFound
-    | IResponseErrorValidation
-    | IResponseSuccessJson<SignatureRequestList>
-  > =>
-    withUserFromRequest(req, async (user) =>
-      pipe(
-        retrieveSignerId(this.ioSignService, user.fiscal_code),
-        TE.mapLeft(() => toErrorRetrievingTheSignerId),
-        TE.map((response) => response.value.id),
-        TE.map((signerId) => this.ioSignService.getSignatureRequests(signerId)),
-        TE.toUnion,
-      )(),
-    );
-
-  constructor(
-    private readonly ioSignService: IoSignService,
-    private readonly profileService: ProfileService,
-  ) {}
 }

@@ -10,7 +10,7 @@ export enum FeatureFlagEnum {
 
 export const FeatureFlag = enumType<FeatureFlagEnum>(
   FeatureFlagEnum,
-  "FeatureFlag",
+  "FeatureFlag"
 );
 
 export type FeatureFlag = t.TypeOf<typeof FeatureFlag>;
@@ -19,7 +19,7 @@ export const getIsUserEligibleForNewFeature =
   <T>(
     isUserBeta: (i: T) => boolean,
     isUserCanary: (i: T) => boolean,
-    featureFlag: FeatureFlag,
+    featureFlag: FeatureFlag
   ): ((i: T) => boolean) =>
   (i): boolean => {
     switch (featureFlag) {

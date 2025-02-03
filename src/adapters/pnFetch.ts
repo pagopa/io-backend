@@ -1,49 +1,48 @@
 /* eslint-disable max-params */
-import { ProblemJson } from "@pagopa/ts-commons/lib/responses";
+import { URL } from "url";
+import { flow, pipe } from "fp-ts/lib/function";
+import * as t from "io-ts";
+import * as E from "fp-ts/Either";
+import * as TE from "fp-ts/TaskEither";
+import * as O from "fp-ts/Option";
 import {
   FiscalCode,
   NonEmptyString,
   Ulid,
 } from "@pagopa/ts-commons/lib/strings";
-import { eventLog } from "@pagopa/winston-ts";
-import * as E from "fp-ts/Either";
-import * as O from "fp-ts/Option";
-import * as TE from "fp-ts/TaskEither";
-import { flow, pipe } from "fp-ts/lib/function";
-import { NotificationAttachmentDownloadMetadataResponse } from "generated/piattaforma-notifiche/NotificationAttachmentDownloadMetadataResponse";
-import * as t from "io-ts";
+import { ProblemJson } from "@pagopa/ts-commons/lib/responses";
 import { Response as NodeResponse } from "node-fetch";
-import nodeFetch from "node-fetch";
-import { Fetch } from "src/clients/third-party-service-client";
-import { LollipopLocalsType } from "src/types/lollipop";
+import { NotificationAttachmentDownloadMetadataResponse } from "generated/piattaforma-notifiche/NotificationAttachmentDownloadMetadataResponse";
 import { match } from "ts-pattern";
-import { URL } from "url";
-
+import { LollipopLocalsType } from "src/types/lollipop";
+import { Fetch } from "src/clients/third-party-service-client";
+import nodeFetch from "node-fetch";
+import { eventLog } from "@pagopa/winston-ts";
 import { PnAPIClient } from "../clients/pn-clients";
-import { PN_CONFIGURATION_ID } from "../config";
-import { pathParamsFromUrl } from "../types/pathParams";
 import { errorsToError } from "../utils/errorsFormatter";
+import { pathParamsFromUrl } from "../types/pathParams";
+import { PN_CONFIGURATION_ID } from "../config";
 
 const getPath = (input: RequestInfo | URL): string =>
   input instanceof URL
     ? `${input.pathname}${input.search}`
     : typeof input === "string"
-      ? `${new URL(input).pathname}${new URL(input).search}`
-      : `${new URL(input.url).pathname}${new URL(input.url).search}`;
+    ? `${new URL(input).pathname}${new URL(input).search}`
+    : `${new URL(input.url).pathname}${new URL(input.url).search}`;
 
 export const ThirdPartyMessagesUrl = pathParamsFromUrl(
   RegExp("^[/]+messages[/]+([^/]+)$"),
-  ([id]) => `/messages/${id}`,
+  ([id]) => `/messages/${id}`
 );
 
 export const ThirdPartyAttachmentUrl = pathParamsFromUrl(
   RegExp("^[/]+messages[/]+([^/]+)/(.+)$"),
-  ([id, url]) => `/messages/${id}/${url}`,
+  ([id, url]) => `/messages/${id}/${url}`
 );
 
 export const ThirdPartyPreconditionUrl = pathParamsFromUrl(
   RegExp("^[/]+messages[/]+([^/]+)/precondition$"),
-  ([id]) => `/messages/${id}/precondition`,
+  ([id]) => `/messages/${id}/precondition`
 );
 
 // document path
@@ -53,7 +52,7 @@ const attachmentPnDocument = "[/]+attachments[/]+documents[/]+([^/]+)$";
 export const PnDocumentUrl = pathParamsFromUrl(
   RegExp(`${basePnDocument}${attachmentPnDocument}`),
   ([iun, docIdx]) =>
-    `/delivery/notifications/received/${iun}/attachments/documents/${docIdx}`,
+    `/delivery/notifications/received/${iun}/attachments/documents/${docIdx}`
 );
 
 // payment path
@@ -62,7 +61,7 @@ const attachmentPnPayment =
 export const PnPaymentUrl = pathParamsFromUrl(
   RegExp(`${basePnDocument}${attachmentPnPayment}`),
   ([iun, docName, docIdx]) =>
-    `/delivery/notifications/received/${iun}/attachments/payment/${docName}/?attachmentIdx=${docIdx}`,
+    `/delivery/notifications/received/${iun}/attachments/payment/${docName}/?attachmentIdx=${docIdx}`
 );
 
 /**
@@ -87,8 +86,8 @@ const retrievePrecondition = (
   pnUrl: string,
   pnApiKey: string,
   fiscalCode: FiscalCode,
-  [iun]: readonly string[],
-  lollipopLocals?: LollipopLocalsType,
+  [iun]: ReadonlyArray<string>,
+  lollipopLocals?: LollipopLocalsType
 ) =>
   pipe(
     () =>
@@ -103,10 +102,10 @@ const retrievePrecondition = (
     TE.chain(
       TE.fromPredicate(
         (r) => r.status === 200,
-        (r) => Error(`Failed to fetch PN ReceivedPrecondition: ${r.status}`),
-      ),
+        (r) => Error(`Failed to fetch PN ReceivedPrecondition: ${r.status}`)
+      )
     ),
-    TE.map((response) => response.value),
+    TE.map((response) => response.value)
   );
 
 const retrieveNotificationDetails = (
@@ -114,8 +113,8 @@ const retrieveNotificationDetails = (
   pnUrl: string,
   pnApiKey: string,
   fiscalCode: FiscalCode,
-  [iun]: readonly string[],
-  lollipopLocals?: LollipopLocalsType,
+  [iun]: ReadonlyArray<string>,
+  lollipopLocals?: LollipopLocalsType
 ) =>
   pipe(
     () =>
@@ -129,21 +128,21 @@ const retrieveNotificationDetails = (
     TE.chain(
       TE.fromPredicate(
         (r) => r.status === 200,
-        (r) => Error(`Failed to fetch PN ReceivedNotification: ${r.status}`),
-      ),
+        (r) => Error(`Failed to fetch PN ReceivedNotification: ${r.status}`)
+      )
     ),
-    TE.map((response) => response.value),
+    TE.map((response) => response.value)
   );
 
 const checkHeaders = (
-  headers?: HeadersInit,
+  headers?: HeadersInit
 ): TE.TaskEither<Error, WithFiscalCode> =>
   pipe(
     headers,
     O.fromNullable,
     E.fromOption(() => Error("Missing fiscal_code in headers")),
     E.chain(flow(WithFiscalCode.decode, E.mapLeft(errorsToError))),
-    TE.fromEither,
+    TE.fromEither
   );
 
 export const errorResponse = (error: Error): Response =>
@@ -158,7 +157,7 @@ export const errorResponse = (error: Error): Response =>
       new NodeResponse(JSON.stringify(problem), {
         status: problem.status,
         statusText: problem.title,
-      }) as unknown as Response, // cast required: the same cast is used in clients code generation
+      }) as unknown as Response // cast required: the same cast is used in clients code generation
   );
 
 export const retryResponse = (retryAfter: number): Response =>
@@ -174,7 +173,7 @@ export const retryResponse = (retryAfter: number): Response =>
         headers: { "Retry-After": `${retryAfter}` },
         status: problem.status,
         statusText: problem.title,
-      }) as unknown as Response, // cast required: the same cast is used in clients code generation
+      }) as unknown as Response // cast required: the same cast is used in clients code generation
   );
 
 export const redirectPrecondition =
@@ -184,7 +183,7 @@ export const redirectPrecondition =
     pnApiKey: string,
     url: string,
     lollipopLocals?: LollipopLocalsType,
-    init?: RequestInit,
+    init?: RequestInit
   ) =>
   (): Promise<Response> =>
     pipe(
@@ -196,7 +195,7 @@ export const redirectPrecondition =
           ThirdPartyPreconditionUrl.decode,
           E.mapLeft(errorsToError),
           TE.fromEither,
-          eventLog.taskEither.info(() => [
+          eventLog.taskEither.info((_) => [
             `pn.precondition.call`,
             {
               locals: lollipopLocals
@@ -213,25 +212,26 @@ export const redirectPrecondition =
                 pnApiKey,
                 headers.fiscal_code,
                 params,
-                lollipopLocals,
-              ),
-            ),
-          ),
-        ),
+                lollipopLocals
+              )
+            )
+          )
+        )
       ),
       TE.map(
+        // eslint-disable-next-line sonarjs/no-identical-functions
         (body) =>
           new NodeResponse(JSON.stringify(body), {
             status: 200,
             statusText: "OK",
-          }) as unknown as Response, // cast required: the same cast is used in clients code generation
+          }) as unknown as Response // cast required: the same cast is used in clients code generation
       ),
       eventLog.taskEither.errorLeft(({ message }) => [
         `Something went wrong trying to call retrievePrecondition`,
         { message, name: "pn.precondition.error" },
       ]),
       TE.mapLeft(errorResponse),
-      TE.toUnion,
+      TE.toUnion
     )();
 
 export const redirectMessages =
@@ -241,7 +241,7 @@ export const redirectMessages =
     pnApiKey: string,
     url: string,
     lollipopLocals?: LollipopLocalsType,
-    init?: RequestInit,
+    init?: RequestInit
   ) =>
   (): Promise<Response> =>
     pipe(
@@ -253,7 +253,7 @@ export const redirectMessages =
           ThirdPartyMessagesUrl.decode,
           E.mapLeft(errorsToError),
           TE.fromEither,
-          eventLog.taskEither.info(() => [
+          eventLog.taskEither.info((_) => [
             `pn.notification.call`,
             {
               locals: lollipopLocals
@@ -270,25 +270,26 @@ export const redirectMessages =
                 pnApiKey,
                 headers.fiscal_code,
                 params,
-                lollipopLocals,
-              ),
-            ),
-          ),
-        ),
+                lollipopLocals
+              )
+            )
+          )
+        )
       ),
       TE.map(
+        // eslint-disable-next-line sonarjs/no-identical-functions
         (body) =>
           new NodeResponse(JSON.stringify(body), {
             status: 200,
             statusText: "OK",
-          }) as unknown as Response, // cast required: the same cast is used in clients code generation
+          }) as unknown as Response // cast required: the same cast is used in clients code generation
       ),
       eventLog.taskEither.errorLeft(({ message }) => [
         `Something went wrong trying to call retrieveNotificationDetails`,
         { message, name: "pn.notification.error" },
       ]),
       TE.mapLeft(errorResponse),
-      TE.toUnion,
+      TE.toUnion
     )();
 
 const getPnDocument = (
@@ -297,7 +298,7 @@ const getPnDocument = (
   pnApiKey: string,
   url: string,
   fiscalCode: FiscalCode,
-  lollipopLocals?: LollipopLocalsType,
+  lollipopLocals?: LollipopLocalsType
 ): TE.TaskEither<Error, NotificationAttachmentDownloadMetadataResponse> =>
   pipe(
     url,
@@ -315,22 +316,22 @@ const getPnDocument = (
               "x-pagopa-cx-taxid": fiscalCode,
               ...lollipopLocals,
             }),
-          E.toError,
+          E.toError
         ),
         TE.chainEitherK(E.mapLeft(errorsToError)),
         TE.chain(
           TE.fromPredicate(
             (r) => r.status === 200,
             (r) =>
-              Error(`Failed to fetch PN SentNotificationDocument: ${r.status}`),
-          ),
+              Error(`Failed to fetch PN SentNotificationDocument: ${r.status}`)
+          )
         ),
         TE.map(
           (response) =>
-            response.value as NotificationAttachmentDownloadMetadataResponse,
-        ),
-      ),
-    ),
+            response.value as NotificationAttachmentDownloadMetadataResponse
+        )
+      )
+    )
   );
 
 const getPnPayment = (
@@ -339,7 +340,7 @@ const getPnPayment = (
   pnApiKey: string,
   url: string,
   fiscalCode: FiscalCode,
-  lollipopLocals?: LollipopLocalsType,
+  lollipopLocals?: LollipopLocalsType
 ): TE.TaskEither<Error, NotificationAttachmentDownloadMetadataResponse> =>
   pipe(
     url,
@@ -358,7 +359,7 @@ const getPnPayment = (
               "x-pagopa-cx-taxid": fiscalCode,
               ...lollipopLocals,
             }),
-          E.toError,
+          E.toError
         ),
         TE.chainEitherK(E.mapLeft(errorsToError)),
         TE.chain(
@@ -366,16 +367,16 @@ const getPnPayment = (
             (r) => r.status === 200,
             (r) =>
               Error(
-                `Failed to fetch PN ReceivedNotificationAttachment: ${r.status}`,
-              ),
-          ),
+                `Failed to fetch PN ReceivedNotificationAttachment: ${r.status}`
+              )
+          )
         ),
         TE.map(
           (response) =>
-            response.value as NotificationAttachmentDownloadMetadataResponse,
-        ),
-      ),
-    ),
+            response.value as NotificationAttachmentDownloadMetadataResponse
+        )
+      )
+    )
   );
 
 export const redirectAttachment =
@@ -385,7 +386,7 @@ export const redirectAttachment =
     pnApiKey: string,
     url: string,
     lollipopLocals?: LollipopLocalsType,
-    init?: RequestInit,
+    init?: RequestInit
   ) =>
   (): Promise<Response> =>
     pipe(
@@ -397,7 +398,6 @@ export const redirectAttachment =
           ThirdPartyAttachmentUrl.decode,
           E.mapLeft(errorsToError),
           TE.fromEither,
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           TE.chain(([_id, getAttachmentUrl]) =>
             match(getAttachmentUrl)
               .when(
@@ -413,9 +413,9 @@ export const redirectAttachment =
                     pnApiKey,
                     au,
                     headers.fiscal_code,
-                    lollipopLocals,
+                    lollipopLocals
                   );
-                },
+                }
               )
               .when(
                 (au) => E.isRight(PnPaymentUrl.decode(au)),
@@ -430,17 +430,17 @@ export const redirectAttachment =
                     pnApiKey,
                     au,
                     headers.fiscal_code,
-                    lollipopLocals,
+                    lollipopLocals
                   );
-                },
+                }
               )
               .otherwise((au) =>
                 TE.left(
                   new Error(
-                    `Can not distinguish a PnDocumentUrl from a PnPaymentUrl with the url ${au}`,
-                  ),
-                ),
-              ),
+                    `Can not distinguish a PnDocumentUrl from a PnPaymentUrl with the url ${au}`
+                  )
+                )
+              )
           ),
           TE.chain((attachment) =>
             pipe(
@@ -454,31 +454,31 @@ export const redirectAttachment =
                       (r) => r.status === 200,
                       (r) =>
                         Error(
-                          `Failed to fetch PN download attachment: ${r.status}`,
-                        ),
-                    ),
-                  ),
-                ),
+                          `Failed to fetch PN download attachment: ${r.status}`
+                        )
+                    )
+                  )
+                )
               ),
-              E.getOrElse(() =>
+              E.getOrElse((_) =>
                 pipe(
                   attachment.retryAfter,
                   t.number.decode,
                   E.mapLeft(errorsToError),
                   TE.fromEither,
-                  TE.map((r) => retryResponse(r)),
-                ),
-              ),
-            ),
-          ),
-        ),
+                  TE.map((r) => retryResponse(r))
+                )
+              )
+            )
+          )
+        )
       ),
       eventLog.taskEither.errorLeft(({ message }) => [
         `Something went wrong trying to call getPnDocumentUrl`,
         { message, name: "pn.attachment.error" },
       ]),
       TE.mapLeft(errorResponse),
-      TE.toUnion,
+      TE.toUnion
     )();
 
 export const pnFetch =
@@ -487,13 +487,13 @@ export const pnFetch =
     configurationId: Ulid,
     pnUrl: string,
     pnApiKey: string,
-    lollipopLocals?: LollipopLocalsType,
+    lollipopLocals?: LollipopLocalsType
   ): typeof fetch =>
   (input, init) => {
     eventLog.peek.info(
       configurationId === PN_CONFIGURATION_ID
         ? [`Calling PN api`, { name: "lollipop.pn.api" }]
-        : ["Calling third party api", { name: "lollipop.third-party.api" }],
+        : ["Calling third party api", { name: "lollipop.third-party.api" }]
     );
     return configurationId === PN_CONFIGURATION_ID
       ? match(getPath(input))
@@ -506,8 +506,8 @@ export const pnFetch =
                 pnApiKey,
                 url,
                 lollipopLocals,
-                init,
-              ),
+                init
+              )
           )
           .when(
             (url) => E.isRight(ThirdPartyPreconditionUrl.decode(url)),
@@ -518,8 +518,8 @@ export const pnFetch =
                 pnApiKey,
                 url,
                 lollipopLocals,
-                init,
-              ),
+                init
+              )
           )
           .when(
             (url) => E.isRight(ThirdPartyAttachmentUrl.decode(url)),
@@ -530,19 +530,19 @@ export const pnFetch =
                 pnApiKey,
                 url,
                 lollipopLocals,
-                init,
-              ),
+                init
+              )
           )
           .otherwise((url) =>
             pipe(
               TE.left(
                 new Error(
-                  `[pnFetch] Can not find a Piattaforma Notifiche implementation for ${url}`,
-                ),
+                  `[pnFetch] Can not find a Piattaforma Notifiche implementation for ${url}`
+                )
               ),
               TE.mapLeft(errorResponse),
-              TE.toUnion,
-            ),
+              TE.toUnion
+            )
           )()
       : origFetch(input, init);
   };

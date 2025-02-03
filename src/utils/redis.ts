@@ -1,9 +1,8 @@
-import * as appInsights from "applicationinsights";
-import * as O from "fp-ts/lib/Option";
-import * as RA from "fp-ts/lib/ReadonlyArray";
-import { pipe } from "fp-ts/lib/function";
 import * as redis from "redis";
-
+import * as appInsights from "applicationinsights";
+import { pipe } from "fp-ts/lib/function";
+import * as RA from "fp-ts/lib/ReadonlyArray";
+import * as O from "fp-ts/lib/Option";
 import { keyPrefixes } from "../services/redisSessionStorage";
 import { log } from "./logger";
 
@@ -13,21 +12,21 @@ export const obfuscateTokensInfo = (message: string) =>
     RA.findFirst((key) => message.includes(key)),
     O.map((key) =>
       // eslint-disable-next-line no-useless-escape
-      message.replace(new RegExp(`\\"${key}\\w+\\"`), `"${key}redacted"`),
+      message.replace(new RegExp(`\\"${key}\\w+\\"`), `"${key}redacted"`)
     ),
-    O.getOrElse(() => message),
+    O.getOrElse(() => message)
   );
 
 export const createClusterRedisClient =
   (
     enableTls: boolean,
     appInsightsClient?: appInsights.TelemetryClient,
-    useReplicas = true,
+    useReplicas: boolean = true
   ) =>
   async (
     redisUrl: string,
     password?: string,
-    port?: string,
+    port?: string
   ): Promise<redis.RedisClusterType> => {
     const DEFAULT_REDIS_PORT = enableTls ? "6380" : "6379";
     const prefixUrl = enableTls ? "rediss://" : "redis://";
@@ -46,7 +45,7 @@ export const createClusterRedisClient =
         password,
         socket: {
           // TODO: We can add a whitelist with all the IP addresses of the redis clsuter
-          checkServerIdentity: () => undefined,
+          checkServerIdentity: (_hostname, _cert) => undefined,
           keepAlive: 2000,
           tls: enableTls,
         },
@@ -75,16 +74,16 @@ export const createClusterRedisClient =
     redisClient.on(
       "reconnecting",
       ({
-        attempt,
         delay,
+        attempt,
       }: {
-        readonly attempt: number;
         readonly delay: number;
+        readonly attempt: number;
       }) => {
         log.warn(
           "[REDIS reconnecting] a reconnection events occurs [delay %s] [attempt %s]",
           delay,
-          attempt,
+          attempt
         );
         appInsightsClient?.trackEvent({
           name: "io-backend.redis.reconnecting",
@@ -94,7 +93,7 @@ export const createClusterRedisClient =
           },
           tagOverrides: { samplingEnabled: "false" },
         });
-      },
+      }
     );
     await redisClient.connect();
     return redisClient;
@@ -102,7 +101,7 @@ export const createClusterRedisClient =
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type Selector<T, S> = {
-  readonly select: (type: T) => readonly S[];
+  readonly select: (type: T) => ReadonlyArray<S>;
   readonly selectOne: (type: T) => S;
 };
 
@@ -113,8 +112,8 @@ export type RedisClientSelectorType = Selector<
 
 export enum RedisClientMode {
   "ALL" = "ALL",
-  "FAST" = "FAST",
   "SAFE" = "SAFE",
+  "FAST" = "FAST",
 }
 
 export const RedisClientSelector =
@@ -122,16 +121,16 @@ export const RedisClientSelector =
   async (
     redisUrl: string,
     password?: string,
-    port?: string,
+    port?: string
   ): Promise<RedisClientSelectorType> => {
     const FAST_REDIS_CLIENT = await createClusterRedisClient(
       enableTls,
-      appInsightsClient,
+      appInsightsClient
     )(redisUrl, password, port);
     const SAFE_REDIS_CLIENT = await createClusterRedisClient(
       enableTls,
       appInsightsClient,
-      false,
+      false
     )(redisUrl, password, port);
     const select = (t: RedisClientMode) => {
       switch (t) {

@@ -1,8 +1,7 @@
 import * as nodeFetch from "node-fetch";
-
 import {
-  Client,
   createClient,
+  Client,
 } from "../../generated/lollipop-first-consumer/client";
 
 export function FirstLollipopConsumerClient(
@@ -10,7 +9,7 @@ export function FirstLollipopConsumerClient(
   baseUrl: string,
   basePath?: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fetchApi: typeof fetch = nodeFetch as any as typeof fetch,
+  fetchApi: typeof fetch = nodeFetch as any as typeof fetch
 ): Client<"ApiKeyAuth"> {
   return createClient<"ApiKeyAuth">({
     basePath,

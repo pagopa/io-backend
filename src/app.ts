@@ -1,4 +1,16 @@
 /* eslint-disable max-lines-per-function */
+/**
+ * Main entry point for the Digital Citizenship proxy.
+ */
+import * as bodyParser from "body-parser";
+import * as express from "express";
+import * as helmet from "helmet";
+import * as morgan from "morgan";
+import * as passport from "passport";
+
+import { Express } from "express";
+import expressEnforcesSsl = require("express-enforces-ssl");
+
 import { TableClient } from "@azure/data-tables";
 import {
   NodeEnvironment,
@@ -7,24 +19,14 @@ import {
 import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { CIDR, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as appInsights from "applicationinsights";
-/**
- * Main entry point for the Digital Citizenship proxy.
- */
-import * as bodyParser from "body-parser";
-import * as express from "express";
-import { Express } from "express";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
-import * as helmet from "helmet";
-import * as morgan from "morgan";
-import * as passport from "passport";
-
 import { ServerInfo } from "../generated/public/ServerInfo";
+
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
-import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
-import { LollipopApiClient } from "./clients/lollipop";
+import { getUserIdentity } from "./controllers/authenticationController";
 import {
   API_CLIENT,
   APP_MESSAGES_API_CLIENT,
@@ -38,16 +40,16 @@ import {
   FF_ENABLE_NOTIFY_ENDPOINT,
   FF_ENABLE_SESSION_ENDPOINTS,
   FF_EUCOVIDCERT_ENABLED,
-  FF_IO_FIMS_ENABLED,
   FF_IO_SIGN_ENABLED,
+  FF_IO_FIMS_ENABLED,
   FF_IO_WALLET_ENABLED,
   FF_ROUTING_PUSH_NOTIF,
   FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST,
   FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX,
   FF_TRIAL_SYSTEM_ENABLED,
   FIRST_LOLLIPOP_CONSUMER_CLIENT,
-  IO_FIMS_API_CLIENT,
   IO_SIGN_API_CLIENT,
+  IO_FIMS_API_CLIENT,
   IO_SIGN_SERVICE_ID,
   IO_WALLET_API_CLIENT,
   LOCKED_PROFILES_STORAGE_CONNECTION_STRING,
@@ -55,13 +57,13 @@ import {
   LOLLIPOP_API_CLIENT,
   LOLLIPOP_REVOKE_QUEUE_NAME,
   LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING,
-  NOTIFICATION_DEFAULT_SUBJECT,
-  NOTIFICATION_DEFAULT_TITLE,
   NOTIFICATIONS_QUEUE_NAME,
   NOTIFICATIONS_STORAGE_CONNECTION_STRING,
+  NOTIFICATION_DEFAULT_SUBJECT,
+  NOTIFICATION_DEFAULT_TITLE,
   PAGOPA_CLIENT,
-  PN_ADDRESS_BOOK_CLIENT_SELECTOR,
   PNAddressBookConfig,
+  PN_ADDRESS_BOOK_CLIENT_SELECTOR,
   PUSH_NOTIFICATIONS_QUEUE_NAME,
   PUSH_NOTIFICATIONS_STORAGE_CONNECTION_STRING,
   ROOT_REDIRECT_URL,
@@ -70,41 +72,42 @@ import {
   TRIAL_SYSTEM_CLIENT,
   URL_TOKEN_STRATEGY,
 } from "./config";
-import { getUserIdentity } from "./controllers/authenticationController";
+import MessagesController from "./controllers/messagesController";
+import NotificationController from "./controllers/notificationController";
+import PagoPAProxyController from "./controllers/pagoPAProxyController";
+import ProfileController from "./controllers/profileController";
+import ServicesController from "./controllers/servicesController";
+import SessionController from "./controllers/sessionController";
+import UserMetadataController from "./controllers/userMetadataController";
+
+import { log } from "./utils/logger";
+import checkIP from "./utils/middleware/checkIP";
+
+import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
+import { LollipopApiClient } from "./clients/lollipop";
 import BonusController from "./controllers/bonusController";
 import CgnController from "./controllers/cgnController";
 import CgnOperatorSearchController from "./controllers/cgnOperatorSearchController";
 import EUCovidCertController from "./controllers/eucovidcertController";
-import IoFimsController from "./controllers/fimsController";
 import { firstLollipopSign } from "./controllers/firstLollipopConsumerController";
 import IoSignController from "./controllers/ioSignController";
-import IoWalletController from "./controllers/ioWalletController";
-import MessagesController from "./controllers/messagesController";
-import NotificationController from "./controllers/notificationController";
-import PagoPAProxyController from "./controllers/pagoPAProxyController";
 import {
   getPNActivationController,
   upsertPNActivationController,
 } from "./controllers/pnController";
-import ProfileController from "./controllers/profileController";
 import ServicesAppBackendController from "./controllers/serviceAppBackendController";
-import ServicesController from "./controllers/servicesController";
-import SessionController from "./controllers/sessionController";
 import SessionLockController from "./controllers/sessionLockController";
 import { getUserForMyPortal } from "./controllers/ssoController";
-import TrialController from "./controllers/trialController";
 import UserDataProcessingController from "./controllers/userDataProcessingController";
-import UserMetadataController from "./controllers/userMetadataController";
 import { ISessionStorage } from "./services/ISessionStorage";
 import AuthenticationLockService from "./services/authenticationLockService";
 import BonusService from "./services/bonusService";
 import CgnOperatorSearchService from "./services/cgnOperatorSearchService";
 import CgnService from "./services/cgnService";
 import EUCovidCertService from "./services/eucovidcertService";
-import IoFimsService from "./services/fimsService";
 import FunctionsAppService from "./services/functionAppService";
 import IoSignService from "./services/ioSignService";
-import IoWalletService from "./services/ioWalletService";
+import IoFimsService from "./services/fimsService";
 import LollipopService from "./services/lollipopService";
 import NewMessagesService from "./services/newMessagesService";
 import NotificationService from "./services/notificationService";
@@ -118,7 +121,6 @@ import ProfileService from "./services/profileService";
 import RedisSessionStorage from "./services/redisSessionStorage";
 import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import ServicesAppBackendService from "./services/servicesAppBackendService";
-import TrialService from "./services/trialService";
 import UserDataProcessingService from "./services/userDataProcessingService";
 import bearerMyPortalTokenStrategy from "./strategies/bearerMyPortalTokenStrategy";
 import bearerSessionTokenStrategy from "./strategies/bearerSessionTokenStrategy";
@@ -126,8 +128,6 @@ import { User } from "./types/user";
 import { attachTrackingData } from "./utils/appinsights";
 import { getRequiredENVVar } from "./utils/container";
 import { constantExpressHandler, toExpressHandler } from "./utils/express";
-import { log } from "./utils/logger";
-import checkIP from "./utils/middleware/checkIP";
 import { expressErrorMiddleware } from "./utils/middleware/express";
 import {
   expressLollipopMiddleware,
@@ -139,8 +139,11 @@ import {
 } from "./utils/package";
 import { RedisClientMode, RedisClientSelector } from "./utils/redis";
 import { ResponseErrorDismissed } from "./utils/responses";
-
-import expressEnforcesSsl = require("express-enforces-ssl");
+import TrialService from "./services/trialService";
+import TrialController from "./controllers/trialController";
+import IoWalletController from "./controllers/ioWalletController";
+import IoWalletService from "./services/ioWalletService";
+import IoFimsController from "./controllers/fimsController";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -148,52 +151,53 @@ const defaultModule = {
 };
 
 export interface IAppFactoryParameters {
+  readonly env: NodeEnvironment;
+  readonly appInsightsClient?: appInsights.TelemetryClient;
+  readonly allowNotifyIPSourceRange: ReadonlyArray<CIDR>;
+  readonly allowMyPortalIPSourceRange: ReadonlyArray<CIDR>;
+  readonly allowSessionHandleIPSourceRange: ReadonlyArray<CIDR>;
+  readonly authenticationBasePath: string;
   readonly APIBasePath: string;
   readonly BonusAPIBasePath: string;
+  readonly MyPortalBasePath: string;
   readonly CGNAPIBasePath: string;
   readonly CGNOperatorSearchAPIBasePath: string;
-  readonly EUCovidCertBasePath: string;
-  readonly IoFimsAPIBasePath: string;
   readonly IoSignAPIBasePath: string;
+  readonly IoFimsAPIBasePath: string;
   readonly IoWalletAPIBasePath: string;
-  readonly MyPortalBasePath: string;
+  readonly EUCovidCertBasePath: string;
   readonly ServicesAppBackendBasePath: string;
   readonly TrialSystemBasePath: string;
-  readonly allowMyPortalIPSourceRange: readonly CIDR[];
-  readonly allowNotifyIPSourceRange: readonly CIDR[];
-  readonly allowSessionHandleIPSourceRange: readonly CIDR[];
-  readonly appInsightsClient?: appInsights.TelemetryClient;
-  readonly authenticationBasePath: string;
-  readonly env: NodeEnvironment;
 }
 
+// eslint-disable-next-line max-lines-per-function, sonarjs/cognitive-complexity
 export async function newApp({
-  APIBasePath,
-  BonusAPIBasePath,
-  CGNAPIBasePath,
-  CGNOperatorSearchAPIBasePath,
-  EUCovidCertBasePath,
-  IoFimsAPIBasePath,
-  IoSignAPIBasePath,
-  IoWalletAPIBasePath,
-  MyPortalBasePath,
-  ServicesAppBackendBasePath,
-  TrialSystemBasePath,
-  allowMyPortalIPSourceRange,
+  env,
   allowNotifyIPSourceRange,
+  allowMyPortalIPSourceRange,
   allowSessionHandleIPSourceRange,
   appInsightsClient,
   authenticationBasePath,
-  env,
+  APIBasePath,
+  BonusAPIBasePath,
+  MyPortalBasePath,
+  CGNAPIBasePath,
+  IoSignAPIBasePath,
+  IoFimsAPIBasePath,
+  IoWalletAPIBasePath,
+  CGNOperatorSearchAPIBasePath,
+  EUCovidCertBasePath,
+  ServicesAppBackendBasePath,
+  TrialSystemBasePath,
 }: IAppFactoryParameters): Promise<Express> {
   const isDevEnvironment = ENV === NodeEnvironmentEnum.DEVELOPMENT;
   const REDIS_CLIENT_SELECTOR = await RedisClientSelector(
     !isDevEnvironment,
-    appInsightsClient,
+    appInsightsClient
   )(
     getRequiredENVVar("REDIS_URL"),
     process.env.REDIS_PASSWORD,
-    process.env.REDIS_PORT,
+    process.env.REDIS_PORT
   );
 
   // Create the Session Storage service
@@ -202,7 +206,7 @@ export async function newApp({
   // Add the strategy to authenticate proxy clients.
   passport.use(
     "bearer.session",
-    bearerSessionTokenStrategy(SESSION_STORAGE, attachTrackingData),
+    bearerSessionTokenStrategy(SESSION_STORAGE, attachTrackingData)
   );
 
   // Add the strategy to authenticate MyPortal clients.
@@ -252,21 +256,21 @@ export async function newApp({
 
   // Adds the user fiscal code
   // we take only the first 6 characters of the fiscal code
-  morgan.token("fiscal_code_short", (req: express.Request) =>
+  morgan.token("fiscal_code_short", (req: express.Request, _) =>
     pipe(
       req.user,
       User.decode,
       E.map((user) => String(user.fiscal_code).slice(0, 6)),
-      E.getOrElse(() => ""),
-    ),
+      E.getOrElse(() => "")
+    )
   );
 
   const obfuscateToken = (originalUrl: string) =>
     originalUrl.replace(/([?&]token=|[?&]access_token=)([^&]*)/g, "$1REDACTED");
 
   // Obfuscate token in url on morgan logs
-  morgan.token("obfuscated_url", (req: express.Request) =>
-    obfuscateToken(req.originalUrl),
+  morgan.token("obfuscated_url", (req: express.Request, _) =>
+    obfuscateToken(req.originalUrl)
   );
 
   const loggerFormat =
@@ -281,11 +285,11 @@ export async function newApp({
   // Parse the incoming request body. This is needed by Passport spid strategy.
   app.use(
     bodyParser.json({
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       verify: (_req, res: express.Response, buf, _encoding: BufferEncoding) => {
+        // eslint-disable-next-line functional/immutable-data
         res.locals.body = buf;
       },
-    }),
+    })
   );
 
   // Parse an urlencoded body.
@@ -312,11 +316,11 @@ export async function newApp({
         // Create the profile service
         const tableClient = TableClient.fromConnectionString(
           LOCKED_PROFILES_STORAGE_CONNECTION_STRING,
-          LOCKED_PROFILES_TABLE_NAME,
+          LOCKED_PROFILES_TABLE_NAME
         );
         const PROFILE_SERVICE = new ProfileService(API_CLIENT);
         const AUTHENTICATION_LOCK_SERVICE = new AuthenticationLockService(
-          tableClient,
+          tableClient
         );
 
         // Create the bonus service
@@ -333,28 +337,28 @@ export async function newApp({
 
         // Create the cgn operator search service
         const CGN_OPERATOR_SEARCH_SERVICE = new CgnOperatorSearchService(
-          CGN_OPERATOR_SEARCH_API_CLIENT,
+          CGN_OPERATOR_SEARCH_API_CLIENT
         );
 
         // Create the EUCovidCert service
         const EUCOVIDCERT_SERVICE = new EUCovidCertService(
-          EUCOVIDCERT_API_CLIENT,
+          EUCOVIDCERT_API_CLIENT
         );
 
         // Create the user data processing service
         const USER_DATA_PROCESSING_SERVICE = new UserDataProcessingService(
-          API_CLIENT,
+          API_CLIENT
         );
 
         // Create the the io-services-app-backend service
         const SERVICES_APP_BACKEND_SERVICE = new ServicesAppBackendService(
-          SERVICES_APP_BACKEND_CLIENT,
+          SERVICES_APP_BACKEND_CLIENT
         );
 
         // Create the io wallet
         const IO_WALLET_SERVICE = new IoWalletService(
           IO_WALLET_API_CLIENT,
-          TRIAL_SYSTEM_CLIENT,
+          TRIAL_SYSTEM_CLIENT
         );
 
         // Create the Notification Service
@@ -363,14 +367,14 @@ export async function newApp({
             () =>
               new NotificationService(
                 NOTIFICATIONS_STORAGE_CONNECTION_STRING,
-                NOTIFICATIONS_QUEUE_NAME,
+                NOTIFICATIONS_QUEUE_NAME
               ),
             (err) =>
-              new Error(`Error initializing Notification Service: [${err}]`),
+              new Error(`Error initializing Notification Service: [${err}]`)
           ),
           E.getOrElseW((err) => {
             throw err;
-          }),
+          })
         );
 
         // Create the Notification Service
@@ -379,16 +383,16 @@ export async function newApp({
             () =>
               new NotificationService(
                 PUSH_NOTIFICATIONS_STORAGE_CONNECTION_STRING,
-                PUSH_NOTIFICATIONS_QUEUE_NAME,
+                PUSH_NOTIFICATIONS_QUEUE_NAME
               ),
             (err) =>
               new Error(
-                `Error initializing Push Notification Service: [${err}]`,
-              ),
+                `Error initializing Push Notification Service: [${err}]`
+              )
           ),
           E.getOrElseW((err) => {
             throw err;
-          }),
+          })
         );
 
         const notificationServiceFactory = getNotificationServiceFactory(
@@ -396,7 +400,7 @@ export async function newApp({
           PUSH_NOTIFICATION_SERVICE,
           FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST,
           FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX,
-          FF_ROUTING_PUSH_NOTIF,
+          FF_ROUTING_PUSH_NOTIF
         );
 
         const LOLLIPOP_SERVICE = pipe(
@@ -404,13 +408,13 @@ export async function newApp({
             () =>
               new LollipopService(
                 LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING,
-                LOLLIPOP_REVOKE_QUEUE_NAME,
+                LOLLIPOP_REVOKE_QUEUE_NAME
               ),
-            (err) => new Error(`Error initializing LollipopService: [${err}]`),
+            (err) => new Error(`Error initializing LollipopService: [${err}]`)
           ),
           E.getOrElseW((err) => {
             throw err;
-          }),
+          })
         );
 
         const TRIAL_SERVICE = new TrialService(TRIAL_SYSTEM_CLIENT);
@@ -425,27 +429,27 @@ export async function newApp({
           LOLLIPOP_API_CLIENT,
           SESSION_STORAGE,
           FIRST_LOLLIPOP_CONSUMER_CLIENT,
-          authMiddlewares.bearerSession,
+          authMiddlewares.bearerSession
         );
 
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         registerAuthenticationRoutes(
           app,
           authenticationBasePath,
-          authMiddlewares.bearerSession,
+          authMiddlewares.bearerSession
         );
 
         // Create the function app service.
         const FN_APP_SERVICE = new FunctionsAppService(API_CLIENT);
         // Create the new messages service.
         const APP_MESSAGES_SERVICE = new NewMessagesService(
-          APP_MESSAGES_API_CLIENT,
+          APP_MESSAGES_API_CLIENT
         );
 
         const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT);
         // Register the user metadata storage service.
         const USER_METADATA_STORAGE = new RedisUserMetadataStorage(
-          REDIS_CLIENT_SELECTOR.selectOne(RedisClientMode.FAST),
+          REDIS_CLIENT_SELECTOR.selectOne(RedisClientMode.FAST)
         );
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         registerAPIRoutes(
@@ -462,7 +466,7 @@ export async function newApp({
           USER_METADATA_STORAGE,
           USER_DATA_PROCESSING_SERVICE,
           authMiddlewares.bearerSession,
-          LOLLIPOP_API_CLIENT,
+          LOLLIPOP_API_CLIENT
         );
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         registerSessionAPIRoutes(
@@ -474,7 +478,7 @@ export async function newApp({
           USER_METADATA_STORAGE,
           LOLLIPOP_SERVICE,
           AUTHENTICATION_LOCK_SERVICE,
-          notificationServiceFactory,
+          notificationServiceFactory
         );
         if (FF_BONUS_ENABLED) {
           // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -482,7 +486,7 @@ export async function newApp({
             app,
             BonusAPIBasePath,
             BONUS_SERVICE,
-            authMiddlewares.bearerSession,
+            authMiddlewares.bearerSession
           );
         }
         if (FF_CGN_ENABLED) {
@@ -491,7 +495,7 @@ export async function newApp({
             app,
             CGNAPIBasePath,
             CGN_SERVICE,
-            authMiddlewares.bearerSession,
+            authMiddlewares.bearerSession
           );
 
           // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -500,7 +504,7 @@ export async function newApp({
             CGNOperatorSearchAPIBasePath,
             CGN_SERVICE,
             CGN_OPERATOR_SEARCH_SERVICE,
-            authMiddlewares.bearerSession,
+            authMiddlewares.bearerSession
           );
         }
 
@@ -513,7 +517,7 @@ export async function newApp({
             PROFILE_SERVICE,
             authMiddlewares.bearerSession,
             LOLLIPOP_API_CLIENT,
-            SESSION_STORAGE,
+            SESSION_STORAGE
           );
         }
 
@@ -524,7 +528,7 @@ export async function newApp({
             IoFimsAPIBasePath,
             IO_FIMS_SERVICE,
             PROFILE_SERVICE,
-            authMiddlewares.bearerSession,
+            authMiddlewares.bearerSession
           );
         }
 
@@ -534,7 +538,7 @@ export async function newApp({
             app,
             EUCovidCertBasePath,
             EUCOVIDCERT_SERVICE,
-            authMiddlewares.bearerSession,
+            authMiddlewares.bearerSession
           );
         }
 
@@ -543,14 +547,14 @@ export async function newApp({
           app,
           MyPortalBasePath,
           allowMyPortalIPSourceRange,
-          authMiddlewares.bearerMyPortal,
+          authMiddlewares.bearerMyPortal
         );
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         registerServicesAppBackendRoutes(
           app,
           ServicesAppBackendBasePath,
           SERVICES_APP_BACKEND_SERVICE,
-          authMiddlewares.bearerSession,
+          authMiddlewares.bearerSession
         );
 
         if (
@@ -563,7 +567,7 @@ export async function newApp({
             app,
             PNAddressBookConfig.PN_ACTIVATION_BASE_PATH,
             pnService,
-            authMiddlewares.bearerSession,
+            authMiddlewares.bearerSession
           );
         }
 
@@ -573,7 +577,7 @@ export async function newApp({
             app,
             TrialSystemBasePath,
             TRIAL_SERVICE,
-            authMiddlewares.bearerSession,
+            authMiddlewares.bearerSession
           );
         }
 
@@ -583,19 +587,19 @@ export async function newApp({
             app,
             IoWalletAPIBasePath,
             IO_WALLET_SERVICE,
-            authMiddlewares.bearerSession,
+            authMiddlewares.bearerSession
           );
         }
 
         return { app };
       },
-      (err) => new Error(`Error on app routes setup: [${err}]`),
+      (err) => new Error(`Error on app routes setup: [${err}]`)
     ),
     TE.map((_) => {
       _.app.on("server:stop", () => {
         // Graceful redis connection shutdown.
         for (const client of REDIS_CLIENT_SELECTOR.select(
-          RedisClientMode.ALL,
+          RedisClientMode.ALL
         )) {
           log.info(`Graceful closing redis connection`);
           pipe(
@@ -605,10 +609,10 @@ export async function newApp({
                 log.error(
                   `An Error occurred closing the redis connection: [${
                     E.toError(err).message
-                  }]`,
-                ),
-              ),
-            ),
+                  }]`
+                )
+              )
+            )
           );
         }
       });
@@ -624,22 +628,22 @@ export async function newApp({
     TE.getOrElse((err) => {
       app.emit("server:stop");
       throw err;
-    }),
+    })
   )();
 }
 
 function registerMyPortalRoutes(
   app: Express,
   basePath: string,
-  allowMyPortalIPSourceRange: readonly CIDR[],
+  allowMyPortalIPSourceRange: ReadonlyArray<CIDR>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerMyPortalTokenAuth: any,
+  bearerMyPortalTokenAuth: any
 ): void {
   app.get(
     `${basePath}/user`,
     checkIP(allowMyPortalIPSourceRange),
     bearerMyPortalTokenAuth,
-    toExpressHandler(getUserForMyPortal),
+    toExpressHandler(getUserForMyPortal)
   );
 }
 
@@ -648,7 +652,7 @@ function registerServicesAppBackendRoutes(
   basePath: string,
   servicesAppBackendService: ServicesAppBackendService,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any,
+  bearerSessionTokenAuth: any
 ): void {
   const servicesAppBackendController: ServicesAppBackendController =
     new ServicesAppBackendController(servicesAppBackendService);
@@ -658,8 +662,8 @@ function registerServicesAppBackendRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       servicesAppBackendController.findInstitutions,
-      servicesAppBackendController,
-    ),
+      servicesAppBackendController
+    )
   );
 
   app.get(
@@ -667,8 +671,8 @@ function registerServicesAppBackendRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       servicesAppBackendController.getFeaturedInstitutions,
-      servicesAppBackendController,
-    ),
+      servicesAppBackendController
+    )
   );
 
   app.get(
@@ -676,8 +680,8 @@ function registerServicesAppBackendRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       servicesAppBackendController.findInstutionServices,
-      servicesAppBackendController,
-    ),
+      servicesAppBackendController
+    )
   );
 
   app.get(
@@ -685,8 +689,8 @@ function registerServicesAppBackendRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       servicesAppBackendController.getFeaturedServices,
-      servicesAppBackendController,
-    ),
+      servicesAppBackendController
+    )
   );
 
   app.get(
@@ -694,8 +698,8 @@ function registerServicesAppBackendRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       servicesAppBackendController.getServiceById,
-      servicesAppBackendController,
-    ),
+      servicesAppBackendController
+    )
   );
 }
 
@@ -704,7 +708,7 @@ function registerEUCovidCertAPIRoutes(
   basePath: string,
   eucovidcertService: EUCovidCertService,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any,
+  bearerSessionTokenAuth: any
 ): void {
   const eucovidCertController: EUCovidCertController =
     new EUCovidCertController(eucovidcertService);
@@ -714,8 +718,8 @@ function registerEUCovidCertAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       eucovidCertController.getEUCovidCertificate,
-      eucovidCertController,
-    ),
+      eucovidCertController
+    )
   );
 }
 
@@ -723,7 +727,7 @@ function registerEUCovidCertAPIRoutes(
 function registerAPIRoutes(
   app: Express,
   basePath: string,
-  _allowNotifyIPSourceRange: readonly CIDR[],
+  _allowNotifyIPSourceRange: ReadonlyArray<CIDR>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   urlTokenAuth: any,
   profileService: ProfileService,
@@ -736,21 +740,21 @@ function registerAPIRoutes(
   userDataProcessingService: UserDataProcessingService,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bearerSessionTokenAuth: any,
-  lollipopClient: ReturnType<typeof LollipopApiClient>,
+  lollipopClient: ReturnType<typeof LollipopApiClient>
 ): void {
   const profileController: ProfileController = new ProfileController(
     profileService,
-    sessionStorage,
+    sessionStorage
   );
 
   const messagesController: MessagesController = new MessagesController(
     appMessagesService,
     lollipopClient,
-    sessionStorage,
+    sessionStorage
   );
 
   const servicesController: ServicesController = new ServicesController(
-    fnAppService,
+    fnAppService
   );
 
   const notificationController: NotificationController =
@@ -760,7 +764,7 @@ function registerAPIRoutes(
     });
 
   const sessionController: SessionController = new SessionController(
-    sessionStorage,
+    sessionStorage
   );
 
   const pagoPAProxyController: PagoPAProxyController =
@@ -775,19 +779,19 @@ function registerAPIRoutes(
   app.get(
     `${basePath}/profile`,
     bearerSessionTokenAuth,
-    toExpressHandler(profileController.getProfile, profileController),
+    toExpressHandler(profileController.getProfile, profileController)
   );
 
   app.get(
     `${basePath}/api-profile`,
     bearerSessionTokenAuth,
-    toExpressHandler(profileController.getApiProfile, profileController),
+    toExpressHandler(profileController.getApiProfile, profileController)
   );
 
   app.post(
     `${basePath}/profile`,
     bearerSessionTokenAuth,
-    toExpressHandler(profileController.updateProfile, profileController),
+    toExpressHandler(profileController.updateProfile, profileController)
   );
 
   app.post(
@@ -795,17 +799,14 @@ function registerAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       profileController.startEmailValidationProcess,
-      profileController,
-    ),
+      profileController
+    )
   );
 
   app.get(
     `${basePath}/user-metadata`,
     bearerSessionTokenAuth,
-    toExpressHandler(
-      userMetadataController.getMetadata,
-      userMetadataController,
-    ),
+    toExpressHandler(userMetadataController.getMetadata, userMetadataController)
   );
 
   app.post(
@@ -813,8 +814,8 @@ function registerAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       userMetadataController.upsertMetadata,
-      userMetadataController,
-    ),
+      userMetadataController
+    )
   );
 
   app.post(
@@ -822,8 +823,8 @@ function registerAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       userDataProcessingController.upsertUserDataProcessing,
-      userDataProcessingController,
-    ),
+      userDataProcessingController
+    )
   );
 
   app.get(
@@ -831,8 +832,8 @@ function registerAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       userDataProcessingController.getUserDataProcessing,
-      userDataProcessingController,
-    ),
+      userDataProcessingController
+    )
   );
 
   app.delete(
@@ -840,29 +841,26 @@ function registerAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       userDataProcessingController.abortUserDataProcessing,
-      userDataProcessingController,
-    ),
+      userDataProcessingController
+    )
   );
 
   app.get(
     `${basePath}/messages`,
     bearerSessionTokenAuth,
-    toExpressHandler(messagesController.getMessagesByUser, messagesController),
+    toExpressHandler(messagesController.getMessagesByUser, messagesController)
   );
 
   app.get(
     `${basePath}/messages/:id`,
     bearerSessionTokenAuth,
-    toExpressHandler(messagesController.getMessage, messagesController),
+    toExpressHandler(messagesController.getMessage, messagesController)
   );
 
   app.put(
     `${basePath}/messages/:id/message-status`,
     bearerSessionTokenAuth,
-    toExpressHandler(
-      messagesController.upsertMessageStatus,
-      messagesController,
-    ),
+    toExpressHandler(messagesController.upsertMessageStatus, messagesController)
   );
 
   app.get(
@@ -870,8 +868,8 @@ function registerAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       messagesController.getThirdPartyMessagePrecondition,
-      messagesController,
-    ),
+      messagesController
+    )
   );
 
   app.get(
@@ -879,8 +877,8 @@ function registerAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       messagesController.getThirdPartyMessage,
-      messagesController,
-    ),
+      messagesController
+    )
   );
 
   app.get(
@@ -888,14 +886,14 @@ function registerAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       messagesController.getThirdPartyMessageAttachment,
-      messagesController,
-    ),
+      messagesController
+    )
   );
 
   app.get(
     `${basePath}/services/:id`,
     bearerSessionTokenAuth,
-    toExpressHandler(servicesController.getService, servicesController),
+    toExpressHandler(servicesController.getService, servicesController)
   );
 
   app.get(
@@ -903,8 +901,8 @@ function registerAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       servicesController.getServicePreferences,
-      servicesController,
-    ),
+      servicesController
+    )
   );
 
   app.post(
@@ -912,17 +910,17 @@ function registerAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       servicesController.upsertServicePreferences,
-      servicesController,
-    ),
+      servicesController
+    )
   );
 
   app.get(
     `${basePath}/services`,
     bearerSessionTokenAuth,
     toExpressHandler(
-      () => Promise.resolve(ResponseSuccessJson({ items: [] })),
-      servicesController,
-    ),
+      (_) => Promise.resolve(ResponseSuccessJson({ items: [] })),
+      servicesController
+    )
   );
 
   app.put(
@@ -930,22 +928,22 @@ function registerAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       notificationController.createOrUpdateInstallation,
-      notificationController,
-    ),
+      notificationController
+    )
   );
 
   if (FF_ENABLE_NOTIFY_ENDPOINT) {
     app.post(
       `${basePath}/notify`,
       urlTokenAuth,
-      toExpressHandler(notificationController.notify, notificationController),
+      toExpressHandler(notificationController.notify, notificationController)
     );
   }
 
   app.get(
     `${basePath}/sessions`,
     bearerSessionTokenAuth,
-    toExpressHandler(sessionController.listSessions, sessionController),
+    toExpressHandler(sessionController.listSessions, sessionController)
   );
 
   app.get(
@@ -953,8 +951,8 @@ function registerAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       pagoPAProxyController.getPaymentInfo,
-      pagoPAProxyController,
-    ),
+      pagoPAProxyController
+    )
   );
 
   app.post(
@@ -962,8 +960,8 @@ function registerAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       pagoPAProxyController.activatePayment,
-      pagoPAProxyController,
-    ),
+      pagoPAProxyController
+    )
   );
 
   app.get(
@@ -971,8 +969,8 @@ function registerAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       pagoPAProxyController.getActivationStatus,
-      pagoPAProxyController,
-    ),
+      pagoPAProxyController
+    )
   );
 }
 
@@ -980,14 +978,14 @@ function registerAPIRoutes(
 function registerSessionAPIRoutes(
   app: Express,
   basePath: string,
-  _allowSessionHandleIPSourceRange: readonly CIDR[],
+  _allowSessionHandleIPSourceRange: ReadonlyArray<CIDR>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   urlTokenAuth: any,
   sessionStorage: RedisSessionStorage,
   userMetadataStorage: RedisUserMetadataStorage,
   lollipopService: LollipopService,
   authenticationLockService: AuthenticationLockService,
-  notificationServiceFactory: NotificationServiceFactory,
+  notificationServiceFactory: NotificationServiceFactory
 ): void {
   if (FF_ENABLE_SESSION_ENDPOINTS) {
     const sessionLockController: SessionLockController =
@@ -996,7 +994,7 @@ function registerSessionAPIRoutes(
         userMetadataStorage,
         lollipopService,
         authenticationLockService,
-        notificationServiceFactory,
+        notificationServiceFactory
       );
 
     app.get(
@@ -1004,8 +1002,8 @@ function registerSessionAPIRoutes(
       urlTokenAuth,
       toExpressHandler(
         sessionLockController.getUserSession,
-        sessionLockController,
-      ),
+        sessionLockController
+      )
     );
 
     app.post(
@@ -1013,8 +1011,8 @@ function registerSessionAPIRoutes(
       urlTokenAuth,
       toExpressHandler(
         sessionLockController.lockUserSession,
-        sessionLockController,
-      ),
+        sessionLockController
+      )
     );
 
     app.post(
@@ -1022,8 +1020,8 @@ function registerSessionAPIRoutes(
       urlTokenAuth,
       toExpressHandler(
         sessionLockController.deleteUserSession,
-        sessionLockController,
-      ),
+        sessionLockController
+      )
     );
 
     app.delete(
@@ -1031,8 +1029,8 @@ function registerSessionAPIRoutes(
       urlTokenAuth,
       toExpressHandler(
         sessionLockController.unlockUserSession,
-        sessionLockController,
-      ),
+        sessionLockController
+      )
     );
 
     app.post(
@@ -1040,8 +1038,8 @@ function registerSessionAPIRoutes(
       urlTokenAuth,
       toExpressHandler(
         sessionLockController.lockUserAuthentication,
-        sessionLockController,
-      ),
+        sessionLockController
+      )
     );
 
     app.post(
@@ -1049,8 +1047,8 @@ function registerSessionAPIRoutes(
       urlTokenAuth,
       toExpressHandler(
         sessionLockController.unlockUserAuthentication,
-        sessionLockController,
-      ),
+        sessionLockController
+      )
     );
 
     app.get(
@@ -1058,8 +1056,8 @@ function registerSessionAPIRoutes(
       urlTokenAuth,
       toExpressHandler(
         sessionLockController.getUserSessionState,
-        sessionLockController,
-      ),
+        sessionLockController
+      )
     );
   }
 }
@@ -1069,59 +1067,59 @@ function registerCgnAPIRoutes(
   basePath: string,
   cgnService: CgnService,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any,
+  bearerSessionTokenAuth: any
 ): void {
   const cgnController: CgnController = new CgnController(
     cgnService,
-    TEST_CGN_FISCAL_CODES,
+    TEST_CGN_FISCAL_CODES
   );
 
   app.get(
     `${basePath}/status`,
     bearerSessionTokenAuth,
-    toExpressHandler(cgnController.getCgnStatus, cgnController),
+    toExpressHandler(cgnController.getCgnStatus, cgnController)
   );
 
   app.get(
     `${basePath}/eyca/status`,
     bearerSessionTokenAuth,
-    toExpressHandler(cgnController.getEycaStatus, cgnController),
+    toExpressHandler(cgnController.getEycaStatus, cgnController)
   );
 
   app.post(
     `${basePath}/activation`,
     bearerSessionTokenAuth,
-    toExpressHandler(cgnController.startCgnActivation, cgnController),
+    toExpressHandler(cgnController.startCgnActivation, cgnController)
   );
 
   app.get(
     `${basePath}/activation`,
     bearerSessionTokenAuth,
-    toExpressHandler(cgnController.getCgnActivation, cgnController),
+    toExpressHandler(cgnController.getCgnActivation, cgnController)
   );
 
   app.post(
     `${basePath}/eyca/activation`,
     bearerSessionTokenAuth,
-    toExpressHandler(cgnController.startEycaActivation, cgnController),
+    toExpressHandler(cgnController.startEycaActivation, cgnController)
   );
 
   app.get(
     `${basePath}/eyca/activation`,
     bearerSessionTokenAuth,
-    toExpressHandler(cgnController.getEycaActivation, cgnController),
+    toExpressHandler(cgnController.getEycaActivation, cgnController)
   );
 
   app.post(
     `${basePath}/delete`,
     bearerSessionTokenAuth,
-    toExpressHandler(cgnController.startCgnUnsubscription, cgnController),
+    toExpressHandler(cgnController.startCgnUnsubscription, cgnController)
   );
 
   app.post(
     `${basePath}/otp`,
     bearerSessionTokenAuth,
-    toExpressHandler(cgnController.generateOtp, cgnController),
+    toExpressHandler(cgnController.generateOtp, cgnController)
   );
 }
 
@@ -1134,11 +1132,11 @@ function registerIoSignAPIRoutes(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bearerSessionTokenAuth: any,
   lollipopClient: ReturnType<typeof LollipopApiClient>,
-  sessionStorage: ISessionStorage,
+  sessionStorage: ISessionStorage
 ): void {
   const ioSignController: IoSignController = new IoSignController(
     ioSignService,
-    profileService,
+    profileService
   );
 
   app.get(
@@ -1147,39 +1145,39 @@ function registerIoSignAPIRoutes(
     constantExpressHandler(
       ResponseSuccessJson({
         serviceId: IO_SIGN_SERVICE_ID as NonEmptyString,
-      }),
-    ),
+      })
+    )
   );
 
   app.post(
     `${basePath}/qtsp/clauses/filled_document`,
     bearerSessionTokenAuth,
-    toExpressHandler(ioSignController.createFilledDocument, ioSignController),
+    toExpressHandler(ioSignController.createFilledDocument, ioSignController)
   );
 
   app.get(
     `${basePath}/qtsp/clauses`,
     bearerSessionTokenAuth,
-    toExpressHandler(ioSignController.getQtspClausesMetadata, ioSignController),
+    toExpressHandler(ioSignController.getQtspClausesMetadata, ioSignController)
   );
 
   app.post(
     `${basePath}/signatures`,
     bearerSessionTokenAuth,
     expressLollipopMiddlewareLegacy(lollipopClient, sessionStorage),
-    toExpressHandler(ioSignController.createSignature, ioSignController),
+    toExpressHandler(ioSignController.createSignature, ioSignController)
   );
 
   app.get(
     `${basePath}/signature-requests`,
     bearerSessionTokenAuth,
-    toExpressHandler(ioSignController.getSignatureRequests, ioSignController),
+    toExpressHandler(ioSignController.getSignatureRequests, ioSignController)
   );
 
   app.get(
     `${basePath}/signature-requests/:id`,
     bearerSessionTokenAuth,
-    toExpressHandler(ioSignController.getSignatureRequest, ioSignController),
+    toExpressHandler(ioSignController.getSignatureRequest, ioSignController)
   );
 }
 
@@ -1189,23 +1187,23 @@ function registerIoFimsAPIRoutes(
   ioFimsService: IoFimsService,
   profileService: ProfileService,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any,
+  bearerSessionTokenAuth: any
 ): void {
   const ioFimsController: IoFimsController = new IoFimsController(
     ioFimsService,
-    profileService,
+    profileService
   );
 
   app.get(
     `${basePath}/accesses`,
     bearerSessionTokenAuth,
-    toExpressHandler(ioFimsController.getAccessHistory, ioFimsController),
+    toExpressHandler(ioFimsController.getAccessHistory, ioFimsController)
   );
 
   app.post(
     `${basePath}/export-requests`,
     bearerSessionTokenAuth,
-    toExpressHandler(ioFimsController.requestExport, ioFimsController),
+    toExpressHandler(ioFimsController.requestExport, ioFimsController)
   );
 }
 
@@ -1215,7 +1213,7 @@ function registerCgnOperatorSearchAPIRoutes(
   cgnService: CgnService,
   cgnOperatorSearchService: CgnOperatorSearchService,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any,
+  bearerSessionTokenAuth: any
 ): void {
   const cgnOperatorController: CgnOperatorSearchController =
     new CgnOperatorSearchController(cgnService, cgnOperatorSearchService);
@@ -1225,26 +1223,26 @@ function registerCgnOperatorSearchAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       cgnOperatorController.getPublishedProductCategories,
-      cgnOperatorController,
-    ),
+      cgnOperatorController
+    )
   );
 
   app.get(
     `${basePath}/merchants/:merchantId`,
     bearerSessionTokenAuth,
-    toExpressHandler(cgnOperatorController.getMerchant, cgnOperatorController),
+    toExpressHandler(cgnOperatorController.getMerchant, cgnOperatorController)
   );
 
   app.get(
     `${basePath}/count`,
     bearerSessionTokenAuth,
-    toExpressHandler(cgnOperatorController.count, cgnOperatorController),
+    toExpressHandler(cgnOperatorController.count, cgnOperatorController)
   );
 
   app.post(
     `${basePath}/search`,
     bearerSessionTokenAuth,
-    toExpressHandler(cgnOperatorController.search, cgnOperatorController),
+    toExpressHandler(cgnOperatorController.search, cgnOperatorController)
   );
 
   app.post(
@@ -1252,8 +1250,8 @@ function registerCgnOperatorSearchAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       cgnOperatorController.getOnlineMerchants,
-      cgnOperatorController,
-    ),
+      cgnOperatorController
+    )
   );
 
   app.post(
@@ -1261,8 +1259,8 @@ function registerCgnOperatorSearchAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       cgnOperatorController.getOfflineMerchants,
-      cgnOperatorController,
-    ),
+      cgnOperatorController
+    )
   );
 
   app.get(
@@ -1270,8 +1268,8 @@ function registerCgnOperatorSearchAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       cgnOperatorController.getDiscountBucketCode,
-      cgnOperatorController,
-    ),
+      cgnOperatorController
+    )
   );
 }
 
@@ -1280,20 +1278,20 @@ function registerBonusAPIRoutes(
   basePath: string,
   bonusService: BonusService,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any,
+  bearerSessionTokenAuth: any
 ): void {
   const bonusController: BonusController = new BonusController(bonusService);
 
   app.post(
     `${basePath}/bonus/vacanze/eligibility`,
     bearerSessionTokenAuth,
-    constantExpressHandler(ResponseErrorDismissed),
+    constantExpressHandler(ResponseErrorDismissed)
   );
 
   app.get(
     `${basePath}/bonus/vacanze/eligibility`,
     bearerSessionTokenAuth,
-    toExpressHandler(bonusController.getBonusEligibilityCheck, bonusController),
+    toExpressHandler(bonusController.getBonusEligibilityCheck, bonusController)
   );
 
   app.get(
@@ -1301,20 +1299,20 @@ function registerBonusAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       bonusController.getLatestBonusActivationById,
-      bonusController,
-    ),
+      bonusController
+    )
   );
 
   app.get(
     `${basePath}/bonus/vacanze/activations`,
     bearerSessionTokenAuth,
-    toExpressHandler(bonusController.getAllBonusActivations, bonusController),
+    toExpressHandler(bonusController.getAllBonusActivations, bonusController)
   );
 
   app.post(
     `${basePath}/bonus/vacanze/activations`,
     bearerSessionTokenAuth,
-    constantExpressHandler(ResponseErrorDismissed),
+    constantExpressHandler(ResponseErrorDismissed)
   );
 }
 
@@ -1323,12 +1321,12 @@ function registerAuthenticationRoutes(
   app: Express,
   authBasePath: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any,
+  bearerSessionTokenAuth: any
 ): void {
   app.get(
     `${authBasePath}/user-identity`,
     bearerSessionTokenAuth,
-    toExpressHandler(getUserIdentity),
+    toExpressHandler(getUserIdentity)
   );
 }
 
@@ -1337,20 +1335,18 @@ function registerPNRoutes(
   pnBasePath: string,
   pnService: ReturnType<typeof PNService>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any,
+  bearerSessionTokenAuth: any
 ) {
   app.get(
     `${pnBasePath}/activation`,
     bearerSessionTokenAuth,
-    toExpressHandler(getPNActivationController(pnService.getPnActivation)),
+    toExpressHandler(getPNActivationController(pnService.getPnActivation))
   );
 
   app.post(
     `${pnBasePath}/activation`,
     bearerSessionTokenAuth,
-    toExpressHandler(
-      upsertPNActivationController(pnService.upsertPnActivation),
-    ),
+    toExpressHandler(upsertPNActivationController(pnService.upsertPnActivation))
   );
 }
 
@@ -1360,11 +1356,11 @@ function registerPublicRoutes(app: Express): void {
   // The minimum app version that support this API
   const minAppVersion = getObjectFromPackageJson(
     "min_app_version",
-    VersionPerPlatform,
+    VersionPerPlatform
   );
   const minAppVersionPagoPa = getObjectFromPackageJson(
     "min_app_version_pagopa",
-    VersionPerPlatform,
+    VersionPerPlatform
   );
 
   app.get("/", (_, res) => {
@@ -1378,14 +1374,14 @@ function registerPublicRoutes(app: Express): void {
         O.getOrElse(() => ({
           android: "UNKNOWN",
           ios: "UNKNOWN",
-        })),
+        }))
       ),
       min_app_version_pagopa: pipe(
         minAppVersionPagoPa,
         O.getOrElse(() => ({
           android: "UNKNOWN",
           ios: "UNKNOWN",
-        })),
+        }))
       ),
       version,
     };
@@ -1395,9 +1391,7 @@ function registerPublicRoutes(app: Express): void {
   // Liveness probe for Kubernetes.
   // @see
   // https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#define-a-liveness-http-request
-  app.get("/ping", (_, res) => {
-    res.status(200).send("ok");
-  });
+  app.get("/ping", (_, res) => { res.status(200).send("ok") });
 }
 
 // eslint-disable-next-line max-params
@@ -1408,13 +1402,13 @@ function registerFirstLollipopConsumer(
   sessionStorage: ISessionStorage,
   firstLollipopConsumerClient: ReturnType<typeof FirstLollipopConsumerClient>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any,
+  bearerSessionTokenAuth: any
 ): void {
   app.post(
     `${basePath}/sign`,
     bearerSessionTokenAuth,
     expressLollipopMiddleware(lollipopClient, sessionStorage),
-    toExpressHandler(firstLollipopSign(firstLollipopConsumerClient)),
+    toExpressHandler(firstLollipopSign(firstLollipopConsumerClient))
   );
 }
 
@@ -1423,20 +1417,20 @@ function registerTrialSystemAPIRoutes(
   basePath: string,
   trialService: TrialService,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any,
+  bearerSessionTokenAuth: any
 ): void {
   const trialController: TrialController = new TrialController(trialService);
 
   app.post(
     `${basePath}/trials/:trialId/subscriptions`,
     bearerSessionTokenAuth,
-    toExpressHandler(trialController.createTrialSubscription, trialController),
+    toExpressHandler(trialController.createTrialSubscription, trialController)
   );
 
   app.get(
     `${basePath}/trials/:trialId/subscriptions`,
     bearerSessionTokenAuth,
-    toExpressHandler(trialController.getTrialSubscription, trialController),
+    toExpressHandler(trialController.getTrialSubscription, trialController)
   );
 }
 
@@ -1445,14 +1439,14 @@ function registerIoWalletAPIRoutes(
   basePath: string,
   ioWalletService: IoWalletService,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any,
+  bearerSessionTokenAuth: any
 ): void {
   const ioWalletController = new IoWalletController(ioWalletService);
 
   app.get(
     `${basePath}/nonce`,
     bearerSessionTokenAuth,
-    toExpressHandler(ioWalletController.getNonce, ioWalletController),
+    toExpressHandler(ioWalletController.getNonce, ioWalletController)
   );
 
   app.post(
@@ -1460,8 +1454,8 @@ function registerIoWalletAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       ioWalletController.createWalletInstance,
-      ioWalletController,
-    ),
+      ioWalletController
+    )
   );
 
   app.post(
@@ -1469,8 +1463,8 @@ function registerIoWalletAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       ioWalletController.createWalletAttestation,
-      ioWalletController,
-    ),
+      ioWalletController
+    )
   );
 
   // TODO SIW-1843
@@ -1479,8 +1473,8 @@ function registerIoWalletAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       ioWalletController.setCurrentWalletInstanceStatus,
-      ioWalletController,
-    ),
+      ioWalletController
+    )
   );
 
   app.get(
@@ -1488,8 +1482,8 @@ function registerIoWalletAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       ioWalletController.getWalletInstanceStatus,
-      ioWalletController,
-    ),
+      ioWalletController
+    )
   );
 
   app.put(
@@ -1497,8 +1491,8 @@ function registerIoWalletAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(
       ioWalletController.setWalletInstanceStatus,
-      ioWalletController,
-    ),
+      ioWalletController
+    )
   );
 }
 

@@ -1,6 +1,5 @@
-import { ResponseErrorInternal } from "@pagopa/ts-commons/lib/responses";
 import { NextFunction, Request, Response } from "express";
-
+import { ResponseErrorInternal } from "@pagopa/ts-commons/lib/responses";
 import { log } from "../logger";
 
 /**
@@ -13,8 +12,7 @@ export function expressErrorMiddleware(
   err: Error,
   _: Request,
   res: Response,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  __: NextFunction,
+  __: NextFunction
 ): void {
   log.error("An exception occurred during http request: %s", err.message);
   // Send a ResponseErrorInternal only if a response was not already sent to the client

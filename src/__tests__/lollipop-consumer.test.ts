@@ -60,7 +60,7 @@ const lollipopConsumerApp = express();
 lollipopConsumerApp.use(
   bodyParser.json({
     verify: (_req, res: express.Response, buf, _encoding: BufferEncoding) => {
-      
+      // eslint-disable-next-line functional/immutable-data
       res.locals.body = buf;
     },
   })
@@ -123,7 +123,7 @@ describe("lollipopSign", () => {
           buf,
           _encoding: BufferEncoding
         ) => {
-          
+          // eslint-disable-next-line functional/immutable-data
           res.locals.body = buf;
         },
       })

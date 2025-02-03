@@ -1,24 +1,25 @@
-import { FiscalCode } from "@pagopa/io-functions-app-sdk/FiscalCode";
-import { eventLog } from "@pagopa/winston-ts";
 import { pipe } from "fp-ts/lib/function";
+
+import { FiscalCode } from "@pagopa/io-functions-app-sdk/FiscalCode";
+import { LollipopLocalsType } from "src/types/lollipop";
+import { eventLog } from "@pagopa/winston-ts";
+import { RCConfigurationPublic } from "generated/io-messages-api/RCConfigurationPublic";
+
 import { RCAuthenticationConfig } from "generated/io-messages-api/RCAuthenticationConfig";
 import { RCConfigurationProdEnvironment } from "generated/io-messages-api/RCConfigurationProdEnvironment";
-import { RCConfigurationPublic } from "generated/io-messages-api/RCConfigurationPublic";
 import { RCConfigurationTestEnvironment } from "generated/io-messages-api/RCConfigurationTestEnvironment";
 import { Ulid } from "generated/parameters/Ulid";
-import { LollipopLocalsType } from "src/types/lollipop";
-
+import { pnFetch } from "../adapters/pnFetch";
 import {
   Client,
   createClient,
 } from "../../generated/third-party-service/client";
-import { pnFetch } from "../adapters/pnFetch";
 
 // ---
 
 export type Fetch = (
   input: RequestInfo | URL,
-  init?: RequestInit | undefined,
+  init?: RequestInit | undefined
 ) => Promise<Response>;
 
 export type ThirdPartyServiceClient = typeof getThirdPartyServiceClient;
@@ -64,7 +65,7 @@ const withPNFetch =
     environment:
       | RCConfigurationProdEnvironment
       | RCConfigurationTestEnvironment,
-    lollipopLocals?: LollipopLocalsType,
+    lollipopLocals?: LollipopLocalsType
   ) =>
   (fetchApi: Fetch): Fetch =>
     pnFetch(
@@ -72,7 +73,7 @@ const withPNFetch =
       configurationId,
       environment.base_url,
       environment.details_authentication.key,
-      lollipopLocals,
+      lollipopLocals
     ) as Fetch;
 
 // ------------------
@@ -88,21 +89,21 @@ export const getThirdPartyServiceClient =
   (
     remoteContentConfiguration: RCConfigurationPublic,
     fetchApi: Fetch,
-    maybeLollipopLocals?: LollipopLocalsType,
+    maybeLollipopLocals?: LollipopLocalsType
   ) =>
   (fiscalCode: FiscalCode): Client<"fiscal_code"> => {
     const environment =
       remoteContentConfiguration.test_environment?.test_users.includes(
-        fiscalCode,
+        fiscalCode
       )
         ? remoteContentConfiguration.test_environment
-        : (remoteContentConfiguration.prod_environment ??
+        : remoteContentConfiguration.prod_environment ??
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          remoteContentConfiguration.test_environment!);
+          remoteContentConfiguration.test_environment!;
 
     eventLog.peek.info(
       remoteContentConfiguration.test_environment?.test_users.includes(
-        fiscalCode,
+        fiscalCode
       )
         ? [
             "Third party client pointing to test environment",
@@ -111,11 +112,11 @@ export const getThirdPartyServiceClient =
         : [
             "Third party client pointing to prod environment",
             { name: "lollipop.third-party.prod" },
-          ],
+          ]
     );
     eventLog.peek.info(
       remoteContentConfiguration.test_environment?.test_users.includes(
-        fiscalCode,
+        fiscalCode
       )
         ? [
             "Fiscal code included in testUsers",
@@ -124,7 +125,7 @@ export const getThirdPartyServiceClient =
         : [
             "Fiscal code not included in testUsers",
             { name: "lollipop.testUsers.fiscal-code" },
-          ],
+          ]
     );
 
     const fetchApiWithRedirectAndAuthentication = pipe(
@@ -134,8 +135,8 @@ export const getThirdPartyServiceClient =
       withPNFetch(
         remoteContentConfiguration.configuration_id,
         environment,
-        maybeLollipopLocals,
-      ),
+        maybeLollipopLocals
+      )
     );
 
     return createClient<"fiscal_code">({

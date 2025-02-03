@@ -1,6 +1,6 @@
+import { Errors } from "io-ts";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { ProblemJson } from "@pagopa/ts-commons/lib/responses";
-import { Errors } from "io-ts";
 
 /**
  * Merge into one single Error several errors provided in input and add a context description
@@ -10,13 +10,13 @@ import { Errors } from "io-ts";
  * @returns A single Error instance with a formatted message.
  */
 export function multipleErrorsFormatter(
-  errors: readonly Error[],
-  context: string,
+  errors: ReadonlyArray<Error>,
+  context: string
 ): Error {
   return new Error(
     errors
       .map((_) => `value [${_.message}]`)
-      .join(` at [context: ${context}]\n`),
+      .join(` at [context: ${context}]\n`)
   );
 }
 
