@@ -3,7 +3,9 @@
  * app by forwarding the call to the API system.
  */
 
-import * as express from "express";
+import { CgnActivationDetail } from "@pagopa/io-functions-cgn-sdk/CgnActivationDetail";
+import { EycaActivationDetail } from "@pagopa/io-functions-cgn-sdk/EycaActivationDetail";
+import { EycaCard } from "@pagopa/io-functions-cgn-sdk/EycaCard";
 import {
   IResponseErrorConflict,
   IResponseErrorForbiddenNotAuthorized,
@@ -13,17 +15,15 @@ import {
   IResponseSuccessAccepted,
   IResponseSuccessJson,
   IResponseSuccessRedirectToResource,
-  ResponseErrorForbiddenNotAuthorized,
+  ResponseErrorForbiddenNotAuthorized
 } from "@pagopa/ts-commons/lib/responses";
-
-import { EycaActivationDetail } from "@pagopa/io-functions-cgn-sdk/EycaActivationDetail";
-import { EycaCard } from "@pagopa/io-functions-cgn-sdk/EycaCard";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import * as express from "express";
 import { Otp } from "generated/cgn/Otp";
-import { CgnActivationDetail } from "@pagopa/io-functions-cgn-sdk/CgnActivationDetail";
+
 import { Card } from "../../generated/cgn/Card";
-import CgnService from "../../src/services/cgnService";
 import { InstanceId } from "../../generated/cgn/InstanceId";
+import CgnService from "../../src/services/cgnService";
 import { User, withUserFromRequest } from "../types/user";
 
 export const withAllowedUser = async <T>(

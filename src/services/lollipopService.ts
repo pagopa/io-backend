@@ -1,5 +1,6 @@
 import { QueueClient, QueueSendMessageResponse } from "@azure/storage-queue";
 import { RevokeAssertionRefInfo } from "@pagopa/io-functions-commons/dist/src/entities/revoke_assertion_ref_info";
+
 import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
 import { base64EncodeObject } from "../utils/messages";
 
@@ -26,7 +27,7 @@ export default class LollipopService {
     assertionRef: AssertionRef
   ): Promise<QueueSendMessageResponse> {
     const revokeMessage = RevokeAssertionRefInfo.encode({
-      assertion_ref: assertionRef,
+      assertion_ref: assertionRef
     });
     return this.queueClient.sendMessage(base64EncodeObject(revokeMessage));
   }

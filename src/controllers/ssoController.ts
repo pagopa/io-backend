@@ -1,13 +1,14 @@
 /**
  * This controller handles requests made from MyPortal.
  */
-import { Request } from "express";
 import {
   IResponseErrorInternal,
   IResponseErrorValidation,
   IResponseSuccessJson,
-  ResponseSuccessJson,
+  ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
+import { Request } from "express";
+
 import { MyPortalUser } from "../../generated/myportal/MyPortalUser";
 import { withUserFromRequest } from "../types/user";
 import { withValidatedOrInternalError } from "../utils/responses";
@@ -28,7 +29,7 @@ export const getUserForMyPortal = (
       MyPortalUser.decode({
         family_name: user.family_name,
         fiscal_code: user.fiscal_code,
-        name: user.name,
+        name: user.name
       }),
       (_) => ResponseSuccessJson(_)
     )

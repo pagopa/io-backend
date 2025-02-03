@@ -3,6 +3,10 @@
  * an API client.
  */
 
+import { ExtendedProfile as ExtendedProfileApi } from "@pagopa/io-functions-app-sdk/ExtendedProfile";
+import { NewProfile } from "@pagopa/io-functions-app-sdk/NewProfile";
+import { Profile as ProfileApi } from "@pagopa/io-functions-app-sdk/Profile";
+import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import {
   IResponseErrorConflict,
   IResponseErrorInternal,
@@ -17,25 +21,19 @@ import {
   ResponseErrorPreconditionFailed,
   ResponseErrorTooManyRequests,
   ResponseSuccessAccepted,
-  ResponseSuccessJson,
+  ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-
-import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
-import { pipe } from "fp-ts/lib/function";
 import * as E from "fp-ts/lib/Either";
-import { ExtendedProfile as ExtendedProfileApi } from "@pagopa/io-functions-app-sdk/ExtendedProfile";
-import { NewProfile } from "@pagopa/io-functions-app-sdk/NewProfile";
-import { Profile as ProfileApi } from "@pagopa/io-functions-app-sdk/Profile";
+import { pipe } from "fp-ts/lib/function";
 
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 import { Profile as ProfileBackend } from "../../generated/backend/Profile";
-
 import { toInitializedProfile } from "../types/profile";
 import { User } from "../types/user";
 import {
   unhandledResponseStatus,
   withCatchAsInternalError,
-  withValidatedOrInternalError,
+  withValidatedOrInternalError
 } from "../utils/responses";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
@@ -56,7 +54,7 @@ export default class ProfileService {
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
       const validated = await client.getProfile({
-        fiscal_code: user.fiscal_code,
+        fiscal_code: user.fiscal_code
       });
 
       return withValidatedOrInternalError(validated, (response) => {
@@ -105,7 +103,7 @@ export default class ProfileService {
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
       const validated = await client.getProfile({
-        fiscal_code: user.fiscal_code,
+        fiscal_code: user.fiscal_code
       });
       return withValidatedOrInternalError(validated, (response) => {
         if (response.status === 200) {
@@ -158,7 +156,7 @@ export default class ProfileService {
     return withCatchAsInternalError(async () => {
       const validated = await client.createProfile({
         body: newProfile,
-        fiscal_code: user.fiscal_code,
+        fiscal_code: user.fiscal_code
       });
 
       return withValidatedOrInternalError(validated, (response) =>
@@ -166,13 +164,13 @@ export default class ProfileService {
           ? // An empty response.
             ResponseSuccessJson({})
           : response.status === 409
-          ? ResponseErrorConflict(
-              response.value ||
-                "A user with the provided fiscal code already exists"
-            )
-          : response.status === 429
-          ? ResponseErrorTooManyRequests()
-          : unhandledResponseStatus(response.status)
+            ? ResponseErrorConflict(
+                response.value ||
+                  "A user with the provided fiscal code already exists"
+              )
+            : response.status === 429
+              ? ResponseErrorTooManyRequests()
+              : unhandledResponseStatus(response.status)
       );
     });
   };
@@ -201,7 +199,7 @@ export default class ProfileService {
         withCatchAsInternalError(async () => {
           const validated = await client.updateProfile({
             body: { ...extendedProfileApi, name: user.name },
-            fiscal_code: user.fiscal_code,
+            fiscal_code: user.fiscal_code
           });
 
           return withValidatedOrInternalError(validated, (response) => {
@@ -246,16 +244,16 @@ export default class ProfileService {
     return withCatchAsInternalError(async () => {
       const validated = await client.startEmailValidationProcess({
         body: { name: user.name },
-        fiscal_code: user.fiscal_code,
+        fiscal_code: user.fiscal_code
       });
       return withValidatedOrInternalError(validated, (response) =>
         response.status === 202
           ? ResponseSuccessAccepted()
           : response.status === 404
-          ? ResponseErrorNotFound("Not found", "User not found.")
-          : response.status === 429
-          ? ResponseErrorTooManyRequests()
-          : unhandledResponseStatus(response.status)
+            ? ResponseErrorNotFound("Not found", "User not found.")
+            : response.status === 429
+              ? ResponseErrorTooManyRequests()
+              : unhandledResponseStatus(response.status)
       );
     });
   };

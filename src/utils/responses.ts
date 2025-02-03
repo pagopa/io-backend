@@ -1,14 +1,8 @@
-import * as express from "express";
-import { PaymentFaultEnum } from "generated/pagopa-proxy/PaymentFault";
-import { PaymentFaultV2Enum } from "generated/pagopa-proxy/PaymentFaultV2";
-import { PaymentProblemJson } from "generated/pagopa-proxy/PaymentProblemJson";
-import * as t from "io-ts";
-import * as E from "fp-ts/lib/Either";
-import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import {
   IWithinRangeIntegerTag,
-  WithinRangeInteger,
+  WithinRangeInteger
 } from "@pagopa/ts-commons/lib/numbers";
+import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import {
   HttpStatusCodeEnum,
   IResponse,
@@ -17,10 +11,17 @@ import {
   ResponseErrorGeneric,
   ResponseErrorInternal,
   ResponseErrorNotFound,
-  ResponseErrorValidation,
+  ResponseErrorValidation
 } from "@pagopa/ts-commons/lib/responses";
+import * as express from "express";
 import * as TE from "fp-ts/TaskEither";
+import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
+import { PaymentFaultEnum } from "generated/pagopa-proxy/PaymentFault";
+import { PaymentFaultV2Enum } from "generated/pagopa-proxy/PaymentFaultV2";
+import { PaymentProblemJson } from "generated/pagopa-proxy/PaymentProblemJson";
+import * as t from "io-ts";
+
 import { errorsToError } from "./errorsFormatter";
 
 /**
@@ -37,7 +38,7 @@ export function ResponseNoContent(): IResponseNoContent {
   return {
     apply: (res: express.Response): unknown => res.status(204).json({}),
     kind: "IResponseNoContent",
-    value: {},
+    value: {}
   };
 }
 
@@ -114,8 +115,8 @@ export function ResponseErrorUnauthorizedForLegalReasons(
     ...ResponseErrorGeneric(HttpStatusCodeEnum.HTTP_STATUS_451, title, detail),
     ...{
       detail: `${title}: ${detail}`,
-      kind: "IResponseErrorUnauthorizedForLegalReasons",
-    },
+      kind: "IResponseErrorUnauthorizedForLegalReasons"
+    }
   };
 }
 
@@ -140,8 +141,8 @@ export function ResponseErrorUnauthorized(
     ),
     ...{
       detail: `Unauthorized: ${detail}`,
-      kind: "IResponseErrorUnauthorized",
-    },
+      kind: "IResponseErrorUnauthorized"
+    }
   };
 }
 
@@ -158,7 +159,7 @@ export const ResponseErrorUnexpectedAuthProblem = () =>
 export type HttpStatusCode = t.TypeOf<typeof HttpStatusCode>;
 export const HttpStatusCode = t.union([
   WithinRangeInteger<100, 599, IWithinRangeIntegerTag<100, 599>>(100, 599),
-  t.literal(599),
+  t.literal(599)
 ]);
 
 export type IResponsePaymentInternalError = IResponse<"IResponseErrorInternal">;
@@ -174,7 +175,7 @@ export const ResponsePaymentError = (
     detail,
     detail_v2: detailV2,
     status: HttpStatusCodeEnum.HTTP_STATUS_500 as HttpStatusCode,
-    title: "Internal server error",
+    title: "Internal server error"
   };
   return {
     apply: (res) =>
@@ -182,7 +183,7 @@ export const ResponsePaymentError = (
         .status(HttpStatusCodeEnum.HTTP_STATUS_500)
         .set("Content-Type", "application/problem+json")
         .json(problem),
-    kind: "IResponseErrorInternal",
+    kind: "IResponseErrorInternal"
   };
 };
 
@@ -208,7 +209,7 @@ export const ResponseSuccessOctet = (
       .set("Content-Type", "application/octet-stream")
       .end(o),
   kind: "IResponseSuccessOctet",
-  value: o,
+  value: o
 });
 
 export const wrapValidationWithInternalError: <A>(
@@ -240,8 +241,8 @@ export const ResponseErrorNotImplemented = (
   ),
   ...{
     detail: `Not Implemented: ${detail}`,
-    kind: "IResponseErrorNotImplemented",
-  },
+    kind: "IResponseErrorNotImplemented"
+  }
 });
 
 /**
@@ -264,6 +265,6 @@ export const ResponseErrorUnsupportedMediaType = (
   ),
   ...{
     detail,
-    kind: "IResponseErrorUnsupportedMediaType",
-  },
+    kind: "IResponseErrorUnsupportedMediaType"
+  }
 });

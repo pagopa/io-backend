@@ -6,10 +6,11 @@ import * as express from "express";
 import { Either } from "fp-ts/lib/Either";
 import { Option } from "fp-ts/lib/Option";
 import * as passport from "passport-http-bearer";
+
 import { ISessionStorage } from "../services/ISessionStorage";
 import { MyPortalToken } from "../types/token";
 import { User } from "../types/user";
-import { fulfill, StrategyDoneFunction } from "../utils/strategies";
+import { StrategyDoneFunction, fulfill } from "../utils/strategies";
 
 const bearerMyPortalTokenStrategy = (
   sessionStorage: ISessionStorage
@@ -17,7 +18,7 @@ const bearerMyPortalTokenStrategy = (
   const options = {
     passReqToCallback: true,
     realm: "Proxy API",
-    scope: "request",
+    scope: "request"
   };
   return new passport.Strategy<passport.VerifyFunctionWithRequest>(
     options,

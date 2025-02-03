@@ -2,34 +2,33 @@
  * This service post a notification to the Notification queue.
  */
 
+import { QueueClient } from "@azure/storage-queue";
 import {
   IResponseErrorInternal,
   IResponseSuccessJson,
   ResponseErrorInternal,
-  ResponseSuccessJson,
+  ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-
-import { QueueClient } from "@azure/storage-queue";
 import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
+
 import { FiscalCode } from "../../generated/backend/FiscalCode";
 import { Installation } from "../../generated/backend/Installation";
 import {
   CreateOrUpdateInstallationMessage,
-  KindEnum as CreateOrUpdateKind,
+  KindEnum as CreateOrUpdateKind
 } from "../../generated/messages/CreateOrUpdateInstallationMessage";
 import {
   DeleteInstallationMessage,
-  KindEnum as DeleteKind,
+  KindEnum as DeleteKind
 } from "../../generated/messages/DeleteInstallationMessage";
 import { NotificationMessageKindEnum } from "../../generated/messages/NotificationMessageKind";
 import {
   KindEnum as NotifyKind,
-  NotifyMessage,
+  NotifyMessage
 } from "../../generated/messages/NotifyMessage";
 import { Notification } from "../../generated/notifications/Notification";
 import { SuccessResponse } from "../../generated/notifications/SuccessResponse";
-
 import { toFiscalCodeHash } from "../types/notification";
 import { base64EncodeObject } from "../utils/messages";
 
@@ -62,8 +61,8 @@ export default class NotificationService {
           notificationTitle,
           O.fromNullable,
           O.getOrElse(() => `${notification.sender_metadata.organization_name}`)
-        ),
-      },
+        )
+      }
     };
     return this.notificationQueueClient
       .sendMessage(base64EncodeObject(notifyMessage))
@@ -91,7 +90,7 @@ export default class NotificationService {
       ],
       platform: installation.platform,
       pushChannel: installation.pushChannel,
-      tags: [toFiscalCodeHash(fiscalCode)],
+      tags: [toFiscalCodeHash(fiscalCode)]
     };
     return this.notificationQueueClient
       .sendMessage(base64EncodeObject(azureInstallation))
@@ -110,7 +109,7 @@ export default class NotificationService {
   > => {
     const deleteMessage: DeleteInstallationMessage = {
       installationId: toFiscalCodeHash(fiscalCode),
-      kind: DeleteKind[NotificationMessageKindEnum.DeleteInstallation],
+      kind: DeleteKind[NotificationMessageKindEnum.DeleteInstallation]
     };
     return this.notificationQueueClient
       .sendMessage(base64EncodeObject(deleteMessage))

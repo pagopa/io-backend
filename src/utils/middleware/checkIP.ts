@@ -2,12 +2,13 @@
  * An Express middleware that checks if source IP falls into a CIDR range.
  */
 
-import * as express from "express";
-import * as E from "fp-ts/lib/Either";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { CIDR, IPString } from "@pagopa/ts-commons/lib/strings";
-import * as rangeCheck from "range_check";
+import * as express from "express";
+import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
+import * as rangeCheck from "range_check";
+
 import { log } from "../logger";
 import { decodeIPAddressFromReq } from "../network";
 

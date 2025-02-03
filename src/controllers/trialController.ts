@@ -3,7 +3,6 @@
  * forwarding the call to the API system.
  */
 
-import * as express from "express";
 import {
   IResponseErrorConflict,
   IResponseErrorInternal,
@@ -12,21 +11,21 @@ import {
   IResponseSuccessAccepted,
   IResponseSuccessJson,
   IResponseSuccessRedirectToResource,
-  ResponseSuccessJson,
+  ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import * as express from "express";
 import TrialService from "src/services/trialService";
-import {
-  FF_IO_WALLET_TRIAL_ENABLED,
-  IO_WALLET_TRIAL_ID,
-} from "../../src/config";
-import { TrialId } from "../../generated/trial-system-api/TrialId";
-import { withUserFromRequest } from "../types/user";
 
-import { withValidatedOrValidationError } from "../utils/responses";
 import { Subscription } from "../../generated/trial-system/Subscription";
 import { SubscriptionStateEnum } from "../../generated/trial-system/SubscriptionState";
+import { TrialId } from "../../generated/trial-system-api/TrialId";
+import {
+  FF_IO_WALLET_TRIAL_ENABLED,
+  IO_WALLET_TRIAL_ID
+} from "../../src/config";
+import { withUserFromRequest } from "../types/user";
+import { withValidatedOrValidationError } from "../utils/responses";
 
 export default class TrialController {
   // eslint-disable-next-line max-params
@@ -75,7 +74,7 @@ export default class TrialController {
                 ResponseSuccessJson({
                   createdAt: new Date(),
                   state: SubscriptionStateEnum.ACTIVE,
-                  trialId,
+                  trialId
                 })
               )
       )

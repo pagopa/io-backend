@@ -1,7 +1,7 @@
-import { pipe } from "fp-ts/function";
-import * as R from "fp-ts/Record";
-import * as t from "io-ts";
 import * as E from "fp-ts/Either";
+import * as R from "fp-ts/Record";
+import { pipe } from "fp-ts/function";
+import * as t from "io-ts";
 
 /**
  * Porting of lodash "set" function.
@@ -25,19 +25,16 @@ export const set = <T extends object>(
   const splittedpath: ReadonlyArray<string> = !Array.isArray(path)
     ? path.toString().match(/[^.[\]]+/g) || []
     : path;
-  // eslint-disable-next-line functional/immutable-data
   splittedpath.slice(0, -1).reduce(
     (
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       a: any,
       c,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       _i
     ) =>
       // Iterate all of them except the last one
-      Object(a[c]) === a[c]
-        ? a[c]
-        : // eslint-disable-next-line functional/immutable-data
-          (a[c] = {}),
+      Object(a[c]) === a[c] ? a[c] : (a[c] = {}),
     obj
   )[splittedpath[splittedpath.length - 1]] = value;
   return obj;
@@ -59,12 +56,7 @@ export const nestifyPrefixedType = (
     env,
     R.filterWithIndex((fieldName) => fieldName.split("_")[0] === prefix),
     R.reduceWithIndex({}, (k, b, a) =>
-      set(
-        b,
-        // eslint-disable-next-line functional/immutable-data
-        k.split("_").splice(1).join("."),
-        a
-      )
+      set(b, k.split("_").splice(1).join("."), a)
     )
   );
 
@@ -74,14 +66,13 @@ const isRecordOfString = (i: unknown): i is Record<string, unknown> =>
   !Object.keys(i).some((property) => typeof property !== "string");
 
 const createNotRecordOfStringErrorL =
-  (input: unknown, context: t.Context) => (): t.Errors =>
-    [
-      {
-        context,
-        message: "input is not a valid record of string",
-        value: input,
-      },
-    ];
+  (input: unknown, context: t.Context) => (): t.Errors => [
+    {
+      context,
+      message: "input is not a valid record of string",
+      value: input
+    }
+  ];
 
 /**
  * Create a io-ts decoder for the input type.

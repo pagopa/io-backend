@@ -1,19 +1,18 @@
-import * as express from "express";
-
+import { Certificate } from "@pagopa/io-functions-eucovidcerts-sdk/Certificate";
 import {
   IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
-  IResponseSuccessJson,
+  IResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
+import * as express from "express";
 
-import { Certificate } from "@pagopa/io-functions-eucovidcerts-sdk/Certificate";
 import { GetCertificateParams } from "../../generated/eucovidcert/GetCertificateParams";
 import { PreferredLanguages } from "../../generated/eucovidcert/PreferredLanguages";
-import { withValidatedOrValidationError } from "../utils/responses";
 import EUCovidService from "../services/eucovidcertService";
 import { withUserFromRequest } from "../types/user";
+import { withValidatedOrValidationError } from "../utils/responses";
 
 export const withGetCertificateParams = async <T>(
   req: express.Request,

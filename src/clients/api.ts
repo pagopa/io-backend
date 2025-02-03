@@ -1,5 +1,5 @@
-import nodeFetch from "node-fetch";
 import { Client, createClient } from "@pagopa/io-functions-app-sdk/client";
+import nodeFetch from "node-fetch";
 
 export function APIClient(
   baseUrl: string,
@@ -15,8 +15,8 @@ export function APIClient(
         ...params,
         // please refer to source api spec for actual header mapping
         // https://github.com/pagopa/io-functions-app/blob/master/openapi/index.yaml#:~:text=%20%20SubscriptionKey:
-        SubscriptionKey: token,
-      }),
+        SubscriptionKey: token
+      })
   });
 }
 

@@ -1,13 +1,12 @@
+import {
+  IPage,
+  asyncIterableToPageArray,
+  mapAsyncIterator
+} from "@pagopa/io-functions-commons/dist/src/utils/async";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import * as T from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
-
-import {
-  asyncIterableToPageArray,
-  IPage,
-  mapAsyncIterator,
-} from "@pagopa/io-functions-commons/dist/src/utils/async";
 import { pipe } from "fp-ts/lib/function";
-import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 
 /**
  * @category model
@@ -26,7 +25,7 @@ const mapAsyncIterable = <T, V>(
   const iterMapped = mapAsyncIterator(iter, f);
   return {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [Symbol.asyncIterator]: (): AsyncIterator<V, any, undefined> => iterMapped,
+    [Symbol.asyncIterator]: (): AsyncIterator<V, any, undefined> => iterMapped
   };
 };
 
@@ -58,7 +57,7 @@ export const fromAsyncIterator = <A>(
   a: AsyncIterator<A>
 ): AsyncIterableTask<A> =>
   fromAsyncIterable({
-    [Symbol.asyncIterator]: () => a,
+    [Symbol.asyncIterator]: () => a
   });
 
 /**
@@ -93,10 +92,8 @@ export const foldTaskEither =
 const foldIterableArray =
   <A>(asyncIterable: AsyncIterable<A>) =>
   async (): Promise<ReadonlyArray<A>> => {
-    // eslint-disable-next-line functional/prefer-readonly-type
-    const array: A[] = [];
+    const array: Array<A> = [];
     for await (const variable of asyncIterable) {
-      // eslint-disable-next-line functional/immutable-data
       array.push(variable);
     }
     return array;
@@ -144,7 +141,6 @@ const reduceIterableArray =
   <A, B>(initialValue: B, reducer: (prev: B, curr: A) => B | Promise<B>) =>
   (asyncIterable: AsyncIterable<A>) =>
   async (): Promise<B> => {
-    // eslint-disable-next-line functional/no-let
     let p: B = initialValue;
 
     for await (const variable of asyncIterable) {

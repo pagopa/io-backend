@@ -1,12 +1,12 @@
-import * as express from "express";
 import {
   IResponse,
-  ResponseErrorInternal,
+  ResponseErrorInternal
 } from "@pagopa/ts-commons/lib/responses";
-import { flow, pipe } from "fp-ts/lib/function";
+import * as express from "express";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
+import { flow, pipe } from "fp-ts/lib/function";
 
 export type ExpressMiddleware = (
   req: express.Request,
@@ -15,9 +15,7 @@ export type ExpressMiddleware = (
 ) => void;
 
 export type ResLocals = Record<string, unknown> & {
-  // eslint-disable-next-line functional/prefer-readonly-type
   detail?: string;
-  // eslint-disable-next-line functional/prefer-readonly-type
   body?: Buffer;
 };
 /**
@@ -29,12 +27,12 @@ export function toExpressHandler<T, P, L extends ResLocals>(
   handler: (req: express.Request, locals?: L) => Promise<IResponse<T>>,
   object?: P
 ): (req: express.Request, res: express.Response<T, L>) => void {
+  // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
   return (req, res): Promise<void | undefined> =>
     handler
       .call(object, req, res.locals)
       .catch(ResponseErrorInternal)
       .then((response) => {
-        // eslint-disable-next-line functional/immutable-data
         res.locals.detail = response.detail;
         response.apply(res);
       });
@@ -64,7 +62,6 @@ export function toExpressMiddleware<T, P>(
         )
       ),
       TE.mapLeft((response) => {
-        // eslint-disable-next-line functional/immutable-data
         res.locals.detail = response.detail;
         response.apply(res);
       }),
@@ -79,7 +76,6 @@ export function constantExpressHandler<T>(
   response: IResponse<T>
 ): (req: express.Request, res: express.Response) => void {
   return (_, res) => {
-    // eslint-disable-next-line functional/immutable-data
     res.locals.detail = response.detail;
     response.apply(res);
   };

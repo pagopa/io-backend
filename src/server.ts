@@ -1,17 +1,18 @@
 /**
  * Main entry point for the Digital Citizenship proxy.
  */
-import * as http from "http";
-import * as https from "https";
-import * as fs from "fs";
-import * as path from "path";
-import * as appInsights from "applicationinsights";
-import * as O from "fp-ts/lib/Option";
+import { withApplicationInsight } from "@pagopa/io-functions-commons/dist/src/utils/transports/application_insight";
 import { NodeEnvironmentEnum } from "@pagopa/ts-commons/lib/environment";
-import { pipe } from "fp-ts/lib/function";
 import { useWinstonFor } from "@pagopa/winston-ts";
 import { LoggerId } from "@pagopa/winston-ts/dist/types/logging";
-import { withApplicationInsight } from "@pagopa/io-functions-commons/dist/src/utils/transports/application_insight";
+import * as appInsights from "applicationinsights";
+import * as O from "fp-ts/lib/Option";
+import { pipe } from "fp-ts/lib/function";
+import * as fs from "fs";
+import * as http from "http";
+import * as https from "https";
+import * as path from "path";
+
 import { newApp } from "./app";
 import {
   ALLOW_MYPORTAL_IP_SOURCE_RANGE,
@@ -31,14 +32,13 @@ import {
   MYPORTAL_BASE_PATH,
   SERVER_PORT,
   SERVICES_APP_BACKEND_BASE_PATH,
-  TRIAL_SYSTEM_API_BASE_PATH,
+  TRIAL_SYSTEM_API_BASE_PATH
 } from "./config";
 import {
-  initAppInsights,
   StartupEventName,
-  trackStartupTime,
+  initAppInsights,
+  trackStartupTime
 } from "./utils/appinsights";
-
 import { initHttpGracefulShutdown } from "./utils/gracefulShutdown";
 import { log } from "./utils/logger";
 import { getCurrentBackendVersion } from "./utils/package";
@@ -68,7 +68,6 @@ const shutdownTimeout: number = process.env.DEFAULT_SHUTDOWN_TIMEOUT_MILLIS
   ? parseInt(process.env.DEFAULT_SHUTDOWN_TIMEOUT_MILLIS, 10)
   : DEFAULT_SHUTDOWN_TIMEOUT_MILLIS;
 
-// eslint-disable-next-line functional/no-let
 let server: http.Server | https.Server;
 const timer = TimeTracer();
 
@@ -89,14 +88,14 @@ const maybeAppInsightsClient = pipe(
       disableAppInsights: process.env.APPINSIGHTS_DISABLED === "true",
       samplingPercentage: process.env.APPINSIGHTS_SAMPLING_PERCENTAGE
         ? parseInt(process.env.APPINSIGHTS_SAMPLING_PERCENTAGE, 10)
-        : DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE,
+        : DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE
     })
   ),
   O.chainFirst((telemetryClient) =>
     O.some(
       useWinstonFor({
         loggerId: LoggerId.event,
-        transports: [withApplicationInsight(telemetryClient, "io-backend")],
+        transports: [withApplicationInsight(telemetryClient, "io-backend")]
       })
     )
   )
@@ -119,7 +118,7 @@ newApp({
   allowSessionHandleIPSourceRange: ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE,
   appInsightsClient: O.toUndefined(maybeAppInsightsClient),
   authenticationBasePath,
-  env: ENV,
+  env: ENV
 })
   .then((app) => {
     const startupTimeMs = timer.getElapsedMilliseconds();
@@ -179,7 +178,7 @@ newApp({
         log.info("Server graceful shutdown complete.");
       },
       signals: shutdownSignals,
-      timeout: shutdownTimeout,
+      timeout: shutdownTimeout
     });
   })
   .catch((err) => {

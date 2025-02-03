@@ -2,28 +2,29 @@
  * This service uses the Redis client to store and retrieve session information.
  */
 
-import { isArray } from "util";
-import * as A from "fp-ts/lib/Array";
-import * as ROA from "fp-ts/lib/ReadonlyArray";
-import * as E from "fp-ts/lib/Either";
-import * as O from "fp-ts/lib/Option";
-import * as B from "fp-ts/lib/boolean";
-import * as R from "fp-ts/lib/Record";
-import * as TE from "fp-ts/lib/TaskEither";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
-import { TaskEither } from "fp-ts/lib/TaskEither";
+import * as A from "fp-ts/lib/Array";
+import * as E from "fp-ts/lib/Either";
 import { Either } from "fp-ts/lib/Either";
-import { Option } from "fp-ts/lib/Option";
-import { flow, pipe, identity } from "fp-ts/lib/function";
 import { NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
-import {
-  NullableBackendAssertionRefFromString,
-  LollipopData,
-} from "../types/assertionRef";
+import * as O from "fp-ts/lib/Option";
+import { Option } from "fp-ts/lib/Option";
+import * as ROA from "fp-ts/lib/ReadonlyArray";
+import * as R from "fp-ts/lib/Record";
+import * as TE from "fp-ts/lib/TaskEither";
+import { TaskEither } from "fp-ts/lib/TaskEither";
+import * as B from "fp-ts/lib/boolean";
+import { flow, identity, pipe } from "fp-ts/lib/function";
+import { isArray } from "util";
+
 import { AssertionRef as BackendAssertionRef } from "../../generated/backend/AssertionRef";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
 import { SessionsList } from "../../generated/backend/SessionsList";
+import {
+  LollipopData,
+  NullableBackendAssertionRefFromString
+} from "../types/assertionRef";
 import { assertUnreachable } from "../types/commons";
 import {
   BPDToken,
@@ -31,11 +32,11 @@ import {
   MyPortalToken,
   SessionToken,
   WalletToken,
-  ZendeskToken,
+  ZendeskToken
 } from "../types/token";
 import { User, UserV1, UserV2, UserV3, UserV4, UserV5 } from "../types/user";
-import { log } from "../utils/logger";
 import { ActiveSessionInfo, LoginTypeEnum } from "../utils/fastLogin";
+import { log } from "../utils/logger";
 import { RedisClientMode, RedisClientSelectorType } from "../utils/redis";
 import { ISessionStorage } from "./ISessionStorage";
 import RedisStorageUtils from "./redisStorageUtils";
@@ -62,7 +63,7 @@ export const keyPrefixes = [
   sessionInfoKeyPrefix,
   noticeEmailPrefix,
   blockedUserSetKey,
-  lollipopDataPrefix,
+  lollipopDataPrefix
 ];
 export const sessionNotFoundError = new Error("Session not found");
 
@@ -166,7 +167,7 @@ export default class RedisSessionStorage
             ),
         E.toError
       ),
-      TE.mapLeft((_) => {
+      TE.mapLeft(() => {
         log.warn(`Error updating USERSESSIONS Set for ${user.fiscal_code}`);
       })
     )().catch(() => void 0);
@@ -214,8 +215,7 @@ export default class RedisSessionStorage
       ),
       TE.mapLeft((err) => {
         log.error("Error reading set members: %s", err);
-        // eslint-disable-next-line functional/prefer-readonly-type
-        return [] as string[];
+        return [] as Array<string>;
       }),
       TE.toUnion
     )();
@@ -352,7 +352,7 @@ export default class RedisSessionStorage
           .selectOne(RedisClientMode.FAST)
           .sAdd(blockedUserSetKey, fiscalCode);
       }, E.toError),
-      TE.map<number, true>((_) => true)
+      TE.map<number, true>(() => true)
     )();
   }
 
@@ -403,7 +403,7 @@ export default class RedisSessionStorage
                 pipe(
                   sessionToken,
                   SessionToken.decode,
-                  E.mapLeft((_) => new Error("Error decoding token"))
+                  E.mapLeft(() => new Error("Error decoding token"))
                 )
               ),
               TE.chain((token: SessionToken) =>
@@ -432,7 +432,7 @@ export default class RedisSessionStorage
             )
           )
       ),
-      TE.chain((_) =>
+      TE.chain(() =>
         pipe(
           TE.tryCatch(() => this.delSessionsSet(fiscalCode), E.toError),
           TE.chain(TE.fromEither)
@@ -453,7 +453,7 @@ export default class RedisSessionStorage
             .del(`${noticeEmailPrefix}${user.session_token}`),
         E.toError
       ),
-      TE.map<number, true>((_) => true)
+      TE.map<number, true>(() => true)
     )();
   }
 
@@ -495,7 +495,7 @@ export default class RedisSessionStorage
                   : // Remap plain string to LollipopData
                     {
                       assertionRef: storedValue,
-                      loginType: LoginTypeEnum.LEGACY,
+                      loginType: LoginTypeEnum.LEGACY
                     }
               )
             )
@@ -578,8 +578,7 @@ export default class RedisSessionStorage
   // ----------------------------------------------
 
   // This mGet fires a bunch of GET operation to prevent CROSS-SLOT errors on the cluster
-  // eslint-disable-next-line functional/prefer-readonly-type
-  private mGet(keys: string[]): TaskEither<Error, Array<string | null>> {
+  private mGet(keys: Array<string>): TaskEither<Error, Array<string | null>> {
     return pipe(
       keys,
       A.map((singleKey) =>
@@ -628,7 +627,7 @@ export default class RedisSessionStorage
           .selectOne(RedisClientMode.FAST)
           .del(`${userSessionsSetKeyPrefix}${fiscalCode}`);
       }, E.toError),
-      TE.map<number, true>((_) => true)
+      TE.map<number, true>(() => true)
     )();
   }
 
@@ -752,7 +751,7 @@ export default class RedisSessionStorage
               return prev;
             },
             (sessionInfo) => ({
-              sessions: [...prev.sessions, sessionInfo],
+              sessions: [...prev.sessions, sessionInfo]
             })
           )
         ),
@@ -766,36 +765,36 @@ export default class RedisSessionStorage
     const requiredTokens = {
       session_info: {
         prefix: sessionInfoKeyPrefix,
-        value: user.session_token,
+        value: user.session_token
       },
       session_token: {
         prefix: sessionKeyPrefix,
-        value: user.session_token,
+        value: user.session_token
       },
       wallet_token: {
         prefix: walletKeyPrefix,
-        value: user.wallet_token,
-      },
+        value: user.wallet_token
+      }
     };
     if (UserV5.is(user)) {
       return {
         ...requiredTokens,
         bpd_token: {
           prefix: bpdTokenPrefix,
-          value: user.bpd_token,
+          value: user.bpd_token
         },
         fims_token: {
           prefix: fimsTokenPrefix,
-          value: user.fims_token,
+          value: user.fims_token
         },
         myportal_token: {
           prefix: myPortalTokenPrefix,
-          value: user.myportal_token,
+          value: user.myportal_token
         },
         zendesk_token: {
           prefix: zendeskTokenPrefix,
-          value: user.zendesk_token,
-        },
+          value: user.zendesk_token
+        }
       };
     }
     if (UserV4.is(user)) {
@@ -803,16 +802,16 @@ export default class RedisSessionStorage
         ...requiredTokens,
         bpd_token: {
           prefix: bpdTokenPrefix,
-          value: user.bpd_token,
+          value: user.bpd_token
         },
         myportal_token: {
           prefix: myPortalTokenPrefix,
-          value: user.myportal_token,
+          value: user.myportal_token
         },
         zendesk_token: {
           prefix: zendeskTokenPrefix,
-          value: user.zendesk_token,
-        },
+          value: user.zendesk_token
+        }
       };
     }
     if (UserV3.is(user)) {
@@ -820,12 +819,12 @@ export default class RedisSessionStorage
         ...requiredTokens,
         bpd_token: {
           prefix: bpdTokenPrefix,
-          value: user.bpd_token,
+          value: user.bpd_token
         },
         myportal_token: {
           prefix: myPortalTokenPrefix,
-          value: user.myportal_token,
-        },
+          value: user.myportal_token
+        }
       };
     }
     if (UserV2.is(user)) {
@@ -833,13 +832,13 @@ export default class RedisSessionStorage
         ...requiredTokens,
         myportal_token: {
           prefix: myPortalTokenPrefix,
-          value: user.myportal_token,
-        },
+          value: user.myportal_token
+        }
       };
     }
     if (UserV1.is(user)) {
       return {
-        ...requiredTokens,
+        ...requiredTokens
       };
     }
     return assertUnreachable(user);

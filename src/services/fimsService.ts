@@ -12,20 +12,17 @@ import {
   ResponseErrorInternal,
   ResponseErrorValidation,
   ResponseSuccessAccepted,
-  ResponseSuccessJson,
+  ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-
 import { EmailString, FiscalCode } from "@pagopa/ts-commons/lib/strings";
-
 import { AccessHistoryPage } from "generated/io-fims-api/AccessHistoryPage";
 import { ExportRequest } from "generated/io-fims-api/ExportRequest";
 
 import { IoFimsAPIClient } from "../clients/io-fims";
-
 import {
   ResponseErrorStatusNotDefinedInSpec,
   withCatchAsInternalError,
-  withValidatedOrInternalError,
+  withValidatedOrInternalError
 } from "../utils/responses";
 
 const invalidRequest = "Invalid request";
@@ -44,7 +41,7 @@ export default class FimsService {
     withCatchAsInternalError(async () => {
       const validated = await this.ioFimsApiClient.getAccessHistory({
         page,
-        user: fiscalCode,
+        user: fiscalCode
       });
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
@@ -77,9 +74,9 @@ export default class FimsService {
     withCatchAsInternalError(async () => {
       const validated = await this.ioFimsApiClient.requestExport({
         body: {
-          email,
+          email
         },
-        user: fiscalCode,
+        user: fiscalCode
       });
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {

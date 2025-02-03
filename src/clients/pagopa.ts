@@ -1,4 +1,5 @@
 import nodeFetch from "node-fetch";
+
 import { Client, createClient } from "../../generated/pagopa-proxy/client";
 
 export function PagoPAClient(
@@ -13,8 +14,8 @@ export function PagoPAClient(
     withDefaults: (op) => (params) =>
       op({
         ...params,
-        apiKeyHeader: apiKey,
-      }),
+        apiKeyHeader: apiKey
+      })
   });
 }
 

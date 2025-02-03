@@ -18,8 +18,8 @@ export function IoWalletAPIClient(
     withDefaults: (op) => (params) =>
       op({
         ...params,
-        FunctionsKey: token,
-      }),
+        FunctionsKey: token
+      })
   });
 }
 

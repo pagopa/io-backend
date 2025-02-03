@@ -1,8 +1,9 @@
-import * as redis from "redis";
 import * as appInsights from "applicationinsights";
-import { pipe } from "fp-ts/lib/function";
-import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as O from "fp-ts/lib/Option";
+import * as RA from "fp-ts/lib/ReadonlyArray";
+import { pipe } from "fp-ts/lib/function";
+import * as redis from "redis";
+
 import { keyPrefixes } from "../services/redisSessionStorage";
 import { log } from "./logger";
 
@@ -45,17 +46,18 @@ export const createClusterRedisClient =
         password,
         socket: {
           // TODO: We can add a whitelist with all the IP addresses of the redis clsuter
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           checkServerIdentity: (_hostname, _cert) => undefined,
           keepAlive: 2000,
-          tls: enableTls,
-        },
+          tls: enableTls
+        }
       },
       rootNodes: [
         {
-          url: `${completeRedisUrl}:${redisPort}`,
-        },
+          url: `${completeRedisUrl}:${redisPort}`
+        }
       ],
-      useReplicas,
+      useReplicas
     });
     redisClient.on("error", (err) => {
       log.error("[REDIS Error] an error occurs on redis client: %s", err);
@@ -66,16 +68,16 @@ export const createClusterRedisClient =
           message:
             err instanceof Object
               ? obfuscateTokensInfo(JSON.stringify(err))
-              : "",
+              : ""
         },
-        tagOverrides: { samplingEnabled: "false" },
+        tagOverrides: { samplingEnabled: "false" }
       });
     });
     redisClient.on(
       "reconnecting",
       ({
         delay,
-        attempt,
+        attempt
       }: {
         readonly delay: number;
         readonly attempt: number;
@@ -89,9 +91,9 @@ export const createClusterRedisClient =
           name: "io-backend.redis.reconnecting",
           properties: {
             attempt,
-            delay,
+            delay
           },
-          tagOverrides: { samplingEnabled: "false" },
+          tagOverrides: { samplingEnabled: "false" }
         });
       }
     );
@@ -113,7 +115,7 @@ export type RedisClientSelectorType = Selector<
 export enum RedisClientMode {
   "ALL" = "ALL",
   "SAFE" = "SAFE",
-  "FAST" = "FAST",
+  "FAST" = "FAST"
 }
 
 export const RedisClientSelector =
@@ -150,6 +152,6 @@ export const RedisClientSelector =
     };
     return {
       select,
-      selectOne: (t) => select(t)[0],
+      selectOne: (t) => select(t)[0]
     };
   };

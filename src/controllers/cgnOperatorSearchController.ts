@@ -4,7 +4,6 @@
  */
 
 import { IResponseErrorForbiddenNotAuthorized } from "@pagopa/ts-commons/lib/responses";
-import * as express from "express";
 import {
   IResponse,
   IResponseErrorInternal,
@@ -12,24 +11,26 @@ import {
   IResponseErrorValidation,
   IResponseSuccessJson,
   ResponseErrorForbiddenNotAuthorized,
-  ResponseErrorInternal,
+  ResponseErrorInternal
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import CgnService from "src/services/cgnService";
+import * as express from "express";
 import * as E from "fp-ts/Either";
-import { DiscountBucketCode } from "generated/io-cgn-operator-search-api/DiscountBucketCode";
-import { Card } from "generated/cgn/Card";
 import { pipe } from "fp-ts/lib/function";
-import { SearchResult } from "generated/io-cgn-operator-search-api/SearchResult";
+import { Card } from "generated/cgn/Card";
 import { CountResult } from "generated/io-cgn-operator-search-api/CountResult";
+import { DiscountBucketCode } from "generated/io-cgn-operator-search-api/DiscountBucketCode";
+import { SearchResult } from "generated/io-cgn-operator-search-api/SearchResult";
+import CgnService from "src/services/cgnService";
+
 import { Merchant } from "../../generated/cgn-operator-search/Merchant";
 import { OfflineMerchants } from "../../generated/cgn-operator-search/OfflineMerchants";
 import { OnlineMerchants } from "../../generated/cgn-operator-search/OnlineMerchants";
-import { GetPublishedCategoriesParameters } from "../../generated/parameters/GetPublishedCategoriesParameters";
 import { PublishedProductCategoriesResult } from "../../generated/cgn-operator-search/PublishedProductCategoriesResult";
 import { OfflineMerchantSearchRequest } from "../../generated/io-cgn-operator-search-api/OfflineMerchantSearchRequest";
 import { OnlineMerchantSearchRequest } from "../../generated/io-cgn-operator-search-api/OnlineMerchantSearchRequest";
 import { SearchRequest } from "../../generated/io-cgn-operator-search-api/SearchRequest";
+import { GetPublishedCategoriesParameters } from "../../generated/parameters/GetPublishedCategoriesParameters";
 import CgnOperatorSearchService from "../services/cgnOperatorSearchService";
 import { User, withUserFromRequest } from "../types/user";
 import { withValidatedOrValidationError } from "../utils/responses";
@@ -51,7 +52,7 @@ export default class CgnOperatorSearchController {
     | IResponseErrorNotFound
     | IResponseSuccessJson<PublishedProductCategoriesResult>
   > =>
-    withUserFromRequest(req, async (_) =>
+    withUserFromRequest(req, async () =>
       withValidatedOrValidationError(
         GetPublishedCategoriesParameters.decode(req.query),
         (params) =>
@@ -94,9 +95,7 @@ export default class CgnOperatorSearchController {
     | IResponseErrorNotFound
     | IResponseSuccessJson<CountResult>
   > =>
-    withUserFromRequest(req, async (_) =>
-      this.cgnOperatorSearchService.count()
-    );
+    withUserFromRequest(req, async () => this.cgnOperatorSearchService.count());
 
   /**
    * Search CGN merchants/discounts that matches with search criteria
@@ -109,7 +108,7 @@ export default class CgnOperatorSearchController {
     | IResponseErrorNotFound
     | IResponseSuccessJson<SearchResult>
   > =>
-    withUserFromRequest(req, async (_) =>
+    withUserFromRequest(req, async () =>
       withValidatedOrValidationError(
         SearchRequest.decode(req.body),
         (searchRequest) => this.cgnOperatorSearchService.search(searchRequest)
@@ -128,7 +127,7 @@ export default class CgnOperatorSearchController {
     | IResponseErrorNotFound
     | IResponseSuccessJson<OnlineMerchants>
   > =>
-    withUserFromRequest(req, async (_) =>
+    withUserFromRequest(req, async () =>
       withValidatedOrValidationError(
         OnlineMerchantSearchRequest.decode(req.body),
         (onlineSearchRequest) =>
@@ -148,7 +147,7 @@ export default class CgnOperatorSearchController {
     | IResponseErrorNotFound
     | IResponseSuccessJson<OfflineMerchants>
   > =>
-    withUserFromRequest(req, async (_) =>
+    withUserFromRequest(req, async () =>
       withValidatedOrValidationError(
         OfflineMerchantSearchRequest.decode(req.body),
         (offlineSearchRequest) =>

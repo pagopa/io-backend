@@ -3,20 +3,20 @@
  * app by forwarding the call to the API system.
  */
 
-import * as express from "express";
 import {
   IResponseErrorGone,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
   IResponseSuccessAccepted,
-  IResponseSuccessJson,
+  IResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import * as express from "express";
 import { BonusActivationWithQrCode } from "generated/bonus/BonusActivationWithQrCode";
 import { PaginatedBonusActivationsCollection } from "generated/io-bonus-api/PaginatedBonusActivationsCollection";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import BonusService from "src/services/bonusService";
+
 import { EligibilityCheck } from "../../generated/io-bonus-api/EligibilityCheck";
 import { InstanceId } from "../../generated/io-bonus-api/InstanceId";
 import { withUserFromRequest } from "../types/user";

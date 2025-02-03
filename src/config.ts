@@ -2,51 +2,50 @@
  * Defines services and register them to the Service Container.
  */
 
-import * as dotenv from "dotenv";
-import * as E from "fp-ts/Either";
-import * as O from "fp-ts/Option";
-import * as t from "io-ts";
 import { agent } from "@pagopa/ts-commons";
-
 import { getNodeEnvironmentFromProcessEnv } from "@pagopa/ts-commons/lib/environment";
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import { HttpsUrlFromString, UrlFromString } from "@pagopa/ts-commons/lib/url";
-
 import {
   AbortableFetch,
   setFetchTimeout,
-  toFetch,
+  toFetch
 } from "@pagopa/ts-commons/lib/fetch";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString, Ulid } from "@pagopa/ts-commons/lib/strings";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { Millisecond } from "@pagopa/ts-commons/lib/units";
+import { HttpsUrlFromString, UrlFromString } from "@pagopa/ts-commons/lib/url";
+import * as dotenv from "dotenv";
+import * as E from "fp-ts/Either";
+import * as O from "fp-ts/Option";
 import { pipe } from "fp-ts/lib/function";
+import * as t from "io-ts";
+
+import { AppMessagesAPIClient } from "./clients/app-messages.client";
+import { BonusAPIClient } from "./clients/bonus";
 import { CgnAPIClient } from "./clients/cgn";
-import { log } from "./utils/logger";
+import { CgnOperatorSearchAPIClient } from "./clients/cgn-operator-search";
+import { EUCovidCertAPIClient } from "./clients/eucovidcert.client";
+import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
+import { IoFimsAPIClient } from "./clients/io-fims";
+import { IoSignAPIClient } from "./clients/io-sign";
+import { IoWalletAPIClient } from "./clients/io-wallet";
+import { LollipopApiClient } from "./clients/lollipop";
+import { PNClientFactory } from "./clients/pn-clients";
+import { ServicesAppBackendAPIClient } from "./clients/services-app-backend";
+import { TrialSystemAPIClient } from "./clients/trial-system.client";
+import ApiClientFactory from "./services/apiClientFactory";
+import PagoPAClientFactory from "./services/pagoPAClientFactory";
 import urlTokenStrategy from "./strategies/urlTokenStrategy";
 import { getRequiredENVVar } from "./utils/container";
-import PagoPAClientFactory from "./services/pagoPAClientFactory";
-import ApiClientFactory from "./services/apiClientFactory";
-import { BonusAPIClient } from "./clients/bonus";
-import { decodeCIDRs } from "./utils/network";
-import { CgnOperatorSearchAPIClient } from "./clients/cgn-operator-search";
-import { ServicesAppBackendAPIClient } from "./clients/services-app-backend";
-import { EUCovidCertAPIClient } from "./clients/eucovidcert.client";
-import { ognlTypeFor } from "./utils/ognl";
-import { AppMessagesAPIClient } from "./clients/app-messages.client";
-import { PNClientFactory } from "./clients/pn-clients";
-import { IoSignAPIClient } from "./clients/io-sign";
 import {
   FeatureFlag,
   FeatureFlagEnum,
-  getIsUserEligibleForNewFeature,
+  getIsUserEligibleForNewFeature
 } from "./utils/featureFlag";
+import { log } from "./utils/logger";
+import { decodeCIDRs } from "./utils/network";
+import { ognlTypeFor } from "./utils/ognl";
 import { CommaSeparatedListOf } from "./utils/separated-list";
-import { LollipopApiClient } from "./clients/lollipop";
-import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
-import { TrialSystemAPIClient } from "./clients/trial-system.client";
-import { IoWalletAPIClient } from "./clients/io-wallet";
-import { IoFimsAPIClient } from "./clients/io-fims";
 
 // Without this, the environment variables loaded by dotenv aren't available in
 // this file.
@@ -139,7 +138,7 @@ const bearerAuthFetch =
   (input, init) =>
     origFetch(input, {
       ...init,
-      headers: { Authorization: `Bearer ${bearerToken}` },
+      headers: { Authorization: `Bearer ${bearerToken}` }
     });
 
 export const getHttpsApiFetchWithBearer = (bearer: string) =>
@@ -288,15 +287,15 @@ const IEnabledPnAddressBookConfig = t.interface({
   PN_API_KEY: NonEmptyString,
   PN_API_KEY_UAT: NonEmptyString,
   PN_API_URL: UrlFromString,
-  PN_API_URL_UAT: UrlFromString,
+  PN_API_URL_UAT: UrlFromString
 });
 type IEnabledPnAddressBookConfig = t.TypeOf<typeof IEnabledPnAddressBookConfig>;
 
 const IPNAddressBookConfig = t.union([
   IEnabledPnAddressBookConfig,
   t.partial({
-    FF_PN_ACTIVATION_ENABLED: t.literal("0"),
-  }),
+    FF_PN_ACTIVATION_ENABLED: t.literal("0")
+  })
 ]);
 type IPNAddressBookConfig = t.TypeOf<typeof IPNAddressBookConfig>;
 
@@ -452,13 +451,13 @@ export const PecServerConfig = t.interface({
   basePath: t.string,
   secret: NonEmptyString,
   serviceId: NonEmptyString,
-  url: NonEmptyString,
+  url: NonEmptyString
 });
 export type PecServerConfig = t.TypeOf<typeof PecServerConfig>;
 
 export const PecServersConfig = t.interface({
   aruba: PecServerConfig,
-  poste: PecServerConfig,
+  poste: PecServerConfig
 });
 export type PecServersConfig = t.TypeOf<typeof PecServersConfig>;
 
@@ -522,7 +521,7 @@ export const PN_CONFIGURATION_ID = pipe(
 export const FF_ROUTING_PUSH_NOTIF = pipe(
   process.env.FF_ROUTING_PUSH_NOTIF,
   FeatureFlag.decode,
-  E.getOrElse((_) => FeatureFlagEnum.NONE)
+  E.getOrElse(() => FeatureFlagEnum.NONE)
 );
 
 export const FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST = pipe(
@@ -540,7 +539,7 @@ export const FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST = pipe(
 export const FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX = pipe(
   process.env.FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX,
   NonEmptyString.decode,
-  E.getOrElse((_) => "XYZ" as NonEmptyString)
+  E.getOrElse(() => "XYZ" as NonEmptyString)
 );
 
 // UNIQUE EMAIL ENFORCEMENT variables

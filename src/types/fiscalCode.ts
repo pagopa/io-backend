@@ -1,6 +1,7 @@
-import * as express from "express";
 import { IResponseErrorValidation } from "@pagopa/ts-commons/lib/responses";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import * as express from "express";
+
 import { withValidatedOrValidationError } from "../utils/responses";
 
 export const withFiscalCodeFromRequestParams = async <T>(

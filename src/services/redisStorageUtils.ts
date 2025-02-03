@@ -1,8 +1,8 @@
-import { isNumber } from "util";
 import * as E from "fp-ts/lib/Either";
 import { Either } from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+import { isNumber } from "util";
 
 export default class RedisStorageUtils {
   /**

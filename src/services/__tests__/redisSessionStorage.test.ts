@@ -145,7 +145,7 @@ describe("RedisSessionStorage#getBySessionToken", () => {
     expect(mockGet).toHaveBeenCalledTimes(1);
     expect(mockGet).toHaveBeenCalledWith(`SESSION-${aValidUser.session_token}`);
     expect(response).toEqual(
-      E.left(new SyntaxError("Unexpected token I in JSON at position 0"))
+      E.left(new SyntaxError("Unexpected token 'I', \"Invalid JSON\" is not valid JSON"))
     );
   });
 
@@ -225,7 +225,7 @@ describe("RedisSessionStorage#getByMyPortalToken", () => {
       `SESSION-${aValidUser.session_token}`
     );
     expect(response).toEqual(
-      E.left(new SyntaxError("Unexpected token I in JSON at position 0"))
+      E.left(new SyntaxError("Unexpected token 'I', \"Invalid JSON\" is not valid JSON"))
     );
   });
 

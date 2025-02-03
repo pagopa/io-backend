@@ -2,6 +2,12 @@
  * This service interactsnwith the Bonus API
  */
 
+import { Card } from "@pagopa/io-functions-cgn-sdk/Card";
+import { CgnActivationDetail } from "@pagopa/io-functions-cgn-sdk/CgnActivationDetail";
+import { EycaActivationDetail } from "@pagopa/io-functions-cgn-sdk/EycaActivationDetail";
+import { EycaCard } from "@pagopa/io-functions-cgn-sdk/EycaCard";
+import { InstanceId } from "@pagopa/io-functions-cgn-sdk/InstanceId";
+import { Otp } from "@pagopa/io-functions-cgn-sdk/Otp";
 import {
   IResponseErrorConflict,
   IResponseErrorForbiddenNotAuthorized,
@@ -17,26 +23,20 @@ import {
   ResponseErrorNotFound,
   ResponseSuccessAccepted,
   ResponseSuccessJson,
-  ResponseSuccessRedirectToResource,
+  ResponseSuccessRedirectToResource
 } from "@pagopa/ts-commons/lib/responses";
-
 import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
-import { EycaActivationDetail } from "@pagopa/io-functions-cgn-sdk/EycaActivationDetail";
-import { EycaCard } from "@pagopa/io-functions-cgn-sdk/EycaCard";
-import { InstanceId } from "@pagopa/io-functions-cgn-sdk/InstanceId";
-import { CgnActivationDetail } from "@pagopa/io-functions-cgn-sdk/CgnActivationDetail";
-import { Card } from "@pagopa/io-functions-cgn-sdk/Card";
-import { Otp } from "@pagopa/io-functions-cgn-sdk/Otp";
+
 import { CgnAPIClient } from "../../src/clients/cgn";
 import { User } from "../types/user";
+import { readableProblem } from "../utils/errorsFormatter";
 import {
   ResponseErrorStatusNotDefinedInSpec,
   ResponseErrorUnexpectedAuthProblem,
   withCatchAsInternalError,
-  withValidatedOrInternalError,
+  withValidatedOrInternalError
 } from "../utils/responses";
-import { readableProblem } from "../utils/errorsFormatter";
 export default class CgnService {
   constructor(private readonly cgnApiClient: ReturnType<CgnAPIClient>) {}
 
@@ -54,7 +54,7 @@ export default class CgnService {
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.cgnApiClient.getCgnStatus({
-        fiscalcode: user.fiscal_code,
+        fiscalcode: user.fiscal_code
       });
 
       return withValidatedOrInternalError(validated, (response) => {
@@ -88,7 +88,7 @@ export default class CgnService {
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.cgnApiClient.getEycaStatus({
-        fiscalcode: user.fiscal_code,
+        fiscalcode: user.fiscal_code
       });
 
       return withValidatedOrInternalError(validated, (response) => {
@@ -128,7 +128,7 @@ export default class CgnService {
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.cgnApiClient.startCgnActivation({
-        fiscalcode: user.fiscal_code,
+        fiscalcode: user.fiscal_code
       });
 
       return withValidatedOrInternalError(validated, (response) => {
@@ -174,7 +174,7 @@ export default class CgnService {
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.cgnApiClient.getCgnActivation({
-        fiscalcode: user.fiscal_code,
+        fiscalcode: user.fiscal_code
       });
 
       return withValidatedOrInternalError(validated, (response) => {
@@ -211,7 +211,7 @@ export default class CgnService {
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.cgnApiClient.startEycaActivation({
-        fiscalcode: user.fiscal_code,
+        fiscalcode: user.fiscal_code
       });
 
       return withValidatedOrInternalError(validated, (response) => {
@@ -257,7 +257,7 @@ export default class CgnService {
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.cgnApiClient.getEycaActivation({
-        fiscalcode: user.fiscal_code,
+        fiscalcode: user.fiscal_code
       });
 
       return withValidatedOrInternalError(validated, (response) => {
@@ -294,7 +294,7 @@ export default class CgnService {
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.cgnApiClient.startCgnUnsubscription({
-        fiscalcode: user.fiscal_code,
+        fiscalcode: user.fiscal_code
       });
 
       return withValidatedOrInternalError(validated, (response) => {
@@ -340,7 +340,7 @@ export default class CgnService {
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.cgnApiClient.generateOtp({
-        fiscalcode: user.fiscal_code,
+        fiscalcode: user.fiscal_code
       });
 
       return withValidatedOrInternalError(validated, (response) => {

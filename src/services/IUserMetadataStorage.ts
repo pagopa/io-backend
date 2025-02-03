@@ -4,6 +4,7 @@
 
 import { Either } from "fp-ts/lib/Either";
 import { UserMetadata } from "generated/backend/UserMetadata";
+
 import { User } from "../types/user";
 
 export interface IUserMetadataStorage {

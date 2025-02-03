@@ -2,9 +2,10 @@ import * as bwipjs from "bwip-js";
 import { ToBufferOptions } from "bwip-js";
 import * as AP from "fp-ts/lib/Apply";
 import * as E from "fp-ts/lib/Either";
-import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/lib/TaskEither";
 import { TaskEither } from "fp-ts/lib/TaskEither";
+import { pipe } from "fp-ts/lib/function";
+
 import { BARCODE_ALGORITHM } from "../../src/config";
 import { DrawingSVG } from "./bwipjs-svg";
 
@@ -45,12 +46,12 @@ export function toBarcode(
 ): TaskEither<Error, IBarcodeOutput> {
   const options = {
     bcid,
-    text,
+    text
   };
   return pipe(
     AP.sequenceS(TE.ApplicativePar)({
       png: toBufferPng(options),
-      svg: TE.fromEither(toBufferSvg(options)),
+      svg: TE.fromEither(toBufferSvg(options))
     }),
     TE.fold(
       (errorOrString) =>
@@ -65,7 +66,7 @@ export function toBarcode(
         TE.fromEither(
           E.right({
             png: images.png.toString("base64"),
-            svg: images.svg.toString("base64"),
+            svg: images.svg.toString("base64")
           })
         )
     )

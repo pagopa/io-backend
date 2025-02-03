@@ -1,4 +1,5 @@
 import nodeFetch from "node-fetch";
+
 import { Client, createClient } from "../../generated/io-sign-api/client";
 
 export function IoSignAPIClient(
@@ -15,8 +16,8 @@ export function IoSignAPIClient(
     withDefaults: (op) => (params) =>
       op({
         ...params,
-        FunctionsKey: token,
-      }),
+        FunctionsKey: token
+      })
   });
 }
 

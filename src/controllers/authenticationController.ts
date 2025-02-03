@@ -4,19 +4,18 @@
  * the IDP.
  */
 
-import * as express from "express";
-import * as E from "fp-ts/lib/Either";
 import {
   IResponseErrorInternal,
   IResponseErrorValidation,
   IResponseSuccessJson,
   ResponseErrorInternal,
-  ResponseSuccessJson,
+  ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-
+import * as express from "express";
+import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
-import { UserIdentity } from "../../generated/auth/UserIdentity";
 
+import { UserIdentity } from "../../generated/auth/UserIdentity";
 import { exactUserIdentityDecode, withUserFromRequest } from "../types/user";
 
 /**
@@ -33,14 +32,14 @@ export const getUserIdentity: (
     pipe(
       user,
       UserIdentity.decode,
-      E.mapLeft((_) =>
+      E.mapLeft(() =>
         ResponseErrorInternal("Unexpected User Identity data format.")
       ),
       E.map((_) =>
         pipe(
           _,
           exactUserIdentityDecode,
-          E.mapLeft((_1) => ResponseErrorInternal("Exact decode failed.")),
+          E.mapLeft(() => ResponseErrorInternal("Exact decode failed.")),
           E.map(ResponseSuccessJson),
           E.toUnion
         )
