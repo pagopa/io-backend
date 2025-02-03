@@ -170,7 +170,6 @@ export interface IAppFactoryParameters {
   readonly TrialSystemBasePath: string;
 }
 
-// eslint-disable-next-line max-lines-per-function, sonarjs/cognitive-complexity
 export async function newApp({
   env,
   allowNotifyIPSourceRange,
@@ -256,6 +255,7 @@ export async function newApp({
 
   // Adds the user fiscal code
   // we take only the first 6 characters of the fiscal code
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   morgan.token("fiscal_code_short", (req: express.Request, _) =>
     pipe(
       req.user,
@@ -269,6 +269,7 @@ export async function newApp({
     originalUrl.replace(/([?&]token=|[?&]access_token=)([^&]*)/g, "$1REDACTED");
 
   // Obfuscate token in url on morgan logs
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   morgan.token("obfuscated_url", (req: express.Request, _) =>
     obfuscateToken(req.originalUrl)
   );
@@ -285,8 +286,8 @@ export async function newApp({
   // Parse the incoming request body. This is needed by Passport spid strategy.
   app.use(
     bodyParser.json({
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       verify: (_req, res: express.Response, buf, _encoding: BufferEncoding) => {
-        // eslint-disable-next-line functional/immutable-data
         res.locals.body = buf;
       },
     })
@@ -918,7 +919,7 @@ function registerAPIRoutes(
     `${basePath}/services`,
     bearerSessionTokenAuth,
     toExpressHandler(
-      (_) => Promise.resolve(ResponseSuccessJson({ items: [] })),
+      () => Promise.resolve(ResponseSuccessJson({ items: [] })),
       servicesController
     )
   );

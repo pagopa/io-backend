@@ -196,7 +196,7 @@ export default class MessagesController {
                         user.fiscal_code,
                         lollipopHeaders
                       ),
-                      TE.mapLeft((_) =>
+                      TE.mapLeft(() =>
                         ResponseErrorInternal(
                           "Error extracting lollipop locals"
                         )
@@ -235,7 +235,7 @@ export default class MessagesController {
                   remoteContentConfiguration,
                   lollipopLocals as LollipopLocalsType
                 ),
-              (_) =>
+              () =>
                 ResponseErrorInternal(
                   "Error getting preconditions from third party service"
                 )
@@ -272,7 +272,7 @@ export default class MessagesController {
                   remoteContentConfiguration,
                   lollipopLocals as LollipopLocalsType
                 ),
-              (_) =>
+              () =>
                 ResponseErrorInternal(
                   "Error getting message from third party service"
                 )
@@ -312,7 +312,7 @@ export default class MessagesController {
                   remoteContentConfiguration,
                   lollipopLocals as LollipopLocalsType
                 ),
-              (_) =>
+              () =>
                 ResponseErrorInternal(
                   "Error getting attachment from third party service"
                 )

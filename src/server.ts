@@ -68,7 +68,6 @@ const shutdownTimeout: number = process.env.DEFAULT_SHUTDOWN_TIMEOUT_MILLIS
   ? parseInt(process.env.DEFAULT_SHUTDOWN_TIMEOUT_MILLIS, 10)
   : DEFAULT_SHUTDOWN_TIMEOUT_MILLIS;
 
-// eslint-disable-next-line functional/no-let
 let server: http.Server | https.Server;
 const timer = TimeTracer();
 

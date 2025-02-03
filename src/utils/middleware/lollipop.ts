@@ -38,7 +38,6 @@ export const expressLollipopMiddlewareLegacy: (
                   lollipopHeaders
                 ),
                 TE.map((lollipopLocals) => {
-                  // eslint-disable-next-line functional/immutable-data
                   res.locals = { ...res.locals, ...lollipopLocals };
                 }),
                 TE.toUnion
@@ -63,7 +62,6 @@ export const expressLollipopMiddlewareLegacy: (
       TE.toUnion
     )();
 
-/* eslint-disable sonarjs/no-identical-functions */
 export const expressLollipopMiddleware: (
   lollipopClient: ReturnType<typeof LollipopApiClient>,
   sessionStorage: ISessionStorage
@@ -82,7 +80,6 @@ export const expressLollipopMiddleware: (
                   O.toUndefined(user)?.fiscal_code
                 ),
                 TE.map((lollipopLocals) => {
-                  // eslint-disable-next-line functional/immutable-data
                   res.locals = { ...res.locals, ...lollipopLocals };
                 }),
                 TE.toUnion
@@ -106,4 +103,3 @@ export const expressLollipopMiddleware: (
       TE.map(() => next()),
       TE.toUnion
     )();
-/* eslint-enable sonarjs/no-identical-functions */

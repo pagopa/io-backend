@@ -17,10 +17,9 @@ const fixQrcodeFill = (svgStr: string): string =>
   svgStr.replace("<path", '<path fill="black"');
 
 function streamToString(stream: NodeJS.ReadableStream): Promise<string> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, functional/prefer-readonly-type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/array-type
   const chunks: any[] = [];
   return new Promise((resolve, reject) => {
-    // eslint-disable-next-line functional/immutable-data
     stream.on("data", (chunk) => chunks.push(chunk));
     stream.on("error", reject);
     stream.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
@@ -28,10 +27,9 @@ function streamToString(stream: NodeJS.ReadableStream): Promise<string> {
 }
 
 function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, functional/prefer-readonly-type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/array-type
   const chunks: any[] = [];
   return new Promise((resolve, reject) => {
-    // eslint-disable-next-line functional/immutable-data
     stream.on("data", (chunk) => chunks.push(chunk));
     stream.on("error", reject);
     stream.on("end", () => resolve(Buffer.concat(chunks)));

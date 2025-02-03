@@ -77,9 +77,9 @@ export default class AuthenticationLockService {
             // eslint-disable-next-line sort-keys
             CreatedAt: new Date(),
           }),
-        (_) => new Error("Something went wrong creating the record")
+        () => new Error("Something went wrong creating the record")
       ),
-      TE.map((_) => true as const)
+      TE.map(() => true as const)
     );
 
   /**

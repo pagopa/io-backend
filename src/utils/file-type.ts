@@ -16,6 +16,7 @@ export const isPdf = (data: Buffer) => data.toString("binary", 0, 4) === "%PDF";
 /**
  * Allow any file type
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const isAny = (_: Buffer) => true;
 
 export const typeToCheck = (type: FileType) =>

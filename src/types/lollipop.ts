@@ -1,4 +1,3 @@
-
 import * as t from "io-ts";
 import { FiscalCode, NonEmptyString, PatternString } from "@pagopa/ts-commons/lib/strings";
 import * as express from "express";

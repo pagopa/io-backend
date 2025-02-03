@@ -53,9 +53,7 @@ export default class PagoPAProxyService {
             )
           : response.status === 400
           ? ResponseErrorValidation(
-              // eslint-disable-next-line sonarjs/no-duplicate-string
               response.value.title || "Bad request (upstream)",
-              // eslint-disable-next-line sonarjs/no-duplicate-string
               response.value.detail || "Bad request response from upstream API"
             )
           : ResponsePaymentError(

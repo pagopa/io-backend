@@ -213,7 +213,6 @@ export default class NewMessagesService {
         id: messageId,
       });
 
-      // eslint-disable-next-line sonarjs/no-identical-functions
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
           case 200:
@@ -504,7 +503,6 @@ export default class NewMessagesService {
               `newMessagesService|getThirdPartyMessagePreconditionFromThirdPartyService|invocation returned an error:${
                 response.status
               } [title: ${response.value?.title ?? "No title"}, detail: ${
-                // eslint-disable-next-line sonarjs/no-duplicate-string
                 response.value?.detail ?? "No details"
               }, type: ${response.value?.type ?? "No type"}]`
             );
@@ -586,14 +584,12 @@ export default class NewMessagesService {
               `newMessagesService|getThirdPartyMessageFromThirdPartyService|invocation returned an error:${
                 response.status
               } [title: ${response.value?.title ?? "No title"}, detail: ${
-                // eslint-disable-next-line sonarjs/no-duplicate-string
                 response.value?.detail ?? "No details"
               }, type: ${response.value?.type ?? "No type"}]`
             );
             return response;
           }),
           TE.mapLeft(
-            // eslint-disable-next-line sonarjs/no-identical-functions
             flow((response) => {
               switch (response.status) {
                 case 400:
@@ -736,7 +732,6 @@ export default class NewMessagesService {
               `newMessagesService|getThirdPartyAttachmentFromThirdPartyService|invocation returned an error:${
                 response.status
               } [title: ${response.value?.title ?? "No title"}, detail: ${
-                // eslint-disable-next-line sonarjs/no-duplicate-string
                 response.value?.detail ?? "No details"
               }, type: ${response.value?.type ?? "No type"}])`
             );
@@ -761,6 +756,7 @@ export default class NewMessagesService {
                 case 500:
                   return ResponseErrorInternal(ERROR_MESSAGE_500);
                 case 503:
+                  // eslint-disable-next-line no-case-declarations
                   const retryAfter = response.headers["Retry-After"] ?? "10";
                   return ResponseErrorServiceTemporarilyUnavailable(
                     ERROR_MESSAGE_503,

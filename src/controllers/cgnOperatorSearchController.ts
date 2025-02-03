@@ -51,7 +51,7 @@ export default class CgnOperatorSearchController {
     | IResponseErrorNotFound
     | IResponseSuccessJson<PublishedProductCategoriesResult>
   > =>
-    withUserFromRequest(req, async (_) =>
+    withUserFromRequest(req, async () =>
       withValidatedOrValidationError(
         GetPublishedCategoriesParameters.decode(req.query),
         (params) =>
@@ -94,7 +94,7 @@ export default class CgnOperatorSearchController {
     | IResponseErrorNotFound
     | IResponseSuccessJson<CountResult>
   > =>
-    withUserFromRequest(req, async (_) =>
+    withUserFromRequest(req, async () =>
       this.cgnOperatorSearchService.count()
     );
 
@@ -109,7 +109,7 @@ export default class CgnOperatorSearchController {
     | IResponseErrorNotFound
     | IResponseSuccessJson<SearchResult>
   > =>
-    withUserFromRequest(req, async (_) =>
+    withUserFromRequest(req, async () =>
       withValidatedOrValidationError(
         SearchRequest.decode(req.body),
         (searchRequest) => this.cgnOperatorSearchService.search(searchRequest)
@@ -128,7 +128,7 @@ export default class CgnOperatorSearchController {
     | IResponseErrorNotFound
     | IResponseSuccessJson<OnlineMerchants>
   > =>
-    withUserFromRequest(req, async (_) =>
+    withUserFromRequest(req, async () =>
       withValidatedOrValidationError(
         OnlineMerchantSearchRequest.decode(req.body),
         (onlineSearchRequest) =>
@@ -148,7 +148,7 @@ export default class CgnOperatorSearchController {
     | IResponseErrorNotFound
     | IResponseSuccessJson<OfflineMerchants>
   > =>
-    withUserFromRequest(req, async (_) =>
+    withUserFromRequest(req, async () =>
       withValidatedOrValidationError(
         OfflineMerchantSearchRequest.decode(req.body),
         (offlineSearchRequest) =>

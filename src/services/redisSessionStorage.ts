@@ -166,7 +166,7 @@ export default class RedisSessionStorage
             ),
         E.toError
       ),
-      TE.mapLeft((_) => {
+      TE.mapLeft(() => {
         log.warn(`Error updating USERSESSIONS Set for ${user.fiscal_code}`);
       })
     )().catch(() => void 0);
@@ -214,8 +214,7 @@ export default class RedisSessionStorage
       ),
       TE.mapLeft((err) => {
         log.error("Error reading set members: %s", err);
-        // eslint-disable-next-line functional/prefer-readonly-type
-        return [] as string[];
+        return [] as Array<string>;
       }),
       TE.toUnion
     )();
@@ -352,7 +351,7 @@ export default class RedisSessionStorage
           .selectOne(RedisClientMode.FAST)
           .sAdd(blockedUserSetKey, fiscalCode);
       }, E.toError),
-      TE.map<number, true>((_) => true)
+      TE.map<number, true>(() => true)
     )();
   }
 
@@ -403,7 +402,7 @@ export default class RedisSessionStorage
                 pipe(
                   sessionToken,
                   SessionToken.decode,
-                  E.mapLeft((_) => new Error("Error decoding token"))
+                  E.mapLeft(() => new Error("Error decoding token"))
                 )
               ),
               TE.chain((token: SessionToken) =>
@@ -432,7 +431,7 @@ export default class RedisSessionStorage
             )
           )
       ),
-      TE.chain((_) =>
+      TE.chain(() =>
         pipe(
           TE.tryCatch(() => this.delSessionsSet(fiscalCode), E.toError),
           TE.chain(TE.fromEither)
@@ -453,7 +452,7 @@ export default class RedisSessionStorage
             .del(`${noticeEmailPrefix}${user.session_token}`),
         E.toError
       ),
-      TE.map<number, true>((_) => true)
+      TE.map<number, true>(() => true)
     )();
   }
 
@@ -578,8 +577,7 @@ export default class RedisSessionStorage
   // ----------------------------------------------
 
   // This mGet fires a bunch of GET operation to prevent CROSS-SLOT errors on the cluster
-  // eslint-disable-next-line functional/prefer-readonly-type
-  private mGet(keys: string[]): TaskEither<Error, Array<string | null>> {
+  private mGet(keys: Array<string>): TaskEither<Error, Array<string | null>> {
     return pipe(
       keys,
       A.map((singleKey) =>
@@ -628,7 +626,7 @@ export default class RedisSessionStorage
           .selectOne(RedisClientMode.FAST)
           .del(`${userSessionsSetKeyPrefix}${fiscalCode}`);
       }, E.toError),
-      TE.map<number, true>((_) => true)
+      TE.map<number, true>(() => true)
     )();
   }
 

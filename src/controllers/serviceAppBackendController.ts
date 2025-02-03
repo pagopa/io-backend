@@ -70,11 +70,13 @@ export default class ServicesAppBackendController {
     );
 
   public readonly getFeaturedServices = async (
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _req: express.Request
   ): Promise<IResponseErrorInternal | IResponseSuccessJson<FeaturedServices>> =>
     this.servicesAppBackendService.getFeaturedServices();
 
   public readonly getFeaturedInstitutions = async (
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _req: express.Request
   ): Promise<IResponseErrorInternal | IResponseSuccessJson<Institutions>> =>
     this.servicesAppBackendService.getFeaturedInstitutions();

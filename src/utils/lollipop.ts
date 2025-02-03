@@ -134,7 +134,6 @@ const getAndValidateAssertionRefForUser = (
     )
   );
 
-/* eslint-disable sonarjs/no-identical-functions */
 /**
  * @deprecated
  */
@@ -145,7 +144,6 @@ export const extractLollipopLocalsFromLollipopHeadersLegacy = (
   lollipopHeaders: LollipopRequiredHeaders
 ) =>
   pipe(
-    // eslint-disable-next-line sonarjs/no-duplicate-string
     TE.of(getNonceOrUlid(lollipopHeaders["signature-input"])),
     TE.bindTo("operationId"),
     TE.bind("assertionRef", ({ operationId }) =>
@@ -479,4 +477,3 @@ export const extractLollipopLocalsFromLollipopHeaders = (
       { ...Object.keys(lcLocals), name: "lollipop.locals.info" },
     ])
   );
-/* eslint-enable sonarjs/no-identical-functions */

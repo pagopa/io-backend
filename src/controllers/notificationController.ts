@@ -94,7 +94,7 @@ export default class NotificationController {
     return withUserFromRequest(req, async (user) =>
       withValidatedOrValidationError(
         InstallationID.decode(req.params.id),
-        (_) =>
+        () =>
           withValidatedOrValidationError(
             Installation.decode(req.body),
             (installation) => {

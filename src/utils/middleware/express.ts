@@ -12,6 +12,7 @@ export function expressErrorMiddleware(
   err: Error,
   _: Request,
   res: Response,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   __: NextFunction
 ): void {
   log.error("An exception occurred during http request: %s", err.message);

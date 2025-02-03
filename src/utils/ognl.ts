@@ -25,19 +25,18 @@ export const set = <T extends object>(
   const splittedpath: ReadonlyArray<string> = !Array.isArray(path)
     ? path.toString().match(/[^.[\]]+/g) || []
     : path;
-  // eslint-disable-next-line functional/immutable-data
   splittedpath.slice(0, -1).reduce(
     (
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       a: any,
       c,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       _i
     ) =>
       // Iterate all of them except the last one
       Object(a[c]) === a[c]
         ? a[c]
-        : // eslint-disable-next-line functional/immutable-data
-          (a[c] = {}),
+        : (a[c] = {}),
     obj
   )[splittedpath[splittedpath.length - 1]] = value;
   return obj;
@@ -61,7 +60,6 @@ export const nestifyPrefixedType = (
     R.reduceWithIndex({}, (k, b, a) =>
       set(
         b,
-        // eslint-disable-next-line functional/immutable-data
         k.split("_").splice(1).join("."),
         a
       )

@@ -147,7 +147,7 @@ export default class SessionLockController {
           )
         ),
         TE.mapLeft((err) => ResponseErrorInternal(err.message)),
-        TE.map((_) => ResponseSuccessJson({ message: "ok" })),
+        TE.map(() => ResponseSuccessJson({ message: "ok" })),
         TE.toUnion
       )()
     );
@@ -173,7 +173,7 @@ export default class SessionLockController {
           this.buildInvalidateUserSessionTask(fiscalCode)
         ),
         TE.mapLeft((err) => ResponseErrorInternal(err.message)),
-        TE.map((_) => ResponseSuccessJson({ message: "ok" })),
+        TE.map(() => ResponseSuccessJson({ message: "ok" })),
         TE.toUnion
       )()
     );
@@ -210,7 +210,7 @@ export default class SessionLockController {
           TE.mapLeft((err) => ResponseErrorInternal(err.message))
         )
       ),
-      TE.map((_) => ResponseSuccessJson({ message: "ok" })),
+      TE.map(() => ResponseSuccessJson({ message: "ok" })),
       TE.toUnion
     )();
 
@@ -234,7 +234,7 @@ export default class SessionLockController {
         pipe(
           // lock the authentication
           this.authenticationLockService.isUserAuthenticationLocked(fiscalCode),
-          TE.mapLeft((_) => ResponseErrorInternal(ERROR_CHECK_USER_AUTH_LOCK)),
+          TE.mapLeft(() => ResponseErrorInternal(ERROR_CHECK_USER_AUTH_LOCK)),
           TE.filterOrElseW(
             (isUserAuthenticationLocked) => !isUserAuthenticationLocked,
             () =>
@@ -242,7 +242,7 @@ export default class SessionLockController {
                 "Another user authentication lock has already been applied"
               )
           ),
-          TE.chainW((_) =>
+          TE.chainW(() =>
             pipe(
               AP.sequenceT(TE.ApplicativeSeq)(
                 // clear session data
@@ -259,7 +259,7 @@ export default class SessionLockController {
               TE.mapLeft((err) => ResponseErrorInternal(err.message))
             )
           ),
-          TE.map((_) => ResponseNoContent()),
+          TE.map(() => ResponseNoContent()),
           TE.toUnion
         )()
       )
@@ -292,7 +292,7 @@ export default class SessionLockController {
               this.authenticationLockService.getUserAuthenticationLockData(
                 fiscalCode
               ),
-              TE.mapLeft((_) =>
+              TE.mapLeft(() =>
                 ResponseErrorInternal(ERROR_CHECK_USER_AUTH_LOCK)
               )
             )
@@ -308,7 +308,7 @@ export default class SessionLockController {
               : // User auth is NOT locked
                 TE.of(true)
           ),
-          TE.map((_) => ResponseNoContent()),
+          TE.map(() => ResponseNoContent()),
           TE.toUnion
         )()
       )

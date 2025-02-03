@@ -61,7 +61,7 @@ export const profileWithEmailValidatedOrError = (
         profile.value,
         ProfileWithEmailValidated.decode,
         E.mapLeft(
-          (_) => new Error("Profile has not a validated email address")
+          () => new Error("Profile has not a validated email address")
         ),
         TE.fromEither
       )
