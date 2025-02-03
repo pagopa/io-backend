@@ -3,7 +3,6 @@
  * redis database through the user metadata storage service.
  */
 
-import * as express from "express";
 import {
   IResponseErrorConflict,
   IResponseErrorInternal,
@@ -13,9 +12,8 @@ import {
   ResponseErrorInternal,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-
+import * as express from "express";
 import * as E from "fp-ts/lib/Either";
-import { IResponseNoContent, ResponseNoContent } from "../utils/responses";
 
 import { UserMetadata } from "../../generated/backend/UserMetadata";
 import { IUserMetadataStorage } from "../services/IUserMetadataStorage";
@@ -24,6 +22,7 @@ import {
   metadataNotFoundError
 } from "../services/redisUserMetadataStorage";
 import { withUserFromRequest } from "../types/user";
+import { IResponseNoContent, ResponseNoContent } from "../utils/responses";
 import { withValidatedOrValidationError } from "../utils/responses";
 
 export default class UserMetadataController {

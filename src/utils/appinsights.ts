@@ -1,19 +1,20 @@
-import * as appInsights from "applicationinsights";
-import {
-  ApplicationInsightsConfig,
-  initAppInsights as startAppInsights
-} from "@pagopa/ts-commons/lib/appinsights";
-import { eventLog } from "@pagopa/winston-ts";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { pipe } from "fp-ts/lib/function";
-import * as O from "fp-ts/lib/Option";
-import { Request } from "express";
-import * as E from "fp-ts/lib/Either";
 import {
   sha256,
   validateDigestHeader
 } from "@pagopa/io-functions-commons/dist/src/utils/crypto";
+import {
+  ApplicationInsightsConfig,
+  initAppInsights as startAppInsights
+} from "@pagopa/ts-commons/lib/appinsights";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { withoutUndefinedValues } from "@pagopa/ts-commons/lib/types";
+import { eventLog } from "@pagopa/winston-ts";
+import * as appInsights from "applicationinsights";
+import { Request } from "express";
+import * as E from "fp-ts/lib/Either";
+import * as O from "fp-ts/lib/Option";
+import { pipe } from "fp-ts/lib/function";
+
 import { LollipopLocalsType } from "../types/lollipop";
 import { toFiscalCodeHash } from "../types/notification";
 import { User } from "../types/user";

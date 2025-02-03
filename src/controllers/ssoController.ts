@@ -1,13 +1,14 @@
 /**
  * This controller handles requests made from MyPortal.
  */
-import { Request } from "express";
 import {
   IResponseErrorInternal,
   IResponseErrorValidation,
   IResponseSuccessJson,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
+import { Request } from "express";
+
 import { MyPortalUser } from "../../generated/myportal/MyPortalUser";
 import { withUserFromRequest } from "../types/user";
 import { withValidatedOrInternalError } from "../utils/responses";

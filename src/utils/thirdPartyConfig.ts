@@ -1,9 +1,7 @@
 /* eslint-disable sort-keys */
 
-import * as t from "io-ts";
-
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-
+import * as t from "io-ts";
 import { BooleanFromString, JsonFromString, withFallback } from "io-ts-types";
 
 export const ClientCert = t.interface({

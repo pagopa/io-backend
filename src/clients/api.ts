@@ -1,5 +1,5 @@
-import nodeFetch from "node-fetch";
 import { Client, createClient } from "@pagopa/io-functions-app-sdk/client";
+import nodeFetch from "node-fetch";
 
 export function APIClient(
   baseUrl: string,

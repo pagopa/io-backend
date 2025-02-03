@@ -1,4 +1,5 @@
 import nodeFetch from "node-fetch";
+
 import { Client, createClient } from "../../generated/io-bonus-api/client";
 
 export function BonusAPIClient(

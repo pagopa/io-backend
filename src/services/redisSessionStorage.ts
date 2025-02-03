@@ -2,28 +2,29 @@
  * This service uses the Redis client to store and retrieve session information.
  */
 
-import { isArray } from "util";
-import * as A from "fp-ts/lib/Array";
-import * as ROA from "fp-ts/lib/ReadonlyArray";
-import * as E from "fp-ts/lib/Either";
-import * as O from "fp-ts/lib/Option";
-import * as B from "fp-ts/lib/boolean";
-import * as R from "fp-ts/lib/Record";
-import * as TE from "fp-ts/lib/TaskEither";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
-import { TaskEither } from "fp-ts/lib/TaskEither";
+import * as A from "fp-ts/lib/Array";
+import * as E from "fp-ts/lib/Either";
 import { Either } from "fp-ts/lib/Either";
-import { Option } from "fp-ts/lib/Option";
-import { flow, pipe, identity } from "fp-ts/lib/function";
 import { NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
-import {
-  NullableBackendAssertionRefFromString,
-  LollipopData
-} from "../types/assertionRef";
+import * as O from "fp-ts/lib/Option";
+import { Option } from "fp-ts/lib/Option";
+import * as ROA from "fp-ts/lib/ReadonlyArray";
+import * as R from "fp-ts/lib/Record";
+import * as TE from "fp-ts/lib/TaskEither";
+import { TaskEither } from "fp-ts/lib/TaskEither";
+import * as B from "fp-ts/lib/boolean";
+import { flow, identity, pipe } from "fp-ts/lib/function";
+import { isArray } from "util";
+
 import { AssertionRef as BackendAssertionRef } from "../../generated/backend/AssertionRef";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
 import { SessionsList } from "../../generated/backend/SessionsList";
+import {
+  LollipopData,
+  NullableBackendAssertionRefFromString
+} from "../types/assertionRef";
 import { assertUnreachable } from "../types/commons";
 import {
   BPDToken,
@@ -34,8 +35,8 @@ import {
   ZendeskToken
 } from "../types/token";
 import { User, UserV1, UserV2, UserV3, UserV4, UserV5 } from "../types/user";
-import { log } from "../utils/logger";
 import { ActiveSessionInfo, LoginTypeEnum } from "../utils/fastLogin";
+import { log } from "../utils/logger";
 import { RedisClientMode, RedisClientSelectorType } from "../utils/redis";
 import { ISessionStorage } from "./ISessionStorage";
 import RedisStorageUtils from "./redisStorageUtils";

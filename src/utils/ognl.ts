@@ -1,7 +1,7 @@
-import { pipe } from "fp-ts/function";
-import * as R from "fp-ts/Record";
-import * as t from "io-ts";
 import * as E from "fp-ts/Either";
+import * as R from "fp-ts/Record";
+import { pipe } from "fp-ts/function";
+import * as t from "io-ts";
 
 /**
  * Porting of lodash "set" function.

@@ -1,21 +1,22 @@
-import { Request, Response, NextFunction } from "express";
-import * as TE from "fp-ts/TaskEither";
-import { pipe } from "fp-ts/lib/function";
 import { ResponseErrorInternal } from "@pagopa/ts-commons/lib/responses";
+import { NextFunction, Request, Response } from "express";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
+import * as TE from "fp-ts/TaskEither";
+import { pipe } from "fp-ts/lib/function";
+
+import { LollipopApiClient } from "../../clients/lollipop";
+import { ISessionStorage } from "../../services/ISessionStorage";
+import { withLollipopHeadersFromRequest } from "../../types/lollipop";
 import {
   withOptionalUserFromRequest,
   withUserFromRequest
 } from "../../types/user";
-import { LollipopApiClient } from "../../clients/lollipop";
-import { withLollipopHeadersFromRequest } from "../../types/lollipop";
 import { log } from "../logger";
 import {
   extractLollipopLocalsFromLollipopHeaders,
   extractLollipopLocalsFromLollipopHeadersLegacy
 } from "../lollipop";
-import { ISessionStorage } from "../../services/ISessionStorage";
 
 /**
  * @deprecated

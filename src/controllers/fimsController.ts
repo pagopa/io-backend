@@ -3,10 +3,6 @@
  * app by forwarding the call to the API system.
  */
 
-import * as express from "express";
-import * as TE from "fp-ts/TaskEither";
-import * as t from "io-ts";
-
 import {
   IResponseErrorConflict,
   IResponseErrorInternal,
@@ -15,18 +11,17 @@ import {
   IResponseSuccessJson,
   ResponseErrorInternal
 } from "@pagopa/ts-commons/lib/responses";
-
-import { pipe } from "fp-ts/lib/function";
 import { EmailString, FiscalCode } from "@pagopa/ts-commons/lib/strings";
-
+import * as express from "express";
+import * as TE from "fp-ts/TaskEither";
+import { pipe } from "fp-ts/lib/function";
 import { AccessHistoryPage } from "generated/io-fims/AccessHistoryPage";
 import { ExportRequest } from "generated/io-fims/ExportRequest";
+import * as t from "io-ts";
 
 import IoFimsService from "../services/fimsService";
-
-import { withUserFromRequest } from "../types/user";
 import ProfileService from "../services/profileService";
-
+import { withUserFromRequest } from "../types/user";
 import { profileWithEmailValidatedOrError } from "../utils/profile";
 
 const responseErrorInternal = (reason: string) => (e: Error) =>

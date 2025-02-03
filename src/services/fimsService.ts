@@ -14,14 +14,11 @@ import {
   ResponseSuccessAccepted,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-
 import { EmailString, FiscalCode } from "@pagopa/ts-commons/lib/strings";
-
 import { AccessHistoryPage } from "generated/io-fims-api/AccessHistoryPage";
 import { ExportRequest } from "generated/io-fims-api/ExportRequest";
 
 import { IoFimsAPIClient } from "../clients/io-fims";
-
 import {
   ResponseErrorStatusNotDefinedInSpec,
   withCatchAsInternalError,

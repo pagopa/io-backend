@@ -2,15 +2,16 @@
  * Interface for the session storage services.
  */
 
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { Either } from "fp-ts/lib/Either";
 import { Option } from "fp-ts/lib/Option";
-import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
+
 import { AssertionRef as BackendAssertionRef } from "../../generated/backend/AssertionRef";
+import { LollipopData } from "../types/assertionRef";
 import { MyPortalToken, SessionToken } from "../types/token";
 import { User } from "../types/user";
-import { LollipopData } from "../types/assertionRef";
 import { ActiveSessionInfo } from "../utils/fastLogin";
 
 export interface ISessionStorage {

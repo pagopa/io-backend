@@ -1,8 +1,9 @@
-import * as redis from "redis";
 import * as appInsights from "applicationinsights";
-import { pipe } from "fp-ts/lib/function";
-import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as O from "fp-ts/lib/Option";
+import * as RA from "fp-ts/lib/ReadonlyArray";
+import { pipe } from "fp-ts/lib/function";
+import * as redis from "redis";
+
 import { keyPrefixes } from "../services/redisSessionStorage";
 import { log } from "./logger";
 

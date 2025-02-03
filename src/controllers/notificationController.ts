@@ -2,25 +2,23 @@
  * This controller handles webhook requests from the API backend.
  */
 
-import * as express from "express";
 import {
   IResponseErrorInternal,
   IResponseErrorValidation,
   IResponseSuccessJson,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-
+import { Millisecond } from "@pagopa/ts-commons/lib/units";
+import * as express from "express";
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
-import { Millisecond } from "@pagopa/ts-commons/lib/units";
 import { pipe } from "fp-ts/lib/function";
 import { NotificationServiceFactory } from "src/services/notificationServiceFactory";
+
 import { Installation } from "../../generated/backend/Installation";
 import { InstallationID } from "../../generated/backend/InstallationID";
-
 import { Notification } from "../../generated/notifications/Notification";
 import { SuccessResponse } from "../../generated/notifications/SuccessResponse";
-
 import RedisSessionStorage from "../services/redisSessionStorage";
 import { withUserFromRequest } from "../types/user";
 import { log } from "../utils/logger";

@@ -1,10 +1,11 @@
 import * as A from "fp-ts/lib/Array";
-import { pipe } from "fp-ts/lib/function";
 import * as T from "fp-ts/lib/Task";
 import { Task } from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
+import { pipe } from "fp-ts/lib/function";
 import { MessageAttachment } from "generated/backend/MessageAttachment";
 import { PrescriptionData } from "generated/backend/PrescriptionData";
+
 import { toBarcode } from "./barcode";
 
 const MIME_TYPES = {

@@ -3,12 +3,8 @@
  * app by forwarding the call to the API system.
  */
 
-import * as express from "express";
-import * as TE from "fp-ts/TaskEither";
-import * as E from "fp-ts/Either";
-
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import {
-  getResponseErrorForbiddenNotAuthorized,
   IResponseErrorForbiddenNotAuthorized,
   IResponseErrorGeneric,
   IResponseErrorInternal,
@@ -17,24 +13,26 @@ import {
   IResponseErrorValidation,
   IResponseSuccessJson,
   IResponseSuccessNoContent,
-  ResponseErrorValidation
+  ResponseErrorValidation,
+  getResponseErrorForbiddenNotAuthorized
 } from "@pagopa/ts-commons/lib/responses";
-
-import { pipe } from "fp-ts/lib/function";
-import { sequenceS } from "fp-ts/lib/Apply";
-import { Errors } from "io-ts";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import IoWalletService from "../services/ioWalletService";
+import * as express from "express";
+import * as E from "fp-ts/Either";
+import * as TE from "fp-ts/TaskEither";
+import { sequenceS } from "fp-ts/lib/Apply";
+import { pipe } from "fp-ts/lib/function";
+import { Errors } from "io-ts";
 
-import { NonceDetailView } from "../../generated/io-wallet/NonceDetailView";
-import { withUserFromRequest } from "../types/user";
-import { CreateWalletInstanceBody } from "../../generated/io-wallet/CreateWalletInstanceBody";
 import { CreateWalletAttestationBody } from "../../generated/io-wallet/CreateWalletAttestationBody";
-import { WalletAttestationView } from "../../generated/io-wallet/WalletAttestationView";
-import { FF_IO_WALLET_TRIAL_ENABLED } from "../config";
+import { CreateWalletInstanceBody } from "../../generated/io-wallet/CreateWalletInstanceBody";
+import { NonceDetailView } from "../../generated/io-wallet/NonceDetailView";
 import { SetWalletInstanceStatusBody } from "../../generated/io-wallet/SetWalletInstanceStatusBody";
+import { WalletAttestationView } from "../../generated/io-wallet/WalletAttestationView";
 import { WalletInstanceData } from "../../generated/io-wallet/WalletInstanceData";
+import { FF_IO_WALLET_TRIAL_ENABLED } from "../config";
+import IoWalletService from "../services/ioWalletService";
+import { withUserFromRequest } from "../types/user";
 
 const toValidationError = (errors: Errors) =>
   ResponseErrorValidation(

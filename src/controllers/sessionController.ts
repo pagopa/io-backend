@@ -2,7 +2,6 @@
  * This controller returns data about the current user session
  */
 
-import * as express from "express";
 import {
   IResponseErrorInternal,
   IResponseErrorValidation,
@@ -10,7 +9,9 @@ import {
   ResponseErrorInternal,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
+import * as express from "express";
 import * as E from "fp-ts/lib/Either";
+
 import { SessionsList } from "../../generated/backend/SessionsList";
 import RedisSessionStorage from "../services/redisSessionStorage";
 import { withUserFromRequest } from "../types/user";

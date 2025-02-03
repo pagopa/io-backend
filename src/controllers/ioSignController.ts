@@ -3,12 +3,7 @@
  * app by forwarding the call to the API system.
  */
 
-import * as express from "express";
-import * as TE from "fp-ts/TaskEither";
-import * as E from "fp-ts/Either";
-import * as t from "io-ts";
-import { sequenceS } from "fp-ts/lib/Apply";
-
+import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
@@ -18,37 +13,38 @@ import {
   ResponseErrorInternal,
   ResponseErrorValidation
 } from "@pagopa/ts-commons/lib/responses";
-
-import { pipe } from "fp-ts/lib/function";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
+import * as express from "express";
+import * as E from "fp-ts/Either";
+import * as TE from "fp-ts/TaskEither";
+import { sequenceS } from "fp-ts/lib/Apply";
+import { pipe } from "fp-ts/lib/function";
+import * as t from "io-ts";
 import { Errors } from "io-ts";
-import {
-  withValidatedOrValidationError,
-  withCatchAsInternalError
-} from "../utils/responses";
+
+import { CreateFilledDocument } from "../../generated/io-sign/CreateFilledDocument";
+import { CreateSignatureBody } from "../../generated/io-sign/CreateSignatureBody";
+import { FilledDocumentDetailView } from "../../generated/io-sign/FilledDocumentDetailView";
+import { Id } from "../../generated/io-sign/Id";
 import {
   IssuerEnvironment,
   IssuerEnvironmentEnum
 } from "../../generated/io-sign/IssuerEnvironment";
-import IoSignService from "../services/ioSignService";
-import { ResLocals } from "../utils/express";
-import { LollipopLocalsType, withLollipopLocals } from "../types/lollipop";
-import { Id } from "../../generated/io-sign/Id";
 import { QtspClausesMetadataDetailView } from "../../generated/io-sign/QtspClausesMetadataDetailView";
 import { SignatureDetailView } from "../../generated/io-sign/SignatureDetailView";
 import { SignatureRequestDetailView } from "../../generated/io-sign/SignatureRequestDetailView";
-import { SignerDetailView } from "../../generated/io-sign-api/SignerDetailView";
 import { SignatureRequestList } from "../../generated/io-sign-api/SignatureRequestList";
-import { FilledDocumentDetailView } from "../../generated/io-sign/FilledDocumentDetailView";
-
-import { CreateFilledDocument } from "../../generated/io-sign/CreateFilledDocument";
-import { CreateSignatureBody } from "../../generated/io-sign/CreateSignatureBody";
-
-import { withUserFromRequest } from "../types/user";
+import { SignerDetailView } from "../../generated/io-sign-api/SignerDetailView";
+import IoSignService from "../services/ioSignService";
 import ProfileService from "../services/profileService";
-
+import { LollipopLocalsType, withLollipopLocals } from "../types/lollipop";
+import { withUserFromRequest } from "../types/user";
+import { ResLocals } from "../utils/express";
 import { profileWithEmailValidatedOrError } from "../utils/profile";
+import {
+  withCatchAsInternalError,
+  withValidatedOrValidationError
+} from "../utils/responses";
 
 const responseErrorValidation = (errs: Errors) =>
   ResponseErrorValidation(

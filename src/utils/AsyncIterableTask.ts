@@ -1,13 +1,12 @@
-import * as T from "fp-ts/lib/Task";
-import * as TE from "fp-ts/lib/TaskEither";
-
 import {
-  asyncIterableToPageArray,
   IPage,
+  asyncIterableToPageArray,
   mapAsyncIterator
 } from "@pagopa/io-functions-commons/dist/src/utils/async";
-import { pipe } from "fp-ts/lib/function";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+import * as T from "fp-ts/lib/Task";
+import * as TE from "fp-ts/lib/TaskEither";
+import { pipe } from "fp-ts/lib/function";
 
 /**
  * @category model

@@ -3,20 +3,19 @@
  * validate and convert type to and from them.
  */
 
+import { IResponseErrorValidation } from "@pagopa/ts-commons/lib/responses";
 import * as express from "express";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
-import * as t from "io-ts";
-import { IResponseErrorValidation } from "@pagopa/ts-commons/lib/responses";
-
 import { pipe } from "fp-ts/lib/function";
-import { EmailAddress } from "../../generated/backend/EmailAddress";
-import { FiscalCode } from "../../generated/backend/FiscalCode";
-import { SpidLevel } from "../../generated/backend/SpidLevel";
+import * as t from "io-ts";
 
 import { CieUserIdentity } from "../../generated/auth/CieUserIdentity";
 import { SpidUserIdentity } from "../../generated/auth/SpidUserIdentity";
 import { UserIdentity } from "../../generated/auth/UserIdentity";
+import { EmailAddress } from "../../generated/backend/EmailAddress";
+import { FiscalCode } from "../../generated/backend/FiscalCode";
+import { SpidLevel } from "../../generated/backend/SpidLevel";
 import { withValidatedOrValidationError } from "../utils/responses";
 import {
   BPDToken,

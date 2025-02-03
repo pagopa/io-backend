@@ -16,37 +16,33 @@ import {
   ResponseSuccessJson,
   ResponseSuccessRedirectToResource
 } from "@pagopa/ts-commons/lib/responses";
-
-import * as O from "fp-ts/lib/Option";
-import { flow, pipe } from "fp-ts/lib/function";
-
-import * as t from "io-ts";
-
 import {
   EmailString,
   FiscalCode,
   NonEmptyString
 } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/Either";
-import { CreateSignatureBody as CreateSignatureBodyApiModel } from "../../generated/io-sign-api/CreateSignatureBody";
-import { IssuerEnvironment } from "../../generated/io-sign/IssuerEnvironment";
-import { SignerDetailView } from "../../generated/io-sign-api/SignerDetailView";
-import { SignatureRequestList } from "../../generated/io-sign-api/SignatureRequestList";
+import * as O from "fp-ts/lib/Option";
+import { flow, pipe } from "fp-ts/lib/function";
+import * as t from "io-ts";
+
 import { FilledDocumentDetailView } from "../../generated/io-sign/FilledDocumentDetailView";
 import { Id } from "../../generated/io-sign/Id";
-
+import { IssuerEnvironment } from "../../generated/io-sign/IssuerEnvironment";
 import { QtspClausesMetadataDetailView } from "../../generated/io-sign/QtspClausesMetadataDetailView";
-
 import { SignatureDetailView } from "../../generated/io-sign/SignatureDetailView";
 import { SignatureRequestDetailView } from "../../generated/io-sign/SignatureRequestDetailView";
+import { CreateSignatureBody as CreateSignatureBodyApiModel } from "../../generated/io-sign-api/CreateSignatureBody";
+import { SignatureRequestList } from "../../generated/io-sign-api/SignatureRequestList";
+import { SignerDetailView } from "../../generated/io-sign-api/SignerDetailView";
 import { IoSignAPIClient } from "../clients/io-sign";
+import { IoSignLollipopLocalsType } from "../controllers/ioSignController";
+import { readableProblem } from "../utils/errorsFormatter";
 import {
   ResponseErrorStatusNotDefinedInSpec,
   withCatchAsInternalError,
   withValidatedOrInternalError
 } from "../utils/responses";
-import { readableProblem } from "../utils/errorsFormatter";
-import { IoSignLollipopLocalsType } from "../controllers/ioSignController";
 import { ResponseErrorNotFound403 } from "./eucovidcertService";
 
 const internalServerError = "Internal server error";

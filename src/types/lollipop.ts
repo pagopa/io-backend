@@ -1,35 +1,36 @@
-import * as t from "io-ts";
+import {
+  IResponseErrorValidation,
+  ResponseErrorValidation
+} from "@pagopa/ts-commons/lib/responses";
 import {
   FiscalCode,
   NonEmptyString,
   PatternString
 } from "@pagopa/ts-commons/lib/strings";
 import * as express from "express";
-import {
-  IResponseErrorValidation,
-  ResponseErrorValidation
-} from "@pagopa/ts-commons/lib/responses";
 import * as E from "fp-ts/Either";
-import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
+import { pipe } from "fp-ts/lib/function";
+import * as t from "io-ts";
+
+import { AssertionRefSha256 } from "../../generated/backend/AssertionRefSha256";
+import { AssertionRefSha384 } from "../../generated/backend/AssertionRefSha384";
+import { AssertionRefSha512 } from "../../generated/backend/AssertionRefSha512";
+import { LollipopContentDigest } from "../../generated/lollipop/LollipopContentDigest";
+import { LollipopMethod } from "../../generated/lollipop/LollipopMethod";
+import { LollipopOriginalURL } from "../../generated/lollipop/LollipopOriginalURL";
+import { LollipopSignature } from "../../generated/lollipop/LollipopSignature";
+import { LollipopSignatureInput } from "../../generated/lollipop/LollipopSignatureInput";
+import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
+import { AssertionType } from "../../generated/lollipop-api/AssertionType";
 import {
   JwkPubKeyHashAlgorithm,
   JwkPubKeyHashAlgorithmEnum
 } from "../../generated/lollipop-api/JwkPubKeyHashAlgorithm";
-import { AssertionRefSha256 } from "../../generated/backend/AssertionRefSha256";
-import { AssertionRefSha384 } from "../../generated/backend/AssertionRefSha384";
-import { AssertionRefSha512 } from "../../generated/backend/AssertionRefSha512";
-import { withValidatedOrValidationError } from "../utils/responses";
-import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
-import { AssertionType } from "../../generated/lollipop-api/AssertionType";
 import { JwkPubKeyToken } from "../../generated/lollipop-api/JwkPubKeyToken";
-import { ResLocals } from "../utils/express";
-import { LollipopMethod } from "../../generated/lollipop/LollipopMethod";
-import { LollipopOriginalURL } from "../../generated/lollipop/LollipopOriginalURL";
-import { LollipopSignature } from "../../generated/lollipop/LollipopSignature";
-import { LollipopContentDigest } from "../../generated/lollipop/LollipopContentDigest";
-import { LollipopSignatureInput } from "../../generated/lollipop/LollipopSignatureInput";
 import LollipopService from "../services/lollipopService";
+import { ResLocals } from "../utils/express";
+import { withValidatedOrValidationError } from "../utils/responses";
 
 export interface LollipopParams {
   readonly isLollipopEnabled: boolean;

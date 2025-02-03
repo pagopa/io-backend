@@ -2,6 +2,12 @@
  * This service interactsnwith the Bonus API
  */
 
+import { Card } from "@pagopa/io-functions-cgn-sdk/Card";
+import { CgnActivationDetail } from "@pagopa/io-functions-cgn-sdk/CgnActivationDetail";
+import { EycaActivationDetail } from "@pagopa/io-functions-cgn-sdk/EycaActivationDetail";
+import { EycaCard } from "@pagopa/io-functions-cgn-sdk/EycaCard";
+import { InstanceId } from "@pagopa/io-functions-cgn-sdk/InstanceId";
+import { Otp } from "@pagopa/io-functions-cgn-sdk/Otp";
 import {
   IResponseErrorConflict,
   IResponseErrorForbiddenNotAuthorized,
@@ -19,24 +25,18 @@ import {
   ResponseSuccessJson,
   ResponseSuccessRedirectToResource
 } from "@pagopa/ts-commons/lib/responses";
-
 import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
-import { EycaActivationDetail } from "@pagopa/io-functions-cgn-sdk/EycaActivationDetail";
-import { EycaCard } from "@pagopa/io-functions-cgn-sdk/EycaCard";
-import { InstanceId } from "@pagopa/io-functions-cgn-sdk/InstanceId";
-import { CgnActivationDetail } from "@pagopa/io-functions-cgn-sdk/CgnActivationDetail";
-import { Card } from "@pagopa/io-functions-cgn-sdk/Card";
-import { Otp } from "@pagopa/io-functions-cgn-sdk/Otp";
+
 import { CgnAPIClient } from "../../src/clients/cgn";
 import { User } from "../types/user";
+import { readableProblem } from "../utils/errorsFormatter";
 import {
   ResponseErrorStatusNotDefinedInSpec,
   ResponseErrorUnexpectedAuthProblem,
   withCatchAsInternalError,
   withValidatedOrInternalError
 } from "../utils/responses";
-import { readableProblem } from "../utils/errorsFormatter";
 export default class CgnService {
   constructor(private readonly cgnApiClient: ReturnType<CgnAPIClient>) {}
 

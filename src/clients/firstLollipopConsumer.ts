@@ -1,7 +1,8 @@
 import * as nodeFetch from "node-fetch";
+
 import {
-  createClient,
-  Client
+  Client,
+  createClient
 } from "../../generated/lollipop-first-consumer/client";
 
 export function FirstLollipopConsumerClient(

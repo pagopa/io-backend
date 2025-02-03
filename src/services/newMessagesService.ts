@@ -1,56 +1,67 @@
 /**
  * This service retrieves messages from the API system using an API client.
  */
-import * as t from "io-ts";
-import nodeFetch from "node-fetch";
 import {
+  IResponseErrorBadGateway,
   IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
-  IResponseErrorServiceUnavailable,
   IResponseErrorNotFound,
+  IResponseErrorServiceUnavailable,
   IResponseErrorTooManyRequests,
   IResponseErrorValidation,
   IResponseSuccessJson,
-  ResponseErrorNotFound,
-  ResponseErrorTooManyRequests,
-  ResponseSuccessJson,
-  ResponseErrorForbiddenNotAuthorized,
-  ResponseErrorInternal,
-  ResponseErrorValidation,
-  ResponseErrorServiceTemporarilyUnavailable,
   IResponseSuccessNoContent,
   ResponseErrorBadGateway,
-  IResponseErrorBadGateway
+  ResponseErrorForbiddenNotAuthorized,
+  ResponseErrorInternal,
+  ResponseErrorNotFound,
+  ResponseErrorServiceTemporarilyUnavailable,
+  ResponseErrorTooManyRequests,
+  ResponseErrorValidation,
+  ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-import { AppMessagesAPIClient } from "src/clients/app-messages.client";
 import {
   FiscalCode,
   NonEmptyString,
   Ulid
 } from "@pagopa/ts-commons/lib/strings";
-import { pipe, flow } from "fp-ts/lib/function";
-import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import * as T from "fp-ts/Task";
-import { LollipopLocalsType } from "src/types/lollipop";
+import * as TE from "fp-ts/TaskEither";
+import { flow, pipe } from "fp-ts/lib/function";
 import { RCConfigurationPublic } from "generated/io-messages-api/RCConfigurationPublic";
+import * as t from "io-ts";
+import nodeFetch from "node-fetch";
+import { AppMessagesAPIClient } from "src/clients/app-messages.client";
+import { LollipopLocalsType } from "src/types/lollipop";
+
+import { CreatedMessageWithContentAndAttachments } from "../../generated/backend/CreatedMessageWithContentAndAttachments";
+import { InvalidThirdPartyMessageTypeEnum } from "../../generated/backend/InvalidThirdPartyMessageType";
+import { MessageBodyMarkdown } from "../../generated/backend/MessageBodyMarkdown";
+import { MessageSubject } from "../../generated/backend/MessageSubject";
+import { ThirdPartyData } from "../../generated/backend/ThirdPartyData";
+import { ThirdPartyMessagePrecondition } from "../../generated/backend/ThirdPartyMessagePrecondition";
+import { ThirdPartyMessageWithContent } from "../../generated/backend/ThirdPartyMessageWithContent";
+import { CreatedMessageWithContent } from "../../generated/io-messages-api/CreatedMessageWithContent";
+import { MessageStatusAttributes } from "../../generated/io-messages-api/MessageStatusAttributes";
+import { MessageStatusChange } from "../../generated/io-messages-api/MessageStatusChange";
+import { PaginatedPublicMessagesCollection } from "../../generated/io-messages-api/PaginatedPublicMessagesCollection";
+import { GetMessageParameters } from "../../generated/parameters/GetMessageParameters";
+import { GetMessagesParameters } from "../../generated/parameters/GetMessagesParameters";
+import {
+  ThirdPartyMessage,
+  ThirdPartyMessageDetails
+} from "../../generated/third-party-service/ThirdPartyMessage";
 import {
   Fetch,
   getThirdPartyServiceClient
 } from "../clients/third-party-service-client";
 import { PN_SERVICE_ID } from "../config";
-import { MessageSubject } from "../../generated/backend/MessageSubject";
-import { InvalidThirdPartyMessageTypeEnum } from "../../generated/backend/InvalidThirdPartyMessageType";
-import { CreatedMessageWithContent } from "../../generated/io-messages-api/CreatedMessageWithContent";
-import { PaginatedPublicMessagesCollection } from "../../generated/io-messages-api/PaginatedPublicMessagesCollection";
-import { GetMessageParameters } from "../../generated/parameters/GetMessageParameters";
-import { GetMessagesParameters } from "../../generated/parameters/GetMessagesParameters";
-import { ThirdPartyMessageWithContent } from "../../generated/backend/ThirdPartyMessageWithContent";
-import { ThirdPartyMessagePrecondition } from "../../generated/backend/ThirdPartyMessagePrecondition";
-import { CreatedMessageWithContentAndAttachments } from "../../generated/backend/CreatedMessageWithContentAndAttachments";
-import { getPrescriptionAttachments } from "../utils/attachments";
 import { User } from "../types/user";
+import { getPrescriptionAttachments } from "../utils/attachments";
+import { FileType, getIsFileTypeForTypes } from "../utils/file-type";
+import { log } from "../utils/logger";
 import {
   IResponseErrorUnsupportedMediaType,
   IResponseSuccessOctet,
@@ -63,16 +74,6 @@ import {
   withValidatedOrInternalError,
   wrapValidationWithInternalError
 } from "../utils/responses";
-import { MessageStatusChange } from "../../generated/io-messages-api/MessageStatusChange";
-import { MessageStatusAttributes } from "../../generated/io-messages-api/MessageStatusAttributes";
-import {
-  ThirdPartyMessage,
-  ThirdPartyMessageDetails
-} from "../../generated/third-party-service/ThirdPartyMessage";
-import { ThirdPartyData } from "../../generated/backend/ThirdPartyData";
-import { log } from "../utils/logger";
-import { FileType, getIsFileTypeForTypes } from "../utils/file-type";
-import { MessageBodyMarkdown } from "../../generated/backend/MessageBodyMarkdown";
 
 const ALLOWED_TYPES: ReadonlySet<FileType> = new Set(["pdf"]);
 

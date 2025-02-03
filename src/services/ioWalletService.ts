@@ -3,7 +3,6 @@
  */
 
 import {
-  getResponseErrorForbiddenNotAuthorized,
   IResponseErrorForbiddenNotAuthorized,
   IResponseErrorGeneric,
   IResponseErrorInternal,
@@ -16,26 +15,27 @@ import {
   ResponseErrorNotFound,
   ResponseErrorServiceTemporarilyUnavailable,
   ResponseSuccessJson,
-  ResponseSuccessNoContent
+  ResponseSuccessNoContent,
+  getResponseErrorForbiddenNotAuthorized
 } from "@pagopa/ts-commons/lib/responses";
-
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { NonceDetailView } from "generated/io-wallet-api/NonceDetailView";
-import { Grant_typeEnum } from "generated/io-wallet-api/CreateWalletAttestationBody";
-import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
+import { pipe } from "fp-ts/lib/function";
+import { Grant_typeEnum } from "generated/io-wallet-api/CreateWalletAttestationBody";
+import { NonceDetailView } from "generated/io-wallet-api/NonceDetailView";
+
+import { SetWalletInstanceStatusWithFiscalCodeData } from "../../generated/io-wallet-api/SetWalletInstanceStatusWithFiscalCodeData";
+import { WalletAttestationView } from "../../generated/io-wallet-api/WalletAttestationView";
+import { WalletInstanceData } from "../../generated/io-wallet-api/WalletInstanceData";
+import { Subscription } from "../../generated/trial-system-api/Subscription";
 import { IoWalletAPIClient } from "../clients/io-wallet";
+import { TrialSystemAPIClient } from "../clients/trial-system.client";
+import { IO_WALLET_TRIAL_ID } from "../config";
 import {
   ResponseErrorStatusNotDefinedInSpec,
   withCatchAsInternalError,
   withValidatedOrInternalError
 } from "../utils/responses";
-import { IO_WALLET_TRIAL_ID } from "../config";
-import { TrialSystemAPIClient } from "../clients/trial-system.client";
-import { Subscription } from "../../generated/trial-system-api/Subscription";
-import { WalletAttestationView } from "../../generated/io-wallet-api/WalletAttestationView";
-import { SetWalletInstanceStatusWithFiscalCodeData } from "../../generated/io-wallet-api/SetWalletInstanceStatusWithFiscalCodeData";
-import { WalletInstanceData } from "../../generated/io-wallet-api/WalletInstanceData";
 
 const unprocessableContentError = "Unprocessable Content";
 const invalidRequest = "Your request didn't validate";

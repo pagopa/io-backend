@@ -2,7 +2,7 @@
  * This controller returns data about the current user session
  */
 
-import * as express from "express";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import {
   IResponseErrorConflict,
   IResponseErrorForbiddenNotAuthorized,
@@ -15,39 +15,38 @@ import {
   ResponseErrorValidation,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-import * as E from "fp-ts/lib/Either";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import { addSeconds } from "date-fns";
+import * as express from "express";
 import * as AP from "fp-ts/lib/Apply";
-import * as TE from "fp-ts/lib/TaskEither";
+import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as ROA from "fp-ts/lib/ReadonlyArray";
-
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
-import { pipe, flow, constVoid } from "fp-ts/lib/function";
 import { ReadonlyNonEmptyArray } from "fp-ts/lib/ReadonlyNonEmptyArray";
+import * as TE from "fp-ts/lib/TaskEither";
+import { constVoid, flow, pipe } from "fp-ts/lib/function";
 import { OutputOf } from "io-ts";
-import { addSeconds } from "date-fns";
+
+import { AuthLockBody } from "../../generated/session/AuthLockBody";
+import { AuthUnlockBody } from "../../generated/session/AuthUnlockBody";
+import { TypeEnum as LoginTypeEnum } from "../../generated/session/SessionInfo";
+import { SessionState } from "../../generated/session/SessionState";
+import { UnlockCode } from "../../generated/session/UnlockCode";
+import { UserSessionInfo } from "../../generated/session/UserSessionInfo";
+import AuthenticationLockService, {
+  NotReleasedAuthenticationLockData
+} from "../services/authenticationLockService";
+import LollipopService from "../services/lollipopService";
+import { NotificationServiceFactory } from "../services/notificationServiceFactory";
+import RedisSessionStorage from "../services/redisSessionStorage";
+import RedisUserMetadataStorage from "../services/redisUserMetadataStorage";
+import { SuccessResponse } from "../types/commons";
+import { withFiscalCodeFromRequestParams } from "../types/fiscalCode";
 import {
   IResponseNoContent,
   ResponseNoContent,
   withValidatedOrValidationError
 } from "../utils/responses";
-import { SuccessResponse } from "../types/commons";
-import LollipopService from "../services/lollipopService";
-import { withFiscalCodeFromRequestParams } from "../types/fiscalCode";
-import RedisSessionStorage from "../services/redisSessionStorage";
-import RedisUserMetadataStorage from "../services/redisUserMetadataStorage";
-import AuthenticationLockService, {
-  NotReleasedAuthenticationLockData
-} from "../services/authenticationLockService";
-import { NotificationServiceFactory } from "../services/notificationServiceFactory";
-
-import { UserSessionInfo } from "../../generated/session/UserSessionInfo";
-import { AuthLockBody } from "../../generated/session/AuthLockBody";
-import { AuthUnlockBody } from "../../generated/session/AuthUnlockBody";
-import { SessionState } from "../../generated/session/SessionState";
-import { TypeEnum as LoginTypeEnum } from "../../generated/session/SessionInfo";
-import { UnlockCode } from "../../generated/session/UnlockCode";
 
 const ERROR_CHECK_USER_AUTH_LOCK =
   "Something went wrong while checking the user authentication lock";

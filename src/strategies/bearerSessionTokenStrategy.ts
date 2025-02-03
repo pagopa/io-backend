@@ -8,10 +8,11 @@ import { Either } from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { Option } from "fp-ts/lib/Option";
 import * as passport from "passport-http-bearer";
+
 import { ISessionStorage } from "../services/ISessionStorage";
 import { SessionToken } from "../types/token";
 import { User } from "../types/user";
-import { fulfill, StrategyDoneFunction } from "../utils/strategies";
+import { StrategyDoneFunction, fulfill } from "../utils/strategies";
 
 const bearerSessionTokenStrategy = (
   sessionStorage: ISessionStorage,

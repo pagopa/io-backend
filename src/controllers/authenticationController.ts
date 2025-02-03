@@ -4,8 +4,6 @@
  * the IDP.
  */
 
-import * as express from "express";
-import * as E from "fp-ts/lib/Either";
 import {
   IResponseErrorInternal,
   IResponseErrorValidation,
@@ -13,10 +11,11 @@ import {
   ResponseErrorInternal,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-
+import * as express from "express";
+import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
-import { UserIdentity } from "../../generated/auth/UserIdentity";
 
+import { UserIdentity } from "../../generated/auth/UserIdentity";
 import { exactUserIdentityDecode, withUserFromRequest } from "../types/user";
 
 /**

@@ -2,33 +2,34 @@
  * This service retrieves messages from the API system using an API client.
  */
 import {
+  IResponseErrorConflict,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
-  ResponseErrorNotFound,
-  ResponseErrorInternal,
-  ResponseErrorValidation,
   IResponseSuccessAccepted,
-  IResponseSuccessRedirectToResource,
-  ResponseSuccessRedirectToResource,
-  ResponseSuccessAccepted,
-  ResponseErrorConflict,
-  IResponseErrorConflict,
   IResponseSuccessJson,
-  ResponseSuccessJson
+  IResponseSuccessRedirectToResource,
+  ResponseErrorConflict,
+  ResponseErrorInternal,
+  ResponseErrorNotFound,
+  ResponseErrorValidation,
+  ResponseSuccessAccepted,
+  ResponseSuccessJson,
+  ResponseSuccessRedirectToResource
 } from "@pagopa/ts-commons/lib/responses";
-import { TrialSystemAPIClient } from "src/clients/trial-system.client";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
+import { pipe } from "fp-ts/lib/function";
+import { TrialSystemAPIClient } from "src/clients/trial-system.client";
+
+import { Subscription } from "../../generated/trial-system/Subscription";
+import { TrialId } from "../../generated/trial-system-api/TrialId";
 import {
   ResponseErrorStatusNotDefinedInSpec,
   ResponseErrorUnexpectedAuthProblem,
   withCatchAsInternalError,
   withValidatedOrInternalError
 } from "../utils/responses";
-import { TrialId } from "../../generated/trial-system-api/TrialId";
-import { Subscription } from "../../generated/trial-system/Subscription";
 
 export default class TrialService {
   constructor(

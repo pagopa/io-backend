@@ -1,3 +1,5 @@
+import { Certificate } from "@pagopa/io-functions-eucovidcerts-sdk/Certificate";
+import { PreferredLanguages } from "@pagopa/io-functions-eucovidcerts-sdk/PreferredLanguages";
 import {
   HttpStatusCodeEnum,
   IResponseErrorForbiddenNotAuthorized,
@@ -11,18 +13,15 @@ import {
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 
-import { Certificate } from "@pagopa/io-functions-eucovidcerts-sdk/Certificate";
-import { PreferredLanguages } from "@pagopa/io-functions-eucovidcerts-sdk/PreferredLanguages";
-import { readableProblem } from "../utils/errorsFormatter";
 import { EUCovidCertAPIClient } from "../clients/eucovidcert.client";
-
+import { User } from "../types/user";
+import { readableProblem } from "../utils/errorsFormatter";
 import {
   ResponseErrorStatusNotDefinedInSpec,
   ResponseErrorUnexpectedAuthProblem,
   withCatchAsInternalError,
   withValidatedOrInternalError
 } from "../utils/responses";
-import { User } from "../types/user";
 
 /**
  * Returns a `504` `Gateway Timeout` error

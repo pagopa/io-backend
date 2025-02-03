@@ -6,19 +6,20 @@ import {
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import * as express from "express";
-import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
+import * as TE from "fp-ts/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+
+import { PNActivation } from "../../generated/api_piattaforma-notifiche-courtesy/PNActivation";
 import { PNEnvironment } from "../clients/pn-clients";
+import { PNService } from "../services/pnService";
 import { withUserFromRequest } from "../types/user";
 import {
   IResponseNoContent,
   ResponseNoContent,
   withValidatedOrValidationError
 } from "../utils/responses";
-import { PNActivation } from "../../generated/api_piattaforma-notifiche-courtesy/PNActivation";
-import { PNService } from "../services/pnService";
 
 /**
  * Upsert the Activation for `Avvisi di Cortesia` Piattaforma Notifiche

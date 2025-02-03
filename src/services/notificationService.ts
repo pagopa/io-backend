@@ -2,16 +2,16 @@
  * This service post a notification to the Notification queue.
  */
 
+import { QueueClient } from "@azure/storage-queue";
 import {
   IResponseErrorInternal,
   IResponseSuccessJson,
   ResponseErrorInternal,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-
-import { QueueClient } from "@azure/storage-queue";
 import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
+
 import { FiscalCode } from "../../generated/backend/FiscalCode";
 import { Installation } from "../../generated/backend/Installation";
 import {
@@ -29,7 +29,6 @@ import {
 } from "../../generated/messages/NotifyMessage";
 import { Notification } from "../../generated/notifications/Notification";
 import { SuccessResponse } from "../../generated/notifications/SuccessResponse";
-
 import { toFiscalCodeHash } from "../types/notification";
 import { base64EncodeObject } from "../utils/messages";
 

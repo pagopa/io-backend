@@ -13,7 +13,6 @@ import { PaymentActivationsGetResponse } from "../../generated/backend/PaymentAc
 import { PaymentActivationsPostResponse } from "../../generated/backend/PaymentActivationsPostResponse";
 import { PaymentRequestsGetResponse } from "../../generated/backend/PaymentRequestsGetResponse";
 import { PaymentActivationsPostRequest } from "../../generated/pagopa-proxy/PaymentActivationsPostRequest";
-
 import {
   ResponsePaymentError,
   withCatchAsInternalError,

@@ -1,6 +1,6 @@
 import { ValidUrl } from "@pagopa/ts-commons/lib/url";
-import { identity, pipe } from "fp-ts/lib/function";
 import * as E from "fp-ts/lib/Either";
+import { identity, pipe } from "fp-ts/lib/function";
 import * as S from "fp-ts/lib/string";
 
 export const stripTrailingSlashIfPresent = (aValidUrl: ValidUrl): string =>

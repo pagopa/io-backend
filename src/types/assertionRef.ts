@@ -1,10 +1,9 @@
-import * as t from "io-ts";
 import { pipe } from "fp-ts/lib/function";
+import * as t from "io-ts";
 import { JsonFromString } from "io-ts-types";
 
-import { LoginType } from "../utils/fastLogin";
-
 import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
+import { LoginType } from "../utils/fastLogin";
 
 // LollipopData
 export type LollipopData = t.TypeOf<typeof LollipopData>;

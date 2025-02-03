@@ -1,27 +1,28 @@
 /* eslint-disable max-params */
-import { URL } from "url";
-import { flow, pipe } from "fp-ts/lib/function";
-import * as t from "io-ts";
-import * as E from "fp-ts/Either";
-import * as TE from "fp-ts/TaskEither";
-import * as O from "fp-ts/Option";
+import { ProblemJson } from "@pagopa/ts-commons/lib/responses";
 import {
   FiscalCode,
   NonEmptyString,
   Ulid
 } from "@pagopa/ts-commons/lib/strings";
-import { ProblemJson } from "@pagopa/ts-commons/lib/responses";
-import { Response as NodeResponse } from "node-fetch";
-import { NotificationAttachmentDownloadMetadataResponse } from "generated/piattaforma-notifiche/NotificationAttachmentDownloadMetadataResponse";
-import { match } from "ts-pattern";
-import { LollipopLocalsType } from "src/types/lollipop";
-import { Fetch } from "src/clients/third-party-service-client";
-import nodeFetch from "node-fetch";
 import { eventLog } from "@pagopa/winston-ts";
+import * as E from "fp-ts/Either";
+import * as O from "fp-ts/Option";
+import * as TE from "fp-ts/TaskEither";
+import { flow, pipe } from "fp-ts/lib/function";
+import { NotificationAttachmentDownloadMetadataResponse } from "generated/piattaforma-notifiche/NotificationAttachmentDownloadMetadataResponse";
+import * as t from "io-ts";
+import { Response as NodeResponse } from "node-fetch";
+import nodeFetch from "node-fetch";
+import { Fetch } from "src/clients/third-party-service-client";
+import { LollipopLocalsType } from "src/types/lollipop";
+import { match } from "ts-pattern";
+import { URL } from "url";
+
 import { PnAPIClient } from "../clients/pn-clients";
-import { errorsToError } from "../utils/errorsFormatter";
-import { pathParamsFromUrl } from "../types/pathParams";
 import { PN_CONFIGURATION_ID } from "../config";
+import { pathParamsFromUrl } from "../types/pathParams";
+import { errorsToError } from "../utils/errorsFormatter";
 
 const getPath = (input: RequestInfo | URL): string =>
   input instanceof URL

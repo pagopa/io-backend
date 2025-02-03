@@ -1,6 +1,7 @@
 /**
  * This service interacts with the GCN operator search API
  */
+import { IResponseType } from "@pagopa/ts-commons/lib/requests";
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
@@ -11,27 +12,26 @@ import {
   ResponseErrorNotFound,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { IResponseType } from "@pagopa/ts-commons/lib/requests";
+import { CountResult } from "generated/io-cgn-operator-search-api/CountResult";
 import { DiscountBucketCode } from "generated/io-cgn-operator-search-api/DiscountBucketCode";
 import { PublishedProductCategoriesResult } from "generated/io-cgn-operator-search-api/PublishedProductCategoriesResult";
-import { GetPublishedCategoriesParameters } from "generated/parameters/GetPublishedCategoriesParameters";
 import { SearchRequest } from "generated/io-cgn-operator-search-api/SearchRequest";
 import { SearchResult } from "generated/io-cgn-operator-search-api/SearchResult";
-import { CountResult } from "generated/io-cgn-operator-search-api/CountResult";
+import { GetPublishedCategoriesParameters } from "generated/parameters/GetPublishedCategoriesParameters";
+
 import { Merchant } from "../../generated/cgn-operator-search/Merchant";
+import { OfflineMerchants } from "../../generated/cgn-operator-search/OfflineMerchants";
+import { OnlineMerchants } from "../../generated/cgn-operator-search/OnlineMerchants";
+import { OfflineMerchantSearchRequest } from "../../generated/io-cgn-operator-search-api/OfflineMerchantSearchRequest";
+import { OnlineMerchantSearchRequest } from "../../generated/io-cgn-operator-search-api/OnlineMerchantSearchRequest";
+import { CgnOperatorSearchAPIClient } from "../../src/clients/cgn-operator-search";
+import { readableProblem } from "../utils/errorsFormatter";
 import {
   ResponseErrorStatusNotDefinedInSpec,
   withCatchAsInternalError,
   withValidatedOrInternalError
 } from "../utils/responses";
-import { readableProblem } from "../utils/errorsFormatter";
-import { CgnOperatorSearchAPIClient } from "../../src/clients/cgn-operator-search";
-import { OnlineMerchantSearchRequest } from "../../generated/io-cgn-operator-search-api/OnlineMerchantSearchRequest";
-import { OnlineMerchants } from "../../generated/cgn-operator-search/OnlineMerchants";
-import { OfflineMerchantSearchRequest } from "../../generated/io-cgn-operator-search-api/OfflineMerchantSearchRequest";
-import { OfflineMerchants } from "../../generated/cgn-operator-search/OfflineMerchants";
 
 type ClientResponses<T> =
   | IResponseType<200, T>

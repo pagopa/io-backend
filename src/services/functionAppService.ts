@@ -15,17 +15,15 @@ import {
   ResponseErrorValidation,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-
-import * as E from "fp-ts/Either";
-
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { PromiseType } from "@pagopa/ts-commons/lib/types";
+import * as E from "fp-ts/Either";
 import { UpsertServicePreference } from "generated/backend/UpsertServicePreference";
 import { APIClient } from "src/clients/api";
-import { ServicePreference } from "../../generated/backend/ServicePreference";
-import { ServicePublic } from "../../generated/backend/ServicePublic";
 
 import { PathTraversalSafePathParam } from "../../generated/backend/PathTraversalSafePathParam";
+import { ServicePreference } from "../../generated/backend/ServicePreference";
+import { ServicePublic } from "../../generated/backend/ServicePublic";
 import {
   ResponseErrorStatusNotDefinedInSpec,
   ResponseErrorUnexpectedAuthProblem,

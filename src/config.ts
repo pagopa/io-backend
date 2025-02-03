@@ -2,51 +2,50 @@
  * Defines services and register them to the Service Container.
  */
 
-import * as dotenv from "dotenv";
-import * as E from "fp-ts/Either";
-import * as O from "fp-ts/Option";
-import * as t from "io-ts";
 import { agent } from "@pagopa/ts-commons";
-
 import { getNodeEnvironmentFromProcessEnv } from "@pagopa/ts-commons/lib/environment";
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import { HttpsUrlFromString, UrlFromString } from "@pagopa/ts-commons/lib/url";
-
 import {
   AbortableFetch,
   setFetchTimeout,
   toFetch
 } from "@pagopa/ts-commons/lib/fetch";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString, Ulid } from "@pagopa/ts-commons/lib/strings";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { Millisecond } from "@pagopa/ts-commons/lib/units";
+import { HttpsUrlFromString, UrlFromString } from "@pagopa/ts-commons/lib/url";
+import * as dotenv from "dotenv";
+import * as E from "fp-ts/Either";
+import * as O from "fp-ts/Option";
 import { pipe } from "fp-ts/lib/function";
+import * as t from "io-ts";
+
+import { AppMessagesAPIClient } from "./clients/app-messages.client";
+import { BonusAPIClient } from "./clients/bonus";
 import { CgnAPIClient } from "./clients/cgn";
-import { log } from "./utils/logger";
+import { CgnOperatorSearchAPIClient } from "./clients/cgn-operator-search";
+import { EUCovidCertAPIClient } from "./clients/eucovidcert.client";
+import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
+import { IoFimsAPIClient } from "./clients/io-fims";
+import { IoSignAPIClient } from "./clients/io-sign";
+import { IoWalletAPIClient } from "./clients/io-wallet";
+import { LollipopApiClient } from "./clients/lollipop";
+import { PNClientFactory } from "./clients/pn-clients";
+import { ServicesAppBackendAPIClient } from "./clients/services-app-backend";
+import { TrialSystemAPIClient } from "./clients/trial-system.client";
+import ApiClientFactory from "./services/apiClientFactory";
+import PagoPAClientFactory from "./services/pagoPAClientFactory";
 import urlTokenStrategy from "./strategies/urlTokenStrategy";
 import { getRequiredENVVar } from "./utils/container";
-import PagoPAClientFactory from "./services/pagoPAClientFactory";
-import ApiClientFactory from "./services/apiClientFactory";
-import { BonusAPIClient } from "./clients/bonus";
-import { decodeCIDRs } from "./utils/network";
-import { CgnOperatorSearchAPIClient } from "./clients/cgn-operator-search";
-import { ServicesAppBackendAPIClient } from "./clients/services-app-backend";
-import { EUCovidCertAPIClient } from "./clients/eucovidcert.client";
-import { ognlTypeFor } from "./utils/ognl";
-import { AppMessagesAPIClient } from "./clients/app-messages.client";
-import { PNClientFactory } from "./clients/pn-clients";
-import { IoSignAPIClient } from "./clients/io-sign";
 import {
   FeatureFlag,
   FeatureFlagEnum,
   getIsUserEligibleForNewFeature
 } from "./utils/featureFlag";
+import { log } from "./utils/logger";
+import { decodeCIDRs } from "./utils/network";
+import { ognlTypeFor } from "./utils/ognl";
 import { CommaSeparatedListOf } from "./utils/separated-list";
-import { LollipopApiClient } from "./clients/lollipop";
-import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
-import { TrialSystemAPIClient } from "./clients/trial-system.client";
-import { IoWalletAPIClient } from "./clients/io-wallet";
-import { IoFimsAPIClient } from "./clients/io-fims";
 
 // Without this, the environment variables loaded by dotenv aren't available in
 // this file.

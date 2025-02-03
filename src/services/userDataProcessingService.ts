@@ -3,6 +3,9 @@
  * an API client.
  */
 
+import { UserDataProcessing } from "@pagopa/io-functions-app-sdk/UserDataProcessing";
+import { UserDataProcessingChoice } from "@pagopa/io-functions-app-sdk/UserDataProcessingChoice";
+import { UserDataProcessingChoiceRequest } from "@pagopa/io-functions-app-sdk/UserDataProcessingChoiceRequest";
 import {
   IResponseErrorConflict,
   IResponseErrorInternal,
@@ -17,12 +20,9 @@ import {
   ResponseSuccessAccepted,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
+import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
 
-import * as O from "fp-ts/lib/Option";
-import { UserDataProcessing } from "@pagopa/io-functions-app-sdk/UserDataProcessing";
-import { UserDataProcessingChoice } from "@pagopa/io-functions-app-sdk/UserDataProcessingChoice";
-import { UserDataProcessingChoiceRequest } from "@pagopa/io-functions-app-sdk/UserDataProcessingChoiceRequest";
 import { User } from "../types/user";
 import {
   unhandledResponseStatus,

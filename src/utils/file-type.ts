@@ -1,7 +1,7 @@
-import { pipe } from "fp-ts/lib/function";
-import * as RS from "fp-ts/ReadonlySet";
-import { match } from "ts-pattern";
 import * as EQ from "fp-ts/Eq";
+import * as RS from "fp-ts/ReadonlySet";
+import { pipe } from "fp-ts/lib/function";
+import { match } from "ts-pattern";
 
 export type FileType = "pdf" | "any";
 

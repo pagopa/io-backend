@@ -1,7 +1,7 @@
-import { pipe } from "fp-ts/lib/function";
-import * as t from "io-ts";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
+import { pipe } from "fp-ts/lib/function";
+import * as t from "io-ts";
 
 export type Encoder = (params: ReadonlyArray<string>) => string;
 

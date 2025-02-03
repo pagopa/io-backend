@@ -1,5 +1,5 @@
-import * as t from "io-ts";
 import { enumType } from "@pagopa/ts-commons/lib/types";
+import * as t from "io-ts";
 
 export enum LoginTypeEnum {
   "LV" = "LV",

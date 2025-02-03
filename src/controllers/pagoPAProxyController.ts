@@ -1,19 +1,17 @@
-import * as express from "express";
-import * as t from "io-ts";
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
   IResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-
-import PagoPAProxyService from "../services/pagoPAProxyService";
+import * as express from "express";
+import * as t from "io-ts";
 
 import { PaymentActivationsGetResponse } from "../../generated/backend/PaymentActivationsGetResponse";
 import { PaymentActivationsPostResponse } from "../../generated/backend/PaymentActivationsPostResponse";
 import { PaymentRequestsGetResponse } from "../../generated/backend/PaymentRequestsGetResponse";
 import { PaymentActivationsPostRequest } from "../../generated/pagopa-proxy/PaymentActivationsPostRequest";
-
+import PagoPAProxyService from "../services/pagoPAProxyService";
 import { withValidatedOrInternalError } from "../utils/responses";
 
 const parsePagopaTestParam = (testParam: unknown) =>

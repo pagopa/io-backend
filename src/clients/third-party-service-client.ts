@@ -1,19 +1,18 @@
-import { pipe } from "fp-ts/lib/function";
-
 import { FiscalCode } from "@pagopa/io-functions-app-sdk/FiscalCode";
-import { LollipopLocalsType } from "src/types/lollipop";
 import { eventLog } from "@pagopa/winston-ts";
-import { RCConfigurationPublic } from "generated/io-messages-api/RCConfigurationPublic";
-
+import { pipe } from "fp-ts/lib/function";
 import { RCAuthenticationConfig } from "generated/io-messages-api/RCAuthenticationConfig";
 import { RCConfigurationProdEnvironment } from "generated/io-messages-api/RCConfigurationProdEnvironment";
+import { RCConfigurationPublic } from "generated/io-messages-api/RCConfigurationPublic";
 import { RCConfigurationTestEnvironment } from "generated/io-messages-api/RCConfigurationTestEnvironment";
 import { Ulid } from "generated/parameters/Ulid";
-import { pnFetch } from "../adapters/pnFetch";
+import { LollipopLocalsType } from "src/types/lollipop";
+
 import {
   Client,
   createClient
 } from "../../generated/third-party-service/client";
+import { pnFetch } from "../adapters/pnFetch";
 
 // ---
 

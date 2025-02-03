@@ -1,8 +1,8 @@
-import nodeFetch from "node-fetch";
 import {
   Client,
   createClient
 } from "@pagopa/io-functions-eucovidcerts-sdk/client";
+import nodeFetch from "node-fetch";
 
 export function EUCovidCertAPIClient(
   token: string,

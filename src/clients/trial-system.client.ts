@@ -1,4 +1,5 @@
 import nodeFetch from "node-fetch";
+
 import { Client, createClient } from "../../generated/trial-system-api/client";
 
 export function TrialSystemAPIClient(

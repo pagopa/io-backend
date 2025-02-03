@@ -3,6 +3,10 @@
  * an API client.
  */
 
+import { ExtendedProfile as ExtendedProfileApi } from "@pagopa/io-functions-app-sdk/ExtendedProfile";
+import { NewProfile } from "@pagopa/io-functions-app-sdk/NewProfile";
+import { Profile as ProfileApi } from "@pagopa/io-functions-app-sdk/Profile";
+import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import {
   IResponseErrorConflict,
   IResponseErrorInternal,
@@ -19,17 +23,11 @@ import {
   ResponseSuccessAccepted,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-
-import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
-import { pipe } from "fp-ts/lib/function";
 import * as E from "fp-ts/lib/Either";
-import { ExtendedProfile as ExtendedProfileApi } from "@pagopa/io-functions-app-sdk/ExtendedProfile";
-import { NewProfile } from "@pagopa/io-functions-app-sdk/NewProfile";
-import { Profile as ProfileApi } from "@pagopa/io-functions-app-sdk/Profile";
+import { pipe } from "fp-ts/lib/function";
 
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 import { Profile as ProfileBackend } from "../../generated/backend/Profile";
-
 import { toInitializedProfile } from "../types/profile";
 import { User } from "../types/user";
 import {

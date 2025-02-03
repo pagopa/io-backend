@@ -1,5 +1,6 @@
 import { QueueClient, QueueSendMessageResponse } from "@azure/storage-queue";
 import { RevokeAssertionRefInfo } from "@pagopa/io-functions-commons/dist/src/entities/revoke_assertion_ref_info";
+
 import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
 import { base64EncodeObject } from "../utils/messages";
 

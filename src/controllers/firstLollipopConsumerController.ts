@@ -1,3 +1,4 @@
+import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
 import {
   IResponseErrorInternal,
   IResponseErrorValidation,
@@ -5,20 +6,18 @@ import {
   ResponseErrorInternal,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-import * as express from "express";
-import { flow, pipe } from "fp-ts/lib/function";
-import * as TE from "fp-ts/TaskEither";
-import * as E from "fp-ts/Either";
-import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { pick } from "@pagopa/ts-commons/lib/types";
+import * as express from "express";
+import * as E from "fp-ts/Either";
+import * as TE from "fp-ts/TaskEither";
+import { flow, pipe } from "fp-ts/lib/function";
 
 import { SignMessageResponse } from "../../generated/first-lc-proxy-models/SignMessageResponse";
-
-import { logLollipopSignRequest } from "../utils/appinsights";
 import { FirstLollipopConsumerClient } from "../clients/firstLollipopConsumer";
-import { ResLocals } from "../utils/express";
 import { withLollipopLocals, withRequiredRawBody } from "../types/lollipop";
+import { logLollipopSignRequest } from "../utils/appinsights";
+import { ResLocals } from "../utils/express";
 
 const FIRST_LOLLIPOP_CONSUMER_ID = "fist-lollipop-consumer" as NonEmptyString;
 

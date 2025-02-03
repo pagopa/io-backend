@@ -1,4 +1,5 @@
 import nodeFetch from "node-fetch";
+
 import { Client, createClient } from "../../generated/lollipop-api/client";
 
 export function LollipopApiClient(

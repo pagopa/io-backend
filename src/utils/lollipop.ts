@@ -1,33 +1,34 @@
-import { flow, identity, pipe } from "fp-ts/lib/function";
+import { sha256 } from "@pagopa/io-functions-commons/dist/src/utils/crypto";
+import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
 import {
   IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
   ResponseErrorForbiddenNotAuthorized,
   ResponseErrorInternal
 } from "@pagopa/ts-commons/lib/responses";
-import * as E from "fp-ts/Either";
-import { ulid } from "ulid";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
-import { eventLog } from "@pagopa/winston-ts";
-import { sha256 } from "@pagopa/io-functions-commons/dist/src/utils/crypto";
-import { Errors } from "io-ts";
-import * as O from "fp-ts/Option";
 import { withoutUndefinedValues } from "@pagopa/ts-commons/lib/types";
+import { eventLog } from "@pagopa/winston-ts";
+import * as E from "fp-ts/Either";
+import * as O from "fp-ts/Option";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as TE from "fp-ts/TaskEither";
-import { RCConfigurationPublic } from "../../generated/io-messages-api/RCConfigurationPublic";
+import { flow, identity, pipe } from "fp-ts/lib/function";
+import { Errors } from "io-ts";
+import { ulid } from "ulid";
+
 import { AssertionRef } from "../../generated/backend/AssertionRef";
-import { ISessionStorage } from "../services/ISessionStorage";
+import { RCConfigurationPublic } from "../../generated/io-messages-api/RCConfigurationPublic";
+import { LollipopSignatureInput } from "../../generated/lollipop/LollipopSignatureInput";
+import { LcParams } from "../../generated/lollipop-api/LcParams";
 import { LollipopApiClient } from "../clients/lollipop";
+import { ISessionStorage } from "../services/ISessionStorage";
 import {
   LollipopLocalsType,
   LollipopRequiredHeaders,
   Thumbprint,
   getAlgoFromAssertionRef
 } from "../types/lollipop";
-import { LollipopSignatureInput } from "../../generated/lollipop/LollipopSignatureInput";
-import { LcParams } from "../../generated/lollipop-api/LcParams";
 import { log } from "./logger";
 
 type ErrorsResponses =

@@ -2,15 +2,6 @@
 /**
  * Main entry point for the Digital Citizenship proxy.
  */
-import * as bodyParser from "body-parser";
-import * as express from "express";
-import * as helmet from "helmet";
-import * as morgan from "morgan";
-import * as passport from "passport";
-
-import { Express } from "express";
-import expressEnforcesSsl = require("express-enforces-ssl");
-
 import { TableClient } from "@azure/data-tables";
 import {
   NodeEnvironment,
@@ -19,14 +10,21 @@ import {
 import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { CIDR, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as appInsights from "applicationinsights";
+import * as bodyParser from "body-parser";
+import * as express from "express";
+import { Express } from "express";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
-import { ServerInfo } from "../generated/public/ServerInfo";
+import * as helmet from "helmet";
+import * as morgan from "morgan";
+import * as passport from "passport";
 
+import { ServerInfo } from "../generated/public/ServerInfo";
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
-import { getUserIdentity } from "./controllers/authenticationController";
+import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
+import { LollipopApiClient } from "./clients/lollipop";
 import {
   API_CLIENT,
   APP_MESSAGES_API_CLIENT,
@@ -40,16 +38,16 @@ import {
   FF_ENABLE_NOTIFY_ENDPOINT,
   FF_ENABLE_SESSION_ENDPOINTS,
   FF_EUCOVIDCERT_ENABLED,
-  FF_IO_SIGN_ENABLED,
   FF_IO_FIMS_ENABLED,
+  FF_IO_SIGN_ENABLED,
   FF_IO_WALLET_ENABLED,
   FF_ROUTING_PUSH_NOTIF,
   FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST,
   FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX,
   FF_TRIAL_SYSTEM_ENABLED,
   FIRST_LOLLIPOP_CONSUMER_CLIENT,
-  IO_SIGN_API_CLIENT,
   IO_FIMS_API_CLIENT,
+  IO_SIGN_API_CLIENT,
   IO_SIGN_SERVICE_ID,
   IO_WALLET_API_CLIENT,
   LOCKED_PROFILES_STORAGE_CONNECTION_STRING,
@@ -57,13 +55,13 @@ import {
   LOLLIPOP_API_CLIENT,
   LOLLIPOP_REVOKE_QUEUE_NAME,
   LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING,
-  NOTIFICATIONS_QUEUE_NAME,
-  NOTIFICATIONS_STORAGE_CONNECTION_STRING,
   NOTIFICATION_DEFAULT_SUBJECT,
   NOTIFICATION_DEFAULT_TITLE,
+  NOTIFICATIONS_QUEUE_NAME,
+  NOTIFICATIONS_STORAGE_CONNECTION_STRING,
   PAGOPA_CLIENT,
-  PNAddressBookConfig,
   PN_ADDRESS_BOOK_CLIENT_SELECTOR,
+  PNAddressBookConfig,
   PUSH_NOTIFICATIONS_QUEUE_NAME,
   PUSH_NOTIFICATIONS_STORAGE_CONNECTION_STRING,
   ROOT_REDIRECT_URL,
@@ -72,42 +70,41 @@ import {
   TRIAL_SYSTEM_CLIENT,
   URL_TOKEN_STRATEGY
 } from "./config";
-import MessagesController from "./controllers/messagesController";
-import NotificationController from "./controllers/notificationController";
-import PagoPAProxyController from "./controllers/pagoPAProxyController";
-import ProfileController from "./controllers/profileController";
-import ServicesController from "./controllers/servicesController";
-import SessionController from "./controllers/sessionController";
-import UserMetadataController from "./controllers/userMetadataController";
-
-import { log } from "./utils/logger";
-import checkIP from "./utils/middleware/checkIP";
-
-import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
-import { LollipopApiClient } from "./clients/lollipop";
+import { getUserIdentity } from "./controllers/authenticationController";
 import BonusController from "./controllers/bonusController";
 import CgnController from "./controllers/cgnController";
 import CgnOperatorSearchController from "./controllers/cgnOperatorSearchController";
 import EUCovidCertController from "./controllers/eucovidcertController";
+import IoFimsController from "./controllers/fimsController";
 import { firstLollipopSign } from "./controllers/firstLollipopConsumerController";
 import IoSignController from "./controllers/ioSignController";
+import IoWalletController from "./controllers/ioWalletController";
+import MessagesController from "./controllers/messagesController";
+import NotificationController from "./controllers/notificationController";
+import PagoPAProxyController from "./controllers/pagoPAProxyController";
 import {
   getPNActivationController,
   upsertPNActivationController
 } from "./controllers/pnController";
+import ProfileController from "./controllers/profileController";
 import ServicesAppBackendController from "./controllers/serviceAppBackendController";
+import ServicesController from "./controllers/servicesController";
+import SessionController from "./controllers/sessionController";
 import SessionLockController from "./controllers/sessionLockController";
 import { getUserForMyPortal } from "./controllers/ssoController";
+import TrialController from "./controllers/trialController";
 import UserDataProcessingController from "./controllers/userDataProcessingController";
+import UserMetadataController from "./controllers/userMetadataController";
 import { ISessionStorage } from "./services/ISessionStorage";
 import AuthenticationLockService from "./services/authenticationLockService";
 import BonusService from "./services/bonusService";
 import CgnOperatorSearchService from "./services/cgnOperatorSearchService";
 import CgnService from "./services/cgnService";
 import EUCovidCertService from "./services/eucovidcertService";
+import IoFimsService from "./services/fimsService";
 import FunctionsAppService from "./services/functionAppService";
 import IoSignService from "./services/ioSignService";
-import IoFimsService from "./services/fimsService";
+import IoWalletService from "./services/ioWalletService";
 import LollipopService from "./services/lollipopService";
 import NewMessagesService from "./services/newMessagesService";
 import NotificationService from "./services/notificationService";
@@ -121,6 +118,7 @@ import ProfileService from "./services/profileService";
 import RedisSessionStorage from "./services/redisSessionStorage";
 import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import ServicesAppBackendService from "./services/servicesAppBackendService";
+import TrialService from "./services/trialService";
 import UserDataProcessingService from "./services/userDataProcessingService";
 import bearerMyPortalTokenStrategy from "./strategies/bearerMyPortalTokenStrategy";
 import bearerSessionTokenStrategy from "./strategies/bearerSessionTokenStrategy";
@@ -128,6 +126,8 @@ import { User } from "./types/user";
 import { attachTrackingData } from "./utils/appinsights";
 import { getRequiredENVVar } from "./utils/container";
 import { constantExpressHandler, toExpressHandler } from "./utils/express";
+import { log } from "./utils/logger";
+import checkIP from "./utils/middleware/checkIP";
 import { expressErrorMiddleware } from "./utils/middleware/express";
 import {
   expressLollipopMiddleware,
@@ -139,11 +139,8 @@ import {
 } from "./utils/package";
 import { RedisClientMode, RedisClientSelector } from "./utils/redis";
 import { ResponseErrorDismissed } from "./utils/responses";
-import TrialService from "./services/trialService";
-import TrialController from "./controllers/trialController";
-import IoWalletController from "./controllers/ioWalletController";
-import IoWalletService from "./services/ioWalletService";
-import IoFimsController from "./controllers/fimsController";
+
+import expressEnforcesSsl = require("express-enforces-ssl");
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define

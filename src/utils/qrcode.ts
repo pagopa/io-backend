@@ -1,8 +1,8 @@
 import * as AP from "fp-ts/lib/Apply";
 import * as E from "fp-ts/lib/Either";
-import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/lib/TaskEither";
 import { TaskEither } from "fp-ts/lib/TaskEither";
+import { pipe } from "fp-ts/lib/function";
 import { BonusActivationWithQrCode } from "generated/bonus/BonusActivationWithQrCode";
 import { BonusActivation } from "generated/io-bonus-api/BonusActivation";
 import { image } from "qr-image";
