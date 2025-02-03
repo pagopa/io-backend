@@ -12,13 +12,13 @@ import {
   IResponseErrorTooManyRequests,
   IResponseErrorValidation,
   IResponseSuccessJson,
-  IResponseSuccessNoContent,
+  IResponseSuccessNoContent
 } from "@pagopa/ts-commons/lib/responses";
 
 import { CreatedMessageWithContentAndAttachments } from "generated/backend/CreatedMessageWithContentAndAttachments";
 import {
   IResponseErrorForbiddenNotAuthorized,
-  ResponseErrorInternal,
+  ResponseErrorInternal
 } from "@pagopa/ts-commons/lib/responses";
 import * as t from "io-ts";
 import { pipe } from "fp-ts/lib/function";
@@ -42,7 +42,7 @@ import {
   withValidatedOrValidationError,
   IResponseSuccessOctet,
   IResponseErrorNotImplemented,
-  IResponseErrorUnsupportedMediaType,
+  IResponseErrorUnsupportedMediaType
 } from "../utils/responses";
 import { LollipopLocalsType, LollipopRequiredHeaders } from "../types/lollipop";
 import { LollipopApiClient } from "../clients/lollipop";
@@ -93,7 +93,7 @@ export default class MessagesController {
           enrichResultData: req.query.enrich_result_data,
           getArchivedMessages: req.query.archived,
           maximumId: req.query.maximum_id,
-          minimumId: req.query.minimum_id,
+          minimumId: req.query.minimum_id
           /* eslint-enable sort-keys */
         }),
         (params) => this.messageService.getMessagesByUser(user, params)
@@ -116,7 +116,7 @@ export default class MessagesController {
       withValidatedOrValidationError(
         GetMessageParameters.decode({
           id: req.params.id,
-          public_message: req.query.public_message,
+          public_message: req.query.public_message
         }),
         (params) => this.messageService.getMessage(user, params)
       )

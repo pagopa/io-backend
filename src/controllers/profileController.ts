@@ -12,7 +12,7 @@ import {
   IResponseErrorTooManyRequests,
   IResponseErrorValidation,
   IResponseSuccessAccepted,
-  IResponseSuccessJson,
+  IResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import { ISessionStorage } from "src/services/ISessionStorage";
 

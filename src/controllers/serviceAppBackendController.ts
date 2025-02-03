@@ -2,7 +2,7 @@ import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
-  IResponseSuccessJson,
+  IResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as express from "express";
@@ -18,7 +18,7 @@ import { ServiceDetails } from "../../generated/services-app-backend/ServiceDeta
 import ServicesAppBackendService from "../services/servicesAppBackendService";
 import {
   withValidatedOrInternalError,
-  withValidatedOrValidationError,
+  withValidatedOrValidationError
 } from "../utils/responses";
 
 const parseOptionalStringParam = (stringParam?: unknown) =>

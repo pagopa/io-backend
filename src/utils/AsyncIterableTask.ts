@@ -4,7 +4,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import {
   asyncIterableToPageArray,
   IPage,
-  mapAsyncIterator,
+  mapAsyncIterator
 } from "@pagopa/io-functions-commons/dist/src/utils/async";
 import { pipe } from "fp-ts/lib/function";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
@@ -26,7 +26,7 @@ const mapAsyncIterable = <T, V>(
   const iterMapped = mapAsyncIterator(iter, f);
   return {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [Symbol.asyncIterator]: (): AsyncIterator<V, any, undefined> => iterMapped,
+    [Symbol.asyncIterator]: (): AsyncIterator<V, any, undefined> => iterMapped
   };
 };
 
@@ -58,7 +58,7 @@ export const fromAsyncIterator = <A>(
   a: AsyncIterator<A>
 ): AsyncIterableTask<A> =>
   fromAsyncIterable({
-    [Symbol.asyncIterator]: () => a,
+    [Symbol.asyncIterator]: () => a
   });
 
 /**

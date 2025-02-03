@@ -15,8 +15,8 @@ export function TrialSystemAPIClient(
     withDefaults: (op) => (params) =>
       op({
         ...params,
-        ApiKeyAuth: token,
-      }),
+        ApiKeyAuth: token
+      })
   });
 }
 

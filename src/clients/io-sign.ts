@@ -15,8 +15,8 @@ export function IoSignAPIClient(
     withDefaults: (op) => (params) =>
       op({
         ...params,
-        FunctionsKey: token,
-      }),
+        FunctionsKey: token
+      })
   });
 }
 

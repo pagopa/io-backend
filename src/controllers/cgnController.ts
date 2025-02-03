@@ -13,7 +13,7 @@ import {
   IResponseSuccessAccepted,
   IResponseSuccessJson,
   IResponseSuccessRedirectToResource,
-  ResponseErrorForbiddenNotAuthorized,
+  ResponseErrorForbiddenNotAuthorized
 } from "@pagopa/ts-commons/lib/responses";
 
 import { EycaActivationDetail } from "@pagopa/io-functions-cgn-sdk/EycaActivationDetail";

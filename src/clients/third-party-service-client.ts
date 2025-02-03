@@ -12,7 +12,7 @@ import { Ulid } from "generated/parameters/Ulid";
 import { pnFetch } from "../adapters/pnFetch";
 import {
   Client,
-  createClient,
+  createClient
 } from "../../generated/third-party-service/client";
 
 // ---
@@ -38,8 +38,8 @@ const withApiKey =
       ...init,
       headers: {
         ...(init?.headers ?? {}),
-        ...{ [authConfig.header_key_name]: authConfig.key },
-      },
+        ...{ [authConfig.header_key_name]: authConfig.key }
+      }
     });
 
 /**
@@ -97,9 +97,9 @@ export const getThirdPartyServiceClient =
         fiscalCode
       )
         ? remoteContentConfiguration.test_environment
-        : remoteContentConfiguration.prod_environment ??
+        : (remoteContentConfiguration.prod_environment ??
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          remoteContentConfiguration.test_environment!;
+          remoteContentConfiguration.test_environment!);
 
     eventLog.peek.info(
       remoteContentConfiguration.test_environment?.test_users.includes(
@@ -107,11 +107,11 @@ export const getThirdPartyServiceClient =
       )
         ? [
             "Third party client pointing to test environment",
-            { name: "lollipop.third-party.test" },
+            { name: "lollipop.third-party.test" }
           ]
         : [
             "Third party client pointing to prod environment",
-            { name: "lollipop.third-party.prod" },
+            { name: "lollipop.third-party.prod" }
           ]
     );
     eventLog.peek.info(
@@ -120,11 +120,11 @@ export const getThirdPartyServiceClient =
       )
         ? [
             "Fiscal code included in testUsers",
-            { name: "lollipop.testUsers.fiscal-code" },
+            { name: "lollipop.testUsers.fiscal-code" }
           ]
         : [
             "Fiscal code not included in testUsers",
-            { name: "lollipop.testUsers.fiscal-code" },
+            { name: "lollipop.testUsers.fiscal-code" }
           ]
     );
 
@@ -146,7 +146,7 @@ export const getThirdPartyServiceClient =
       withDefaults: (op) => (params) =>
         op({
           ...params,
-          fiscal_code: fiscalCode,
-        }),
+          fiscal_code: fiscalCode
+        })
     });
   };

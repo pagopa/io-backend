@@ -8,7 +8,7 @@ import * as O from "fp-ts/Option";
 import {
   FiscalCode,
   NonEmptyString,
-  Ulid,
+  Ulid
 } from "@pagopa/ts-commons/lib/strings";
 import { ProblemJson } from "@pagopa/ts-commons/lib/responses";
 import { Response as NodeResponse } from "node-fetch";
@@ -27,8 +27,8 @@ const getPath = (input: RequestInfo | URL): string =>
   input instanceof URL
     ? `${input.pathname}${input.search}`
     : typeof input === "string"
-    ? `${new URL(input).pathname}${new URL(input).search}`
-    : `${new URL(input.url).pathname}${new URL(input.url).search}`;
+      ? `${new URL(input).pathname}${new URL(input).search}`
+      : `${new URL(input.url).pathname}${new URL(input.url).search}`;
 
 export const ThirdPartyMessagesUrl = pathParamsFromUrl(
   RegExp("^[/]+messages[/]+([^/]+)$"),
@@ -74,8 +74,8 @@ const withAccept_iojson =
       ...init,
       headers: {
         ...(init?.headers ?? {}),
-        Accept: "application/io+json",
-      },
+        Accept: "application/io+json"
+      }
     });
 
 const WithFiscalCode = t.interface({ fiscal_code: FiscalCode });
@@ -96,7 +96,7 @@ const retrievePrecondition = (
         ApiKeyAuth: pnApiKey,
         iun,
         "x-pagopa-cx-taxid": fiscalCode,
-        ...lollipopLocals,
+        ...lollipopLocals
       }),
     TE.mapLeft(errorsToError),
     TE.chain(
@@ -122,7 +122,7 @@ const retrieveNotificationDetails = (
         ApiKeyAuth: pnApiKey,
         iun,
         "x-pagopa-cx-taxid": fiscalCode,
-        ...lollipopLocals,
+        ...lollipopLocals
       }),
     TE.mapLeft(errorsToError),
     TE.chain(
@@ -150,13 +150,13 @@ export const errorResponse = (error: Error): Response =>
     {
       detail: error.message,
       status: 500,
-      title: "Error fetching PN data",
+      title: "Error fetching PN data"
     },
     ProblemJson.encode,
     (problem) =>
       new NodeResponse(JSON.stringify(problem), {
         status: problem.status,
-        statusText: problem.title,
+        statusText: problem.title
       }) as unknown as Response // cast required: the same cast is used in clients code generation
   );
 
@@ -165,14 +165,14 @@ export const retryResponse = (retryAfter: number): Response =>
     {
       detail: "Data is not ready yet",
       status: 503,
-      title: "Error fetching PN data",
+      title: "Error fetching PN data"
     },
     ProblemJson.encode,
     (problem) =>
       new NodeResponse(JSON.stringify(problem), {
         headers: { "Retry-After": `${retryAfter}` },
         status: problem.status,
-        statusText: problem.title,
+        statusText: problem.title
       }) as unknown as Response // cast required: the same cast is used in clients code generation
   );
 
@@ -201,8 +201,8 @@ export const redirectPrecondition =
               locals: lollipopLocals
                 ? Object.keys(lollipopLocals)
                 : "No lollipop locals",
-              name: "pn.precondition.call",
-            },
+              name: "pn.precondition.call"
+            }
           ]),
           TE.chain((params) =>
             pipe(
@@ -222,12 +222,12 @@ export const redirectPrecondition =
         (body) =>
           new NodeResponse(JSON.stringify(body), {
             status: 200,
-            statusText: "OK",
+            statusText: "OK"
           }) as unknown as Response // cast required: the same cast is used in clients code generation
       ),
       eventLog.taskEither.errorLeft(({ message }) => [
         `Something went wrong trying to call retrievePrecondition`,
-        { message, name: "pn.precondition.error" },
+        { message, name: "pn.precondition.error" }
       ]),
       TE.mapLeft(errorResponse),
       TE.toUnion
@@ -258,8 +258,8 @@ export const redirectMessages =
               locals: lollipopLocals
                 ? Object.keys(lollipopLocals)
                 : "No lollipop locals",
-              name: "pn.notification.call",
-            },
+              name: "pn.notification.call"
+            }
           ]),
           TE.chain((params) =>
             pipe(
@@ -279,12 +279,12 @@ export const redirectMessages =
         (body) =>
           new NodeResponse(JSON.stringify(body), {
             status: 200,
-            statusText: "OK",
+            statusText: "OK"
           }) as unknown as Response // cast required: the same cast is used in clients code generation
       ),
       eventLog.taskEither.errorLeft(({ message }) => [
         `Something went wrong trying to call retrieveNotificationDetails`,
-        { message, name: "pn.notification.error" },
+        { message, name: "pn.notification.error" }
       ]),
       TE.mapLeft(errorResponse),
       TE.toUnion
@@ -312,7 +312,7 @@ const getPnDocument = (
               docIdx: Number(docIdx),
               iun,
               "x-pagopa-cx-taxid": fiscalCode,
-              ...lollipopLocals,
+              ...lollipopLocals
             }),
           E.toError
         ),
@@ -355,7 +355,7 @@ const getPnPayment = (
               attachmentName: docName,
               iun,
               "x-pagopa-cx-taxid": fiscalCode,
-              ...lollipopLocals,
+              ...lollipopLocals
             }),
           E.toError
         ),
@@ -404,7 +404,7 @@ export const redirectAttachment =
                 (au) => {
                   eventLog.peek.info([
                     `Calling PN with lollipopLocals: ${lollipopLocals}`,
-                    { name: "lollipo.pn.api.attachment" },
+                    { name: "lollipo.pn.api.attachment" }
                   ]);
                   return getPnDocument(
                     origFetch,
@@ -421,7 +421,7 @@ export const redirectAttachment =
                 (au) => {
                   eventLog.peek.info([
                     `Calling PN with lollipopLocals: ${lollipopLocals}`,
-                    { name: "lollipo.pn.api.payment" },
+                    { name: "lollipo.pn.api.payment" }
                   ]);
                   return getPnPayment(
                     origFetch,
@@ -474,7 +474,7 @@ export const redirectAttachment =
       ),
       eventLog.taskEither.errorLeft(({ message }) => [
         `Something went wrong trying to call getPnDocumentUrl`,
-        { message, name: "pn.attachment.error" },
+        { message, name: "pn.attachment.error" }
       ]),
       TE.mapLeft(errorResponse),
       TE.toUnion

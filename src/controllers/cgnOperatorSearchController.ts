@@ -12,7 +12,7 @@ import {
   IResponseErrorValidation,
   IResponseSuccessJson,
   ResponseErrorForbiddenNotAuthorized,
-  ResponseErrorInternal,
+  ResponseErrorInternal
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import CgnService from "src/services/cgnService";
@@ -94,9 +94,7 @@ export default class CgnOperatorSearchController {
     | IResponseErrorNotFound
     | IResponseSuccessJson<CountResult>
   > =>
-    withUserFromRequest(req, async () =>
-      this.cgnOperatorSearchService.count()
-    );
+    withUserFromRequest(req, async () => this.cgnOperatorSearchService.count());
 
   /**
    * Search CGN merchants/discounts that matches with search criteria

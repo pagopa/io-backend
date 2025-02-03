@@ -15,8 +15,8 @@ export function LollipopApiClient(
     withDefaults: (op) => (params) =>
       op({
         ...params,
-        ApiKeyAuth: token,
-      }),
+        ApiKeyAuth: token
+      })
   });
 }
 

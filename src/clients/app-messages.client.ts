@@ -19,8 +19,8 @@ export function AppMessagesAPIClient(
       // @ts-ignore
       op({
         ...params,
-        SubscriptionKey: token,
-      }),
+        SubscriptionKey: token
+      })
   });
 }
 

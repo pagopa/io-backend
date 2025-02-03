@@ -13,7 +13,7 @@ import {
   ResponseErrorForbiddenNotAuthorized,
   ResponseErrorInternal,
   ResponseErrorValidation,
-  ResponseSuccessJson,
+  ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import * as E from "fp-ts/lib/Either";
 import * as AP from "fp-ts/lib/Apply";
@@ -30,7 +30,7 @@ import { addSeconds } from "date-fns";
 import {
   IResponseNoContent,
   ResponseNoContent,
-  withValidatedOrValidationError,
+  withValidatedOrValidationError
 } from "../utils/responses";
 import { SuccessResponse } from "../types/commons";
 import LollipopService from "../services/lollipopService";
@@ -38,7 +38,7 @@ import { withFiscalCodeFromRequestParams } from "../types/fiscalCode";
 import RedisSessionStorage from "../services/redisSessionStorage";
 import RedisUserMetadataStorage from "../services/redisUserMetadataStorage";
 import AuthenticationLockService, {
-  NotReleasedAuthenticationLockData,
+  NotReleasedAuthenticationLockData
 } from "../services/authenticationLockService";
 import { NotificationServiceFactory } from "../services/notificationServiceFactory";
 
@@ -341,13 +341,13 @@ export default class SessionLockController {
                 `Error reading the session info: [${err.message}]`
               )
             )
-          ),
+          )
         }),
         TE.map(({ isUserAuthenticationLocked, maybeSessionRemaningTTL }) =>
           O.isNone(maybeSessionRemaningTTL)
             ? SessionState.encode({
                 access_enabled: !isUserAuthenticationLocked,
-                session_info: { active: false },
+                session_info: { active: false }
               })
             : SessionState.encode({
                 access_enabled: !isUserAuthenticationLocked,
@@ -357,8 +357,8 @@ export default class SessionLockController {
                     new Date(),
                     maybeSessionRemaningTTL.value.ttl
                   ),
-                  type: LoginTypeEnum[maybeSessionRemaningTTL.value.type],
-                },
+                  type: LoginTypeEnum[maybeSessionRemaningTTL.value.type]
+                }
               })
         ),
         TE.map(ResponseSuccessJson),
@@ -416,7 +416,7 @@ export default class SessionLockController {
           E.toError
         ),
         TE.chain(TE.fromEither)
-      ),
+      )
     ] as const;
 
   private readonly clearInstallation = (fiscalCode: FiscalCode) =>

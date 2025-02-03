@@ -15,7 +15,7 @@ import {
   ResponseErrorNotFound,
   ResponseErrorTooManyRequests,
   ResponseSuccessAccepted,
-  ResponseSuccessJson,
+  ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import { pipe } from "fp-ts/lib/function";
 
@@ -27,7 +27,7 @@ import { User } from "../types/user";
 import {
   unhandledResponseStatus,
   withCatchAsInternalError,
-  withValidatedOrInternalError,
+  withValidatedOrInternalError
 } from "../utils/responses";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
@@ -50,22 +50,22 @@ export default class UserDataProcessingService {
     return withCatchAsInternalError(async () => {
       const validated = await client.upsertUserDataProcessing({
         body: userDataProcessingChoiceRequest,
-        fiscal_code: user.fiscal_code,
+        fiscal_code: user.fiscal_code
       });
 
       return withValidatedOrInternalError(validated, (response) =>
         response.status === 200
           ? ResponseSuccessJson(response.value)
           : response.status === 429
-          ? ResponseErrorTooManyRequests()
-          : response.status === 409
-          ? ResponseErrorConflict(
-              pipe(
-                O.fromNullable(response.value.detail),
-                O.getOrElse(() => "Conflict")
-              )
-            )
-          : unhandledResponseStatus(response.status)
+            ? ResponseErrorTooManyRequests()
+            : response.status === 409
+              ? ResponseErrorConflict(
+                  pipe(
+                    O.fromNullable(response.value.detail),
+                    O.getOrElse(() => "Conflict")
+                  )
+                )
+              : unhandledResponseStatus(response.status)
       );
     });
   };
@@ -86,17 +86,20 @@ export default class UserDataProcessingService {
     return withCatchAsInternalError(async () => {
       const validated = await client.getUserDataProcessing({
         choice: userDataProcessingChoiceParam,
-        fiscal_code: user.fiscal_code,
+        fiscal_code: user.fiscal_code
       });
 
       return withValidatedOrInternalError(validated, (response) =>
         response.status === 200
           ? ResponseSuccessJson(response.value)
           : response.status === 404
-          ? ResponseErrorNotFound("Not Found", "User data processing not found")
-          : response.status === 429
-          ? ResponseErrorTooManyRequests()
-          : unhandledResponseStatus(response.status)
+            ? ResponseErrorNotFound(
+                "Not Found",
+                "User data processing not found"
+              )
+            : response.status === 429
+              ? ResponseErrorTooManyRequests()
+              : unhandledResponseStatus(response.status)
       );
     });
   };
@@ -119,19 +122,24 @@ export default class UserDataProcessingService {
     return withCatchAsInternalError(async () => {
       const validated = await client.abortUserDataProcessing({
         choice: userDataProcessingChoiceParam,
-        fiscal_code: user.fiscal_code,
+        fiscal_code: user.fiscal_code
       });
 
       return withValidatedOrInternalError(validated, (response) =>
         response.status === 202
           ? ResponseSuccessAccepted()
           : response.status === 404
-          ? ResponseErrorNotFound("Not Found", "User data processing not found")
-          : response.status === 409
-          ? ResponseErrorConflict("Cannot abort user data processing request")
-          : response.status === 429
-          ? ResponseErrorTooManyRequests()
-          : unhandledResponseStatus(response.status)
+            ? ResponseErrorNotFound(
+                "Not Found",
+                "User data processing not found"
+              )
+            : response.status === 409
+              ? ResponseErrorConflict(
+                  "Cannot abort user data processing request"
+                )
+              : response.status === 429
+                ? ResponseErrorTooManyRequests()
+                : unhandledResponseStatus(response.status)
       );
     });
   };

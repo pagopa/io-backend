@@ -6,14 +6,14 @@ import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import {
   withOptionalUserFromRequest,
-  withUserFromRequest,
+  withUserFromRequest
 } from "../../types/user";
 import { LollipopApiClient } from "../../clients/lollipop";
 import { withLollipopHeadersFromRequest } from "../../types/lollipop";
 import { log } from "../logger";
 import {
   extractLollipopLocalsFromLollipopHeaders,
-  extractLollipopLocalsFromLollipopHeadersLegacy,
+  extractLollipopLocalsFromLollipopHeadersLegacy
 } from "../lollipop";
 import { ISessionStorage } from "../../services/ISessionStorage";
 

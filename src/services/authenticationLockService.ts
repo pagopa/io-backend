@@ -28,7 +28,7 @@ const NotReleasedAuthenticationLockData = t.type({
   rowKey: UnlockCode,
 
   // eslint-disable-next-line sort-keys
-  CreatedAt: DateFromString,
+  CreatedAt: DateFromString
 });
 
 export default class AuthenticationLockService {
@@ -75,7 +75,7 @@ export default class AuthenticationLockService {
             rowKey: unlockCode,
 
             // eslint-disable-next-line sort-keys
-            CreatedAt: new Date(),
+            CreatedAt: new Date()
           }),
         () => new Error("Something went wrong creating the record")
       ),
@@ -103,8 +103,8 @@ export default class AuthenticationLockService {
               partitionKey: fiscalCode,
               rowKey: unlockCode,
               // eslint-disable-next-line sort-keys
-              Released: true,
-            },
+              Released: true
+            }
           ] as TransactionAction
       ),
       (actions) =>
@@ -128,8 +128,8 @@ export default class AuthenticationLockService {
     pipe(
       this.tableClient.listEntities({
         queryOptions: {
-          filter: odata`PartitionKey eq ${fiscalCode} and not Released`,
-        },
+          filter: odata`PartitionKey eq ${fiscalCode} and not Released`
+        }
       }),
       AI.fromAsyncIterable,
       AI.foldTaskEither(E.toError),

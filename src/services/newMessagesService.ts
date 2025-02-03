@@ -20,13 +20,13 @@ import {
   ResponseErrorServiceTemporarilyUnavailable,
   IResponseSuccessNoContent,
   ResponseErrorBadGateway,
-  IResponseErrorBadGateway,
+  IResponseErrorBadGateway
 } from "@pagopa/ts-commons/lib/responses";
 import { AppMessagesAPIClient } from "src/clients/app-messages.client";
 import {
   FiscalCode,
   NonEmptyString,
-  Ulid,
+  Ulid
 } from "@pagopa/ts-commons/lib/strings";
 import { pipe, flow } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
@@ -37,7 +37,7 @@ import { LollipopLocalsType } from "src/types/lollipop";
 import { RCConfigurationPublic } from "generated/io-messages-api/RCConfigurationPublic";
 import {
   Fetch,
-  getThirdPartyServiceClient,
+  getThirdPartyServiceClient
 } from "../clients/third-party-service-client";
 import { PN_SERVICE_ID } from "../config";
 import { MessageSubject } from "../../generated/backend/MessageSubject";
@@ -61,13 +61,13 @@ import {
   unhandledResponseStatus,
   withCatchAsInternalError,
   withValidatedOrInternalError,
-  wrapValidationWithInternalError,
+  wrapValidationWithInternalError
 } from "../utils/responses";
 import { MessageStatusChange } from "../../generated/io-messages-api/MessageStatusChange";
 import { MessageStatusAttributes } from "../../generated/io-messages-api/MessageStatusAttributes";
 import {
   ThirdPartyMessage,
-  ThirdPartyMessageDetails,
+  ThirdPartyMessageDetails
 } from "../../generated/third-party-service/ThirdPartyMessage";
 import { ThirdPartyData } from "../../generated/backend/ThirdPartyData";
 import { log } from "../utils/logger";
@@ -83,7 +83,7 @@ const ERROR_MESSAGE_400 = "Bad request";
 
 export const MessageWithThirdPartyData = t.intersection([
   CreatedMessageWithContent,
-  t.interface({ content: t.interface({ third_party_data: ThirdPartyData }) }),
+  t.interface({ content: t.interface({ third_party_data: ThirdPartyData }) })
 ]);
 export type MessageWithThirdPartyData = t.TypeOf<
   typeof MessageWithThirdPartyData
@@ -119,7 +119,7 @@ export default class NewMessagesService {
         enrich_result_data: params.enrichResultData,
         archived: params.getArchivedMessages,
         maximum_id: params.maximumId,
-        minimum_id: params.minimumId,
+        minimum_id: params.minimumId
         /* eslint-enable sort-keys */
       });
 
@@ -127,10 +127,10 @@ export default class NewMessagesService {
         response.status === 200
           ? ResponseSuccessJson(response.value)
           : response.status === 404
-          ? ResponseErrorNotFound("Not found", "User not found")
-          : response.status === 429
-          ? ResponseErrorTooManyRequests()
-          : unhandledResponseStatus(response.status)
+            ? ResponseErrorNotFound("Not found", "User not found")
+            : response.status === 429
+              ? ResponseErrorTooManyRequests()
+              : unhandledResponseStatus(response.status)
       );
     });
 
@@ -150,7 +150,7 @@ export default class NewMessagesService {
       const res = await this.apiClient.getMessage({
         fiscal_code: user.fiscal_code,
         id: params.id,
-        public_message: params.public_message,
+        public_message: params.public_message
       });
 
       const resMessageContent = pipe(
@@ -175,8 +175,8 @@ export default class NewMessagesService {
                     ...messageWithContent,
                     content: {
                       ...messageWithContent.content,
-                      attachments,
-                    },
+                      attachments
+                    }
                   })),
                   T.map(ResponseSuccessJson)
                 )();
@@ -185,8 +185,8 @@ export default class NewMessagesService {
           return response.status === 404
             ? ResponseErrorNotFound("Not found", "Message not found")
             : response.status === 429
-            ? ResponseErrorTooManyRequests()
-            : unhandledResponseStatus(response.status);
+              ? ResponseErrorTooManyRequests()
+              : unhandledResponseStatus(response.status);
         }
       );
     });
@@ -210,7 +210,7 @@ export default class NewMessagesService {
       const validated = await this.apiClient.upsertMessageStatusAttributes({
         body: messageStatusChange,
         fiscal_code: fiscalCode,
-        id: messageId,
+        id: messageId
       });
 
       return withValidatedOrInternalError(validated, (response) => {
@@ -218,7 +218,7 @@ export default class NewMessagesService {
           case 200:
             return ResponseSuccessJson({
               is_archived: response.value.is_archived,
-              is_read: response.value.is_read,
+              is_read: response.value.is_read
             });
           case 401:
             return ResponseErrorUnexpectedAuthProblem();
@@ -292,7 +292,7 @@ export default class NewMessagesService {
         ),
         TE.map((thirdPartyMessage) => ({
           ...message,
-          third_party_message: thirdPartyMessage,
+          third_party_message: thirdPartyMessage
         }))
       ),
       TE.map(ResponseSuccessJson),
@@ -351,7 +351,7 @@ export default class NewMessagesService {
         () =>
           this.apiClient.getMessage({
             fiscal_code: fiscalCode,
-            id: messageId,
+            id: messageId
           }),
         (e) => ResponseErrorInternal(E.toError(e).message)
       ),
@@ -413,7 +413,7 @@ export default class NewMessagesService {
       TE.tryCatch(
         () =>
           this.apiClient.getRCConfiguration({
-            id: configurationId,
+            id: configurationId
           }),
         (e) => ResponseErrorInternal(E.toError(e).message)
       ),
@@ -487,7 +487,7 @@ export default class NewMessagesService {
           () =>
             client.getThirdPartyMessagePrecondition({
               id: message.content.third_party_data.id,
-              ...lollipopLocals,
+              ...lollipopLocals
             }),
           (e) => ResponseErrorInternal(E.toError(e).message)
         )
@@ -568,7 +568,7 @@ export default class NewMessagesService {
           () =>
             client.getThirdPartyMessageDetails({
               id: message.content.third_party_data.id,
-              ...lollipopLocals,
+              ...lollipopLocals
             }),
           (e) => ResponseErrorInternal(E.toError(e).message)
         )
@@ -679,8 +679,8 @@ export default class NewMessagesService {
         : {
             ...response.details,
             markdown: message.content.markdown,
-            subject: message.content.subject,
-          },
+            subject: message.content.subject
+          }
     });
   };
 
@@ -716,7 +716,7 @@ export default class NewMessagesService {
             client.getThirdPartyMessageAttachment({
               attachment_url: attachmentUrl,
               id: message.content.third_party_data.id,
-              ...lollipopLocals,
+              ...lollipopLocals
             }),
           (e) => ResponseErrorInternal(E.toError(e).message)
         )

@@ -15,8 +15,8 @@ export function CgnAPIClient(
     withDefaults: (op) => (params) =>
       op({
         ...params,
-        ApiKey: token,
-      }),
+        ApiKey: token
+      })
   });
 }
 

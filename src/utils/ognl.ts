@@ -34,9 +34,7 @@ export const set = <T extends object>(
       _i
     ) =>
       // Iterate all of them except the last one
-      Object(a[c]) === a[c]
-        ? a[c]
-        : (a[c] = {}),
+      Object(a[c]) === a[c] ? a[c] : (a[c] = {}),
     obj
   )[splittedpath[splittedpath.length - 1]] = value;
   return obj;
@@ -58,11 +56,7 @@ export const nestifyPrefixedType = (
     env,
     R.filterWithIndex((fieldName) => fieldName.split("_")[0] === prefix),
     R.reduceWithIndex({}, (k, b, a) =>
-      set(
-        b,
-        k.split("_").splice(1).join("."),
-        a
-      )
+      set(b, k.split("_").splice(1).join("."), a)
     )
   );
 
@@ -72,14 +66,13 @@ const isRecordOfString = (i: unknown): i is Record<string, unknown> =>
   !Object.keys(i).some((property) => typeof property !== "string");
 
 const createNotRecordOfStringErrorL =
-  (input: unknown, context: t.Context) => (): t.Errors =>
-    [
-      {
-        context,
-        message: "input is not a valid record of string",
-        value: input,
-      },
-    ];
+  (input: unknown, context: t.Context) => (): t.Errors => [
+    {
+      context,
+      message: "input is not a valid record of string",
+      value: input
+    }
+  ];
 
 /**
  * Create a io-ts decoder for the input type.

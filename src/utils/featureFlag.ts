@@ -5,7 +5,7 @@ export enum FeatureFlagEnum {
   ALL = "ALL",
   BETA = "BETA",
   CANARY = "CANARY",
-  NONE = "NONE",
+  NONE = "NONE"
 }
 
 export const FeatureFlag = enumType<FeatureFlagEnum>(

@@ -9,7 +9,7 @@ import {
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
   IResponseErrorValidation,
-  IResponseSuccessJson,
+  IResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import * as express from "express";
 import { PathTraversalSafePathParam } from "../../generated/backend/PathTraversalSafePathParam";

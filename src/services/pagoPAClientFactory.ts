@@ -7,7 +7,7 @@ import nodeFetch from "node-fetch";
 import { PagoPAClient } from "../clients/pagopa";
 import {
   IPagoPAClientFactoryInterface,
-  PagoPAEnvironment,
+  PagoPAEnvironment
 } from "./IPagoPAClientFactory";
 
 // TODO: this class is actually useless as PagoPAClient is immutable, it can be removed

@@ -15,8 +15,8 @@ export function IoFimsAPIClient(
     withDefaults: (op) => (params) =>
       op({
         ...params,
-        FunctionsKey: token,
-      }),
+        FunctionsKey: token
+      })
   });
 }
 

@@ -9,7 +9,7 @@ import { image } from "qr-image";
 
 const MIME_TYPES = {
   png: "image/png",
-  svg: "image/svg+xml",
+  svg: "image/svg+xml"
 };
 
 // Needed to display the SVG into the mobile App
@@ -52,20 +52,20 @@ export function withQrcode(
   return pipe(
     AP.sequenceS(TE.ApplicativePar)({
       pngBuffer: streamToBufferTask(image(bonus.id, { type: "png" })),
-      svgString: streamToStringTask(image(bonus.id, { type: "svg" })),
+      svgString: streamToStringTask(image(bonus.id, { type: "svg" }))
     }),
     TE.map(({ pngBuffer, svgString }) => ({
       ...bonus,
       qr_code: [
         {
           content: pngBuffer.toString("base64"),
-          mime_type: MIME_TYPES.png,
+          mime_type: MIME_TYPES.png
         },
         {
           content: Buffer.from(fixQrcodeFill(svgString)).toString("base64"),
-          mime_type: MIME_TYPES.svg,
-        },
-      ],
+          mime_type: MIME_TYPES.svg
+        }
+      ]
     }))
   );
 }

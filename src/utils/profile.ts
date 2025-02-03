@@ -11,9 +11,9 @@ import { EmailAddress } from "../../generated/backend/EmailAddress";
 // define a type that represents a Profile with a non optional email address
 const ProfileWithEmail = t.intersection([
   t.type({
-    email: EmailAddress,
+    email: EmailAddress
   }),
-  InitializedProfile,
+  InitializedProfile
 ]);
 
 type ProfileWithEmail = t.TypeOf<typeof ProfileWithEmail>;
@@ -60,9 +60,7 @@ export const profileWithEmailValidatedOrError = (
       pipe(
         profile.value,
         ProfileWithEmailValidated.decode,
-        E.mapLeft(
-          () => new Error("Profile has not a validated email address")
-        ),
+        E.mapLeft(() => new Error("Profile has not a validated email address")),
         TE.fromEither
       )
     )

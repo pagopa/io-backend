@@ -1,7 +1,7 @@
 import * as nodeFetch from "node-fetch";
 import {
   createClient,
-  Client,
+  Client
 } from "../../generated/lollipop-first-consumer/client";
 
 export function FirstLollipopConsumerClient(
@@ -18,8 +18,8 @@ export function FirstLollipopConsumerClient(
     withDefaults: (op) => (params) =>
       op({
         ...params,
-        ApiKeyAuth: token,
-      }),
+        ApiKeyAuth: token
+      })
   });
 }
 

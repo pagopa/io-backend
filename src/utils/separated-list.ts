@@ -23,8 +23,8 @@ export const GetArbitrarySeparatedListOf =
                 .map((e) => e.trim())
                 .filter(Boolean)
             : !input
-            ? [] // fallback to empty array in case of empty input
-            : input // it should not happen, but in case we let the decoder fail
+              ? [] // fallback to empty array in case of empty input
+              : input // it should not happen, but in case we let the decoder fail
         ),
       String
     );

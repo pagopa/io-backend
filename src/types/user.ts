@@ -24,7 +24,7 @@ import {
   MyPortalToken,
   SessionToken,
   WalletToken,
-  ZendeskToken,
+  ZendeskToken
 } from "./token";
 
 // required attributes
@@ -37,7 +37,7 @@ export const UserWithoutTokens = t.intersection([
     family_name: t.string,
     fiscal_code: FiscalCode,
     name: t.string,
-    spid_level: SpidLevel,
+    spid_level: SpidLevel
   }),
   t.partial({
     nameID: t.string,
@@ -45,14 +45,14 @@ export const UserWithoutTokens = t.intersection([
     sessionIndex: t.string,
     session_tracking_id: t.string, // unique ID used for tracking in appinsights
     spid_email: EmailAddress,
-    spid_idp: t.string,
-  }),
+    spid_idp: t.string
+  })
 ]);
 export type UserWithoutTokens = t.TypeOf<typeof UserWithoutTokens>;
 
 const RequiredUserTokensV1 = t.interface({
   session_token: SessionToken,
-  wallet_token: WalletToken,
+  wallet_token: WalletToken
 });
 export const UserV1 = t.intersection([UserWithoutTokens, RequiredUserTokensV1]);
 export type UserV1 = t.TypeOf<typeof UserV1>;
@@ -60,8 +60,8 @@ export type UserV1 = t.TypeOf<typeof UserV1>;
 const RequiredUserTokensV2 = t.intersection([
   RequiredUserTokensV1,
   t.interface({
-    myportal_token: MyPortalToken,
-  }),
+    myportal_token: MyPortalToken
+  })
 ]);
 export const UserV2 = t.intersection([UserWithoutTokens, RequiredUserTokensV2]);
 export type UserV2 = t.TypeOf<typeof UserV2>;
@@ -69,8 +69,8 @@ export type UserV2 = t.TypeOf<typeof UserV2>;
 const RequiredUserTokensV3 = t.intersection([
   RequiredUserTokensV2,
   t.interface({
-    bpd_token: BPDToken,
-  }),
+    bpd_token: BPDToken
+  })
 ]);
 export const UserV3 = t.intersection([UserWithoutTokens, RequiredUserTokensV3]);
 export type UserV3 = t.TypeOf<typeof UserV3>;
@@ -78,8 +78,8 @@ export type UserV3 = t.TypeOf<typeof UserV3>;
 const RequiredUserTokensV4 = t.intersection([
   RequiredUserTokensV3,
   t.interface({
-    zendesk_token: ZendeskToken,
-  }),
+    zendesk_token: ZendeskToken
+  })
 ]);
 export const UserV4 = t.intersection([UserWithoutTokens, RequiredUserTokensV4]);
 export type UserV4 = t.TypeOf<typeof UserV4>;
@@ -87,8 +87,8 @@ export type UserV4 = t.TypeOf<typeof UserV4>;
 const RequiredUserTokensV5 = t.intersection([
   RequiredUserTokensV4,
   t.interface({
-    fims_token: FIMSToken,
-  }),
+    fims_token: FIMSToken
+  })
 ]);
 export const UserV5 = t.intersection([UserWithoutTokens, RequiredUserTokensV5]);
 export type UserV5 = t.TypeOf<typeof UserV5>;

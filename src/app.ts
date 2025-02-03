@@ -14,7 +14,7 @@ import expressEnforcesSsl = require("express-enforces-ssl");
 import { TableClient } from "@azure/data-tables";
 import {
   NodeEnvironment,
-  NodeEnvironmentEnum,
+  NodeEnvironmentEnum
 } from "@pagopa/ts-commons/lib/environment";
 import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { CIDR, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -70,7 +70,7 @@ import {
   SERVICES_APP_BACKEND_CLIENT,
   TEST_CGN_FISCAL_CODES,
   TRIAL_SYSTEM_CLIENT,
-  URL_TOKEN_STRATEGY,
+  URL_TOKEN_STRATEGY
 } from "./config";
 import MessagesController from "./controllers/messagesController";
 import NotificationController from "./controllers/notificationController";
@@ -93,7 +93,7 @@ import { firstLollipopSign } from "./controllers/firstLollipopConsumerController
 import IoSignController from "./controllers/ioSignController";
 import {
   getPNActivationController,
-  upsertPNActivationController,
+  upsertPNActivationController
 } from "./controllers/pnController";
 import ServicesAppBackendController from "./controllers/serviceAppBackendController";
 import SessionLockController from "./controllers/sessionLockController";
@@ -113,7 +113,7 @@ import NewMessagesService from "./services/newMessagesService";
 import NotificationService from "./services/notificationService";
 import {
   NotificationServiceFactory,
-  getNotificationServiceFactory,
+  getNotificationServiceFactory
 } from "./services/notificationServiceFactory";
 import PagoPAProxyService from "./services/pagoPAProxyService";
 import { PNService } from "./services/pnService";
@@ -131,11 +131,11 @@ import { constantExpressHandler, toExpressHandler } from "./utils/express";
 import { expressErrorMiddleware } from "./utils/middleware/express";
 import {
   expressLollipopMiddleware,
-  expressLollipopMiddlewareLegacy,
+  expressLollipopMiddlewareLegacy
 } from "./utils/middleware/lollipop";
 import {
   getCurrentBackendVersion,
-  getObjectFromPackageJson,
+  getObjectFromPackageJson
 } from "./utils/package";
 import { RedisClientMode, RedisClientSelector } from "./utils/redis";
 import { ResponseErrorDismissed } from "./utils/responses";
@@ -147,7 +147,7 @@ import IoFimsController from "./controllers/fimsController";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
-  newApp,
+  newApp
 };
 
 export interface IAppFactoryParameters {
@@ -187,7 +187,7 @@ export async function newApp({
   CGNOperatorSearchAPIBasePath,
   EUCovidCertBasePath,
   ServicesAppBackendBasePath,
-  TrialSystemBasePath,
+  TrialSystemBasePath
 }: IAppFactoryParameters): Promise<Express> {
   const isDevEnvironment = ENV === NodeEnvironmentEnum.DEVELOPMENT;
   const REDIS_CLIENT_SELECTOR = await RedisClientSelector(
@@ -217,14 +217,14 @@ export async function newApp({
   // Creates middlewares for each implemented strategy
   const authMiddlewares = {
     bearerMyPortal: passport.authenticate("bearer.myportal", {
-      session: false,
+      session: false
     }),
     bearerSession: passport.authenticate("bearer.session", {
-      session: false,
+      session: false
     }),
     urlToken: passport.authenticate("authtoken", {
-      session: false,
-    }),
+      session: false
+    })
   };
 
   // Create and setup the Express app.
@@ -289,7 +289,7 @@ export async function newApp({
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       verify: (_req, res: express.Response, buf, _encoding: BufferEncoding) => {
         res.locals.body = buf;
-      },
+      }
     })
   );
 
@@ -761,7 +761,7 @@ function registerAPIRoutes(
   const notificationController: NotificationController =
     new NotificationController(notificationServiceFactory, sessionStorage, {
       notificationDefaultSubject: NOTIFICATION_DEFAULT_SUBJECT,
-      notificationDefaultTitle: NOTIFICATION_DEFAULT_TITLE,
+      notificationDefaultTitle: NOTIFICATION_DEFAULT_TITLE
     });
 
   const sessionController: SessionController = new SessionController(
@@ -1145,7 +1145,7 @@ function registerIoSignAPIRoutes(
     bearerSessionTokenAuth,
     constantExpressHandler(
       ResponseSuccessJson({
-        serviceId: IO_SIGN_SERVICE_ID as NonEmptyString,
+        serviceId: IO_SIGN_SERVICE_ID as NonEmptyString
       })
     )
   );
@@ -1374,17 +1374,17 @@ function registerPublicRoutes(app: Express): void {
         minAppVersion,
         O.getOrElse(() => ({
           android: "UNKNOWN",
-          ios: "UNKNOWN",
+          ios: "UNKNOWN"
         }))
       ),
       min_app_version_pagopa: pipe(
         minAppVersionPagoPa,
         O.getOrElse(() => ({
           android: "UNKNOWN",
-          ios: "UNKNOWN",
+          ios: "UNKNOWN"
         }))
       ),
-      version,
+      version
     };
     res.status(200).json(serverInfo);
   });
@@ -1392,7 +1392,9 @@ function registerPublicRoutes(app: Express): void {
   // Liveness probe for Kubernetes.
   // @see
   // https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#define-a-liveness-http-request
-  app.get("/ping", (_, res) => { res.status(200).send("ok") });
+  app.get("/ping", (_, res) => {
+    res.status(200).send("ok");
+  });
 }
 
 // eslint-disable-next-line max-params

@@ -6,14 +6,14 @@ import * as O from "fp-ts/Option";
 export type Encoder = (params: ReadonlyArray<string>) => string;
 
 const createSingleError =
-  (input: unknown, context: t.Context, errorMessage: string) => (): t.Errors =>
-    [
-      {
-        context,
-        message: errorMessage,
-        value: input,
-      },
-    ];
+  (input: unknown, context: t.Context, errorMessage: string) =>
+  (): t.Errors => [
+    {
+      context,
+      message: errorMessage,
+      value: input
+    }
+  ];
 
 export type PathParams = t.Type<ReadonlyArray<string>, string, unknown>;
 export const pathParamsFromUrl = (

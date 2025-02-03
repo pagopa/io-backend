@@ -4,7 +4,7 @@ import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
-  IResponseSuccessJson,
+  IResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 
 import PagoPAProxyService from "../services/pagoPAProxyService";

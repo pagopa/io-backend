@@ -31,12 +31,12 @@ import {
   MYPORTAL_BASE_PATH,
   SERVER_PORT,
   SERVICES_APP_BACKEND_BASE_PATH,
-  TRIAL_SYSTEM_API_BASE_PATH,
+  TRIAL_SYSTEM_API_BASE_PATH
 } from "./config";
 import {
   initAppInsights,
   StartupEventName,
-  trackStartupTime,
+  trackStartupTime
 } from "./utils/appinsights";
 
 import { initHttpGracefulShutdown } from "./utils/gracefulShutdown";
@@ -88,14 +88,14 @@ const maybeAppInsightsClient = pipe(
       disableAppInsights: process.env.APPINSIGHTS_DISABLED === "true",
       samplingPercentage: process.env.APPINSIGHTS_SAMPLING_PERCENTAGE
         ? parseInt(process.env.APPINSIGHTS_SAMPLING_PERCENTAGE, 10)
-        : DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE,
+        : DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE
     })
   ),
   O.chainFirst((telemetryClient) =>
     O.some(
       useWinstonFor({
         loggerId: LoggerId.event,
-        transports: [withApplicationInsight(telemetryClient, "io-backend")],
+        transports: [withApplicationInsight(telemetryClient, "io-backend")]
       })
     )
   )
@@ -118,7 +118,7 @@ newApp({
   allowSessionHandleIPSourceRange: ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE,
   appInsightsClient: O.toUndefined(maybeAppInsightsClient),
   authenticationBasePath,
-  env: ENV,
+  env: ENV
 })
   .then((app) => {
     const startupTimeMs = timer.getElapsedMilliseconds();
@@ -178,7 +178,7 @@ newApp({
         log.info("Server graceful shutdown complete.");
       },
       signals: shutdownSignals,
-      timeout: shutdownTimeout,
+      timeout: shutdownTimeout
     });
   })
   .catch((err) => {

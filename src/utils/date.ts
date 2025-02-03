@@ -16,7 +16,7 @@ export const isOlderThan = (years: number) => (dateOfBirth: Date, when: Date) =>
 export const isValidDate = (d: Date) =>
   d instanceof Date && !isNaN(d.getTime());
 
-const months: { readonly [k: string]: number } = {
+const months: Readonly<Record<string, number>> = {
   ["A"]: 1,
   ["B"]: 2,
   ["C"]: 3,
@@ -28,7 +28,7 @@ const months: { readonly [k: string]: number } = {
   ["P"]: 9,
   ["R"]: 10,
   ["S"]: 11,
-  ["T"]: 12,
+  ["T"]: 12
 };
 
 /**

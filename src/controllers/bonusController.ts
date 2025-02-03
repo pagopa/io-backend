@@ -10,7 +10,7 @@ import {
   IResponseErrorNotFound,
   IResponseErrorValidation,
   IResponseSuccessAccepted,
-  IResponseSuccessJson,
+  IResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 
 import { BonusActivationWithQrCode } from "generated/bonus/BonusActivationWithQrCode";

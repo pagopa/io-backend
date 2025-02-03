@@ -1,7 +1,7 @@
 import * as express from "express";
 import {
   IResponse,
-  ResponseErrorInternal,
+  ResponseErrorInternal
 } from "@pagopa/ts-commons/lib/responses";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as E from "fp-ts/lib/Either";

@@ -17,7 +17,7 @@ import {
   IResponseErrorValidation,
   IResponseSuccessJson,
   IResponseSuccessNoContent,
-  ResponseErrorValidation,
+  ResponseErrorValidation
 } from "@pagopa/ts-commons/lib/responses";
 
 import { pipe } from "fp-ts/lib/function";
@@ -152,7 +152,7 @@ export default class IoWalletController {
               id: pipe(
                 NonEmptyString.decode(req.params.walletInstanceId),
                 E.mapLeft(toValidationError)
-              ),
+              )
             }),
             TE.fromEither
           )

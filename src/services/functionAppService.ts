@@ -13,7 +13,7 @@ import {
   ResponseErrorNotFound,
   ResponseErrorTooManyRequests,
   ResponseErrorValidation,
-  ResponseSuccessJson,
+  ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 
 import * as E from "fp-ts/Either";
@@ -31,13 +31,12 @@ import {
   ResponseErrorUnexpectedAuthProblem,
   unhandledResponseStatus,
   withCatchAsInternalError,
-  withValidatedOrInternalError,
+  withValidatedOrInternalError
 } from "../utils/responses";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
-type RightOf<T extends E.Either<unknown, unknown>> = T extends E.Right<infer R>
-  ? R
-  : never;
+type RightOf<T extends E.Either<unknown, unknown>> =
+  T extends E.Right<infer R> ? R : never;
 
 const handleGetServicePreferencesResponse = (
   response: RightOf<
@@ -85,7 +84,7 @@ export default class FunctionsAppService {
       const client = this.apiClient.getClient();
 
       const validated = await client.getService({
-        service_id: serviceId,
+        service_id: serviceId
       });
 
       return withValidatedOrInternalError(validated, (response) =>
@@ -95,10 +94,10 @@ export default class FunctionsAppService {
               ResponseSuccessJson
             )
           : response.status === 404
-          ? ResponseErrorNotFound("Not found", "Service not found")
-          : response.status === 429
-          ? ResponseErrorTooManyRequests()
-          : unhandledResponseStatus(response.status)
+            ? ResponseErrorNotFound("Not found", "Service not found")
+            : response.status === 429
+              ? ResponseErrorTooManyRequests()
+              : unhandledResponseStatus(response.status)
       );
     });
 
@@ -121,7 +120,7 @@ export default class FunctionsAppService {
 
       const validated = await client.getServicePreferences({
         fiscal_code: fiscalCode,
-        service_id: serviceId,
+        service_id: serviceId
       });
 
       return withValidatedOrInternalError(
@@ -151,7 +150,7 @@ export default class FunctionsAppService {
       const validated = await client.upsertServicePreferences({
         body: servicePreferences,
         fiscal_code: fiscalCode,
-        service_id: serviceId,
+        service_id: serviceId
       });
 
       return withValidatedOrInternalError(

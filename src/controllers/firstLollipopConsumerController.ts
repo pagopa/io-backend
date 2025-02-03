@@ -3,7 +3,7 @@ import {
   IResponseErrorValidation,
   IResponseSuccessJson,
   ResponseErrorInternal,
-  ResponseSuccessJson,
+  ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import * as express from "express";
 import { flow, pipe } from "fp-ts/lib/function";
@@ -42,7 +42,7 @@ export const firstLollipopSign =
           TE.tryCatch(
             () =>
               client.signMessage({
-                ...localsWithBody,
+                ...localsWithBody
               }),
             () => ResponseErrorInternal("Error calling the Lollipop Consumer")
           ),

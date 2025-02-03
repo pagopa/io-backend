@@ -1,16 +1,20 @@
 import * as t from "io-ts";
-import { FiscalCode, NonEmptyString, PatternString } from "@pagopa/ts-commons/lib/strings";
+import {
+  FiscalCode,
+  NonEmptyString,
+  PatternString
+} from "@pagopa/ts-commons/lib/strings";
 import * as express from "express";
 import {
   IResponseErrorValidation,
-  ResponseErrorValidation,
+  ResponseErrorValidation
 } from "@pagopa/ts-commons/lib/responses";
 import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
 import {
   JwkPubKeyHashAlgorithm,
-  JwkPubKeyHashAlgorithmEnum,
+  JwkPubKeyHashAlgorithmEnum
 } from "../../generated/lollipop-api/JwkPubKeyHashAlgorithm";
 import { AssertionRefSha256 } from "../../generated/backend/AssertionRefSha256";
 import { AssertionRefSha384 } from "../../generated/backend/AssertionRefSha384";
@@ -37,9 +41,9 @@ export const LollipopRequiredHeaders = t.intersection([
     signature: LollipopSignature,
     ["signature-input"]: LollipopSignatureInput,
     ["x-pagopa-lollipop-original-method"]: LollipopMethod,
-    ["x-pagopa-lollipop-original-url"]: LollipopOriginalURL,
+    ["x-pagopa-lollipop-original-url"]: LollipopOriginalURL
   }),
-  t.partial({ ["content-digest"]: LollipopContentDigest }),
+  t.partial({ ["content-digest"]: LollipopContentDigest })
 ]);
 export type LollipopRequiredHeaders = t.TypeOf<typeof LollipopRequiredHeaders>;
 
@@ -50,12 +54,12 @@ export const LollipopLocalsType = t.intersection([
     ["x-pagopa-lollipop-assertion-type"]: AssertionType,
     ["x-pagopa-lollipop-auth-jwt"]: NonEmptyString,
     ["x-pagopa-lollipop-public-key"]: JwkPubKeyToken,
-    ["x-pagopa-lollipop-user-id"]: FiscalCode,
+    ["x-pagopa-lollipop-user-id"]: FiscalCode
   }),
   t.partial({
     body: t.any,
-    ["content-digest"]: LollipopContentDigest,
-  }),
+    ["content-digest"]: LollipopContentDigest
+  })
 ]);
 export type LollipopLocalsType = t.TypeOf<typeof LollipopLocalsType>;
 
@@ -146,7 +150,7 @@ export type Thumbprint = t.TypeOf<typeof Thumbprint>;
 export const algoToAssertionRefSet = new Set([
   { algo: JwkPubKeyHashAlgorithmEnum.sha256, type: AssertionRefSha256 },
   { algo: JwkPubKeyHashAlgorithmEnum.sha384, type: AssertionRefSha384 },
-  { algo: JwkPubKeyHashAlgorithmEnum.sha512, type: AssertionRefSha512 },
+  { algo: JwkPubKeyHashAlgorithmEnum.sha512, type: AssertionRefSha512 }
 ]);
 
 export const getAlgoFromAssertionRef = (

@@ -13,8 +13,8 @@ export function PagoPAClient(
     withDefaults: (op) => (params) =>
       op({
         ...params,
-        apiKeyHeader: apiKey,
-      }),
+        apiKeyHeader: apiKey
+      })
   });
 }
 

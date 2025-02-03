@@ -16,7 +16,7 @@ import {
   IResponseSuccessJson,
   IResponseSuccessRedirectToResource,
   ResponseErrorInternal,
-  ResponseErrorValidation,
+  ResponseErrorValidation
 } from "@pagopa/ts-commons/lib/responses";
 
 import { pipe } from "fp-ts/lib/function";
@@ -25,11 +25,11 @@ import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { Errors } from "io-ts";
 import {
   withValidatedOrValidationError,
-  withCatchAsInternalError,
+  withCatchAsInternalError
 } from "../utils/responses";
 import {
   IssuerEnvironment,
-  IssuerEnvironmentEnum,
+  IssuerEnvironmentEnum
 } from "../../generated/io-sign/IssuerEnvironment";
 import IoSignService from "../services/ioSignService";
 import { ResLocals } from "../utils/express";
@@ -60,8 +60,8 @@ export const IoSignLollipopLocalsType = t.intersection([
   LollipopLocalsType,
   t.type({
     ["x-pagopa-lollipop-custom-sign-challenge"]: NonEmptyString,
-    ["x-pagopa-lollipop-custom-tos-challenge"]: NonEmptyString,
-  }),
+    ["x-pagopa-lollipop-custom-tos-challenge"]: NonEmptyString
+  })
 ]);
 export type IoSignLollipopLocalsType = t.TypeOf<
   typeof IoSignLollipopLocalsType
@@ -78,7 +78,7 @@ export const withIoSignCustomLollipopLocalsFromRequest =
         ["x-pagopa-lollipop-custom-sign-challenge"]:
           req.headers["x-pagopa-lollipop-custom-sign-challenge"],
         ["x-pagopa-lollipop-custom-tos-challenge"]:
-          req.headers["x-pagopa-lollipop-custom-tos-challenge"],
+          req.headers["x-pagopa-lollipop-custom-tos-challenge"]
       },
       IoSignLollipopLocalsType.decode,
       E.mapLeft(responseErrorValidation)
@@ -156,7 +156,7 @@ export default class IoSignController {
                     "Error retrieving a user profile with validated email address"
                   )
                 )
-              ),
+              )
             }),
             TE.map(({ userProfile, signerId }) =>
               this.ioSignService.createFilledDocument(
@@ -208,7 +208,7 @@ export default class IoSignController {
                     "Error retrieving a user profile with validated email address"
                   )
                 )
-              ),
+              )
             }),
             TE.chainW(({ signerId, userProfile }) =>
               pipe(
@@ -219,9 +219,9 @@ export default class IoSignController {
                 TE.map((signatureBody) => ({
                   body: {
                     ...signatureBody,
-                    email: userProfile.email,
+                    email: userProfile.email
                   },
-                  signerId: signerId.value.id,
+                  signerId: signerId.value.id
                 }))
               )
             ),
@@ -264,7 +264,7 @@ export default class IoSignController {
             retrieveSignerId(this.ioSignService, user.fiscal_code),
             TE.mapLeft(() => toErrorRetrievingTheSignerId),
             TE.map((response) => response.value.id)
-          ),
+          )
         }),
         TE.map(({ signerId, signatureRequestId: id }) =>
           this.ioSignService.getSignatureRequest(id, signerId)

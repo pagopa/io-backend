@@ -1,7 +1,7 @@
 import nodeFetch from "node-fetch";
 import {
   Client,
-  createClient,
+  createClient
 } from "@pagopa/io-functions-eucovidcerts-sdk/client";
 
 export function EUCovidCertAPIClient(
@@ -17,8 +17,8 @@ export function EUCovidCertAPIClient(
     withDefaults: (op) => (params) =>
       op({
         ...params,
-        ApiKey: token,
-      }),
+        ApiKey: token
+      })
   });
 }
 

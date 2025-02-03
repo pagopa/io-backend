@@ -19,7 +19,7 @@ import { flow, pipe, identity } from "fp-ts/lib/function";
 import { NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
 import {
   NullableBackendAssertionRefFromString,
-  LollipopData,
+  LollipopData
 } from "../types/assertionRef";
 import { AssertionRef as BackendAssertionRef } from "../../generated/backend/AssertionRef";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
@@ -31,7 +31,7 @@ import {
   MyPortalToken,
   SessionToken,
   WalletToken,
-  ZendeskToken,
+  ZendeskToken
 } from "../types/token";
 import { User, UserV1, UserV2, UserV3, UserV4, UserV5 } from "../types/user";
 import { log } from "../utils/logger";
@@ -62,7 +62,7 @@ export const keyPrefixes = [
   sessionInfoKeyPrefix,
   noticeEmailPrefix,
   blockedUserSetKey,
-  lollipopDataPrefix,
+  lollipopDataPrefix
 ];
 export const sessionNotFoundError = new Error("Session not found");
 
@@ -494,7 +494,7 @@ export default class RedisSessionStorage
                   : // Remap plain string to LollipopData
                     {
                       assertionRef: storedValue,
-                      loginType: LoginTypeEnum.LEGACY,
+                      loginType: LoginTypeEnum.LEGACY
                     }
               )
             )
@@ -750,7 +750,7 @@ export default class RedisSessionStorage
               return prev;
             },
             (sessionInfo) => ({
-              sessions: [...prev.sessions, sessionInfo],
+              sessions: [...prev.sessions, sessionInfo]
             })
           )
         ),
@@ -764,36 +764,36 @@ export default class RedisSessionStorage
     const requiredTokens = {
       session_info: {
         prefix: sessionInfoKeyPrefix,
-        value: user.session_token,
+        value: user.session_token
       },
       session_token: {
         prefix: sessionKeyPrefix,
-        value: user.session_token,
+        value: user.session_token
       },
       wallet_token: {
         prefix: walletKeyPrefix,
-        value: user.wallet_token,
-      },
+        value: user.wallet_token
+      }
     };
     if (UserV5.is(user)) {
       return {
         ...requiredTokens,
         bpd_token: {
           prefix: bpdTokenPrefix,
-          value: user.bpd_token,
+          value: user.bpd_token
         },
         fims_token: {
           prefix: fimsTokenPrefix,
-          value: user.fims_token,
+          value: user.fims_token
         },
         myportal_token: {
           prefix: myPortalTokenPrefix,
-          value: user.myportal_token,
+          value: user.myportal_token
         },
         zendesk_token: {
           prefix: zendeskTokenPrefix,
-          value: user.zendesk_token,
-        },
+          value: user.zendesk_token
+        }
       };
     }
     if (UserV4.is(user)) {
@@ -801,16 +801,16 @@ export default class RedisSessionStorage
         ...requiredTokens,
         bpd_token: {
           prefix: bpdTokenPrefix,
-          value: user.bpd_token,
+          value: user.bpd_token
         },
         myportal_token: {
           prefix: myPortalTokenPrefix,
-          value: user.myportal_token,
+          value: user.myportal_token
         },
         zendesk_token: {
           prefix: zendeskTokenPrefix,
-          value: user.zendesk_token,
-        },
+          value: user.zendesk_token
+        }
       };
     }
     if (UserV3.is(user)) {
@@ -818,12 +818,12 @@ export default class RedisSessionStorage
         ...requiredTokens,
         bpd_token: {
           prefix: bpdTokenPrefix,
-          value: user.bpd_token,
+          value: user.bpd_token
         },
         myportal_token: {
           prefix: myPortalTokenPrefix,
-          value: user.myportal_token,
-        },
+          value: user.myportal_token
+        }
       };
     }
     if (UserV2.is(user)) {
@@ -831,13 +831,13 @@ export default class RedisSessionStorage
         ...requiredTokens,
         myportal_token: {
           prefix: myPortalTokenPrefix,
-          value: user.myportal_token,
-        },
+          value: user.myportal_token
+        }
       };
     }
     if (UserV1.is(user)) {
       return {
-        ...requiredTokens,
+        ...requiredTokens
       };
     }
     return assertUnreachable(user);

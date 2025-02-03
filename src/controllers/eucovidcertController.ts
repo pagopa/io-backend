@@ -5,7 +5,7 @@ import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
-  IResponseSuccessJson,
+  IResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 
 import { Certificate } from "@pagopa/io-functions-eucovidcerts-sdk/Certificate";

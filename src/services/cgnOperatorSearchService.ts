@@ -9,7 +9,7 @@ import {
   ProblemJson,
   ResponseErrorInternal,
   ResponseErrorNotFound,
-  ResponseSuccessJson,
+  ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -24,7 +24,7 @@ import { Merchant } from "../../generated/cgn-operator-search/Merchant";
 import {
   ResponseErrorStatusNotDefinedInSpec,
   withCatchAsInternalError,
-  withValidatedOrInternalError,
+  withValidatedOrInternalError
 } from "../utils/responses";
 import { readableProblem } from "../utils/errorsFormatter";
 import { CgnOperatorSearchAPIClient } from "../../src/clients/cgn-operator-search";
@@ -76,7 +76,7 @@ export default class CgnService {
   ): Promise<ServiceResponses<Merchant>> =>
     withCatchAsInternalError(async () => {
       const validated = await this.cgnOperatorSearchApiClient.getMerchant({
-        merchantId,
+        merchantId
       });
 
       return withValidatedOrInternalError(validated, (response) =>
@@ -104,7 +104,7 @@ export default class CgnService {
   ): Promise<ServiceResponses<SearchResult>> =>
     withCatchAsInternalError(async () => {
       const validated = await this.cgnOperatorSearchApiClient.search({
-        body: searchRequest,
+        body: searchRequest
       });
 
       return withValidatedOrInternalError(validated, (response) =>
@@ -124,7 +124,7 @@ export default class CgnService {
     withCatchAsInternalError(async () => {
       const validated =
         await this.cgnOperatorSearchApiClient.getOnlineMerchants({
-          body: onlineMerchantSearchRequest,
+          body: onlineMerchantSearchRequest
         });
 
       return withValidatedOrInternalError(validated, (response) =>
@@ -144,7 +144,7 @@ export default class CgnService {
     withCatchAsInternalError(async () => {
       const validated =
         await this.cgnOperatorSearchApiClient.getOfflineMerchants({
-          body: offlineMerchantSearchRequest,
+          body: offlineMerchantSearchRequest
         });
 
       return withValidatedOrInternalError(validated, (response) =>
@@ -163,7 +163,7 @@ export default class CgnService {
     withCatchAsInternalError(async () => {
       const validated =
         await this.cgnOperatorSearchApiClient.getDiscountBucketCode({
-          discountId,
+          discountId
         });
 
       return withValidatedOrInternalError(validated, (response) =>

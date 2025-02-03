@@ -12,14 +12,14 @@ import {
   IResponseSuccessAccepted,
   IResponseSuccessJson,
   IResponseSuccessRedirectToResource,
-  ResponseSuccessJson,
+  ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import TrialService from "src/services/trialService";
 import {
   FF_IO_WALLET_TRIAL_ENABLED,
-  IO_WALLET_TRIAL_ID,
+  IO_WALLET_TRIAL_ID
 } from "../../src/config";
 import { TrialId } from "../../generated/trial-system-api/TrialId";
 import { withUserFromRequest } from "../types/user";
@@ -75,7 +75,7 @@ export default class TrialController {
                 ResponseSuccessJson({
                   createdAt: new Date(),
                   state: SubscriptionStateEnum.ACTIVE,
-                  trialId,
+                  trialId
                 })
               )
       )

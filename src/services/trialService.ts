@@ -15,7 +15,7 @@ import {
   ResponseErrorConflict,
   IResponseErrorConflict,
   IResponseSuccessJson,
-  ResponseSuccessJson,
+  ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import { TrialSystemAPIClient } from "src/clients/trial-system.client";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -25,7 +25,7 @@ import {
   ResponseErrorStatusNotDefinedInSpec,
   ResponseErrorUnexpectedAuthProblem,
   withCatchAsInternalError,
-  withValidatedOrInternalError,
+  withValidatedOrInternalError
 } from "../utils/responses";
 import { TrialId } from "../../generated/trial-system-api/TrialId";
 import { Subscription } from "../../generated/trial-system/Subscription";
@@ -52,9 +52,9 @@ export default class TrialService {
     withCatchAsInternalError(async () => {
       const validated = await this.apiClient.createSubscription({
         body: {
-          userId,
+          userId
         },
-        trialId,
+        trialId
       });
 
       return withValidatedOrInternalError(validated, (response) => {
@@ -64,7 +64,7 @@ export default class TrialService {
               {
                 createdAt: response.value.createdAt,
                 state: response.value.state,
-                trialId: response.value.trialId,
+                trialId: response.value.trialId
               },
               (resBody) =>
                 ResponseSuccessRedirectToResource(
@@ -118,7 +118,7 @@ export default class TrialService {
     withCatchAsInternalError(async () => {
       const validated = await this.apiClient.getSubscription({
         trialId,
-        userId,
+        userId
       });
 
       return withValidatedOrInternalError(validated, (response) => {
@@ -128,7 +128,7 @@ export default class TrialService {
               {
                 createdAt: response.value.createdAt,
                 state: response.value.state,
-                trialId: response.value.trialId,
+                trialId: response.value.trialId
               },
               ResponseSuccessJson
             );

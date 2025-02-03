@@ -14,7 +14,7 @@ import {
   ResponseErrorNotFound,
   ResponseErrorValidation,
   ResponseSuccessJson,
-  ResponseSuccessRedirectToResource,
+  ResponseSuccessRedirectToResource
 } from "@pagopa/ts-commons/lib/responses";
 
 import * as O from "fp-ts/lib/Option";
@@ -25,7 +25,7 @@ import * as t from "io-ts";
 import {
   EmailString,
   FiscalCode,
-  NonEmptyString,
+  NonEmptyString
 } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/Either";
 import { CreateSignatureBody as CreateSignatureBodyApiModel } from "../../generated/io-sign-api/CreateSignatureBody";
@@ -43,7 +43,7 @@ import { IoSignAPIClient } from "../clients/io-sign";
 import {
   ResponseErrorStatusNotDefinedInSpec,
   withCatchAsInternalError,
-  withValidatedOrInternalError,
+  withValidatedOrInternalError
 } from "../utils/responses";
 import { readableProblem } from "../utils/errorsFormatter";
 import { IoSignLollipopLocalsType } from "../controllers/ioSignController";
@@ -82,7 +82,7 @@ export default class IoSignService {
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.ioSignApiClient.getSignerByFiscalCode({
-        body: { fiscal_code: fiscalCode },
+        body: { fiscal_code: fiscalCode }
       });
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
@@ -126,9 +126,9 @@ export default class IoSignService {
           document_url,
           email,
           family_name,
-          name,
+          name
         },
-        "x-iosign-signer-id": signerId,
+        "x-iosign-signer-id": signerId
       });
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
@@ -176,7 +176,7 @@ export default class IoSignService {
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.ioSignApiClient.getQtspClausesMetadata({
-        "x-iosign-issuer-environment": issuerEnvironment,
+        "x-iosign-issuer-environment": issuerEnvironment
       });
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
@@ -216,7 +216,7 @@ export default class IoSignService {
       const validated = await this.ioSignApiClient.createSignature({
         ...ioSignLollipopLocals,
         body,
-        "x-iosign-signer-id": signerId,
+        "x-iosign-signer-id": signerId
       });
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
@@ -263,7 +263,7 @@ export default class IoSignService {
     withCatchAsInternalError(async () => {
       const validated = await this.ioSignApiClient.getSignatureRequestById({
         id: signatureRequestId,
-        "x-iosign-signer-id": signerId,
+        "x-iosign-signer-id": signerId
       });
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
@@ -278,7 +278,7 @@ export default class IoSignService {
                   )
                   .json(response.value),
               kind: "IResponseSuccessJson",
-              value: response.value,
+              value: response.value
             };
           case 404:
             return ResponseErrorNotFound(
@@ -305,7 +305,7 @@ export default class IoSignService {
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.ioSignApiClient.getSignatureRequests({
-        "x-iosign-signer-id": signerId,
+        "x-iosign-signer-id": signerId
       });
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {

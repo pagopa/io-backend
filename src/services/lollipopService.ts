@@ -26,7 +26,7 @@ export default class LollipopService {
     assertionRef: AssertionRef
   ): Promise<QueueSendMessageResponse> {
     const revokeMessage = RevokeAssertionRefInfo.encode({
-      assertion_ref: assertionRef,
+      assertion_ref: assertionRef
     });
     return this.queueClient.sendMessage(base64EncodeObject(revokeMessage));
   }

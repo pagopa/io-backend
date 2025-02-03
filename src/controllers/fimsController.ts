@@ -13,7 +13,7 @@ import {
   IResponseErrorValidation,
   IResponseSuccessAccepted,
   IResponseSuccessJson,
-  ResponseErrorInternal,
+  ResponseErrorInternal
 } from "@pagopa/ts-commons/lib/responses";
 
 import { pipe } from "fp-ts/lib/function";

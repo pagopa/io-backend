@@ -16,7 +16,7 @@ import {
   ResponseErrorNotFound,
   ResponseErrorServiceTemporarilyUnavailable,
   ResponseSuccessJson,
-  ResponseSuccessNoContent,
+  ResponseSuccessNoContent
 } from "@pagopa/ts-commons/lib/responses";
 
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -28,7 +28,7 @@ import { IoWalletAPIClient } from "../clients/io-wallet";
 import {
   ResponseErrorStatusNotDefinedInSpec,
   withCatchAsInternalError,
-  withValidatedOrInternalError,
+  withValidatedOrInternalError
 } from "../utils/responses";
 import { IO_WALLET_TRIAL_ID } from "../config";
 import { TrialSystemAPIClient } from "../clients/trial-system.client";
@@ -103,8 +103,8 @@ export default class IoWalletService {
           challenge,
           fiscal_code,
           hardware_key_tag,
-          key_attestation,
-        },
+          key_attestation
+        }
       });
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
@@ -157,8 +157,8 @@ export default class IoWalletService {
         body: {
           assertion,
           fiscal_code,
-          grant_type,
-        },
+          grant_type
+        }
       });
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
@@ -215,7 +215,7 @@ export default class IoWalletService {
     withCatchAsInternalError(async () => {
       const validated = await this.ioWalletApiClient.setWalletInstanceStatus({
         body: { fiscal_code, status },
-        id,
+        id
       });
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
@@ -253,7 +253,7 @@ export default class IoWalletService {
     withCatchAsInternalError(async () => {
       const validated =
         await this.ioWalletApiClient.setCurrentWalletInstanceStatus({
-          body: { fiscal_code, status },
+          body: { fiscal_code, status }
         });
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
@@ -295,7 +295,7 @@ export default class IoWalletService {
     withCatchAsInternalError(async () => {
       const validated = await this.ioWalletApiClient.getWalletInstanceStatus({
         "fiscal-code": fiscal_code,
-        id,
+        id
       });
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
@@ -336,7 +336,7 @@ export default class IoWalletService {
     withCatchAsInternalError(async () => {
       const validated = await this.trialSystemApiClient.getSubscription({
         trialId: IO_WALLET_TRIAL_ID,
-        userId,
+        userId
       });
 
       return withValidatedOrInternalError(validated, (response) => {
@@ -345,7 +345,7 @@ export default class IoWalletService {
             return pipe(
               {
                 createdAt: response.value.createdAt,
-                state: response.value.state,
+                state: response.value.state
               },
               ResponseSuccessJson
             );

@@ -45,12 +45,12 @@ export function toBarcode(
 ): TaskEither<Error, IBarcodeOutput> {
   const options = {
     bcid,
-    text,
+    text
   };
   return pipe(
     AP.sequenceS(TE.ApplicativePar)({
       png: toBufferPng(options),
-      svg: TE.fromEither(toBufferSvg(options)),
+      svg: TE.fromEither(toBufferSvg(options))
     }),
     TE.fold(
       (errorOrString) =>
@@ -65,7 +65,7 @@ export function toBarcode(
         TE.fromEither(
           E.right({
             png: images.png.toString("base64"),
-            svg: images.svg.toString("base64"),
+            svg: images.svg.toString("base64")
           })
         )
     )

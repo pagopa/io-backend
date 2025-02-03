@@ -1,7 +1,7 @@
 import * as appInsights from "applicationinsights";
 import {
   ApplicationInsightsConfig,
-  initAppInsights as startAppInsights,
+  initAppInsights as startAppInsights
 } from "@pagopa/ts-commons/lib/appinsights";
 import { eventLog } from "@pagopa/winston-ts";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -11,7 +11,7 @@ import { Request } from "express";
 import * as E from "fp-ts/lib/Either";
 import {
   sha256,
-  validateDigestHeader,
+  validateDigestHeader
 } from "@pagopa/io-functions-commons/dist/src/utils/crypto";
 import { withoutUndefinedValues } from "@pagopa/ts-commons/lib/types";
 import { LollipopLocalsType } from "../types/lollipop";
@@ -59,10 +59,8 @@ export function attachTrackingData(user: User): void {
 
 export function sessionIdPreprocessor(
   envelope: appInsights.Contracts.Envelope,
-  context?: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    readonly [name: string]: any;
-  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  context?: Readonly<Record<string, any>>
 ): boolean {
   if (context !== undefined) {
     try {
@@ -91,7 +89,7 @@ export function sessionIdPreprocessor(
 
 export enum StartupEventName {
   SERVER = "api-backend.httpserver.startup",
-  SPID = "api-backend.spid.config",
+  SPID = "api-backend.spid.config"
 }
 
 export const trackStartupTime = (
@@ -102,9 +100,9 @@ export const trackStartupTime = (
   telemetryClient.trackEvent({
     name: type,
     properties: {
-      time: timeMs.toString(),
+      time: timeMs.toString()
     },
-    tagOverrides: { samplingEnabled: "false" },
+    tagOverrides: { samplingEnabled: "false" }
   });
 };
 
@@ -192,12 +190,12 @@ export const logLollipopSignRequest =
         // The fiscal code will be sent hashed to the logs
         ["x-pagopa-lollipop-user-id"]: sha256(
           lollipopHeadersWithoutBody["x-pagopa-lollipop-user-id"]
-        ),
+        )
       })),
       O.map(withoutUndefinedValues),
       eventLog.option.info((lollipopEventData) => [
         `Lollipop Request log`,
-        lollipopEventData,
+        lollipopEventData
       ])
     );
   };

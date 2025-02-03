@@ -6,7 +6,7 @@ import {
   IResponseErrorInternal,
   IResponseErrorValidation,
   IResponseSuccessJson,
-  ResponseSuccessJson,
+  ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import { MyPortalUser } from "../../generated/myportal/MyPortalUser";
 import { withUserFromRequest } from "../types/user";
@@ -28,7 +28,7 @@ export const getUserForMyPortal = (
       MyPortalUser.decode({
         family_name: user.family_name,
         fiscal_code: user.fiscal_code,
-        name: user.name,
+        name: user.name
       }),
       (_) => ResponseSuccessJson(_)
     )

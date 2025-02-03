@@ -12,7 +12,7 @@ import {
   ResponseErrorInternal,
   ResponseErrorNotFound,
   ResponseSuccessAccepted,
-  ResponseSuccessJson,
+  ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import * as TE from "fp-ts/lib/TaskEither";
 import { BonusActivationWithQrCode } from "generated/bonus/BonusActivationWithQrCode";
@@ -29,7 +29,7 @@ import {
   ResponseErrorStatusNotDefinedInSpec,
   ResponseErrorUnexpectedAuthProblem,
   withCatchAsInternalError,
-  withValidatedOrInternalError,
+  withValidatedOrInternalError
 } from "../utils/responses";
 import { readableProblem } from "../utils/errorsFormatter";
 
@@ -50,7 +50,7 @@ export default class BonusService {
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.bonusApiClient.getBonusEligibilityCheck({
-        fiscalcode: user.fiscal_code,
+        fiscalcode: user.fiscal_code
       });
 
       return withValidatedOrInternalError(validated, (response) => {
@@ -91,7 +91,7 @@ export default class BonusService {
     withCatchAsInternalError(async () => {
       const validated = await this.bonusApiClient.getLatestBonusActivationById({
         bonus_id: bonusId,
-        fiscalcode: user.fiscal_code,
+        fiscalcode: user.fiscal_code
       });
 
       return withValidatedOrInternalError(validated, (response) => {

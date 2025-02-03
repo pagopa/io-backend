@@ -5,7 +5,7 @@ import { flow } from "fp-ts/lib/function";
 import { FiscalCode } from "../../generated/io-bonus-api/FiscalCode";
 import {
   FeatureFlag,
-  getIsUserEligibleForNewFeature,
+  getIsUserEligibleForNewFeature
 } from "../utils/featureFlag";
 import { toFiscalCodeHash } from "../types/notification";
 

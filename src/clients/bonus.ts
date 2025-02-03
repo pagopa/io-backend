@@ -15,8 +15,8 @@ export function BonusAPIClient(
         ...params,
         // please refer to source api spec for actual header mapping
         // https://github.com/pagopa/io-functions-bonus/blob/master/openapi/index.yaml#:~:text=%20%20ApiKey:
-        ApiKey: token,
-      }),
+        ApiKey: token
+      })
   });
 }
 

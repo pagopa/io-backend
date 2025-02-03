@@ -10,14 +10,14 @@ import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
 export type LollipopData = t.TypeOf<typeof LollipopData>;
 export const LollipopData = t.type({
   assertionRef: AssertionRef,
-  loginType: LoginType,
+  loginType: LoginType
 });
 
 // CompactLollipopData
 type CompactLollipopData = t.TypeOf<typeof CompactLollipopData>;
 const CompactLollipopData = t.type({
   a: AssertionRef,
-  t: LoginType,
+  t: LoginType
 });
 
 // LollipopDataFromCompact
@@ -55,5 +55,5 @@ export const NullableBackendAssertionRefFromString = t.union([
   t.null,
   t.undefined,
   AssertionRef,
-  LollipopDataFromString,
+  LollipopDataFromString
 ]);

@@ -15,7 +15,7 @@ import { HttpsUrlFromString, UrlFromString } from "@pagopa/ts-commons/lib/url";
 import {
   AbortableFetch,
   setFetchTimeout,
-  toFetch,
+  toFetch
 } from "@pagopa/ts-commons/lib/fetch";
 import { NonEmptyString, Ulid } from "@pagopa/ts-commons/lib/strings";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
@@ -39,7 +39,7 @@ import { IoSignAPIClient } from "./clients/io-sign";
 import {
   FeatureFlag,
   FeatureFlagEnum,
-  getIsUserEligibleForNewFeature,
+  getIsUserEligibleForNewFeature
 } from "./utils/featureFlag";
 import { CommaSeparatedListOf } from "./utils/separated-list";
 import { LollipopApiClient } from "./clients/lollipop";
@@ -139,7 +139,7 @@ const bearerAuthFetch =
   (input, init) =>
     origFetch(input, {
       ...init,
-      headers: { Authorization: `Bearer ${bearerToken}` },
+      headers: { Authorization: `Bearer ${bearerToken}` }
     });
 
 export const getHttpsApiFetchWithBearer = (bearer: string) =>
@@ -288,15 +288,15 @@ const IEnabledPnAddressBookConfig = t.interface({
   PN_API_KEY: NonEmptyString,
   PN_API_KEY_UAT: NonEmptyString,
   PN_API_URL: UrlFromString,
-  PN_API_URL_UAT: UrlFromString,
+  PN_API_URL_UAT: UrlFromString
 });
 type IEnabledPnAddressBookConfig = t.TypeOf<typeof IEnabledPnAddressBookConfig>;
 
 const IPNAddressBookConfig = t.union([
   IEnabledPnAddressBookConfig,
   t.partial({
-    FF_PN_ACTIVATION_ENABLED: t.literal("0"),
-  }),
+    FF_PN_ACTIVATION_ENABLED: t.literal("0")
+  })
 ]);
 type IPNAddressBookConfig = t.TypeOf<typeof IPNAddressBookConfig>;
 
@@ -452,13 +452,13 @@ export const PecServerConfig = t.interface({
   basePath: t.string,
   secret: NonEmptyString,
   serviceId: NonEmptyString,
-  url: NonEmptyString,
+  url: NonEmptyString
 });
 export type PecServerConfig = t.TypeOf<typeof PecServerConfig>;
 
 export const PecServersConfig = t.interface({
   aruba: PecServerConfig,
-  poste: PecServerConfig,
+  poste: PecServerConfig
 });
 export type PecServersConfig = t.TypeOf<typeof PecServersConfig>;
 

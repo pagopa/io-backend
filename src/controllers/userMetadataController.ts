@@ -11,7 +11,7 @@ import {
   IResponseSuccessJson,
   ResponseErrorConflict,
   ResponseErrorInternal,
-  ResponseSuccessJson,
+  ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 
 import * as E from "fp-ts/lib/Either";
@@ -21,7 +21,7 @@ import { UserMetadata } from "../../generated/backend/UserMetadata";
 import { IUserMetadataStorage } from "../services/IUserMetadataStorage";
 import {
   invalidVersionNumberError,
-  metadataNotFoundError,
+  metadataNotFoundError
 } from "../services/redisUserMetadataStorage";
 import { withUserFromRequest } from "../types/user";
 import { withValidatedOrValidationError } from "../utils/responses";
