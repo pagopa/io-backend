@@ -30,10 +30,12 @@ jobs:
           body-regex: "${{ env.JIRA_COMMENT_REGEX }}"
 
       - name: Extract Jira Issue to Link
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
         id: extract_jira_issue
         if: steps.lint.outcome == 'success'
         run: |
-          PR_TITLE=$(echo "${{ github.event.pull_request.title }}")
+          PR_TITLE=$(echo "$PR_TITLE")
           ISSUES_STR=$(awk -F'\\[|\\]' '{print $2}' <<< "$PR_TITLE" | sed "s/#//g" | sed "s/,//g")
           ISSUES=($ISSUES_STR)
           JIRA_ISSUE=$(echo ${ISSUES_STR##* })
@@ -76,7 +78,9 @@ jobs:
             Please check it out.
           edit-mode: replace
       - name: Failure message
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
         if: steps.lint.outcome != 'success'
         run: |
-          echo "Pull request title (${{ github.event.pull_request.title }}) is not properly formatted or it is not related to any Jira issue"
+          echo "Pull request title ($PR_TITLE) is not properly formatted or it is not related to any Jira issue"
           exit 1
