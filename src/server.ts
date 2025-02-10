@@ -72,9 +72,10 @@ let server: http.Server | https.Server;
 const timer = TimeTracer();
 
 /**
- * If APPINSIGHTS_INSTRUMENTATIONKEY env is provided initialize an App Insights Client
- * WARNING: When the key is provided several information are collected automatically
- * and sent to App Insights.
+ * If APPINSIGHTS_CONNECTION_STRING env and APPINSIGHTS_CLOUD_ROLE_NAME env
+ * are provided initialize an App Insights Client
+ * WARNING: When the connection string is provided several information are
+ * collected automatically and sent to App Insights.
  * To see what kind of informations are automatically collected
  *
  * @see: utils/appinsights.js into the class AppInsightsClientBuilder

@@ -105,7 +105,7 @@ export const initTelemetryClient = (config: AppInsightsConfig) =>
     O.fromNullable,
     O.getOrElse(() => {
       const client = initAppInsights(
-        config.APPLICATIONINSIGHTS_CONNECTION_STRING,
+        config.APPINSIGHTS_CONNECTION_STRING,
         {
           applicationVersion: getCurrentBackendVersion(),
           cloudRole: config.APPINSIGHTS_CLOUD_ROLE_NAME,
