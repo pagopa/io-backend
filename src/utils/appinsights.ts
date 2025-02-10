@@ -104,19 +104,16 @@ export const initTelemetryClient = (config: AppInsightsConfig) =>
     ai.defaultClient,
     O.fromNullable,
     O.getOrElse(() => {
-      const client = initAppInsights(
-        config.APPINSIGHTS_CONNECTION_STRING,
-        {
-          applicationVersion: getCurrentBackendVersion(),
-          cloudRole: config.APPINSIGHTS_CLOUD_ROLE_NAME,
-          disableAppInsights: config.APPINSIGHTS_DISABLE === "true",
-          samplingPercentage: pipe(
-            config.APPINSIGHTS_SAMPLING_PERCENTAGE,
-            O.fromNullable,
-            O.getOrElse(() => DEFAULT_SAMPLING_PERCENTAGE)
-          )
-        }
-      );
+      const client = initAppInsights(config.APPINSIGHTS_CONNECTION_STRING, {
+        applicationVersion: getCurrentBackendVersion(),
+        cloudRole: config.APPINSIGHTS_CLOUD_ROLE_NAME,
+        disableAppInsights: config.APPINSIGHTS_DISABLE === "true",
+        samplingPercentage: pipe(
+          config.APPINSIGHTS_SAMPLING_PERCENTAGE,
+          O.fromNullable,
+          O.getOrElse(() => DEFAULT_SAMPLING_PERCENTAGE)
+        )
+      });
       client.addTelemetryProcessor(sessionIdPreprocessor);
       return client;
     })
