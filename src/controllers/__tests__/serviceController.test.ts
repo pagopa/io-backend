@@ -5,7 +5,7 @@ import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import {
   NonEmptyString,
-  OrganizationFiscalCode
+  OrganizationFiscalCode,
 } from "@pagopa/ts-commons/lib/strings";
 
 import { DepartmentName } from "../../../generated/backend/DepartmentName";
@@ -28,15 +28,15 @@ const proxyService: ServicePublic = {
   organization_name: "Organization name" as OrganizationName,
   service_id: "5a563817fcc896087002ea46c49a" as NonEmptyString,
   service_name: "Service name" as ServiceName,
-  version: 42 as NonNegativeInteger
+  version: 42 as NonNegativeInteger,
 };
 
 const mockGetService = jest.fn();
 jest.mock("../../services/functionAppService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
-      getService: mockGetService
-    }))
+      getService: mockGetService,
+    })),
   };
 });
 
@@ -65,7 +65,7 @@ describe("serviceController#getService", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: proxyService
+      value: proxyService,
     });
   });
 });

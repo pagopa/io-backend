@@ -62,7 +62,10 @@ const proxyMessageResponse = {
 };
 
 const aConfigurationId = "01HMRBX080WA6SGYBQP1A7FSKH" as Ulid;
-const aThirdPartyMessageDetail = { details: { aDetail: "detail" }, configuration_id: aConfigurationId };
+const aThirdPartyMessageDetail = {
+  details: { aDetail: "detail" },
+  configuration_id: aConfigurationId,
+};
 
 const proxyThirdPartyMessageResponse = {
   ...proxyMessageResponse,
@@ -558,7 +561,6 @@ describe("MessagesController#getThirdPartyMessagePrecondition", () => {
       mockedUser.fiscal_code,
       req.params.id
     );
-    
   });
 });
 

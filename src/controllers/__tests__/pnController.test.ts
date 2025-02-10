@@ -9,7 +9,7 @@ import mockRes from "../../__mocks__/response";
 import { mockedUser } from "../../__mocks__/user_mock";
 import {
   upsertPNActivationController,
-  getPNActivationController
+  getPNActivationController,
 } from "../pnController";
 
 import * as O from "fp-ts/Option";
@@ -21,7 +21,7 @@ const unexpectedPnActivation = Promise.resolve(
   right<never, IResponseType<599, undefined, never>>({
     headers: {},
     status: 599,
-    value: undefined
+    value: undefined,
   })
 );
 const failPnActivation = Promise.reject(new Error("error"));
@@ -31,27 +31,28 @@ const successUpsertPnActivation = Promise.resolve(
   right<never, IResponseType<204, undefined, never>>({
     headers: {},
     status: 204,
-    value: undefined
+    value: undefined,
   })
 );
 const badRequestUpsertPnActivation = Promise.resolve(
   right<never, IResponseType<400, undefined, never>>({
     headers: {},
     status: 400,
-    value: undefined
+    value: undefined,
   })
 );
 
-const aIoCourtesyDigitalAddressActivation: IoCourtesyDigitalAddressActivation = {
-  activationStatus: true
-};
+const aIoCourtesyDigitalAddressActivation: IoCourtesyDigitalAddressActivation =
+  {
+    activationStatus: true,
+  };
 
 // getPNActivation responses mocks
 const successGetPnActivation = Promise.resolve(
   right<never, IResponseType<200, IoCourtesyDigitalAddressActivation, never>>({
     headers: {},
     status: 200,
-    value: aIoCourtesyDigitalAddressActivation
+    value: aIoCourtesyDigitalAddressActivation,
   })
 );
 // TODO: The client generator doesn't get the response type declared with relative path from url
@@ -59,14 +60,14 @@ const notFoundGetPnActivation = Promise.resolve(
   right<never, IResponseType<404, undefined, never>>({
     headers: {},
     status: 404,
-    value: undefined
+    value: undefined,
   })
 );
 const badRequestGetPnActivation = Promise.resolve(
   right<never, IResponseType<400, undefined, never>>({
     headers: {},
     status: 400,
-    value: undefined
+    value: undefined,
   })
 );
 
@@ -101,7 +102,7 @@ describe("pnController#upsertPNActivationController", () => {
       environment,
       isTestValue,
       pnServiceResponse,
-      responseKind
+      responseKind,
     }: {
       environment: PNEnvironment;
       isTestValue: boolean | undefined;
@@ -117,10 +118,10 @@ describe("pnController#upsertPNActivationController", () => {
       );
       const controller = upsertPNActivationController(mockUpsertPnActivation);
       req.body = {
-        activation_status: true
+        activation_status: true,
       } as PNActivation;
       req.query = {
-        isTest: isTestValue
+        isTest: isTestValue,
       };
       const response = await controller(req);
       response.apply(res);
@@ -134,7 +135,7 @@ describe("pnController#upsertPNActivationController", () => {
       expect(response).toEqual(
         expect.objectContaining({
           apply: expect.any(Function),
-          kind: responseKind
+          kind: responseKind,
         })
       );
     }
@@ -145,10 +146,10 @@ describe("pnController#upsertPNActivationController", () => {
     const controller = upsertPNActivationController(mockUpsertPnActivation);
     // Invalid payload
     req.body = {
-      activation_status: "true"
+      activation_status: "true",
     };
     req.query = {
-      isTest: true
+      isTest: true,
     };
     const response = await controller(req);
     response.apply(res);
@@ -158,7 +159,7 @@ describe("pnController#upsertPNActivationController", () => {
     expect(response).toEqual(
       expect.objectContaining({
         apply: expect.any(Function),
-        kind: "IResponseErrorValidation"
+        kind: "IResponseErrorValidation",
       })
     );
   });
@@ -195,7 +196,7 @@ describe("pnController#getPNActivationController", () => {
       isTestValue,
       pnServiceResponse,
       responseKind,
-      expectedValue
+      expectedValue,
     }: {
       environment: PNEnvironment;
       isTestValue: boolean | undefined;
@@ -208,7 +209,7 @@ describe("pnController#getPNActivationController", () => {
       );
       const controller = getPNActivationController(mockGetPnActivation);
       req.query = {
-        isTest: isTestValue
+        isTest: isTestValue,
       };
       const response = await controller(req);
       response.apply(res);
@@ -222,15 +223,15 @@ describe("pnController#getPNActivationController", () => {
         expect.objectContaining(
           pipe(
             expectedValue,
-            O.map(activation_status => ({ activation_status })),
-            O.map(value => ({
+            O.map((activation_status) => ({ activation_status })),
+            O.map((value) => ({
               apply: expect.any(Function),
               kind: responseKind,
-              value
+              value,
             })),
             O.getOrElse(() => ({
               apply: expect.any(Function),
-              kind: responseKind
+              kind: responseKind,
             }))
           )
         )

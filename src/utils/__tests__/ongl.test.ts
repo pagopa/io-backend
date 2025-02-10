@@ -6,26 +6,26 @@ const dummyEnv = {
   OTHERS: "others env properties",
   PREFIX_id: "dummy_id",
   PREFIX_name: "dummy_name",
-  PREFIX_inner_id: "dummy_inner_id"
+  PREFIX_inner_id: "dummy_inner_id",
 };
 
 const dummyNestedEnv = {
   id: "dummy_id",
   name: "dummy_name",
-  inner: { id: "dummy_inner_id" }
+  inner: { id: "dummy_inner_id" },
 };
 
 const dummyTypeDecoded = {
   id: "dummy_id",
   name: "dummy_name",
-  inner: { id: "dummy_inner_id" }
+  inner: { id: "dummy_inner_id" },
 };
 
 type dummyType = t.Type<typeof dummyType>;
 const dummyType = t.interface({
   id: t.string,
   name: t.string,
-  inner: t.interface({ id: t.string })
+  inner: t.interface({ id: t.string }),
 });
 
 describe("set", () => {
@@ -45,7 +45,7 @@ describe("ognl", () => {
 
   it("GIVEN a not valid dummyType configuration WHEN the decode is called THEN a left either is returned", () => {
     const decoded = ognlTypeFor(dummyType, "PREFIX").decode({
-      PREFIX_wrong: "wrong"
+      PREFIX_wrong: "wrong",
     });
     expect(E.isLeft(decoded)).toBeTruthy();
   });

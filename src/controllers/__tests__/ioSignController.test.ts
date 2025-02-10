@@ -1,12 +1,12 @@
 import {
   ResponseErrorInternal,
-  ResponseSuccessJson
+  ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import IoSignController, {
-  IoSignLollipopLocalsType
+  IoSignLollipopLocalsType,
 } from "../ioSignController";
 import { IoSignAPIClient } from "../../clients/io-sign";
 import ApiClient from "../../services/apiClientFactory";
@@ -17,7 +17,7 @@ import { FilledDocumentDetailView } from "../../../generated/io-sign-api/FilledD
 import {
   aFiscalCode,
   mockedInitializedProfile,
-  mockedUser
+  mockedUser,
 } from "../../__mocks__/user_mock";
 import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
@@ -29,7 +29,7 @@ import { TypeEnum as ClauseTypeEnum } from "../../../generated/io-sign-api/Claus
 import { NonNegativeNumber } from "@pagopa/ts-commons/lib/numbers";
 import {
   SignatureDetailView,
-  StatusEnum as SignatureStatusEnum
+  StatusEnum as SignatureStatusEnum,
 } from "../../../generated/io-sign/SignatureDetailView";
 import { LollipopMethodEnum } from "../../../generated/lollipop/LollipopMethod";
 import { LollipopJWTAuthorization } from "../../../generated/io-sign-api/LollipopJWTAuthorization";
@@ -38,7 +38,7 @@ import {
   aLollipopOriginalUrl,
   anAssertionRef,
   aSignature,
-  aSignatureInput
+  aSignatureInput,
 } from "../../__mocks__/lollipop";
 import { AssertionTypeEnum } from "../../../generated/io-sign-api/AssertionType";
 import { CreateSignatureBody } from "../../../generated/io-sign/CreateSignatureBody";
@@ -54,7 +54,7 @@ const badRequestErrorResponse = {
   detail: expect.any(String),
   status: 400,
   title: expect.any(String),
-  type: undefined
+  type: undefined,
 };
 
 const mockCreateFilledDocument = jest.fn();
@@ -72,8 +72,10 @@ const lollipopRequestHeaders = {
   ["signature-input"]: aSignatureInput,
   ["x-pagopa-lollipop-original-method"]: LollipopMethodEnum.POST,
   ["x-pagopa-lollipop-original-url"]: aLollipopOriginalUrl,
-  ["x-pagopa-lollipop-custom-sign-challenge"]: "customTosChallenge" as NonEmptyString,
-  ["x-pagopa-lollipop-custom-tos-challenge"]: "customSignChallenge" as NonEmptyString
+  ["x-pagopa-lollipop-custom-sign-challenge"]:
+    "customTosChallenge" as NonEmptyString,
+  ["x-pagopa-lollipop-custom-tos-challenge"]:
+    "customSignChallenge" as NonEmptyString,
 };
 
 const ioSignLollipopLocals: IoSignLollipopLocalsType = {
@@ -82,7 +84,7 @@ const ioSignLollipopLocals: IoSignLollipopLocalsType = {
   ["x-pagopa-lollipop-assertion-type"]: AssertionTypeEnum.SAML,
   ["x-pagopa-lollipop-auth-jwt"]: aBearerToken,
   ["x-pagopa-lollipop-public-key"]: aPubKey,
-  ["x-pagopa-lollipop-user-id"]: aFiscalCode
+  ["x-pagopa-lollipop-user-id"]: aFiscalCode,
 };
 
 jest.mock("../../services/ioSignService", () => {
@@ -93,8 +95,8 @@ jest.mock("../../services/ioSignService", () => {
       getQtspClausesMetadata: mockGetQtspClausesMetadata,
       getSignatureRequests: mockGetSignatureRequests,
       getSignatureRequest: mockGetSignatureRequest,
-      createSignature: mockCreateSignature
-    }))
+      createSignature: mockCreateSignature,
+    })),
   };
 });
 
@@ -103,25 +105,25 @@ const mockGetProfile = jest.fn();
 jest.mock("../../services/profileService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
-      getProfile: mockGetProfile
-    }))
+      getProfile: mockGetProfile,
+    })),
   };
 });
 
 const qtspClausesMetadata = {
   clauses: [
     {
-      text: "(1) Io sottoscritto/a dichiaro quanto...."
+      text: "(1) Io sottoscritto/a dichiaro quanto....",
     },
     {
-      text: "(2) Io sottoscritto/a accetto..."
-    }
+      text: "(2) Io sottoscritto/a accetto...",
+    },
   ],
   document_url: "https://mock.com/modulo.pdf",
   privacy_url: "https://mock.com/privacy.pdf",
   terms_and_conditions_url: "https://mock.com/tos.pdf",
   privacy_text: "[PLACE HOLDER]",
-  nonce: "acSPlAeZY9TM0gdzJcl9+Cp3NxlUTPyk/+B9CqHsufWQmib+QHpe=="
+  nonce: "acSPlAeZY9TM0gdzJcl9+Cp3NxlUTPyk/+B9CqHsufWQmib+QHpe==",
 };
 
 const signatureRequest: SignatureRequestDetailView = {
@@ -131,7 +133,7 @@ const signatureRequest: SignatureRequestDetailView = {
   issuer: {
     email: "issuer@fakedomain.com" as EmailString,
     description: "Fake description" as NonEmptyString,
-    environment: IssuerEnvironmentEnum.TEST
+    environment: IssuerEnvironmentEnum.TEST,
   },
   dossier_id: "01ARZ3NDEKTSV4RRFFQ69G5FAV" as Id,
   dossier_title: "Contratto 150 ore" as NonEmptyString,
@@ -143,13 +145,13 @@ const signatureRequest: SignatureRequestDetailView = {
       url: "https://my-document.url/document.pdf",
       metadata: {
         title: "My document title",
-        signature_fields: []
-      }
-    }
+        signature_fields: [],
+      },
+    },
   ],
   created_at: new Date(),
   updated_at: new Date(),
-  expires_at: new Date()
+  expires_at: new Date(),
 };
 
 const signatureRequestList: SignatureRequestList = {
@@ -162,22 +164,22 @@ const signatureRequestList: SignatureRequestList = {
       status: signatureRequest.status,
       created_at: signatureRequest.created_at,
       expires_at: signatureRequest.expires_at,
-      updated_at: signatureRequest.updated_at
-    }
-  ]
+      updated_at: signatureRequest.updated_at,
+    },
+  ],
 };
 
 const signature: SignatureDetailView = {
   id: "01GKVMRN408NXRT3R5HN3ADBJJ" as Id,
   signature_request_id: "01GKVMRN408NXRT3R5HN3ADBJJ" as Id,
   qtsp_signature_request_id: "01GKVMRN408NXRT3R5HN3ADBJJ" as Id,
-  status: SignatureStatusEnum.CREATED
+  status: SignatureStatusEnum.CREATED,
 };
 
 const qtspAcceptedClauses: QtspClauses = {
   accepted_clauses: [{ text: "fake caluses...." as NonEmptyString }],
   filled_document_url: "https://my-document.url/document.pdf" as NonEmptyString,
-  nonce: "000000000==" as NonEmptyString
+  nonce: "000000000==" as NonEmptyString,
 };
 
 const documentsToSign: ReadonlyArray<DocumentToSign> = [
@@ -187,25 +189,25 @@ const documentsToSign: ReadonlyArray<DocumentToSign> = [
       {
         clause: {
           title: "Firma document",
-          type: ClauseTypeEnum.REQUIRED
+          type: ClauseTypeEnum.REQUIRED,
         },
         attrs: {
-          unique_name: "field1" as NonEmptyString
-        }
+          unique_name: "field1" as NonEmptyString,
+        },
       },
       {
         clause: {
           title: "Firma document",
-          type: ClauseTypeEnum.REQUIRED
+          type: ClauseTypeEnum.REQUIRED,
         },
         attrs: {
           bottom_left: { x: 10, y: 10 },
           top_right: { x: 100, y: 20 },
-          page: 1 as NonNegativeNumber
-        }
-      }
-    ]
-  }
+          page: 1 as NonNegativeNumber,
+        },
+      },
+    ],
+  },
 ];
 
 const client = IoSignAPIClient(API_KEY, API_URL, API_BASE_PATH);
@@ -217,7 +219,7 @@ const profileService = new ProfileService(apiClient);
 const documentToFill = "http://mockdocument.com/upload.pdf";
 
 const filledDocumentMock: FilledDocumentDetailView = {
-  filled_document_url: "http://mockdocument.com/doc.pdf"
+  filled_document_url: "http://mockdocument.com/doc.pdf",
 };
 
 const signerDetailMock = { id: "0000000" };
@@ -237,9 +239,9 @@ describe("IoSignController#createFilledDocument", () => {
 
     const req = {
       ...mockReq({
-        body: { document_url: documentToFill }
+        body: { document_url: documentToFill },
       }),
-      user: mockedUser
+      user: mockedUser,
     };
 
     const controller = new IoSignController(ioSignService, profileService);
@@ -257,9 +259,9 @@ describe("IoSignController#createFilledDocument", () => {
   it("should call createFilledDocument method on the IoSignService with valid values", async () => {
     const req = {
       ...mockReq({
-        body: { document_url: "http://mockdocument.com/upload.pdf" }
+        body: { document_url: "http://mockdocument.com/upload.pdf" },
       }),
-      user: mockedUser
+      user: mockedUser,
     };
 
     mockCreateFilledDocument.mockReturnValue(
@@ -277,14 +279,14 @@ describe("IoSignController#createFilledDocument", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: filledDocumentMock
+      value: filledDocumentMock,
     });
   });
 
   it("should not call createFilledDocument method on the IoSignService with empty document_url", async () => {
     const req = {
       ...mockReq(),
-      user: mockedUser
+      user: mockedUser,
     };
 
     const res = mockRes();
@@ -310,9 +312,9 @@ describe("IoSignController#createFilledDocument", () => {
 
     const req = {
       ...mockReq({
-        body: { document_url: documentToFill }
+        body: { document_url: documentToFill },
       }),
-      user: mockedUser
+      user: mockedUser,
     };
 
     const controller = new IoSignController(ioSignService, profileService);
@@ -322,7 +324,7 @@ describe("IoSignController#createFilledDocument", () => {
       expect.objectContaining({
         kind: "IResponseErrorInternal",
         detail:
-          "Internal server error: Error retrieving the signer id for this user"
+          "Internal server error: Error retrieving the signer id for this user",
       })
     );
   });
@@ -337,9 +339,9 @@ describe("IoSignController#createFilledDocument", () => {
 
     const req = {
       ...mockReq({
-        body: { document_url: documentToFill }
+        body: { document_url: documentToFill },
       }),
-      user: mockedUser
+      user: mockedUser,
     };
 
     const controller = new IoSignController(ioSignService, profileService);
@@ -349,7 +351,7 @@ describe("IoSignController#createFilledDocument", () => {
       expect.objectContaining({
         kind: "IResponseErrorInternal",
         detail:
-          "Internal server error: Error retrieving a user profile with validated email address | Error retrieving user profile"
+          "Internal server error: Error retrieving a user profile with validated email address | Error retrieving user profile",
       })
     );
   });
@@ -363,10 +365,10 @@ describe("IoSignController#getQtspClausesMetadata", () => {
   const req = {
     ...mockReq({
       headers: {
-        "x-iosign-issuer-environment": "TEST"
-      }
+        "x-iosign-issuer-environment": "TEST",
+      },
     }),
-    user: mockedUser
+    user: mockedUser,
   };
 
   it("should make the correct service method call with TEST issuer env", async () => {
@@ -382,10 +384,10 @@ describe("IoSignController#getQtspClausesMetadata", () => {
     const reqWithDefaultEnv = {
       ...mockReq({
         headers: {
-          "x-iosign-issuer-environment": "DEFAULT"
-        }
+          "x-iosign-issuer-environment": "DEFAULT",
+        },
       }),
-      user: mockedUser
+      user: mockedUser,
     };
 
     const controller = new IoSignController(ioSignService, profileService);
@@ -399,7 +401,7 @@ describe("IoSignController#getQtspClausesMetadata", () => {
   it("should make the correct service method call without issuer env", async () => {
     const reqWithoutIssuerEnv = {
       ...mockReq({}),
-      user: mockedUser
+      user: mockedUser,
     };
 
     const controller = new IoSignController(ioSignService, profileService);
@@ -420,7 +422,7 @@ describe("IoSignController#getQtspClausesMetadata", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: qtspClausesMetadata
+      value: qtspClausesMetadata,
     });
   });
 });
@@ -434,7 +436,7 @@ describe("IoSignController#getSignatureRequests", () => {
     const controller = new IoSignController(ioSignService, profileService);
     const req = {
       ...mockReq({}),
-      user: mockedUser
+      user: mockedUser,
     };
     await controller.getSignatureRequests(req);
     expect(mockGetSignatureRequests).toHaveBeenCalledWith(signerDetailMock.id);
@@ -447,14 +449,14 @@ describe("IoSignController#getSignatureRequests", () => {
     const controller = new IoSignController(ioSignService, profileService);
     const req = {
       ...mockReq({}),
-      user: mockedUser
+      user: mockedUser,
     };
     const response = await controller.getSignatureRequests(req);
 
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: signatureRequestList
+      value: signatureRequestList,
     });
   });
 });
@@ -469,10 +471,10 @@ describe("IoSignController#getSignatureRequest", () => {
     const req = {
       ...mockReq({
         params: {
-          id: signatureRequest.id
-        }
+          id: signatureRequest.id,
+        },
       }),
-      user: mockedUser
+      user: mockedUser,
     };
     await controller.getSignatureRequest(req);
     expect(mockGetSignatureRequest).toHaveBeenCalledWith(
@@ -489,17 +491,17 @@ describe("IoSignController#getSignatureRequest", () => {
     const req = {
       ...mockReq({
         params: {
-          id: signatureRequest.id
-        }
+          id: signatureRequest.id,
+        },
       }),
-      user: mockedUser
+      user: mockedUser,
     };
     const response = await controller.getSignatureRequest(req);
 
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: signatureRequest
+      value: signatureRequest,
     });
   });
 });
@@ -519,14 +521,14 @@ describe("IoSignController#createSignature", () => {
     const body = {
       signature_request_id: signature.signature_request_id,
       documents_to_sign: documentsToSign,
-      qtsp_clauses: qtspAcceptedClauses
+      qtsp_clauses: qtspAcceptedClauses,
     };
     const req = {
       ...mockReq({
-        body
+        body,
       }),
       headers: lollipopRequestHeaders,
-      user: mockedUser
+      user: mockedUser,
     };
 
     const controller = new IoSignController(ioSignService, profileService);
@@ -536,7 +538,7 @@ describe("IoSignController#createSignature", () => {
       ioSignLollipopLocals,
       {
         ...body,
-        email: mockedInitializedProfile.email
+        email: mockedInitializedProfile.email,
       },
       signerDetailMock.id
     );
@@ -546,15 +548,15 @@ describe("IoSignController#createSignature", () => {
     const body: CreateSignatureBody = {
       signature_request_id: signature.signature_request_id,
       documents_to_sign: documentsToSign,
-      qtsp_clauses: qtspAcceptedClauses
+      qtsp_clauses: qtspAcceptedClauses,
     };
 
     const req = {
       ...mockReq({
-        body
+        body,
       }),
       headers: lollipopRequestHeaders,
-      user: mockedUser
+      user: mockedUser,
     };
 
     mockCreateSignature.mockReturnValue(
@@ -575,7 +577,7 @@ describe("IoSignController#createSignature", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: filledDocumentMock
+      value: filledDocumentMock,
     });
   });
 
@@ -583,7 +585,7 @@ describe("IoSignController#createSignature", () => {
     const req = {
       ...mockReq(),
       user: mockedUser,
-      headers: lollipopRequestHeaders
+      headers: lollipopRequestHeaders,
     };
 
     const res = mockRes();
@@ -615,11 +617,11 @@ describe("IoSignController#createSignature", () => {
         body: {
           signature_request_id: signature.signature_request_id,
           documents_to_sign: documentsToSign,
-          qtsp_clauses: qtspAcceptedClauses
-        }
+          qtsp_clauses: qtspAcceptedClauses,
+        },
       }),
       headers: lollipopRequestHeaders,
-      user: mockedUser
+      user: mockedUser,
     };
 
     const controller = new IoSignController(ioSignService, profileService);
@@ -632,7 +634,7 @@ describe("IoSignController#createSignature", () => {
       expect.objectContaining({
         kind: "IResponseErrorInternal",
         detail:
-          "Internal server error: Error retrieving the signer id for this user"
+          "Internal server error: Error retrieving the signer id for this user",
       })
     );
   });
@@ -650,11 +652,11 @@ describe("IoSignController#createSignature", () => {
         body: {
           signature_request_id: signature.signature_request_id,
           documents_to_sign: documentsToSign,
-          qtsp_clauses: qtspAcceptedClauses
-        }
+          qtsp_clauses: qtspAcceptedClauses,
+        },
       }),
       headers: lollipopRequestHeaders,
-      user: mockedUser
+      user: mockedUser,
     };
 
     const controller = new IoSignController(ioSignService, profileService);
@@ -667,7 +669,7 @@ describe("IoSignController#createSignature", () => {
       expect.objectContaining({
         kind: "IResponseErrorInternal",
         detail:
-          "Internal server error: Error retrieving a user profile with validated email address | Error retrieving user profile"
+          "Internal server error: Error retrieving a user profile with validated email address | Error retrieving user profile",
       })
     );
   });

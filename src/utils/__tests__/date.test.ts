@@ -1,11 +1,11 @@
-import * as E from "fp-ts/Either"
-import * as O from "fp-ts/Option"
+import * as E from "fp-ts/Either";
+import * as O from "fp-ts/Option";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import {
   formatDate,
   isOlderThan,
   toBirthDate,
-  StrictUTCISODateFromString
+  StrictUTCISODateFromString,
 } from "../date";
 
 const toDate = new Date("2020-01-01");

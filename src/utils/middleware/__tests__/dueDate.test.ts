@@ -5,7 +5,7 @@ import * as express from "express";
 const currentDate = new Date();
 const RealDate = Date;
 // @ts-ignore override Date constructor to have fixed date
-Date = function(...options): Date {
+Date = function (...options): Date {
   if (options.length) {
     return new RealDate(...options);
   }
@@ -31,9 +31,7 @@ describe("dueDateMiddleware", () => {
     app.use(dueDateMiddleware(aPastDate));
     app.get("/test", mockHandler);
 
-    await request(app)
-      .get("/test")
-      .expect(404);
+    await request(app).get("/test").expect(404);
     expect(mockHandler).not.toHaveBeenCalled();
   });
 
@@ -42,9 +40,7 @@ describe("dueDateMiddleware", () => {
     app.use(dueDateMiddleware(aFutureDate));
     app.get("/test", mockHandler);
 
-    await request(app)
-      .get("/test")
-      .expect(mockHandlerStatusCode);
+    await request(app).get("/test").expect(mockHandlerStatusCode);
     expect(mockHandler).toHaveBeenCalled();
   });
 
@@ -53,9 +49,7 @@ describe("dueDateMiddleware", () => {
     app.use(dueDateMiddleware(currentDate));
     app.get("/test", mockHandler);
 
-    await request(app)
-      .get("/test")
-      .expect(mockHandlerStatusCode);
+    await request(app).get("/test").expect(mockHandlerStatusCode);
     expect(mockHandler).toHaveBeenCalled();
   });
 });

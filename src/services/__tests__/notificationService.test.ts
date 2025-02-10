@@ -10,11 +10,11 @@ import { MessageSubject } from "../../../generated/backend/MessageSubject";
 import { PlatformEnum } from "../../../generated/backend/Platform";
 import {
   CreateOrUpdateInstallationMessage,
-  KindEnum as CreateOrUpdateKind
+  KindEnum as CreateOrUpdateKind,
 } from "../../../generated/messages/CreateOrUpdateInstallationMessage";
 import {
   DeleteInstallationMessage,
-  KindEnum as DeleteKind
+  KindEnum as DeleteKind,
 } from "../../../generated/messages/DeleteInstallationMessage";
 import { NotifyMessage } from "../../../generated/messages/NotifyMessage";
 import { toFiscalCodeHash } from "../../types/notification";
@@ -30,25 +30,25 @@ const aPushChannel =
   "fLKP3EATnBI:APA91bEy4go681jeSEpLkNqhtIrdPnEKu6Dfi-STtUiEnQn8RwMfBiPGYaqdWrmzJyXIh5Yms4017MYRS9O1LGPZwA4sOLCNIoKl4Fwg7cSeOkliAAtlQ0rVg71Kr5QmQiLlDJyxcq3p";
 const anAppleDevice = {
   platform: PlatformEnum.apns,
-  pushChannel: aPushChannel
+  pushChannel: aPushChannel,
 };
 const anAppleInstallation: CreateOrUpdateInstallationMessage = {
   installationId: toFiscalCodeHash(aFiscalCode),
   kind: CreateOrUpdateKind.CreateOrUpdateInstallation,
   platform: PlatformEnum.apns,
   pushChannel: aPushChannel,
-  tags: [aFiscalCodeHash] // This is the sha256 of "GRBGPP87L04L741X"
+  tags: [aFiscalCodeHash], // This is the sha256 of "GRBGPP87L04L741X"
 };
 const aGoogleDevice = {
   platform: PlatformEnum.gcm,
-  pushChannel: aPushChannel
+  pushChannel: aPushChannel,
 };
 const aGoogleInstallation: CreateOrUpdateInstallationMessage = {
   installationId: toFiscalCodeHash(aFiscalCode),
   kind: CreateOrUpdateKind.CreateOrUpdateInstallation,
   platform: PlatformEnum.gcm,
   pushChannel: aPushChannel,
-  tags: [aFiscalCodeHash] // This is the sha256 of "GRBGPP87L04L741X"
+  tags: [aFiscalCodeHash], // This is the sha256 of "GRBGPP87L04L741X"
 };
 
 const aNotificationSubject = "this is a message" as MessageSubject;
@@ -57,26 +57,26 @@ const aValidNotification = {
   message: {
     content: {
       markdown: "test".repeat(80) as MessageBodyMarkdown,
-      subject: aNotificationSubject
+      subject: aNotificationSubject,
     },
     created_at: new Date(),
     fiscal_code: aFiscalCode,
     id: "01CCKCY7QQ7WCHWTH8NB504386",
-    sender_service_id: "234567" as NonEmptyString
+    sender_service_id: "234567" as NonEmptyString,
   },
   sender_metadata: {
     department_name: "test department" as NonEmptyString,
     organization_name: "test organization" as NonEmptyString,
-    service_name: "test service" as NonEmptyString
-  }
+    service_name: "test service" as NonEmptyString,
+  },
 };
 const mockSendMessage = jest.fn();
 jest.mock("@azure/storage-queue", () => ({
   QueueClient: jest.fn().mockImplementation((_, __) => {
     return {
-      sendMessage: mockSendMessage
+      sendMessage: mockSendMessage,
     };
-  })
+  }),
 }));
 
 const genericError = new Error("Generic Error");
@@ -87,7 +87,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
   });
 
   it("should submit a correct installation to the Queue Storage, Apple platform", async () => {
-    mockSendMessage.mockImplementation(_ => Promise.resolve());
+    mockSendMessage.mockImplementation((_) => Promise.resolve());
 
     const service = new NotificationService("", "");
 
@@ -99,7 +99,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: { message: "ok" }
+      value: { message: "ok" },
     });
     expect(mockSendMessage).toBeCalledWith(
       base64EncodeObject(anAppleInstallation)
@@ -107,7 +107,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
   });
 
   it("should submit a correct installation to the Queue Storage, Google platform", async () => {
-    mockSendMessage.mockImplementation(_ => Promise.resolve());
+    mockSendMessage.mockImplementation((_) => Promise.resolve());
 
     const service = new NotificationService("", "");
 
@@ -119,7 +119,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: { message: "ok" }
+      value: { message: "ok" },
     });
     expect(mockSendMessage).toBeCalledWith(
       base64EncodeObject(aGoogleInstallation)
@@ -127,7 +127,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
   });
 
   it("should fail if the Queue Storage fails on createOrUpdateInstallation", async () => {
-    mockSendMessage.mockImplementation(_ => Promise.reject(genericError));
+    mockSendMessage.mockImplementation((_) => Promise.reject(genericError));
 
     const service = new NotificationService("", "");
 
@@ -139,7 +139,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       detail: expect.anything(),
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
     expect(mockSendMessage).toBeCalledWith(
       base64EncodeObject(anAppleInstallation)
@@ -153,7 +153,7 @@ describe("NotificationService#notify", () => {
   });
 
   it("should submit a notification to the Queue Storage", async () => {
-    mockSendMessage.mockImplementation(_ => Promise.resolve());
+    mockSendMessage.mockImplementation((_) => Promise.resolve());
     const service = new NotificationService("", "");
 
     const res = await service.notify(aValidNotification, aNotificationSubject);
@@ -161,7 +161,7 @@ describe("NotificationService#notify", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: { message: "ok" }
+      value: { message: "ok" },
     });
     expect(mockSendMessage).toBeCalled();
     const decodedMessage = JSON.parse(
@@ -171,7 +171,7 @@ describe("NotificationService#notify", () => {
   });
 
   it("should write organization name in title, if notificationTitle parameter is empty", async () => {
-    mockSendMessage.mockImplementation(_ => Promise.resolve());
+    mockSendMessage.mockImplementation((_) => Promise.resolve());
     const service = new NotificationService("", "");
 
     const res = await service.notify(aValidNotification, aNotificationSubject);
@@ -179,7 +179,7 @@ describe("NotificationService#notify", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: { message: "ok" }
+      value: { message: "ok" },
     });
     expect(mockSendMessage).toBeCalled();
     const decodedMessage = JSON.parse(
@@ -189,7 +189,7 @@ describe("NotificationService#notify", () => {
     pipe(
       decodedMessage,
       NotifyMessage.decode,
-      E.map(m =>
+      E.map((m) =>
         expect(m).toEqual({
           installationId: toFiscalCodeHash(
             aValidNotification.message.fiscal_code
@@ -198,16 +198,16 @@ describe("NotificationService#notify", () => {
           payload: {
             message: aValidNotification.message.content.subject,
             message_id: aValidNotification.message.id,
-            title: aValidNotification.sender_metadata.organization_name
-          }
+            title: aValidNotification.sender_metadata.organization_name,
+          },
         })
       ),
-      E.mapLeft(_ => fail("Cannot decode NotifyMessage"))
+      E.mapLeft((_) => fail("Cannot decode NotifyMessage"))
     );
   });
 
   it("should write notificationTitle in title, if notificationTitle not empty", async () => {
-    mockSendMessage.mockImplementation(_ => Promise.resolve());
+    mockSendMessage.mockImplementation((_) => Promise.resolve());
     const service = new NotificationService("", "");
 
     const res = await service.notify(
@@ -219,7 +219,7 @@ describe("NotificationService#notify", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: { message: "ok" }
+      value: { message: "ok" },
     });
     expect(mockSendMessage).toBeCalled();
     const decodedMessage = JSON.parse(
@@ -229,7 +229,7 @@ describe("NotificationService#notify", () => {
     pipe(
       decodedMessage,
       NotifyMessage.decode,
-      E.map(m =>
+      E.map((m) =>
         expect(m).toEqual({
           installationId: toFiscalCodeHash(
             aValidNotification.message.fiscal_code
@@ -238,16 +238,16 @@ describe("NotificationService#notify", () => {
           payload: {
             message: aValidNotification.message.content.subject,
             message_id: aValidNotification.message.id,
-            title: "a custom title"
-          }
+            title: "a custom title",
+          },
         })
       ),
-      E.mapLeft(_ => fail("Cannot decode NotifyMessage"))
+      E.mapLeft((_) => fail("Cannot decode NotifyMessage"))
     );
   });
 
   it("should fail if the Queue Storage fails on notify", async () => {
-    mockSendMessage.mockImplementation(_ => Promise.reject(genericError));
+    mockSendMessage.mockImplementation((_) => Promise.reject(genericError));
 
     const service = new NotificationService("", "");
 
@@ -256,7 +256,7 @@ describe("NotificationService#notify", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       detail: expect.anything(),
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
     expect(mockSendMessage).toBeCalled();
     const decodedMessage = JSON.parse(
@@ -273,11 +273,11 @@ describe("NotificationService#deleteInstallation", () => {
 
   const expectedDeleteInstallationMessage: DeleteInstallationMessage = {
     installationId: aFiscalCodeHash as NonEmptyString,
-    kind: DeleteKind.DeleteInstallation
+    kind: DeleteKind.DeleteInstallation,
   };
 
   it("should submit a delete installation message to the Queue Storage", async () => {
-    mockSendMessage.mockImplementation(_ => Promise.resolve());
+    mockSendMessage.mockImplementation((_) => Promise.resolve());
     const service = new NotificationService("", "");
 
     const res = await service.deleteInstallation(aFiscalCode);
@@ -285,7 +285,7 @@ describe("NotificationService#deleteInstallation", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: { message: "ok" }
+      value: { message: "ok" },
     });
 
     expect(mockSendMessage).toBeCalledWith(
@@ -294,7 +294,7 @@ describe("NotificationService#deleteInstallation", () => {
   });
 
   it("should fail if the Queue Storage fails on deleteInstallation", async () => {
-    mockSendMessage.mockImplementation(_ => Promise.reject(genericError));
+    mockSendMessage.mockImplementation((_) => Promise.reject(genericError));
     const service = new NotificationService("", "");
 
     const res = await service.deleteInstallation(aFiscalCode);
@@ -302,7 +302,7 @@ describe("NotificationService#deleteInstallation", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       detail: expect.anything(),
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
 
     expect(mockSendMessage).toBeCalledWith(

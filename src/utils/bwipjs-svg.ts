@@ -297,7 +297,7 @@ export function DrawingSVG(opts: ToBufferOptions, FontLib: IFontLib) {
         svg +
         "</svg>\n"
       );
-    }
+    },
   };
 
   // translate/rotate and return as an SVG coordinate pair

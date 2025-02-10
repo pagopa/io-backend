@@ -22,7 +22,7 @@ const badRequestErrorResponse = {
   detail: expect.any(String),
   status: 400,
   title: expect.any(String),
-  type: undefined
+  type: undefined,
 };
 
 const aBonusId = "bonusId" as BonusCode & NonEmptyString;
@@ -36,10 +36,10 @@ const aEligibilityCheck: EligibilityCheck = {
     isee_type: "123" as NonEmptyString,
     max_amount: 150,
     max_tax_benefit: 30,
-    request_id: 1
+    request_id: 1,
   },
   id: "aEligibilityCheck.id" as NonEmptyString,
-  status: "ELIGIBILE" as any
+  status: "ELIGIBILE" as any,
 };
 
 const aBonusActivation: BonusActivation = {
@@ -49,26 +49,31 @@ const aBonusActivation: BonusActivation = {
     dsu_created_at: new Date(),
     dsu_protocol_id: "dsuprotid" as NonEmptyString,
     family_members: [
-      { fiscal_code: mockedUser.fiscal_code, name: mockedUser.name as NonEmptyString, surname: mockedUser.family_name as NonEmptyString}
+      {
+        fiscal_code: mockedUser.fiscal_code,
+        name: mockedUser.name as NonEmptyString,
+        surname: mockedUser.family_name as NonEmptyString,
+      },
     ],
     has_discrepancies: false,
     isee_type: "iseetype",
     max_amount: 150,
     max_tax_benefit: 30,
-    request_id: 1
+    request_id: 1,
   },
   id: aBonusId,
-  status: BonusActivationStatusEnum.ACTIVE
+  status: BonusActivationStatusEnum.ACTIVE,
 };
 
-const aPaginatedBonusActivationCollection: PaginatedBonusActivationsCollection = {
-  items: [
-    {
-      id: aBonusId,
-      is_applicant: true
-    }
-  ]
-};
+const aPaginatedBonusActivationCollection: PaginatedBonusActivationsCollection =
+  {
+    items: [
+      {
+        id: aBonusId,
+        is_applicant: true,
+      },
+    ],
+  };
 
 const mockGetAllBonusActivations = jest.fn();
 const mockStartBonusEligibilityCheck = jest.fn();
@@ -82,8 +87,8 @@ jest.mock("../../services/bonusService", () => {
       getBonusEligibilityCheck: mockGetBonusEligibilityCheck,
       getLatestBonusActivationById: mockGetLatestBonusActivationById,
       startBonusActivationProcedure: mockStartBonusActivationProcedure,
-      startBonusEligibilityCheck: mockStartBonusEligibilityCheck
-    }))
+      startBonusEligibilityCheck: mockStartBonusEligibilityCheck,
+    })),
   };
 });
 
@@ -118,7 +123,7 @@ describe("BonusController#getEligibilityCheck", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: aEligibilityCheck
+      value: aEligibilityCheck,
     });
   });
 
@@ -149,10 +154,10 @@ describe("BonusController#getLatestBonusActivationById", () => {
     const req = {
       ...mockReq({
         params: {
-          bonus_id: aBonusId
-        }
+          bonus_id: aBonusId,
+        },
       }),
-      user: mockedUser
+      user: mockedUser,
     };
     const client = BonusAPIClient(API_KEY, API_URL);
     const bonusService = new BonusService(client);
@@ -169,10 +174,10 @@ describe("BonusController#getLatestBonusActivationById", () => {
     const req = {
       ...mockReq({
         params: {
-          bonus_id: aBonusId
-        }
+          bonus_id: aBonusId,
+        },
       }),
-      user: mockedUser
+      user: mockedUser,
     };
     mockGetLatestBonusActivationById.mockReturnValue(
       Promise.resolve(ResponseSuccessJson(aBonusActivation))
@@ -186,7 +191,7 @@ describe("BonusController#getLatestBonusActivationById", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: aBonusActivation
+      value: aBonusActivation,
     });
   });
 
@@ -194,10 +199,10 @@ describe("BonusController#getLatestBonusActivationById", () => {
     const req = {
       ...mockReq({
         params: {
-          bonus_id: aBonusId
-        }
+          bonus_id: aBonusId,
+        },
       }),
-      user: undefined
+      user: undefined,
     };
     const res = mockRes();
     const client = BonusAPIClient(API_KEY, API_URL);
@@ -217,10 +222,10 @@ describe("BonusController#getLatestBonusActivationById", () => {
     const req = {
       ...mockReq({
         params: {
-          bonus_id: undefined
-        }
+          bonus_id: undefined,
+        },
       }),
-      user: mockedUser
+      user: mockedUser,
     };
     const res = mockRes();
     const client = BonusAPIClient(API_KEY, API_URL);
@@ -268,7 +273,7 @@ describe("BonusController#getAllBonusActivations", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: aPaginatedBonusActivationCollection
+      value: aPaginatedBonusActivationCollection,
     });
   });
 

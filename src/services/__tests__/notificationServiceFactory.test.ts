@@ -13,9 +13,9 @@ const mockSendMessage = jest.fn();
 jest.mock("@azure/storage-queue", () => ({
   QueueClient: jest.fn().mockImplementation((_, __) => {
     return {
-      sendMessage: mockSendMessage
+      sendMessage: mockSendMessage,
     };
-  })
+  }),
 }));
 
 const oldNotificationService = new NotificationService("OLD", "OLD");

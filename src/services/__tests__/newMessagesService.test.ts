@@ -13,7 +13,11 @@ import mockRes from "../../__mocks__/response";
 import { GetMessagesParameters } from "../../../generated/parameters/GetMessagesParameters";
 import { MessageStatusChange } from "../../../generated/io-messages-api/MessageStatusChange";
 import { Change_typeEnum as Reading_Change_typeEnum } from "../../../generated/io-messages-api/MessageStatusReadingChange";
-import { FiscalCode, NonEmptyString, Ulid } from "@pagopa/ts-commons/lib/strings";
+import {
+  FiscalCode,
+  NonEmptyString,
+  Ulid,
+} from "@pagopa/ts-commons/lib/strings";
 import { MessageStatusAttributes } from "../../../generated/io-messages-api/MessageStatusAttributes";
 import { MessageStatusWithAttributes } from "../../../generated/io-messages-api/MessageStatusWithAttributes";
 import { AppMessagesAPIClient } from "../../clients/app-messages.client";
@@ -274,13 +278,13 @@ const dummyGetThirdPartyServiceClient = jest.spyOn(
   thirdPartyServiceClient,
   "getThirdPartyServiceClient"
 );
-dummyGetThirdPartyServiceClient.mockReturnValue(((_fiscalCode: FiscalCode) => {
+dummyGetThirdPartyServiceClient.mockReturnValue((_fiscalCode: FiscalCode) => {
   return {
     getThirdPartyMessageDetails: mockGetTPMessageFromExternalService,
     getThirdPartyMessageAttachment: mockGetTPAttachment,
     getThirdPartyMessagePrecondition: mockGetTPMessagePrecondition,
   };
-}));
+});
 
 // ----------------------------
 // Tests
@@ -294,7 +298,7 @@ const api: ReturnType<typeof AppMessagesAPIClient> = {
   getMessage: mockGetMessage,
   getMessagesByUser: mockGetMessages,
   upsertMessageStatusAttributes: mockUpsertMessageStatus,
-  getRCConfiguration: mockGetRCConfiguration
+  getRCConfiguration: mockGetRCConfiguration,
 };
 
 describe("MessageService#getMessagesByUser", () => {
@@ -303,9 +307,7 @@ describe("MessageService#getMessagesByUser", () => {
       return t.success(validApiMessagesResponse);
     });
 
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
     const res = await service.getMessagesByUser(mockedUser, mockParameters);
 
@@ -323,9 +325,7 @@ describe("MessageService#getMessagesByUser", () => {
       t.success(emptyApiMessagesResponse)
     );
 
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
     const res = await service.getMessagesByUser(mockedUser, mockParameters);
 
@@ -340,9 +340,7 @@ describe("MessageService#getMessagesByUser", () => {
       t.success(tooManyReqApiMessagesResponse)
     );
 
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
     const res = await service.getMessagesByUser(mockedUser, mockParameters);
 
@@ -352,9 +350,7 @@ describe("MessageService#getMessagesByUser", () => {
   it("returns an error if the getMessagesByUser API returns an error", async () => {
     mockGetMessages.mockImplementation(() => t.success(problemJson));
 
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
     const res = await service.getMessagesByUser(mockedUser, mockParameters);
     expect(mockGetMessages).toHaveBeenCalledWith({
@@ -368,9 +364,7 @@ describe("MessageService#getMessagesByUser", () => {
       t.success(invalidApiMessagesResponse)
     );
 
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
     const res = await service.getMessagesByUser(mockedUser, mockParameters);
     expect(mockGetMessages).toHaveBeenCalledWith({
@@ -384,9 +378,7 @@ describe("MessageService#getMessage", () => {
   it("returns a message from the API", async () => {
     mockGetMessage.mockImplementation(() => t.success(validApiMessageResponse));
 
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
     const res = await service.getMessage(
       mockedUser,
@@ -408,9 +400,7 @@ describe("MessageService#getMessage", () => {
       t.success(validApiMessageWithEnrichedDataResponse)
     );
 
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
     const res = await service.getMessage(mockedUser, getMessageParam);
 
@@ -430,9 +420,7 @@ describe("MessageService#getMessage", () => {
       t.success(validApiMessageResponseWithPrescriptionMetadata)
     );
 
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
     const res = await service.getMessage(mockedUser, { id: aValidMessageId });
 
@@ -446,9 +434,7 @@ describe("MessageService#getMessage", () => {
   it("returns an error if the getMessage API returns an error", async () => {
     mockGetMessage.mockImplementation(() => t.success(problemJson));
 
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
     const res = await service.getMessage(
       mockedUser,
@@ -466,9 +452,7 @@ describe("MessageService#getMessage", () => {
       t.success(invalidApiMessageResponse)
     );
 
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
     const res = await service.getMessage(
       mockedUser,
@@ -486,9 +470,7 @@ describe("MessageService#getMessage", () => {
       t.success(tooManyReqApiMessagesResponse)
     );
 
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
     const res = await service.getMessage(
       mockedUser,
@@ -525,9 +507,7 @@ describe("MessageService#upsertMessageStatus", () => {
       });
     });
 
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
     const res = await service.upsertMessageStatus(
       mockedUser.fiscal_code,
       aValidMessageId,
@@ -575,9 +555,7 @@ describe("MessageService#upsertMessageStatus", () => {
         });
       });
 
-      const service = new NewMessageService(
-        api
-      );
+      const service = new NewMessageService(api);
       const res = await service.upsertMessageStatus(
         mockedUser.fiscal_code,
         aValidMessageId,
@@ -607,9 +585,7 @@ describe("MessageService#getThirdPartyMessageFnApp", () => {
       t.success(validApiThirdPartyMessageResponse)
     );
 
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
     const res = await service.getThirdPartyMessageFnApp(
       mockedUser.fiscal_code,
@@ -628,9 +604,7 @@ describe("MessageService#getThirdPartyMessageFnApp", () => {
       t.success(emptyApiMessagesResponse)
     );
 
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
     const res = await service.getThirdPartyMessageFnApp(
       mockedUser.fiscal_code,
@@ -654,9 +628,7 @@ describe("MessageService#getThirdPartyMessageFnApp", () => {
       t.success(tooManyReqApiMessagesResponse)
     );
 
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
     const res = await service.getThirdPartyMessageFnApp(
       mockedUser.fiscal_code,
@@ -679,9 +651,7 @@ describe("MessageService#getThirdPartyMessageFnApp", () => {
       t.success(authProblemMessagesResponse)
     );
 
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
     const res = await service.getThirdPartyMessageFnApp(
       mockedUser.fiscal_code,
@@ -706,9 +676,7 @@ describe("MessageService#getThirdPartyMessage", () => {
   });
 
   it("should return a message from the API", async () => {
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
     // @ts-ignore
     const res = await service.getThirdPartyMessage(
@@ -730,9 +698,7 @@ describe("MessageService#getThirdPartyMessage", () => {
       throw Error(anError);
     });
 
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
     const res = await service.getThirdPartyMessage(
       aValidMessageWithThirdPartyData,
@@ -753,9 +719,7 @@ describe("MessageService#getThirdPartyMessage", () => {
       t.success(problemJson)
     );
 
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
     const res = await service.getThirdPartyMessage(
       aValidMessageWithThirdPartyData,
@@ -775,9 +739,7 @@ describe("MessageService#getThirdPartyMessage", () => {
       t.success({ status: 404 })
     );
 
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
     const res = await service.getThirdPartyMessage(
       aValidMessageWithThirdPartyData,
@@ -805,21 +767,21 @@ describe("MessageService#getThirdPartyMessage", () => {
         })
     );
 
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
-    const res = await service.getThirdPartyMessage({
-      ...aValidMessage,
-      content: {
-        ...aValidMessage.content,
-        third_party_data: {
-          ...aValidThirdPartyData,
-          has_attachments: true,
+    const res = await service.getThirdPartyMessage(
+      {
+        ...aValidMessage,
+        content: {
+          ...aValidMessage.content,
+          third_party_data: {
+            ...aValidThirdPartyData,
+            has_attachments: true,
+          },
         },
-      },
-    } as unknown as MessageWithThirdPartyData,
-    aRemoteContentConfigurationWithBothEnv);
+      } as unknown as MessageWithThirdPartyData,
+      aRemoteContentConfigurationWithBothEnv
+    );
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
@@ -842,21 +804,21 @@ describe("MessageService#getThirdPartyMessage", () => {
           },
         })
     );
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
-    const res = await service.getThirdPartyMessage({
-      ...aValidMessage,
-      content: {
-        ...aValidMessage.content,
-        third_party_data: {
-          ...aValidThirdPartyData,
-          has_remote_content: true,
+    const res = await service.getThirdPartyMessage(
+      {
+        ...aValidMessage,
+        content: {
+          ...aValidMessage.content,
+          third_party_data: {
+            ...aValidThirdPartyData,
+            has_remote_content: true,
+          },
         },
-      },
-    } as unknown as MessageWithThirdPartyData,
-    aRemoteContentConfigurationWithBothEnv);
+      } as unknown as MessageWithThirdPartyData,
+      aRemoteContentConfigurationWithBothEnv
+    );
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
@@ -882,21 +844,21 @@ describe("MessageService#getThirdPartyMessage", () => {
           },
         })
     );
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
-    const res = await service.getThirdPartyMessage({
-      ...aValidMessage,
-      content: {
-        ...aValidMessage.content,
-        third_party_data: {
-          ...aValidThirdPartyData,
-          has_remote_content: true,
+    const res = await service.getThirdPartyMessage(
+      {
+        ...aValidMessage,
+        content: {
+          ...aValidMessage.content,
+          third_party_data: {
+            ...aValidThirdPartyData,
+            has_remote_content: true,
+          },
         },
-      },
-    } as unknown as MessageWithThirdPartyData,
-    aRemoteContentConfigurationWithBothEnv);
+      } as unknown as MessageWithThirdPartyData,
+      aRemoteContentConfigurationWithBothEnv
+    );
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
@@ -922,21 +884,21 @@ describe("MessageService#getThirdPartyMessage", () => {
           },
         })
     );
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
-    const res = await service.getThirdPartyMessage({
-      ...aValidMessage,
-      content: {
-        ...aValidMessage.content,
-        third_party_data: {
-          ...aValidThirdPartyData,
-          has_remote_content: true,
+    const res = await service.getThirdPartyMessage(
+      {
+        ...aValidMessage,
+        content: {
+          ...aValidMessage.content,
+          third_party_data: {
+            ...aValidThirdPartyData,
+            has_remote_content: true,
+          },
         },
-      },
-    } as unknown as MessageWithThirdPartyData,
-    aRemoteContentConfigurationWithBothEnv);
+      } as unknown as MessageWithThirdPartyData,
+      aRemoteContentConfigurationWithBothEnv
+    );
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
@@ -957,22 +919,22 @@ describe("MessageService#getThirdPartyMessage", () => {
         })
     );
 
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
-    const res = await service.getThirdPartyMessage({
-      ...aValidMessage,
-      content: {
-        ...aValidMessage.content,
-        third_party_data: {
-          ...aValidThirdPartyData,
-          has_remote_content: true,
-          has_attachments: true,
+    const res = await service.getThirdPartyMessage(
+      {
+        ...aValidMessage,
+        content: {
+          ...aValidMessage.content,
+          third_party_data: {
+            ...aValidThirdPartyData,
+            has_remote_content: true,
+            has_attachments: true,
+          },
         },
-      },
-    } as unknown as MessageWithThirdPartyData,
-    aRemoteContentConfigurationWithBothEnv);
+      } as unknown as MessageWithThirdPartyData,
+      aRemoteContentConfigurationWithBothEnv
+    );
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
@@ -995,22 +957,22 @@ describe("MessageService#getThirdPartyMessage", () => {
         })
     );
 
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
-    const res = await service.getThirdPartyMessage({
-      ...aValidMessage,
-      content: {
-        ...aValidMessage.content,
-        third_party_data: {
-          ...aValidThirdPartyData,
-          has_remote_content: true,
-          has_attachments: false,
+    const res = await service.getThirdPartyMessage(
+      {
+        ...aValidMessage,
+        content: {
+          ...aValidMessage.content,
+          third_party_data: {
+            ...aValidThirdPartyData,
+            has_remote_content: true,
+            has_attachments: false,
+          },
         },
-      },
-    } as unknown as MessageWithThirdPartyData,
-    aRemoteContentConfigurationWithBothEnv);
+      } as unknown as MessageWithThirdPartyData,
+      aRemoteContentConfigurationWithBothEnv
+    );
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
@@ -1037,22 +999,22 @@ describe("MessageService#getThirdPartyMessage", () => {
         })
     );
 
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
-    const res = await service.getThirdPartyMessage({
-      ...aValidMessage,
-      content: {
-        ...aValidMessage.content,
-        third_party_data: {
-          ...aValidThirdPartyData,
-          has_remote_content: false,
-          has_attachments: true,
+    const res = await service.getThirdPartyMessage(
+      {
+        ...aValidMessage,
+        content: {
+          ...aValidMessage.content,
+          third_party_data: {
+            ...aValidThirdPartyData,
+            has_remote_content: false,
+            has_attachments: true,
+          },
         },
-      },
-    } as unknown as MessageWithThirdPartyData,
-    aRemoteContentConfigurationWithBothEnv);
+      } as unknown as MessageWithThirdPartyData,
+      aRemoteContentConfigurationWithBothEnv
+    );
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
@@ -1082,9 +1044,7 @@ describe("MessageService#getThirdPartyMessage", () => {
           },
         })
     );
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
     const aValidContent = {
       ...aValidMessage.content,
@@ -1094,11 +1054,13 @@ describe("MessageService#getThirdPartyMessage", () => {
       },
     };
 
-    const res = await service.getThirdPartyMessage({
-      ...aValidMessage,
-      content: aValidContent,
-    } as unknown as MessageWithThirdPartyData,
-    aRemoteContentConfigurationWithBothEnv);
+    const res = await service.getThirdPartyMessage(
+      {
+        ...aValidMessage,
+        content: aValidContent,
+      } as unknown as MessageWithThirdPartyData,
+      aRemoteContentConfigurationWithBothEnv
+    );
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
@@ -1117,9 +1079,7 @@ describe("MessageService#getThirdPartyMessagePrecondition", () => {
   });
 
   it("should return a valid PreconditionContent when third party service return 200", async () => {
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
     const res = await service.getThirdPartyMessagePrecondition(
       aValidMessageWithThirdPartyData,
@@ -1149,9 +1109,7 @@ describe("MessageService#getThirdPartyMessagePrecondition", () => {
       })
     );
 
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
     const res = await service.getThirdPartyMessagePrecondition(
       aValidMessageWithThirdPartyData,
@@ -1180,9 +1138,7 @@ describe("MessageService#getThirdPartyMessagePrecondition", () => {
       })
     );
 
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
     const res = await service.getThirdPartyMessagePrecondition(
       aValidMessageWithThirdPartyData,
@@ -1218,9 +1174,7 @@ describe("MessageService#getThirdPartyAttachment", () => {
   });
 
   it("should return an attachment from the API", async () => {
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
     const res = await service.getThirdPartyAttachment(
       aValidMessageWithThirdPartyData,
@@ -1247,9 +1201,7 @@ describe("MessageService#getThirdPartyAttachment", () => {
       });
     });
 
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
     const res = await service.getThirdPartyAttachment(
       aValidMessageWithThirdPartyData,
@@ -1272,9 +1224,7 @@ describe("MessageService#getThirdPartyAttachment", () => {
       throw Error(anError);
     });
 
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
     const res = await service.getThirdPartyAttachment(
       aValidMessageWithThirdPartyData,
@@ -1297,9 +1247,7 @@ describe("MessageService#getThirdPartyAttachment", () => {
       t.success(problemJson)
     );
 
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
     const res = await service.getThirdPartyAttachment(
       aValidMessageWithThirdPartyData,
@@ -1321,9 +1269,7 @@ describe("MessageService#getThirdPartyAttachment", () => {
       t.success({ status: 404 })
     );
 
-    const service = new NewMessageService(
-      api
-    );
+    const service = new NewMessageService(api);
 
     const res = await service.getThirdPartyAttachment(
       aValidMessageWithThirdPartyData,
@@ -1334,7 +1280,7 @@ describe("MessageService#getThirdPartyAttachment", () => {
     expect(res).toMatchObject({
       kind: "IResponseErrorNotFound",
     });
-    
+
     expect(mockGetTPAttachment).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
       attachment_url: anAttachmentUrl,

@@ -15,7 +15,8 @@ import { pipe } from "fp-ts/lib/function";
 import * as E from "fp-ts/lib/Either";
 
 const aRptId = "123456";
-const acodiceContestoPagamento = "01234567890123456789012345678901" as CodiceContestoPagamento;
+const acodiceContestoPagamento =
+  "01234567890123456789012345678901" as CodiceContestoPagamento;
 
 const unknownErrorMessage = "Unknown response.";
 
@@ -24,14 +25,14 @@ const validPaymentInfoResponse: TypeofApiResponse<GetPaymentInfoT> = {
   status: 200,
   value: {
     codiceContestoPagamento: acodiceContestoPagamento,
-    importoSingoloVersamento: 200 as ImportoEuroCents
-  }
+    importoSingoloVersamento: 200 as ImportoEuroCents,
+  },
 };
 
 const badRequestPaymentInfoResponse: TypeofApiResponse<GetPaymentInfoT> = {
   headers: {},
   status: 400,
-  value: { title: "Request not valid" }
+  value: { title: "Request not valid" },
 };
 
 const errorPaymentInfoResponse: TypeofApiResponse<GetPaymentInfoT> = {
@@ -39,8 +40,8 @@ const errorPaymentInfoResponse: TypeofApiResponse<GetPaymentInfoT> = {
   status: 500,
   value: {
     detail: PaymentFaultEnum.PAYMENT_UNAVAILABLE,
-    detail_v2: PaymentFaultV2Enum.PPT_IBAN_NON_CENSITO
-  }
+    detail_v2: PaymentFaultV2Enum.PPT_IBAN_NON_CENSITO,
+  },
 };
 
 const proxyPaymentInfoResponse: TypeofApiResponse<GetPaymentInfoT> = {
@@ -48,18 +49,18 @@ const proxyPaymentInfoResponse: TypeofApiResponse<GetPaymentInfoT> = {
   status: 200,
   value: {
     codiceContestoPagamento: acodiceContestoPagamento,
-    importoSingoloVersamento: 200 as ImportoEuroCents
-  }
+    importoSingoloVersamento: 200 as ImportoEuroCents,
+  },
 };
 
 const validPaymentActivation: PaymentActivationsPostRequest = pipe(
   {
     codiceContestoPagamento: acodiceContestoPagamento,
     importoSingoloVersamento: 200,
-    rptId: "12345678901012123456789012312"
+    rptId: "12345678901012123456789012312",
   },
   PaymentActivationsPostRequest.decode,
-  E.getOrElseW(errors => {
+  E.getOrElseW((errors) => {
     throw Error(`Invalid RptId to decode: ${JSON.stringify(errors)}`);
   })
 );
@@ -67,38 +68,38 @@ const validPaymentActivation: PaymentActivationsPostRequest = pipe(
 const validActivatePaymentResponse = {
   status: 200,
   value: {
-    importoSingoloVersamento: 200
-  }
+    importoSingoloVersamento: 200,
+  },
 };
 const badRequestActivatePaymentResponse = {
   status: 400,
-  value: Error("Activate bad request")
+  value: Error("Activate bad request"),
 };
 const errorActivatePaymentResponse = {
   status: 500,
-  value: Error("Activate error")
+  value: Error("Activate error"),
 };
 const proxyActivatePaymentResponse = {
   importoSingoloVersamento:
-    validActivatePaymentResponse.value.importoSingoloVersamento
+    validActivatePaymentResponse.value.importoSingoloVersamento,
 };
 
 const validActivationStatusResponse = {
   status: 200,
   value: {
-    idPagamento: "123455"
-  }
+    idPagamento: "123455",
+  },
 };
 const notFoundActivationStatusResponse = {
   status: 404,
-  value: Error("Activation status not found")
+  value: Error("Activation status not found"),
 };
 const errorActivationStatusResponse = {
   status: 500,
-  value: Error("Activation status error")
+  value: Error("Activation status error"),
 };
 const proxyActivationStatusResponse = {
-  idPagamento: validActivationStatusResponse.value.idPagamento
+  idPagamento: validActivationStatusResponse.value.idPagamento,
 };
 
 const mockActivatePayment = jest.fn();
@@ -108,14 +109,14 @@ const mockGetClient = jest.fn().mockImplementation(() => {
   return {
     activatePayment: mockActivatePayment,
     getActivationStatus: mockGetActivationStatus,
-    getPaymentInfo: mockGetPaymentInfo
+    getPaymentInfo: mockGetPaymentInfo,
   };
 });
 jest.mock("../../services/pagoPAClientFactory", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
-      getClient: mockGetClient
-    }))
+      getClient: mockGetClient,
+    })),
   };
 });
 
@@ -142,12 +143,12 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockGetPaymentInfo).toHaveBeenCalledWith({
-      rpt_id_from_string: aRptId
+      rpt_id_from_string: aRptId,
     });
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: proxyPaymentInfoResponse.value
+      value: proxyPaymentInfoResponse.value,
     });
   });
 
@@ -162,12 +163,12 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.TEST);
     expect(mockGetPaymentInfo).toHaveBeenCalledWith({
-      rpt_id_from_string: aRptId
+      rpt_id_from_string: aRptId,
     });
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: proxyPaymentInfoResponse.value
+      value: proxyPaymentInfoResponse.value,
     });
   });
 
@@ -182,7 +183,7 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockGetPaymentInfo).toHaveBeenCalledWith({
-      rpt_id_from_string: aRptId
+      rpt_id_from_string: aRptId,
     });
     expect(res.kind).toEqual("IResponseErrorValidation");
   });
@@ -198,7 +199,7 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockGetPaymentInfo).toHaveBeenCalledWith({
-      rpt_id_from_string: aRptId
+      rpt_id_from_string: aRptId,
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
@@ -214,7 +215,7 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockGetPaymentInfo).toHaveBeenCalledWith({
-      rpt_id_from_string: aRptId
+      rpt_id_from_string: aRptId,
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
@@ -236,12 +237,12 @@ describe("PagoPAProxyService#activatePayment", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockActivatePayment).toHaveBeenCalledWith({
-      paymentActivationsPostRequest: validPaymentActivation
+      paymentActivationsPostRequest: validPaymentActivation,
     });
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: proxyActivatePaymentResponse
+      value: proxyActivatePaymentResponse,
     });
   });
 
@@ -256,12 +257,12 @@ describe("PagoPAProxyService#activatePayment", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.TEST);
     expect(mockActivatePayment).toHaveBeenCalledWith({
-      paymentActivationsPostRequest: validPaymentActivation
+      paymentActivationsPostRequest: validPaymentActivation,
     });
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: proxyActivatePaymentResponse
+      value: proxyActivatePaymentResponse,
     });
   });
 
@@ -276,7 +277,7 @@ describe("PagoPAProxyService#activatePayment", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockActivatePayment).toHaveBeenCalledWith({
-      paymentActivationsPostRequest: validPaymentActivation
+      paymentActivationsPostRequest: validPaymentActivation,
     });
     expect(res.kind).toEqual("IResponseErrorValidation");
   });
@@ -292,7 +293,7 @@ describe("PagoPAProxyService#activatePayment", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockActivatePayment).toHaveBeenCalledWith({
-      paymentActivationsPostRequest: validPaymentActivation
+      paymentActivationsPostRequest: validPaymentActivation,
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
@@ -308,7 +309,7 @@ describe("PagoPAProxyService#activatePayment", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockActivatePayment).toHaveBeenCalledWith({
-      paymentActivationsPostRequest: validPaymentActivation
+      paymentActivationsPostRequest: validPaymentActivation,
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
@@ -333,12 +334,12 @@ describe("PagoPAProxyService#getActivationStatus", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockGetActivationStatus).toHaveBeenCalledWith({
-      codice_contesto_pagamento: acodiceContestoPagamento
+      codice_contesto_pagamento: acodiceContestoPagamento,
     });
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: proxyActivationStatusResponse
+      value: proxyActivationStatusResponse,
     });
   });
 
@@ -356,12 +357,12 @@ describe("PagoPAProxyService#getActivationStatus", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.TEST);
     expect(mockGetActivationStatus).toHaveBeenCalledWith({
-      codice_contesto_pagamento: acodiceContestoPagamento
+      codice_contesto_pagamento: acodiceContestoPagamento,
     });
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: proxyActivationStatusResponse
+      value: proxyActivationStatusResponse,
     });
   });
 
@@ -379,7 +380,7 @@ describe("PagoPAProxyService#getActivationStatus", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockGetActivationStatus).toHaveBeenCalledWith({
-      codice_contesto_pagamento: acodiceContestoPagamento
+      codice_contesto_pagamento: acodiceContestoPagamento,
     });
     expect(res.kind).toEqual("IResponseErrorNotFound");
   });
@@ -398,7 +399,7 @@ describe("PagoPAProxyService#getActivationStatus", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockGetActivationStatus).toHaveBeenCalledWith({
-      codice_contesto_pagamento: acodiceContestoPagamento
+      codice_contesto_pagamento: acodiceContestoPagamento,
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
@@ -417,7 +418,7 @@ describe("PagoPAProxyService#getActivationStatus", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockGetActivationStatus).toHaveBeenCalledWith({
-      codice_contesto_pagamento: acodiceContestoPagamento
+      codice_contesto_pagamento: acodiceContestoPagamento,
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });

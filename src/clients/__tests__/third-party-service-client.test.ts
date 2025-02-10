@@ -8,7 +8,7 @@ import {
   aPnThirdPartyMessage,
   aPNThirdPartyNotification,
   base64File,
-  aPNConfigurationId
+  aPNConfigurationId,
 } from "../../__mocks__/pn";
 import { lollipopParams } from "../../__mocks__/lollipop";
 import { aRemoteContentConfigurationWithBothEnv } from "../../__mocks__/remote-configuration";
@@ -19,7 +19,7 @@ mockNodeFetch.mockImplementation(
     return {
       ok: true,
       status: 200,
-      json: async () => aPnThirdPartyMessage
+      json: async () => aPnThirdPartyMessage,
     } as Response;
   }
 );
@@ -41,9 +41,10 @@ describe("third-party-service-client", () => {
 
     client.getThirdPartyMessageDetails({
       id: aThirdPartyId,
-      ...lollipopParams
+      ...lollipopParams,
     });
-    const expectedConfig = aRemoteContentConfigurationWithBothEnv.test_environment!;
+    const expectedConfig =
+      aRemoteContentConfigurationWithBothEnv.test_environment!;
 
     expect(mockNodeFetch).toHaveBeenCalledWith(
       `${expectedConfig.base_url}/messages/${aThirdPartyId}`,
@@ -52,10 +53,10 @@ describe("third-party-service-client", () => {
           fiscal_code: aFiscalCode,
           [expectedConfig.details_authentication.header_key_name]:
             expectedConfig.details_authentication.key,
-          ...lollipopParams
+          ...lollipopParams,
         },
         method: "get",
-        redirect: "manual"
+        redirect: "manual",
       }
     );
   });
@@ -71,9 +72,10 @@ describe("third-party-service-client", () => {
 
     await client.getThirdPartyMessageDetails({
       id: aThirdPartyId,
-      ...lollipopParams
+      ...lollipopParams,
     });
-    const expectedConfig = aRemoteContentConfigurationWithBothEnv.prod_environment!;
+    const expectedConfig =
+      aRemoteContentConfigurationWithBothEnv.prod_environment!;
 
     expect(mockNodeFetch).toHaveBeenCalledWith(
       `${expectedConfig.base_url}/messages/${aThirdPartyId}`,
@@ -82,10 +84,10 @@ describe("third-party-service-client", () => {
           fiscal_code: aProdFiscalCode,
           [expectedConfig.details_authentication.header_key_name]:
             expectedConfig.details_authentication.key,
-          ...lollipopParams
+          ...lollipopParams,
         },
         method: "get",
-        redirect: "manual"
+        redirect: "manual",
       }
     );
   });
@@ -94,16 +96,20 @@ describe("third-party-service-client", () => {
     const aProdFiscalCode = "GRBRPP87L04L741X" as FiscalCode;
 
     const client = getThirdPartyServiceClient(
-      { ...aRemoteContentConfigurationWithBothEnv, configuration_id: aPNConfigurationId },
+      {
+        ...aRemoteContentConfigurationWithBothEnv,
+        configuration_id: aPNConfigurationId,
+      },
       mockNodeFetch,
       lollipopParams
     )(aProdFiscalCode);
 
     const res = await client.getThirdPartyMessageDetails({
       id: aThirdPartyId,
-      ...lollipopParams
+      ...lollipopParams,
     });
-    const expectedConfig = aRemoteContentConfigurationWithBothEnv.prod_environment!;
+    const expectedConfig =
+      aRemoteContentConfigurationWithBothEnv.prod_environment!;
 
     expect(mockNodeFetch).toHaveBeenCalledWith(
       `${expectedConfig.base_url}/delivery/notifications/received/${aThirdPartyId}`,
@@ -114,17 +120,17 @@ describe("third-party-service-client", () => {
           "x-api-key": "anykey",
           [expectedConfig.details_authentication.header_key_name]:
             expectedConfig.details_authentication.key,
-          ...lollipopParams
+          ...lollipopParams,
         },
         method: "get",
-        redirect: "manual"
+        redirect: "manual",
       }
     );
 
     expect(res).toMatchObject(
       E.right({
         status: 200,
-        value: aPNThirdPartyNotification
+        value: aPNThirdPartyNotification,
       })
     );
   });
@@ -138,7 +144,7 @@ describe("third-party-service-client", () => {
         return {
           ok: true,
           status: 200,
-          arrayBuffer: async () => arrayBuffer
+          arrayBuffer: async () => arrayBuffer,
         } as Response;
       }
     );
@@ -146,7 +152,10 @@ describe("third-party-service-client", () => {
     const aProdFiscalCode = "GRBRPP87L04L741X" as FiscalCode;
 
     const client = getThirdPartyServiceClient(
-      { ...aRemoteContentConfigurationWithBothEnv, configuration_id: aConfigurationId },
+      {
+        ...aRemoteContentConfigurationWithBothEnv,
+        configuration_id: aConfigurationId,
+      },
       mockNodeFetch,
       lollipopParams
     )(aProdFiscalCode);
@@ -154,14 +163,15 @@ describe("third-party-service-client", () => {
     const res = await client.getThirdPartyMessageAttachment({
       id: aThirdPartyId,
       attachment_url: "an/url",
-      ...lollipopParams
+      ...lollipopParams,
     });
-    const expectedConfig = aRemoteContentConfigurationWithBothEnv.prod_environment!;
+    const expectedConfig =
+      aRemoteContentConfigurationWithBothEnv.prod_environment!;
 
     expect(res).toMatchObject(
       E.right({
         status: 200,
-        value: buffer
+        value: buffer,
       })
     );
 
@@ -172,10 +182,10 @@ describe("third-party-service-client", () => {
           fiscal_code: aProdFiscalCode,
           [expectedConfig.details_authentication.header_key_name]:
             expectedConfig.details_authentication.key,
-          ...lollipopParams
+          ...lollipopParams,
         },
         method: "get",
-        redirect: "manual"
+        redirect: "manual",
       }
     );
   });
@@ -184,7 +194,10 @@ describe("third-party-service-client", () => {
     const aProdFiscalCode = "GRBRPP87L04L741X" as FiscalCode;
 
     const client = getThirdPartyServiceClient(
-      { ...aRemoteContentConfigurationWithBothEnv, configuration_id: aPNConfigurationId },
+      {
+        ...aRemoteContentConfigurationWithBothEnv,
+        configuration_id: aPNConfigurationId,
+      },
       mockNodeFetch,
       lollipopParams
     )(aProdFiscalCode);
@@ -192,9 +205,10 @@ describe("third-party-service-client", () => {
     await client.getThirdPartyMessageAttachment({
       id: aThirdPartyId,
       attachment_url: `delivery/notifications/received/${aThirdPartyId}/attachments/documents/0`,
-      ...lollipopParams
+      ...lollipopParams,
     });
-    const expectedConfig = aRemoteContentConfigurationWithBothEnv.prod_environment!;
+    const expectedConfig =
+      aRemoteContentConfigurationWithBothEnv.prod_environment!;
 
     expect(mockNodeFetch).toHaveBeenCalledWith(
       `${expectedConfig.base_url}/delivery/notifications/received/${aThirdPartyId}/attachments/documents/0`,
@@ -204,10 +218,10 @@ describe("third-party-service-client", () => {
           "x-api-key": "anykey",
           [expectedConfig.details_authentication.header_key_name]:
             expectedConfig.details_authentication.key,
-          ...lollipopParams
+          ...lollipopParams,
         },
         method: "get",
-        redirect: "manual"
+        redirect: "manual",
       }
     );
   });

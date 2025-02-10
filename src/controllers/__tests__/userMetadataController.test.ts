@@ -4,14 +4,14 @@ import { UserMetadata } from "../../../generated/backend/UserMetadata";
 import mockReq from "../../__mocks__/request";
 import RedisUserMetadataStorage, {
   invalidVersionNumberError,
-  metadataNotFoundError
+  metadataNotFoundError,
 } from "../../services/redisUserMetadataStorage";
 import { mockedUser } from "../../__mocks__/user_mock";
 import UserMetadataController from "../userMetadataController";
 
 const mockMetadata: UserMetadata = {
   metadata: "TEST-METADATA-GENERIC-STRING",
-  version: 1
+  version: 1,
 };
 
 const mockGetMetadata = jest.fn();
@@ -20,10 +20,10 @@ jest.mock("../../services/redisUserMetadataStorage", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
       get: mockGetMetadata,
-      set: mockUpsertMetadata
+      set: mockUpsertMetadata,
     })),
     invalidVersionNumberError: new Error("Invalid Version Number"),
-    metadataNotFoundError: new Error("Metadata not found")
+    metadataNotFoundError: new Error("Metadata not found"),
   };
 });
 
@@ -49,7 +49,7 @@ describe("UserMetadataController#getMetadata", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: mockMetadata
+      value: mockMetadata,
     });
   });
 
@@ -72,7 +72,7 @@ describe("UserMetadataController#getMetadata", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseNoContent",
-      value: {}
+      value: {},
     });
   });
 
@@ -94,7 +94,7 @@ describe("UserMetadataController#getMetadata", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       detail: `Internal server error: ${redisError.message}`,
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 });
@@ -123,7 +123,7 @@ describe("UserMetadataController#upsertMetadata", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: mockMetadata
+      value: mockMetadata,
     });
   });
 
@@ -147,7 +147,7 @@ describe("UserMetadataController#upsertMetadata", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       detail: `Internal server error: ${redisError.message}`,
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -172,7 +172,7 @@ describe("UserMetadataController#upsertMetadata", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       detail: `Conflict: ${invalidVersionNumberError.message}`,
-      kind: "IResponseErrorConflict"
+      kind: "IResponseErrorConflict",
     });
   });
 });

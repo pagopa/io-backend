@@ -3,7 +3,7 @@
 import * as t from "io-ts";
 import {
   UserDataProcessingChoice,
-  UserDataProcessingChoiceEnum
+  UserDataProcessingChoiceEnum,
 } from "@pagopa/io-functions-app-sdk/UserDataProcessingChoice";
 import { UserDataProcessingChoiceRequest } from "@pagopa/io-functions-app-sdk/UserDataProcessingChoiceRequest";
 import { mockedUser } from "../../__mocks__/user_mock";
@@ -21,45 +21,45 @@ const aUserDataProcessingResponse = {
   id: `${mockedUser.fiscal_code}-DOWNLOAD-0000000000000000`,
   status: "PENDING",
   userDataProcessingId: `${mockedUser.fiscal_code}-DOWNLOAD`,
-  version: 0
+  version: 0,
 };
 
 const validApiUserDataProcessingResponse = {
   status: 200,
   value: {
-    ...aUserDataProcessingResponse
-  }
+    ...aUserDataProcessingResponse,
+  },
 };
 
 const tooManyReqApiUserDataProcessingResponse = {
-  status: 429
+  status: 429,
 };
 const invalidApiUserDataProcessingResponse = {
-  status: 500
+  status: 500,
 };
 
 const conflictApiUserDataProcessingResponse = {
   status: 409,
   value: {
-    detail: "Another request is already WIP or PENDING for this User"
-  }
+    detail: "Another request is already WIP or PENDING for this User",
+  },
 };
 const problemJson = {
-  status: 500
+  status: 500,
 };
 
 const mockedUserDataProcessingChoice: UserDataProcessingChoice =
   UserDataProcessingChoiceEnum.DOWNLOAD;
 
 const mockedUserDataProcessingChoiceRequest: UserDataProcessingChoiceRequest = {
-  choice: mockedUserDataProcessingChoice
+  choice: mockedUserDataProcessingChoice,
 };
 const mockGetUserDataProcessing = jest.fn();
 const mockUpsertUserDataProcessing = jest.fn();
 const mockGetClient = jest.fn().mockImplementation(() => {
   return {
     getUserDataProcessing: mockGetUserDataProcessing,
-    upsertUserDataProcessing: mockUpsertUserDataProcessing
+    upsertUserDataProcessing: mockUpsertUserDataProcessing,
   };
 });
 
@@ -70,8 +70,8 @@ beforeEach(() => {
 jest.mock("../../services/apiClientFactory", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
-      getClient: mockGetClient
-    }))
+      getClient: mockGetClient,
+    })),
   };
 });
 
@@ -92,11 +92,11 @@ describe("UserDataProcessingService#getUserDataProcessing", () => {
 
     expect(mockGetUserDataProcessing).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
-      choice: mockedUserDataProcessingChoice
+      choice: mockedUserDataProcessingChoice,
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
-      value: aUserDataProcessingResponse
+      value: aUserDataProcessingResponse,
     });
   });
 
@@ -126,7 +126,7 @@ describe("UserDataProcessingService#getUserDataProcessing", () => {
     );
     expect(mockGetUserDataProcessing).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
-      choice: mockedUserDataProcessingChoice
+      choice: mockedUserDataProcessingChoice,
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
@@ -144,7 +144,7 @@ describe("UserDataProcessingService#getUserDataProcessing", () => {
     );
     expect(mockGetUserDataProcessing).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
-      choice: mockedUserDataProcessingChoice
+      choice: mockedUserDataProcessingChoice,
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
@@ -168,11 +168,11 @@ describe("UserDataProcessingService#upsertUserDataProcessing", () => {
 
     expect(mockUpsertUserDataProcessing).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
-      body: mockedUserDataProcessingChoiceRequest
+      body: mockedUserDataProcessingChoiceRequest,
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
-      value: aUserDataProcessingResponse
+      value: aUserDataProcessingResponse,
     });
   });
 
@@ -219,7 +219,7 @@ describe("UserDataProcessingService#upsertUserDataProcessing", () => {
     );
     expect(mockUpsertUserDataProcessing).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
-      body: mockedUserDataProcessingChoiceRequest
+      body: mockedUserDataProcessingChoiceRequest,
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
@@ -237,7 +237,7 @@ describe("UserDataProcessingService#upsertUserDataProcessing", () => {
     );
     expect(mockUpsertUserDataProcessing).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
-      body: mockedUserDataProcessingChoiceRequest
+      body: mockedUserDataProcessingChoiceRequest,
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });

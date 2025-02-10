@@ -1,6 +1,6 @@
 import {
   ResponseSuccessAccepted,
-  ResponseSuccessJson
+  ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
@@ -12,11 +12,11 @@ import { CgnAPIClient } from "../../clients/cgn";
 import CgnService from "../../services/cgnService";
 import {
   CardPending,
-  StatusEnum
+  StatusEnum,
 } from "@pagopa/io-functions-cgn-sdk/CardPending";
 import {
   CgnActivationDetail,
-  StatusEnum as ActivationStatusEnum
+  StatusEnum as ActivationStatusEnum,
 } from "@pagopa/io-functions-cgn-sdk/CgnActivationDetail";
 import { EycaActivationDetail } from "@pagopa/io-functions-cgn-sdk/EycaActivationDetail";
 import { Otp } from "../../../generated/cgn/Otp";
@@ -30,7 +30,7 @@ const badRequestErrorResponse = {
   detail: expect.any(String),
   status: 400,
   title: expect.any(String),
-  type: undefined
+  type: undefined,
 };
 
 const mockGetCgnStatus = jest.fn();
@@ -52,35 +52,35 @@ jest.mock("../../services/cgnService", () => {
       startEycaActivation: mockStartEycaActivation,
       getEycaStatus: mockGetEycaStatus,
       startCgnUnsubscription: mockStartCgnUnsubscription,
-      generateOtp: mockGenerateOtp
-    }))
+      generateOtp: mockGenerateOtp,
+    })),
   };
 });
 
 const aPendingCgn: CardPending = {
-  status: StatusEnum.PENDING
+  status: StatusEnum.PENDING,
 };
 
 const aPendingEycaCard: CardPending = {
-  status: StatusEnum.PENDING
+  status: StatusEnum.PENDING,
 };
 
 const aCgnActivationDetail: CgnActivationDetail = {
   instance_id: {
-    id: "instanceId" as NonEmptyString
+    id: "instanceId" as NonEmptyString,
   },
-  status: ActivationStatusEnum.COMPLETED
+  status: ActivationStatusEnum.COMPLETED,
 };
 
 const anEycaActivationDetail: EycaActivationDetail = {
-  status: ActivationStatusEnum.COMPLETED
+  status: ActivationStatusEnum.COMPLETED,
 };
 
 const allowedTestFiscalCodesMock = jest.fn().mockImplementation(() => []);
 const aGeneratedOtp: Otp = {
   code: "AAAAAA12312" as OtpCode,
   expires_at: new Date(),
-  ttl: 10
+  ttl: 10,
 };
 
 const client = CgnAPIClient(API_KEY, API_URL, API_BASE_PATH);
@@ -118,7 +118,7 @@ describe("CgnController#getCgnStatus", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: aPendingCgn
+      value: aPendingCgn,
     });
   });
 
@@ -145,7 +145,7 @@ describe("CgnController#getCgnStatus", () => {
     const req = { ...mockReq(), user: mockedUser };
 
     allowedTestFiscalCodesMock.mockImplementationOnce(() => [
-      "GRBGPP87L04L741Z" as FiscalCode
+      "GRBGPP87L04L741Z" as FiscalCode,
     ]);
     const controller = new CgnController(
       cgnService,
@@ -157,7 +157,7 @@ describe("CgnController#getCgnStatus", () => {
     // service method is not called
     expect(mockGetCgnStatus).not.toBeCalled();
     expect(response).toMatchObject({
-      kind: "IResponseErrorForbiddenNotAuthorized"
+      kind: "IResponseErrorForbiddenNotAuthorized",
     });
   });
 });
@@ -196,7 +196,7 @@ describe("CgnController#getEycaStatus", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: aPendingEycaCard
+      value: aPendingEycaCard,
     });
   });
 
@@ -224,7 +224,7 @@ describe("CgnController#getEycaStatus", () => {
     const req = { ...mockReq(), user: mockedUser };
 
     allowedTestFiscalCodesMock.mockImplementationOnce(() => [
-      "GRBGPP87L04L741Z" as FiscalCode
+      "GRBGPP87L04L741Z" as FiscalCode,
     ]);
     const controller = new CgnController(
       cgnService,
@@ -236,7 +236,7 @@ describe("CgnController#getEycaStatus", () => {
     // service method is not called
     expect(mockGetEycaStatus).not.toBeCalled();
     expect(response).toMatchObject({
-      kind: "IResponseErrorForbiddenNotAuthorized"
+      kind: "IResponseErrorForbiddenNotAuthorized",
     });
   });
 });
@@ -275,7 +275,7 @@ describe("CgnController#startCgnActivation", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessAccepted",
-      value: undefined
+      value: undefined,
     });
   });
 
@@ -302,7 +302,7 @@ describe("CgnController#startCgnActivation", () => {
     const req = { ...mockReq(), user: mockedUser };
 
     allowedTestFiscalCodesMock.mockImplementationOnce(() => [
-      "GRBGPP87L04L741Z" as FiscalCode
+      "GRBGPP87L04L741Z" as FiscalCode,
     ]);
     const controller = new CgnController(
       cgnService,
@@ -314,7 +314,7 @@ describe("CgnController#startCgnActivation", () => {
     // service method is not called
     expect(mockStartCgnActivation).not.toBeCalled();
     expect(response).toMatchObject({
-      kind: "IResponseErrorForbiddenNotAuthorized"
+      kind: "IResponseErrorForbiddenNotAuthorized",
     });
   });
 });
@@ -353,7 +353,7 @@ describe("CgnController#getCgnActivation", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: aCgnActivationDetail
+      value: aCgnActivationDetail,
     });
   });
 
@@ -379,7 +379,7 @@ describe("CgnController#getCgnActivation", () => {
     const req = { ...mockReq(), user: mockedUser };
 
     allowedTestFiscalCodesMock.mockImplementationOnce(() => [
-      "GRBGPP87L04L741Z" as FiscalCode
+      "GRBGPP87L04L741Z" as FiscalCode,
     ]);
     const controller = new CgnController(
       cgnService,
@@ -391,7 +391,7 @@ describe("CgnController#getCgnActivation", () => {
     // service method is not called
     expect(mockGetCgnActivation).not.toBeCalled();
     expect(response).toMatchObject({
-      kind: "IResponseErrorForbiddenNotAuthorized"
+      kind: "IResponseErrorForbiddenNotAuthorized",
     });
   });
 });
@@ -430,7 +430,7 @@ describe("CgnController#getEycaActivation", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: anEycaActivationDetail
+      value: anEycaActivationDetail,
     });
   });
 
@@ -457,7 +457,7 @@ describe("CgnController#getEycaActivation", () => {
     const req = { ...mockReq(), user: mockedUser };
 
     allowedTestFiscalCodesMock.mockImplementationOnce(() => [
-      "GRBGPP87L04L741Z" as FiscalCode
+      "GRBGPP87L04L741Z" as FiscalCode,
     ]);
     const controller = new CgnController(
       cgnService,
@@ -469,7 +469,7 @@ describe("CgnController#getEycaActivation", () => {
     // service method is not called
     expect(mockGetEycaActivation).not.toBeCalled();
     expect(response).toMatchObject({
-      kind: "IResponseErrorForbiddenNotAuthorized"
+      kind: "IResponseErrorForbiddenNotAuthorized",
     });
   });
 });
@@ -508,7 +508,7 @@ describe("CgnController#startEycaActivation", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessAccepted",
-      value: undefined
+      value: undefined,
     });
   });
 
@@ -534,7 +534,7 @@ describe("CgnController#startEycaActivation", () => {
     const req = { ...mockReq(), user: mockedUser };
 
     allowedTestFiscalCodesMock.mockImplementationOnce(() => [
-      "GRBGPP87L04L741Z" as FiscalCode
+      "GRBGPP87L04L741Z" as FiscalCode,
     ]);
     const controller = new CgnController(
       cgnService,
@@ -546,7 +546,7 @@ describe("CgnController#startEycaActivation", () => {
     // service method is not called
     expect(mockStartEycaActivation).not.toBeCalled();
     expect(response).toMatchObject({
-      kind: "IResponseErrorForbiddenNotAuthorized"
+      kind: "IResponseErrorForbiddenNotAuthorized",
     });
   });
 });
@@ -586,7 +586,7 @@ describe("CgnController#startCgnUnsubscription", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessAccepted",
-      value: undefined
+      value: undefined,
     });
   });
 
@@ -613,7 +613,7 @@ describe("CgnController#startCgnUnsubscription", () => {
     const req = { ...mockReq(), user: mockedUser };
 
     allowedTestFiscalCodesMock.mockImplementationOnce(() => [
-      "GRBGPP87L04L741Z" as FiscalCode
+      "GRBGPP87L04L741Z" as FiscalCode,
     ]);
 
     const controller = new CgnController(
@@ -626,7 +626,7 @@ describe("CgnController#startCgnUnsubscription", () => {
     // service method is not called
     expect(mockStartCgnUnsubscription).not.toBeCalled();
     expect(response).toMatchObject({
-      kind: "IResponseErrorForbiddenNotAuthorized"
+      kind: "IResponseErrorForbiddenNotAuthorized",
     });
   });
 });
@@ -665,7 +665,7 @@ describe("CgnController#generateOtp", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: aGeneratedOtp
+      value: aGeneratedOtp,
     });
   });
 

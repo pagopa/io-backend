@@ -4,7 +4,7 @@ import { mockedUser } from "../../__mocks__/user_mock";
 import CgnService from "../cgnService";
 import {
   CardPending,
-  StatusEnum
+  StatusEnum,
 } from "@pagopa/io-functions-cgn-sdk/CardPending";
 import { Otp } from "../../../generated/cgn/Otp";
 import { OtpCode } from "../../../generated/cgn/OtpCode";
@@ -32,9 +32,9 @@ mockStartCgnActivation.mockImplementation(() =>
     headers: { Location: "/api/v1/cgn/activation" },
     value: {
       id: {
-        id: "AnInstanceId"
-      }
-    }
+        id: "AnInstanceId",
+      },
+    },
   })
 );
 
@@ -48,9 +48,9 @@ mockStartEycaActivation.mockImplementation(() =>
     headers: { Location: "/api/v1/cgn/eyca/activation" },
     value: {
       id: {
-        id: "AnInstanceId"
-      }
-    }
+        id: "AnInstanceId",
+      },
+    },
   })
 );
 
@@ -60,9 +60,9 @@ mockStartCgnUnsubscription.mockImplementation(() =>
     headers: { Location: "/api/v1/cgn/delete" },
     value: {
       id: {
-        id: "AnInstanceId"
-      }
-    }
+        id: "AnInstanceId",
+      },
+    },
   })
 );
 
@@ -79,20 +79,20 @@ const api = {
   startCgnActivation: mockStartCgnActivation,
   startEycaActivation: mockStartEycaActivation,
   startCgnUnsubscription: mockStartCgnUnsubscription,
-  upsertCgnStatus: jest.fn()
+  upsertCgnStatus: jest.fn(),
 } as ReturnType<CgnAPIClient>;
 
 const aPendingCgn: CardPending = {
-  status: StatusEnum.PENDING
+  status: StatusEnum.PENDING,
 };
 const aPendingEycaCard: CardPending = {
-  status: StatusEnum.PENDING
+  status: StatusEnum.PENDING,
 };
 
 const aGeneratedOtp: Otp = {
   code: "AAAAAA12312" as OtpCode,
   expires_at: new Date(),
-  ttl: 10
+  ttl: 10,
 };
 describe("CgnService#getCgnStatus", () => {
   beforeEach(() => {
@@ -105,7 +105,7 @@ describe("CgnService#getCgnStatus", () => {
     await service.getCgnStatus(mockedUser);
 
     expect(mockGetCgnStatus).toHaveBeenCalledWith({
-      fiscalcode: mockedUser.fiscal_code
+      fiscalcode: mockedUser.fiscal_code,
     });
   });
 
@@ -115,7 +115,7 @@ describe("CgnService#getCgnStatus", () => {
     const res = await service.getCgnStatus(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessJson"
+      kind: "IResponseSuccessJson",
     });
   });
 
@@ -127,7 +127,7 @@ describe("CgnService#getCgnStatus", () => {
     const res = await service.getCgnStatus(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -139,7 +139,7 @@ describe("CgnService#getCgnStatus", () => {
     const res = await service.getCgnStatus(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorNotFound"
+      kind: "IResponseErrorNotFound",
     });
   });
 
@@ -154,7 +154,7 @@ describe("CgnService#getCgnStatus", () => {
     const res = await service.getCgnStatus(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -165,7 +165,7 @@ describe("CgnService#getCgnStatus", () => {
     const res = await service.getCgnStatus(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -178,7 +178,7 @@ describe("CgnService#getCgnStatus", () => {
     const res = await service.getCgnStatus(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 });
@@ -194,7 +194,7 @@ describe("CgnService#getEycaStatus", () => {
     await service.getEycaStatus(mockedUser);
 
     expect(mockGetEycaStatus).toHaveBeenCalledWith({
-      fiscalcode: mockedUser.fiscal_code
+      fiscalcode: mockedUser.fiscal_code,
     });
   });
 
@@ -204,7 +204,7 @@ describe("CgnService#getEycaStatus", () => {
     const res = await service.getEycaStatus(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessJson"
+      kind: "IResponseSuccessJson",
     });
   });
 
@@ -216,7 +216,7 @@ describe("CgnService#getEycaStatus", () => {
     const res = await service.getEycaStatus(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -228,7 +228,7 @@ describe("CgnService#getEycaStatus", () => {
     const res = await service.getEycaStatus(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorForbiddenNotAuthorized"
+      kind: "IResponseErrorForbiddenNotAuthorized",
     });
   });
 
@@ -240,7 +240,7 @@ describe("CgnService#getEycaStatus", () => {
     const res = await service.getEycaStatus(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorNotFound"
+      kind: "IResponseErrorNotFound",
     });
   });
 
@@ -252,7 +252,7 @@ describe("CgnService#getEycaStatus", () => {
     const res = await service.getEycaStatus(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorConflict"
+      kind: "IResponseErrorConflict",
     });
   });
 
@@ -267,7 +267,7 @@ describe("CgnService#getEycaStatus", () => {
     const res = await service.getEycaStatus(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -278,7 +278,7 @@ describe("CgnService#getEycaStatus", () => {
     const res = await service.getEycaStatus(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -291,7 +291,7 @@ describe("CgnService#getEycaStatus", () => {
     const res = await service.getEycaStatus(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 });
@@ -307,7 +307,7 @@ describe("CgnService#startCgnActivation", () => {
     await service.startCgnActivation(mockedUser);
 
     expect(mockStartCgnActivation).toHaveBeenCalledWith({
-      fiscalcode: mockedUser.fiscal_code
+      fiscalcode: mockedUser.fiscal_code,
     });
   });
 
@@ -317,7 +317,7 @@ describe("CgnService#startCgnActivation", () => {
     const res = await service.startCgnActivation(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessRedirectToResource"
+      kind: "IResponseSuccessRedirectToResource",
     });
   });
 
@@ -331,7 +331,7 @@ describe("CgnService#startCgnActivation", () => {
     const res = await service.startCgnActivation(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessAccepted"
+      kind: "IResponseSuccessAccepted",
     });
   });
 
@@ -344,7 +344,7 @@ describe("CgnService#startCgnActivation", () => {
     const res = await service.startCgnActivation(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -358,7 +358,7 @@ describe("CgnService#startCgnActivation", () => {
     const res = await service.startCgnActivation(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorForbiddenNotAuthorized"
+      kind: "IResponseErrorForbiddenNotAuthorized",
     });
   });
 
@@ -372,7 +372,7 @@ describe("CgnService#startCgnActivation", () => {
     const res = await service.startCgnActivation(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorConflict"
+      kind: "IResponseErrorConflict",
     });
   });
 
@@ -387,7 +387,7 @@ describe("CgnService#startCgnActivation", () => {
     const res = await service.startCgnActivation(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -400,7 +400,7 @@ describe("CgnService#startCgnActivation", () => {
     const res = await service.startCgnActivation(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -413,7 +413,7 @@ describe("CgnService#startCgnActivation", () => {
     const res = await service.startCgnActivation(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 });
@@ -429,7 +429,7 @@ describe("CgnService#getCgnActivation", () => {
     await service.getCgnActivation(mockedUser);
 
     expect(mockGetCgnActivation).toHaveBeenCalledWith({
-      fiscalcode: mockedUser.fiscal_code
+      fiscalcode: mockedUser.fiscal_code,
     });
   });
 
@@ -439,7 +439,7 @@ describe("CgnService#getCgnActivation", () => {
     const res = await service.getCgnActivation(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessJson"
+      kind: "IResponseSuccessJson",
     });
   });
 
@@ -453,7 +453,7 @@ describe("CgnService#getCgnActivation", () => {
     const res = await service.getCgnActivation(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -467,7 +467,7 @@ describe("CgnService#getCgnActivation", () => {
     const res = await service.getCgnActivation(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorNotFound"
+      kind: "IResponseErrorNotFound",
     });
   });
 
@@ -482,7 +482,7 @@ describe("CgnService#getCgnActivation", () => {
     const res = await service.getCgnActivation(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -495,7 +495,7 @@ describe("CgnService#getCgnActivation", () => {
     const res = await service.getCgnActivation(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -508,7 +508,7 @@ describe("CgnService#getCgnActivation", () => {
     const res = await service.getCgnActivation(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 });
@@ -524,7 +524,7 @@ describe("CgnService#getEycaActivation", () => {
     await service.getEycaActivation(mockedUser);
 
     expect(mockGetEycaActivation).toHaveBeenCalledWith({
-      fiscalcode: mockedUser.fiscal_code
+      fiscalcode: mockedUser.fiscal_code,
     });
   });
 
@@ -534,7 +534,7 @@ describe("CgnService#getEycaActivation", () => {
     const res = await service.getEycaActivation(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessJson"
+      kind: "IResponseSuccessJson",
     });
   });
 
@@ -548,7 +548,7 @@ describe("CgnService#getEycaActivation", () => {
     const res = await service.getEycaActivation(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -562,7 +562,7 @@ describe("CgnService#getEycaActivation", () => {
     const res = await service.getEycaActivation(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorNotFound"
+      kind: "IResponseErrorNotFound",
     });
   });
 
@@ -577,7 +577,7 @@ describe("CgnService#getEycaActivation", () => {
     const res = await service.getEycaActivation(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -590,7 +590,7 @@ describe("CgnService#getEycaActivation", () => {
     const res = await service.getEycaActivation(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -603,7 +603,7 @@ describe("CgnService#getEycaActivation", () => {
     const res = await service.getEycaActivation(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 });
@@ -619,7 +619,7 @@ describe("CgnService#startEycaActivation", () => {
     await service.startEycaActivation(mockedUser);
 
     expect(mockStartEycaActivation).toHaveBeenCalledWith({
-      fiscalcode: mockedUser.fiscal_code
+      fiscalcode: mockedUser.fiscal_code,
     });
   });
 
@@ -629,7 +629,7 @@ describe("CgnService#startEycaActivation", () => {
     const res = await service.startEycaActivation(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessRedirectToResource"
+      kind: "IResponseSuccessRedirectToResource",
     });
   });
 
@@ -643,7 +643,7 @@ describe("CgnService#startEycaActivation", () => {
     const res = await service.startEycaActivation(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessAccepted"
+      kind: "IResponseSuccessAccepted",
     });
   });
 
@@ -656,7 +656,7 @@ describe("CgnService#startEycaActivation", () => {
     const res = await service.startEycaActivation(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -670,7 +670,7 @@ describe("CgnService#startEycaActivation", () => {
     const res = await service.startEycaActivation(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorForbiddenNotAuthorized"
+      kind: "IResponseErrorForbiddenNotAuthorized",
     });
   });
 
@@ -684,7 +684,7 @@ describe("CgnService#startEycaActivation", () => {
     const res = await service.startEycaActivation(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorConflict"
+      kind: "IResponseErrorConflict",
     });
   });
 
@@ -699,7 +699,7 @@ describe("CgnService#startEycaActivation", () => {
     const res = await service.startEycaActivation(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -712,7 +712,7 @@ describe("CgnService#startEycaActivation", () => {
     const res = await service.startEycaActivation(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -725,7 +725,7 @@ describe("CgnService#startEycaActivation", () => {
     const res = await service.startEycaActivation(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 });
@@ -741,7 +741,7 @@ describe("CgnService#startCgnUnsubscription", () => {
     await service.startCgnUnsubscription(mockedUser);
 
     expect(mockStartCgnUnsubscription).toHaveBeenCalledWith({
-      fiscalcode: mockedUser.fiscal_code
+      fiscalcode: mockedUser.fiscal_code,
     });
   });
 
@@ -751,7 +751,7 @@ describe("CgnService#startCgnUnsubscription", () => {
     const res = await service.startCgnUnsubscription(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessRedirectToResource"
+      kind: "IResponseSuccessRedirectToResource",
     });
   });
 
@@ -765,7 +765,7 @@ describe("CgnService#startCgnUnsubscription", () => {
     const res = await service.startCgnUnsubscription(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessAccepted"
+      kind: "IResponseSuccessAccepted",
     });
   });
 
@@ -778,7 +778,7 @@ describe("CgnService#startCgnUnsubscription", () => {
     const res = await service.startCgnUnsubscription(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -792,7 +792,7 @@ describe("CgnService#startCgnUnsubscription", () => {
     const res = await service.startCgnUnsubscription(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorForbiddenNotAuthorized"
+      kind: "IResponseErrorForbiddenNotAuthorized",
     });
   });
 
@@ -806,7 +806,7 @@ describe("CgnService#startCgnUnsubscription", () => {
     const res = await service.startCgnUnsubscription(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorConflict"
+      kind: "IResponseErrorConflict",
     });
   });
 
@@ -821,7 +821,7 @@ describe("CgnService#startCgnUnsubscription", () => {
     const res = await service.startCgnUnsubscription(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -834,7 +834,7 @@ describe("CgnService#startCgnUnsubscription", () => {
     const res = await service.startCgnUnsubscription(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -847,7 +847,7 @@ describe("CgnService#startCgnUnsubscription", () => {
     const res = await service.startCgnUnsubscription(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 });
@@ -863,7 +863,7 @@ describe("CgnService#generateOtp", () => {
     await service.generateOtp(mockedUser);
 
     expect(mockGenerateOtp).toHaveBeenCalledWith({
-      fiscalcode: mockedUser.fiscal_code
+      fiscalcode: mockedUser.fiscal_code,
     });
   });
 
@@ -873,7 +873,7 @@ describe("CgnService#generateOtp", () => {
     const res = await service.generateOtp(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessJson"
+      kind: "IResponseSuccessJson",
     });
   });
 
@@ -885,7 +885,7 @@ describe("CgnService#generateOtp", () => {
     const res = await service.generateOtp(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -897,7 +897,7 @@ describe("CgnService#generateOtp", () => {
     const res = await service.generateOtp(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorForbiddenNotAuthorized"
+      kind: "IResponseErrorForbiddenNotAuthorized",
     });
   });
 
@@ -912,7 +912,7 @@ describe("CgnService#generateOtp", () => {
     const res = await service.generateOtp(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -923,7 +923,7 @@ describe("CgnService#generateOtp", () => {
     const res = await service.generateOtp(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -936,7 +936,7 @@ describe("CgnService#generateOtp", () => {
     const res = await service.generateOtp(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 });

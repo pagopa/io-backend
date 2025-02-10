@@ -8,7 +8,7 @@ import {
   aLollipopOriginalUrl,
   anAssertionRef,
   aSignature,
-  aSignatureInput
+  aSignatureInput,
 } from "../../__mocks__/lollipop";
 import mockReq from "../../__mocks__/request";
 import { aFiscalCode } from "../../__mocks__/user_mock";
@@ -21,7 +21,7 @@ import { LOLLIPOP_SIGN_EVENT_NAME } from "../appinsights";
 import {
   CONTENT_DIGEST_CONSTANTS,
   generateDigestHeader,
-  sha256
+  sha256,
 } from "@pagopa/io-functions-commons/dist/src/utils/crypto";
 import { logLollipopSignRequest } from "../appinsights";
 
@@ -34,16 +34,16 @@ const lollipopParams: LollipopLocalsType = {
   "x-pagopa-lollipop-assertion-type": AssertionTypeEnum.SAML,
   "x-pagopa-lollipop-auth-jwt": "a bearer token" as LollipopJWTAuthorization,
   "x-pagopa-lollipop-public-key": "a pub key" as LollipopPublicKey,
-  "x-pagopa-lollipop-user-id": aFiscalCode
+  "x-pagopa-lollipop-user-id": aFiscalCode,
 };
 const aLollipopConsumerId = "first-lollipop-consumer-id" as NonEmptyString;
 const mockTrackEvent = jest.fn();
-const mockedTelemetryClient = ({
-  trackEvent: mockTrackEvent
-} as unknown) as TelemetryClient;
+const mockedTelemetryClient = {
+  trackEvent: mockTrackEvent,
+} as unknown as TelemetryClient;
 useWinstonFor({
   loggerId: LoggerId.event,
-  transports: [withApplicationInsight(mockedTelemetryClient, "io-backend")]
+  transports: [withApplicationInsight(mockedTelemetryClient, "io-backend")],
 });
 describe("logLollipopSignRequest", () => {
   beforeEach(() => {
@@ -57,7 +57,7 @@ describe("logLollipopSignRequest", () => {
     lollipop_consumer_id: aLollipopConsumerId,
     method: expectedMethod,
     original_url: expectedOriginalUrl,
-    message: "Lollipop Request log"
+    message: "Lollipop Request log",
   };
 
   it.each`
@@ -72,7 +72,7 @@ describe("logLollipopSignRequest", () => {
     ({
       LCResponse,
       lollipopParams,
-      eventProperties
+      eventProperties,
     }: {
       LCResponse: E.Either<Error, { status: number }>;
       lollipopParams: LollipopLocalsType & { "x-pagopa-extra-header"?: string };
@@ -93,9 +93,9 @@ describe("logLollipopSignRequest", () => {
           ...eventProperties,
           lc_response: E.isRight(LCResponse)
             ? JSON.stringify(LCResponse.right)
-            : LCResponse.left.message
+            : LCResponse.left.message,
         },
-        tagOverrides: { samplingEnabled: "false" }
+        tagOverrides: { samplingEnabled: "false" },
       });
     }
   );
@@ -109,9 +109,10 @@ describe("logLollipopSignRequest", () => {
       "x-pagopa-lollipop-original-url": aLollipopOriginalUrl,
       "x-pagopa-lollipop-assertion-ref": anAssertionRef,
       "x-pagopa-lollipop-assertion-type": AssertionTypeEnum.SAML,
-      "x-pagopa-lollipop-auth-jwt": "a bearer token" as LollipopJWTAuthorization,
+      "x-pagopa-lollipop-auth-jwt":
+        "a bearer token" as LollipopJWTAuthorization,
       "x-pagopa-lollipop-public-key": "a pub key" as LollipopPublicKey,
-      "a-custom-header": "a custom header value"
+      "a-custom-header": "a custom header value",
     };
     logLollipopSignRequest(aLollipopConsumerId)(
       // @ts-expect-error

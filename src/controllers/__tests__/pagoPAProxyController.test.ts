@@ -2,7 +2,7 @@
 
 import {
   ResponseErrorInternal,
-  ResponseSuccessJson
+  ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import mockReq from "../../__mocks__/request";
 import PagoPAClientFactory from "../../services/pagoPAClientFactory";
@@ -18,12 +18,12 @@ const internalErrorMessage = "Internal error.";
 const paymentActivationsPostRequest = {
   codiceContestoPagamento: aCodiceContestoPagamento,
   importoSingoloVersamento: 200,
-  rptId: "12345678901012123456789012345"
+  rptId: "12345678901012123456789012345",
 };
 
 const proxyPaymentInfoResponse = {
   codiceContestoPagamento: aCodiceContestoPagamento,
-  importoSingoloVersamento: 200
+  importoSingoloVersamento: 200,
 };
 
 const proxyPaymentActivationsPostResponse = {
@@ -39,20 +39,20 @@ const proxyPaymentActivationsPostResponse = {
     indirizzoBeneficiario: "Via Roma",
     localitaBeneficiario: "Canicattì",
     nazioneBeneficiario: "IT",
-    provinciaBeneficiario: "Agrigento"
+    provinciaBeneficiario: "Agrigento",
   },
   ibanAccredito: "IT17X0605502100000001234567",
-  importoSingoloVersamento: 10052
+  importoSingoloVersamento: 10052,
 };
 
 const proxyPaymentActivationsGetResponse = {
-  idPagamento: anIdPagamento
+  idPagamento: anIdPagamento,
 };
 
 const aResponseErrorInternal = {
   apply: expect.any(Function),
   detail: expect.any(String),
-  kind: "IResponseErrorInternal"
+  kind: "IResponseErrorInternal",
 };
 
 const mockActivatePayment = jest.fn();
@@ -63,8 +63,8 @@ jest.mock("../../services/pagoPAProxyService", () => {
     default: jest.fn().mockImplementation(() => ({
       activatePayment: mockActivatePayment,
       getActivationStatus: mockGetActivationStatus,
-      getPaymentInfo: mockGetPaymentInfo
-    }))
+      getPaymentInfo: mockGetPaymentInfo,
+    })),
   };
 });
 
@@ -99,7 +99,7 @@ describe("PagoPAProxyController#getPaymentInfo", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: proxyPaymentInfoResponse
+      value: proxyPaymentInfoResponse,
     });
   });
 
@@ -121,7 +121,7 @@ describe("PagoPAProxyController#getPaymentInfo", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: proxyPaymentInfoResponse
+      value: proxyPaymentInfoResponse,
     });
   });
 
@@ -171,7 +171,7 @@ describe("PagoPAProxyController#activatePayment", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: proxyPaymentActivationsPostResponse
+      value: proxyPaymentActivationsPostResponse,
     });
   });
 
@@ -196,7 +196,7 @@ describe("PagoPAProxyController#activatePayment", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: proxyPaymentActivationsPostResponse
+      value: proxyPaymentActivationsPostResponse,
     });
   });
 
@@ -248,7 +248,7 @@ describe("PagoPAProxyController#getActivationStatus", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: proxyPaymentActivationsGetResponse
+      value: proxyPaymentActivationsGetResponse,
     });
   });
 
@@ -273,7 +273,7 @@ describe("PagoPAProxyController#getActivationStatus", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: proxyPaymentActivationsGetResponse
+      value: proxyPaymentActivationsGetResponse,
     });
   });
 

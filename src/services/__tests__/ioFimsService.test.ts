@@ -142,7 +142,7 @@ describe("IoFimsService#requestExport", () => {
     expect(res).toMatchObject({
       kind: "IResponseSuccessAccepted",
     });
-  })
+  });
 
   it("should handle a conflict response", async () => {
     const service = new IoFimsService(api);
@@ -157,7 +157,7 @@ describe("IoFimsService#requestExport", () => {
     expect(res).toMatchObject({
       kind: "IResponseErrorConflict",
     });
-  })
+  });
 
   it("should handle a validation error when the client returns 422", async () => {
     mockRequestExport.mockImplementationOnce(() => t.success({ status: 422 }));

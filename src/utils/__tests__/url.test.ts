@@ -10,16 +10,15 @@ describe("stripTrailingSlashIfPresent", () => {
   it("GIVEN a ValidUrl SHOULD return a textual url without a final slash", async () => {
     const validUrl = pipe(
       UrlFromString.decode(aTextualUrl),
-      E.getOrElseW(_ => {
+      E.getOrElseW((_) => {
         throw "Error";
       })
     );
 
     expect(S.endsWith("/")(validUrl.href)).toEqual(true);
 
-    const textualUrlWithoutTrailingSlash = stripTrailingSlashIfPresent(
-      validUrl
-    );
+    const textualUrlWithoutTrailingSlash =
+      stripTrailingSlashIfPresent(validUrl);
 
     expect(S.endsWith("/")(textualUrlWithoutTrailingSlash)).toEqual(false);
   });

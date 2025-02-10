@@ -9,11 +9,11 @@ import {
   ResponseErrorInternal,
   ResponseErrorNotFound,
   ResponseErrorValidation,
-  ResponseSuccessJson
+  ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import {
   ResponseErrorStatusNotDefinedInSpec,
-  ResponseErrorUnexpectedAuthProblem
+  ResponseErrorUnexpectedAuthProblem,
 } from "../../utils/responses";
 import { RevokedCertificate } from "../../../generated/eucovidcert/RevokedCertificate";
 
@@ -27,26 +27,26 @@ const aRevokedCertificate: RevokedCertificate = {
   header_info: {
     logo_id: "aLogoId",
     title: "a Title",
-    subtitle: "a Subtitle"
+    subtitle: "a Subtitle",
   },
   info: "bla bla bla",
   revoked_on: new Date("2018-10-13T00:00:00.000Z"),
-  status: RevokedStatusEnum.revoked
+  status: RevokedStatusEnum.revoked,
 };
 
 const aMockedRequestWithRightParams = {
   ...mockReq(),
   user: mockedUser,
   body: {
-    accessData: { auth_code: aMockedAuthCode }
-  }
+    accessData: { auth_code: aMockedAuthCode },
+  },
 } as e.Request;
 
 const aMockedGetCertificate = jest.fn();
 jest.mock("../../services/eucovidcertService", () => ({
-  default: jest.fn().mockImplementation(_ => ({
-    getEUCovidCertificate: aMockedGetCertificate
-  }))
+  default: jest.fn().mockImplementation((_) => ({
+    getEUCovidCertificate: aMockedGetCertificate,
+  })),
 }));
 
 const client = EUCovidCertAPIClient(API_KEY, API_URL);
@@ -81,7 +81,7 @@ describe("EUCovidCertificateController", () => {
     expect(response).toEqual(
       expect.objectContaining({
         kind: "IResponseSuccessJson",
-        value: aRevokedCertificate
+        value: aRevokedCertificate,
       })
     );
   });
@@ -104,7 +104,7 @@ describe("EUCovidCertificateController", () => {
     expect(response).toEqual(
       expect.objectContaining({
         kind: expected_kind,
-        detail: expected_detail
+        detail: expected_detail,
       })
     );
   });
@@ -114,7 +114,7 @@ describe("EUCovidCertificateController", () => {
   it("should not make service call with empy user", async () => {
     const reqWithoutUser = {
       ...aMockedRequestWithRightParams,
-      user: undefined
+      user: undefined,
     } as e.Request;
 
     const controller = new EUCovidCertController(service);
@@ -124,7 +124,7 @@ describe("EUCovidCertificateController", () => {
 
     expect(response).toEqual(
       expect.objectContaining({
-        kind: "IResponseErrorValidation"
+        kind: "IResponseErrorValidation",
       })
     );
   });
@@ -132,7 +132,7 @@ describe("EUCovidCertificateController", () => {
   it("should not make service call with empty body params", async () => {
     const reqWithoutUser = {
       ...aMockedRequestWithRightParams,
-      body: {}
+      body: {},
     } as e.Request;
 
     const controller = new EUCovidCertController(service);
@@ -141,7 +141,7 @@ describe("EUCovidCertificateController", () => {
     expect(aMockedGetCertificate).not.toHaveBeenCalled();
     expect(response).toEqual(
       expect.objectContaining({
-        kind: "IResponseErrorValidation"
+        kind: "IResponseErrorValidation",
       })
     );
   });

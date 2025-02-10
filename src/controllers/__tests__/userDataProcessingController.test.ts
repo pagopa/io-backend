@@ -1,12 +1,12 @@
 import {
   ResponseErrorNotFound,
-  ResponseSuccessJson
+  ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 
 import * as E from "fp-ts/lib/Either";
 import {
   UserDataProcessingChoice,
-  UserDataProcessingChoiceEnum
+  UserDataProcessingChoiceEnum,
 } from "@pagopa/io-functions-app-sdk/UserDataProcessingChoice";
 import { UserDataProcessingChoiceRequest } from "@pagopa/io-functions-app-sdk/UserDataProcessingChoiceRequest";
 import UserDataProcessingService from "../../../src/services/userDataProcessingService";
@@ -31,8 +31,8 @@ const aUserDataProcessingResponse = {
     id: "SPNDNL80A13Y555X-DOWNLOAD-0000000000000000",
     status: "PENDING",
     userDataProcessingId: "SPNDNL80A13Y555X-DOWNLOAD",
-    version: 0
-  }
+    version: 0,
+  },
 };
 
 const userDataProcessingMissingErrorResponse = ResponseErrorNotFound(
@@ -44,14 +44,14 @@ const mockedUserDataProcessingChoice: UserDataProcessingChoice =
   UserDataProcessingChoiceEnum.DOWNLOAD;
 
 const mockedUserDataProcessingChoiceRequest: UserDataProcessingChoiceRequest = {
-  choice: mockedUserDataProcessingChoice
+  choice: mockedUserDataProcessingChoice,
 };
 
 const badRequestErrorResponse = {
   detail: expect.any(String),
   status: 400,
   title: expect.any(String),
-  type: undefined
+  type: undefined,
 };
 
 const mockGetUserDataProcessing = jest.fn();
@@ -60,8 +60,8 @@ jest.mock("../../services/userDataProcessingService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
       getUserDataProcessing: mockGetUserDataProcessing,
-      upsertUserDataProcessing: mockUpsertUserDataProcessing
-    }))
+      upsertUserDataProcessing: mockUpsertUserDataProcessing,
+    })),
   };
 });
 
@@ -95,7 +95,7 @@ describe("UserDataProcessingController#getUserDataProcessing", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: aUserDataProcessingResponse
+      value: aUserDataProcessingResponse,
     });
   });
 
@@ -150,7 +150,7 @@ describe("UserDataProcessingController#getUserDataProcessing", () => {
     );
     expect(response).toEqual({
       ...userDataProcessingMissingErrorResponse,
-      apply: expect.any(Function)
+      apply: expect.any(Function),
     });
   });
 });
@@ -177,9 +177,8 @@ describe("UserDataProcessingController#upsertUserDataProcessing", () => {
     );
     const response = await controller.upsertUserDataProcessing(req);
 
-    const errorOrUserDataProcessingChoice = UserDataProcessingChoiceRequest.decode(
-      req.body
-    );
+    const errorOrUserDataProcessingChoice =
+      UserDataProcessingChoiceRequest.decode(req.body);
     expect(E.isRight(errorOrUserDataProcessingChoice)).toBeTruthy();
     if (E.isRight(errorOrUserDataProcessingChoice)) {
       expect(mockUpsertUserDataProcessing).toHaveBeenCalledWith(
@@ -190,7 +189,7 @@ describe("UserDataProcessingController#upsertUserDataProcessing", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: aUserDataProcessingResponse
+      value: aUserDataProcessingResponse,
     });
   });
 

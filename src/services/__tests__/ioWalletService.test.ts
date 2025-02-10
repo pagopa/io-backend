@@ -107,7 +107,11 @@ describe("IoWalletService#getNonce", () => {
 
     await service.getNonce("a_fiscal_code");
 
-    expect(mockGetNonce).toHaveBeenCalledWith({});
+    expect(mockGetNonce).toHaveBeenCalledWith({
+      body: {
+        fiscal_code: "a_fiscal_code",
+      },
+    });
   });
 
   it("should handle a success response", async () => {

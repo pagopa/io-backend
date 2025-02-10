@@ -24,11 +24,11 @@ const aEligibilityCheck: EligibilityCheck = {
     isee_type: "123" as NonEmptyString,
     max_amount: 150,
     max_tax_benefit: 30,
-    request_id: 1
+    request_id: 1,
   },
   id: "aEligibilityCheck.id" as NonEmptyString,
   // tslint:disable-next-line: no-any
-  status: "ELIGIBLE" as any
+  status: "ELIGIBLE" as any,
 };
 
 const aBonusActivation: BonusActivation = {
@@ -41,17 +41,17 @@ const aBonusActivation: BonusActivation = {
       {
         fiscal_code: "SPNDNL80R14C522K" as FiscalCode,
         name: "mario" as NonEmptyString,
-        surname: "rossi" as NonEmptyString
-      }
+        surname: "rossi" as NonEmptyString,
+      },
     ],
     has_discrepancies: false,
     isee_type: "iseetype",
     max_amount: 150,
     max_tax_benefit: 30,
-    request_id: 1
+    request_id: 1,
   },
   id: aBonusId,
-  status: BonusActivationStatusEnum.ACTIVE
+  status: BonusActivationStatusEnum.ACTIVE,
 };
 
 // mock for a not adult User
@@ -67,7 +67,7 @@ const mockBonusAPIClient = {
   getBonusEligibilityCheck: mockGetBonusEligibilityCheck,
   getLatestBonusActivationById: mockGetLatestBonusActivationById,
   startBonusActivationProcedure: mockStartBonusActivationProcedure,
-  startBonusEligibilityCheck: mockStartBonusEligibilityCheck
+  startBonusEligibilityCheck: mockStartBonusEligibilityCheck,
 } as ReturnType<BonusAPIClient>;
 
 const api = mockBonusAPIClient;
@@ -83,7 +83,7 @@ describe("BonusService#getBonusEligibilityCheck", () => {
     await service.getBonusEligibilityCheck(mockedUser);
 
     expect(mockGetBonusEligibilityCheck).toHaveBeenCalledWith({
-      fiscalcode: mockedUser.fiscal_code
+      fiscalcode: mockedUser.fiscal_code,
     });
   });
 
@@ -98,7 +98,7 @@ describe("BonusService#getBonusEligibilityCheck", () => {
 
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
-      value: aEligibilityCheck
+      value: aEligibilityCheck,
     });
   });
 
@@ -113,7 +113,7 @@ describe("BonusService#getBonusEligibilityCheck", () => {
     const res = await service.getBonusEligibilityCheck(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -126,7 +126,7 @@ describe("BonusService#getBonusEligibilityCheck", () => {
     const res = await service.getBonusEligibilityCheck(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -139,7 +139,7 @@ describe("BonusService#getBonusEligibilityCheck", () => {
     const res = await service.getBonusEligibilityCheck(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 });
@@ -156,7 +156,7 @@ describe("BonusService#getLatestBonusActivationById", () => {
 
     expect(mockGetLatestBonusActivationById).toHaveBeenCalledWith({
       bonus_id: aBonusId,
-      fiscalcode: mockedUser.fiscal_code
+      fiscalcode: mockedUser.fiscal_code,
     });
   });
 
@@ -178,9 +178,9 @@ describe("BonusService#getLatestBonusActivationById", () => {
         ...aBonusActivation,
         qr_code: [
           { content: expect.any(String), mime_type: "image/png" },
-          { content: expect.any(String), mime_type: "image/svg+xml" }
-        ]
-      }
+          { content: expect.any(String), mime_type: "image/svg+xml" },
+        ],
+      },
     });
     if (res.kind === "IResponseSuccessJson") {
       const svg = new Buffer(res.value.qr_code[1].content, "base64");
@@ -202,7 +202,7 @@ describe("BonusService#getLatestBonusActivationById", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -218,7 +218,7 @@ describe("BonusService#getLatestBonusActivationById", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
@@ -234,7 +234,7 @@ describe("BonusService#getLatestBonusActivationById", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 });

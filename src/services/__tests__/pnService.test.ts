@@ -18,7 +18,7 @@ const mockUATKey = "test-uat-key";
 const mockNodeFetch = jest.fn();
 
 const anActivationStatusPayload: IoCourtesyDigitalAddressActivation = {
-  activationStatus: true
+  activationStatus: true,
 };
 
 describe("pnService#upsertPnServiceActivation", () => {
@@ -40,7 +40,7 @@ describe("pnService#upsertPnServiceActivation", () => {
           status: 204,
           json: async () => {
             return;
-          }
+          },
         } as Response)
     );
   });
@@ -59,16 +59,16 @@ describe("pnService#upsertPnServiceActivation", () => {
       body: JSON.stringify(anActivationStatusPayload),
       headers: expect.objectContaining({
         "x-api-key": mockProdKey,
-        "x-pagopa-cx-taxid": aFiscalCode
+        "x-pagopa-cx-taxid": aFiscalCode,
       }),
-      method: "put"
+      method: "put",
     });
     expect(isRight(response)).toBeTruthy();
     if (isRight(response)) {
       expect(response.right).toEqual(
         expect.objectContaining({
           status: 204,
-          value: undefined
+          value: undefined,
         })
       );
     }
@@ -89,16 +89,16 @@ describe("pnService#upsertPnServiceActivation", () => {
       body: JSON.stringify(anActivationStatusPayload),
       headers: expect.objectContaining({
         "x-api-key": mockUATKey,
-        "x-pagopa-cx-taxid": aFiscalCode
+        "x-pagopa-cx-taxid": aFiscalCode,
       }),
-      method: "put"
+      method: "put",
     });
     expect(isRight(response)).toBeTruthy();
     if (isRight(response)) {
       expect(response.right).toEqual(
         expect.objectContaining({
           status: 204,
-          value: undefined
+          value: undefined,
         })
       );
     }
@@ -125,9 +125,9 @@ describe("pnService#upsertPnServiceActivation", () => {
       body: JSON.stringify(anActivationStatusPayload),
       headers: expect.objectContaining({
         "x-api-key": mockUATKey,
-        "x-pagopa-cx-taxid": aFiscalCode
+        "x-pagopa-cx-taxid": aFiscalCode,
       }),
-      method: "put"
+      method: "put",
     });
   });
 
@@ -139,7 +139,7 @@ describe("pnService#upsertPnServiceActivation", () => {
           status: 299,
           json: async () => {
             return;
-          }
+          },
         } as Response)
     );
     const response = await service.upsertPnActivation(
@@ -156,9 +156,9 @@ describe("pnService#upsertPnServiceActivation", () => {
       body: JSON.stringify(anActivationStatusPayload),
       headers: expect.objectContaining({
         "x-api-key": mockProdKey,
-        "x-pagopa-cx-taxid": aFiscalCode
+        "x-pagopa-cx-taxid": aFiscalCode,
       }),
-      method: "put"
+      method: "put",
     });
     expect(isLeft(response)).toBeTruthy();
   });
@@ -183,7 +183,7 @@ describe("pnService#getPnServiceActivation", () => {
           status: 200,
           json: async () => {
             return anActivationStatusPayload;
-          }
+          },
         } as Response)
     );
   });
@@ -200,16 +200,16 @@ describe("pnService#getPnServiceActivation", () => {
     expect(mockNodeFetch).toBeCalledWith(expect.any(String), {
       headers: expect.objectContaining({
         "x-api-key": mockProdKey,
-        "x-pagopa-cx-taxid": aFiscalCode
+        "x-pagopa-cx-taxid": aFiscalCode,
       }),
-      method: "get"
+      method: "get",
     });
     expect(isRight(response)).toBeTruthy();
     if (isRight(response)) {
       expect(response.right).toEqual(
         expect.objectContaining({
           status: 200,
-          value: anActivationStatusPayload
+          value: anActivationStatusPayload,
         })
       );
     }
@@ -228,16 +228,16 @@ describe("pnService#getPnServiceActivation", () => {
     expect(mockNodeFetch).toBeCalledWith(expect.any(String), {
       headers: expect.objectContaining({
         "x-api-key": mockUATKey,
-        "x-pagopa-cx-taxid": aFiscalCode
+        "x-pagopa-cx-taxid": aFiscalCode,
       }),
-      method: "get"
+      method: "get",
     });
     expect(isRight(response)).toBeTruthy();
     if (isRight(response)) {
       expect(response.right).toEqual(
         expect.objectContaining({
           status: 200,
-          value: anActivationStatusPayload
+          value: anActivationStatusPayload,
         })
       );
     }
@@ -262,9 +262,9 @@ describe("pnService#getPnServiceActivation", () => {
     expect(mockNodeFetch).toBeCalledWith(expect.any(String), {
       headers: expect.objectContaining({
         "x-api-key": mockUATKey,
-        "x-pagopa-cx-taxid": aFiscalCode
+        "x-pagopa-cx-taxid": aFiscalCode,
       }),
-      method: "get"
+      method: "get",
     });
   });
 
@@ -276,7 +276,7 @@ describe("pnService#getPnServiceActivation", () => {
           status: 299,
           json: async () => {
             return anActivationStatusPayload;
-          }
+          },
         } as Response)
     );
     const response = await service.getPnActivation(
@@ -291,9 +291,9 @@ describe("pnService#getPnServiceActivation", () => {
     expect(mockNodeFetch).toBeCalledWith(expect.any(String), {
       headers: expect.objectContaining({
         "x-api-key": mockProdKey,
-        "x-pagopa-cx-taxid": aFiscalCode
+        "x-pagopa-cx-taxid": aFiscalCode,
       }),
-      method: "get"
+      method: "get",
     });
     expect(isLeft(response)).toBeTruthy();
   });

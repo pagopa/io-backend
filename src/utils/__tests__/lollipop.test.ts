@@ -47,10 +47,10 @@ describe("checkIfLollipopIsEnabled", () => {
   });
 
   it("Should return false when lollipop is disabled and the user is not in the blacklist", async () => {
-    const res = await checkIfLollipopIsEnabled(
-      aLollipopEnabledFiscalCode,
-      { ...aRemoteContentConfigurationWithBothEnv, is_lollipop_enabled: false }
-    )();
+    const res = await checkIfLollipopIsEnabled(aLollipopEnabledFiscalCode, {
+      ...aRemoteContentConfigurationWithBothEnv,
+      is_lollipop_enabled: false,
+    })();
 
     expect(E.isRight(res)).toBeTruthy();
     if (E.isRight(res)) {
@@ -59,10 +59,10 @@ describe("checkIfLollipopIsEnabled", () => {
   });
 
   it("Should return false when lollipop is disabled and the user is in the blacklist", async () => {
-    const res = await checkIfLollipopIsEnabled(
-      aLollipopDisabledFiscalCode,
-      { ...aRemoteContentConfigurationWithBothEnv, is_lollipop_enabled: false }
-    )();
+    const res = await checkIfLollipopIsEnabled(aLollipopDisabledFiscalCode, {
+      ...aRemoteContentConfigurationWithBothEnv,
+      is_lollipop_enabled: false,
+    })();
 
     expect(E.isRight(res)).toBeTruthy();
     if (E.isRight(res)) {

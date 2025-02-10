@@ -10,9 +10,9 @@ import mockRes from "../../__mocks__/response";
 
 const mockClientGetCertificate = jest.fn();
 
-const client = ({
-  getCertificate: mockClientGetCertificate
-} as unknown) as ReturnType<EUCovidCertAPIClient>;
+const client = {
+  getCertificate: mockClientGetCertificate,
+} as unknown as ReturnType<EUCovidCertAPIClient>;
 
 const aMockedAuthCode = "000";
 
@@ -21,11 +21,11 @@ const aRevokedCertificate: RevokedCertificate = {
   header_info: {
     logo_id: "aLogoId",
     title: "a Title",
-    subtitle: "a Subtitle"
+    subtitle: "a Subtitle",
   },
   info: "bla bla bla",
   revoked_on: new Date("2018-10-13T00:00:00.000Z"),
-  status: RevokedStatusEnum.revoked
+  status: RevokedStatusEnum.revoked,
 };
 
 describe("EUCovidCertService", () => {
@@ -41,8 +41,8 @@ describe("EUCovidCertService", () => {
     expect(mockClientGetCertificate).toHaveBeenCalledWith({
       accessData: {
         auth_code: aMockedAuthCode,
-        fiscal_code: mockedUser.fiscal_code
-      }
+        fiscal_code: mockedUser.fiscal_code,
+      },
     });
   });
 
@@ -60,7 +60,7 @@ describe("EUCovidCertService", () => {
 
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
-      value: aRevokedCertificate
+      value: aRevokedCertificate,
     });
   });
 
@@ -79,7 +79,7 @@ describe("EUCovidCertService", () => {
       value,
       expected_status_code,
       expected_kind,
-      expected_detail
+      expected_detail,
     }) => {
       mockClientGetCertificate.mockImplementation(() =>
         t.success({ status: status_code, value })
@@ -98,7 +98,7 @@ describe("EUCovidCertService", () => {
 
       expect(res).toMatchObject({
         kind: expected_kind,
-        detail: expected_detail
+        detail: expected_detail,
       });
     }
   );

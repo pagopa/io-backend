@@ -10,7 +10,7 @@ import { User } from "../../types/user";
 import { mockSessionToken, mockWalletToken } from "../../__mocks__/user_mock";
 import RedisUserMetadataStorage, {
   invalidVersionNumberError,
-  metadataNotFoundError
+  metadataNotFoundError,
 } from "../redisUserMetadataStorage";
 
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
@@ -27,22 +27,22 @@ const aValidUser: User = {
   session_token: mockSessionToken,
   spid_email: anEmailAddress,
   spid_level: aValidSpidLevel,
-  wallet_token: mockWalletToken
+  wallet_token: mockWalletToken,
 };
 
 const metadata: string = "GENERIC-USER-METADATA";
 const aValidUserMetadata: UserMetadata = {
   metadata,
-  version: 10
+  version: 10,
 };
 const validNewVersion = 11;
 
 const mockSet = jest.fn();
 const mockGet = jest.fn();
-const mockRedisClient = ({
+const mockRedisClient = {
   get: mockGet,
-  set: mockSet
-} as unknown) as RedisClientType;
+  set: mockSet,
+} as unknown as RedisClientType;
 
 const userMetadataStorage = new RedisUserMetadataStorage(mockRedisClient);
 const redisClientError = new Error("REDIS CLIENT ERROR");
@@ -65,32 +65,32 @@ describe("RedisUserMetadataStorage#get", () => {
       undefined,
       JSON.stringify(aValidUserMetadata),
       right(aValidUserMetadata),
-      "should get current user metadata for the user"
+      "should get current user metadata for the user",
     ],
     [
       undefined,
       "Invalid JSON",
       left(new Error("Unable to parse the user metadata json")),
-      "should fail if user metadata parse fails"
+      "should fail if user metadata parse fails",
     ],
     [
       undefined,
       JSON.stringify({ message: "Invalid" }),
       left(new Error("Unable to decode the user metadata")),
-      "should fail if user metadata decode fails"
+      "should fail if user metadata decode fails",
     ],
     [
       undefined,
       null,
       left(metadataNotFoundError),
-      "should fail if user metadata don't exists"
+      "should fail if user metadata don't exists",
     ],
     [
       redisClientError,
       undefined,
       left(redisClientError),
-      "should fail if user metadata don't exists"
-    ]
+      "should fail if user metadata don't exists",
+    ],
   ])("%s, %s, %s, %s", async (mockGetError, mockGetResponse, expected, _) => {
     redisMethodImplFromError(mockGet, mockGetResponse, mockGetError);
 
@@ -106,14 +106,14 @@ describe("RedisUserMetadataStorage#get", () => {
   });
 
   it("should update user metadata", async () => {
-    mockGet.mockImplementation(_ =>
+    mockGet.mockImplementation((_) =>
       Promise.resolve(JSON.stringify(aValidUserMetadata))
     );
     mockSet.mockImplementation((_, __) => Promise.resolve("OK"));
 
     const newMetadata: UserMetadata = {
       metadata,
-      version: validNewVersion
+      version: validNewVersion,
     };
     const response = await userMetadataStorage.set(aValidUser, newMetadata);
     expect(mockGet).toHaveBeenCalledWith(`USERMETA-${aValidUser.fiscal_code}`);
@@ -125,12 +125,12 @@ describe("RedisUserMetadataStorage#get", () => {
   });
 
   it("should set user metadata if don't exists", async () => {
-    mockGet.mockImplementation(_ => Promise.resolve(null));
+    mockGet.mockImplementation((_) => Promise.resolve(null));
     mockSet.mockImplementation((_, __) => Promise.resolve("OK"));
 
     const newMetadata: UserMetadata = {
       metadata,
-      version: 1
+      version: 1,
     };
     const response = await userMetadataStorage.set(aValidUser, newMetadata);
     expect(mockGet).toHaveBeenCalledWith(`USERMETA-${aValidUser.fiscal_code}`);
@@ -142,13 +142,13 @@ describe("RedisUserMetadataStorage#get", () => {
   });
 
   it("should fail update user metadata with invalid version number", async () => {
-    mockGet.mockImplementation(_ =>
+    mockGet.mockImplementation((_) =>
       Promise.resolve(JSON.stringify(aValidUserMetadata))
     );
 
     const newMetadata: UserMetadata = {
       metadata,
-      version: aValidUserMetadata.version - 1
+      version: aValidUserMetadata.version - 1,
     };
     const response = await userMetadataStorage.set(aValidUser, newMetadata);
     expect(mockGet).toHaveBeenCalledWith(`USERMETA-${aValidUser.fiscal_code}`);
@@ -157,10 +157,10 @@ describe("RedisUserMetadataStorage#get", () => {
   });
 
   it("should fail update user metadata if redis client error occours on get", async () => {
-    mockGet.mockImplementation(_ => Promise.reject(redisClientError));
+    mockGet.mockImplementation((_) => Promise.reject(redisClientError));
     const newMetadata: UserMetadata = {
       metadata,
-      version: 1
+      version: 1,
     };
     const response = await userMetadataStorage.set(aValidUser, newMetadata);
     expect(mockGet).toHaveBeenCalledWith(`USERMETA-${aValidUser.fiscal_code}`);
@@ -169,14 +169,14 @@ describe("RedisUserMetadataStorage#get", () => {
   });
 
   it("should fail update user metadata if redis client error occours on set", async () => {
-    mockGet.mockImplementation(_ =>
+    mockGet.mockImplementation((_) =>
       Promise.resolve(JSON.stringify(aValidUserMetadata))
     );
     mockSet.mockImplementation((_, __) => Promise.reject(redisClientError));
 
     const newMetadata: UserMetadata = {
       metadata,
-      version: validNewVersion
+      version: validNewVersion,
     };
     const response = await userMetadataStorage.set(aValidUser, newMetadata);
     expect(mockGet).toHaveBeenCalledWith(`USERMETA-${aValidUser.fiscal_code}`);

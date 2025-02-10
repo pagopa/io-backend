@@ -399,7 +399,7 @@ describe("CgnOperatorController#count", () => {
 
   it("should not call count method on the CgnOperatorSearchService with empty user", async () => {
     const req = {
-      ...mockReq({ }),
+      ...mockReq({}),
       user: undefined,
     };
     const res = mockRes();

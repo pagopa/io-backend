@@ -21,37 +21,37 @@ export const notificationDetailResponseExampleAsObject = {
         municipality: "casalecchio di reno",
         municipalityDetails: "",
         province: "Bologna",
-        foreignState: "italia"
+        foreignState: "italia",
       },
       payment: {
         noticeCode: "302019876543219876",
         creditorTaxId: "77777777777",
         pagoPaForm: {
           digests: {
-            sha256: "wIe6KnvYKKU/zVF8lE/M11VMhK8IggEuKi1GXjiR1kk="
+            sha256: "wIe6KnvYKKU/zVF8lE/M11VMhK8IggEuKi1GXjiR1kk=",
           },
           contentType: "application/pdf",
           ref: {
             key: "PN_NOTIFICATION_ATTACHMENTS-0001-URZZ-CCVL-DXJ4-UXOG",
-            versionToken: "jkc2PslrgkkvGH2exaOyFRaV70Ns2lQp"
-          }
-        }
-      }
-    }
+            versionToken: "jkc2PslrgkkvGH2exaOyFRaV70Ns2lQp",
+          },
+        },
+      },
+    },
   ],
   documents: [
     {
       digests: {
-        sha256: "BuIdviesjkElGiz6cAPWl8BK6nWRyjWMEhgHHJzrOHU="
+        sha256: "BuIdviesjkElGiz6cAPWl8BK6nWRyjWMEhgHHJzrOHU=",
       },
       contentType: "application/pdf",
       ref: {
         key: "PN_NOTIFICATION_ATTACHMENTS-0001-HO48-AL2O-SCRZ-PNKW",
-        versionToken: "P7cX2vFo2AvNgn_qEhVIeXuf7N0ERi8m"
+        versionToken: "P7cX2vFo2AvNgn_qEhVIeXuf7N0ERi8m",
       },
       title: "Verbale",
-      docIdx: "0"
-    }
+      docIdx: "0",
+    },
   ],
   notificationFeePolicy: "DELIVERY_MODE",
   cancelledIun: "",
@@ -77,16 +77,16 @@ export const notificationDetailResponseExampleAsObject = {
         "KMZV-LYMY-TDMZ-202207-J-1_0_DeliveryModeInt.DIGITAL(value=DIGITAL)_ContactPhaseInt.CHOOSE_DELIVERY(value=CHOOSE_DELIVERY)_0_public_registry_call",
         "public_registry_response_KMZV-LYMY-TDMZ-202207-J-1_0_DeliveryModeInt.DIGITAL(value=DIGITAL)_ContactPhaseInt.CHOOSE_DELIVERY(value=CHOOSE_DELIVERY)_0_public_registry_call",
         "KMZV-LYMY-TDMZ-202207-J-1_get_address0_source_DigitalAddressSourceInt.GENERAL(value=GENERAL)_attempt_0",
-        "KMZV-LYMY-TDMZ-202207-J-1_schedule_analog_workflow_0"
-      ]
+        "KMZV-LYMY-TDMZ-202207-J-1_schedule_analog_workflow_0",
+      ],
     },
     {
       status: "VIEWED",
       activeFrom: "2022-07-05T15:36:10.230+00:00",
       relatedTimelineElements: [
-        "KMZV-LYMY-TDMZ-202207-J-1_notification_viewed_0"
-      ]
-    }
+        "KMZV-LYMY-TDMZ-202207-J-1_notification_viewed_0",
+      ],
+    },
   ],
   timeline: [
     {
@@ -95,10 +95,10 @@ export const notificationDetailResponseExampleAsObject = {
       legalFactsIds: [
         {
           key: "safestorage://PN_LEGAL_FACTS-0002-YWFW-GGP8-QWYO-7232",
-          category: "SENDER_ACK"
-        }
+          category: "SENDER_ACK",
+        },
       ],
-      category: "REQUEST_ACCEPTED"
+      category: "REQUEST_ACCEPTED",
     },
     {
       elementId: "KMZV-LYMY-TDMZ-202207-J-1_aar_gen_0",
@@ -108,8 +108,8 @@ export const notificationDetailResponseExampleAsObject = {
       details: {
         recIndex: 0,
         numberOfPages: 1,
-        generatedAarUrl: "safestorage://PN_AAR-0002-WE0Q-X1ZY-ZFCI-ZYM7"
-      }
+        generatedAarUrl: "safestorage://PN_AAR-0002-WE0Q-X1ZY-ZFCI-ZYM7",
+      },
     },
     {
       elementId:
@@ -119,8 +119,8 @@ export const notificationDetailResponseExampleAsObject = {
       category: "GET_ADDRESS",
       details: {
         recIndex: 0,
-        digitalAddressSource: "PLATFORM"
-      }
+        digitalAddressSource: "PLATFORM",
+      },
     },
     {
       elementId:
@@ -130,8 +130,8 @@ export const notificationDetailResponseExampleAsObject = {
       category: "GET_ADDRESS",
       details: {
         recIndex: 0,
-        digitalAddressSource: "SPECIAL"
-      }
+        digitalAddressSource: "SPECIAL",
+      },
     },
     {
       elementId:
@@ -143,8 +143,8 @@ export const notificationDetailResponseExampleAsObject = {
         recIndex: 0,
         deliveryMode: "DIGITAL",
         contactPhase: "CHOOSE_DELIVERY",
-        sentAttemptMade: 0
-      }
+        sentAttemptMade: 0,
+      },
     },
     {
       elementId:
@@ -153,8 +153,8 @@ export const notificationDetailResponseExampleAsObject = {
       legalFactsIds: [],
       category: "PUBLIC_REGISTRY_RESPONSE",
       details: {
-        recIndex: 0
-      }
+        recIndex: 0,
+      },
     },
     {
       elementId:
@@ -164,8 +164,8 @@ export const notificationDetailResponseExampleAsObject = {
       category: "GET_ADDRESS",
       details: {
         recIndex: 0,
-        digitalAddressSource: "GENERAL"
-      }
+        digitalAddressSource: "GENERAL",
+      },
     },
     {
       elementId: "KMZV-LYMY-TDMZ-202207-J-1_schedule_analog_workflow_0",
@@ -173,8 +173,8 @@ export const notificationDetailResponseExampleAsObject = {
       legalFactsIds: [],
       category: "SCHEDULE_ANALOG_WORKFLOW",
       details: {
-        recIndex: 0
-      }
+        recIndex: 0,
+      },
     },
     {
       elementId: "KMZV-LYMY-TDMZ-202207-J-1_notification_viewed_0",
@@ -182,15 +182,15 @@ export const notificationDetailResponseExampleAsObject = {
       legalFactsIds: [
         {
           key: "safestorage://PN_LEGAL_FACTS-0002-YMJ5-JPBC-DVF2-BABG",
-          category: "RECIPIENT_ACCESS"
-        }
+          category: "RECIPIENT_ACCESS",
+        },
       ],
       category: "NOTIFICATION_VIEWED",
       details: {
-        recIndex: 0
-      }
-    }
-  ]
+        recIndex: 0,
+      },
+    },
+  ],
 };
 
 export const notificationResponseExampleAsObject = {
@@ -199,17 +199,16 @@ export const notificationResponseExampleAsObject = {
       id: "PN_NOTIFICATION_ATTACHMENTS-0001-HO48-AL2O-SCRZ-PNKW",
       content_type: "application/pdf",
       name: "Verbale",
-      url:
-        "/delivery/notifications/received/KMZV-LYMY-TDMZ-202207-J-1/attachments/documents/0"
-    }
+      url: "/delivery/notifications/received/KMZV-LYMY-TDMZ-202207-J-1/attachments/documents/0",
+    },
   ],
-  details: notificationDetailResponseExampleAsObject
+  details: notificationDetailResponseExampleAsObject,
 };
 
 export const notificationDetailResponseExample = pipe(
   notificationResponseExampleAsObject,
   PNThirdParthyMessage.decode,
-  E.getOrElseW(e => {
+  E.getOrElseW((e) => {
     throw new Error(
       "a pn notfication is not valid: " +
         errorsToReadableMessages(e, true).join("|")
