@@ -2,22 +2,25 @@ import {
   sha256,
   validateDigestHeader
 } from "@pagopa/io-functions-commons/dist/src/utils/crypto";
-import {
-  ApplicationInsightsConfig,
-  initAppInsights as startAppInsights
-} from "@pagopa/ts-commons/lib/appinsights";
+import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { withoutUndefinedValues } from "@pagopa/ts-commons/lib/types";
 import { eventLog } from "@pagopa/winston-ts";
-import * as appInsights from "applicationinsights";
+import * as ai from "applicationinsights";
 import { Request } from "express";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
+import { AppInsightsConfig } from "src/config";
 
 import { LollipopLocalsType } from "../types/lollipop";
 import { toFiscalCodeHash } from "../types/notification";
 import { User } from "../types/user";
+import { getCurrentBackendVersion } from "./package";
+
+// the internal function runtime has MaxTelemetryItem per second set to 20 by default
+// @see https://github.com/Azure/azure-functions-host/blob/master/src/WebJobs.Script/Config/ApplicationInsightsLoggerOptionsSetup.cs#L29
+const DEFAULT_SAMPLING_PERCENTAGE = 5;
 
 const SESSION_TRACKING_ID_KEY = "session_tracking_id";
 const USER_TRACKING_ID_KEY = "user_tracking_id";
@@ -36,7 +39,7 @@ const USER_TRACKING_ID_KEY = "user_tracking_id";
  * @see https://github.com/microsoft/ApplicationInsights-node.js/issues/392#issuecomment-387532917
  */
 export function attachTrackingData(user: User): void {
-  const correlationContext = appInsights.getCorrelationContext();
+  const correlationContext = ai.getCorrelationContext();
 
   // may happen when developing locally
   if (!correlationContext) {
@@ -59,7 +62,7 @@ export function attachTrackingData(user: User): void {
 }
 
 export function sessionIdPreprocessor(
-  envelope: appInsights.Contracts.Envelope,
+  envelope: ai.Contracts.Envelope,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   context?: Readonly<Record<string, any>>
 ): boolean {
@@ -70,15 +73,14 @@ export function sessionIdPreprocessor(
           USER_TRACKING_ID_KEY
         );
       if (userTrackingId !== undefined) {
-        envelope.tags[appInsights.defaultClient.context.keys.userId] =
-          userTrackingId;
+        envelope.tags[ai.defaultClient.context.keys.userId] = userTrackingId;
       }
       const sessionTrackingId =
         context.correlationContext.customProperties.getProperty(
           SESSION_TRACKING_ID_KEY
         );
       if (sessionTrackingId !== undefined) {
-        envelope.tags[appInsights.defaultClient.context.keys.sessionId] =
+        envelope.tags[ai.defaultClient.context.keys.sessionId] =
           sessionTrackingId;
       }
     } catch (e) {
@@ -88,25 +90,6 @@ export function sessionIdPreprocessor(
   return true;
 }
 
-export enum StartupEventName {
-  SERVER = "api-backend.httpserver.startup",
-  SPID = "api-backend.spid.config"
-}
-
-export const trackStartupTime = (
-  telemetryClient: appInsights.TelemetryClient,
-  type: StartupEventName,
-  timeMs: bigint
-): void => {
-  telemetryClient.trackEvent({
-    name: type,
-    properties: {
-      time: timeMs.toString()
-    },
-    tagOverrides: { samplingEnabled: "false" }
-  });
-};
-
 /**
  * App Insights is initialized to collect the following informations:
  * - Incoming API calls
@@ -115,14 +98,55 @@ export const trackStartupTime = (
  * - Outcoming API Calls (dependencies)
  * - Realtime API metrics
  */
-export function initAppInsights(
-  instrumentationKey: string,
-  config: ApplicationInsightsConfig = {}
-): appInsights.TelemetryClient {
-  startAppInsights(instrumentationKey, config);
-  appInsights.defaultClient.addTelemetryProcessor(sessionIdPreprocessor);
-  return appInsights.defaultClient;
+// Avoid to initialize Application Insights more than once
+export const initTelemetryClient = (config: AppInsightsConfig) =>
+  pipe(
+    ai.defaultClient,
+    O.fromNullable,
+    O.getOrElse(() => {
+      const client = initAppInsights(
+        config.APPLICATIONINSIGHTS_CONNECTION_STRING,
+        {
+          applicationVersion: getCurrentBackendVersion(),
+          cloudRole: config.APPINSIGHTS_CLOUD_ROLE_NAME,
+          disableAppInsights: config.APPINSIGHTS_DISABLE === "true",
+          samplingPercentage: pipe(
+            config.APPINSIGHTS_SAMPLING_PERCENTAGE,
+            O.fromNullable,
+            O.getOrElse(() => DEFAULT_SAMPLING_PERCENTAGE)
+          )
+        }
+      );
+      client.addTelemetryProcessor(sessionIdPreprocessor);
+      return client;
+    })
+  );
+
+export type TelemetryClient = ReturnType<typeof initTelemetryClient>;
+
+export enum StartupEventName {
+  SERVER = "api-backend.httpserver.startup",
+  SPID = "api-backend.spid.config"
 }
+
+export const trackStartupTime = (
+  telemetryClient: TelemetryClient,
+  type: StartupEventName,
+  timeMs: bigint
+): void => {
+  pipe(
+    O.fromNullable(telemetryClient),
+    O.map((client) =>
+      client.trackEvent({
+        name: type,
+        properties: {
+          time: timeMs.toString()
+        },
+        tagOverrides: { samplingEnabled: "false" }
+      })
+    )
+  );
+};
 
 export const LOLLIPOP_SIGN_EVENT_NAME = "lollipop.sign";
 

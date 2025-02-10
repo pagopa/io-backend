@@ -6,6 +6,7 @@ import { NodeEnvironmentEnum } from "@pagopa/ts-commons/lib/environment";
 import { useWinstonFor } from "@pagopa/winston-ts";
 import { LoggerId } from "@pagopa/winston-ts/dist/types/logging";
 import * as appInsights from "applicationinsights";
+import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
 import * as fs from "fs";
@@ -23,7 +24,6 @@ import {
   BONUS_API_BASE_PATH,
   CGN_API_BASE_PATH,
   CGN_OPERATOR_SEARCH_API_BASE_PATH,
-  DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE,
   ENV,
   EUCOVIDCERT_API_BASE_PATH,
   IO_FIMS_API_BASE_PATH,
@@ -32,16 +32,16 @@ import {
   MYPORTAL_BASE_PATH,
   SERVER_PORT,
   SERVICES_APP_BACKEND_BASE_PATH,
-  TRIAL_SYSTEM_API_BASE_PATH
+  TRIAL_SYSTEM_API_BASE_PATH,
+  errorOrAppInsightConfig
 } from "./config";
 import {
   StartupEventName,
-  initAppInsights,
+  initTelemetryClient,
   trackStartupTime
 } from "./utils/appinsights";
 import { initHttpGracefulShutdown } from "./utils/gracefulShutdown";
 import { log } from "./utils/logger";
-import { getCurrentBackendVersion } from "./utils/package";
 import { TimeTracer } from "./utils/timer";
 
 const authenticationBasePath = AUTHENTICATION_BASE_PATH;
@@ -80,17 +80,9 @@ const timer = TimeTracer();
  * @see: utils/appinsights.js into the class AppInsightsClientBuilder
  */
 const maybeAppInsightsClient = pipe(
-  process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
-  O.fromNullable,
-  O.map((k) =>
-    initAppInsights(k, {
-      applicationVersion: getCurrentBackendVersion(),
-      disableAppInsights: process.env.APPINSIGHTS_DISABLED === "true",
-      samplingPercentage: process.env.APPINSIGHTS_SAMPLING_PERCENTAGE
-        ? parseInt(process.env.APPINSIGHTS_SAMPLING_PERCENTAGE, 10)
-        : DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE
-    })
-  ),
+  errorOrAppInsightConfig,
+  E.map((config) => initTelemetryClient(config)),
+  O.fromEither,
   O.chainFirst((telemetryClient) =>
     O.some(
       useWinstonFor({
