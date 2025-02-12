@@ -66,7 +66,7 @@ export default class IoWalletService {
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.ioWalletApiClient.getNonce({
-        body: { fiscal_code },
+        body: { fiscal_code }
       });
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
