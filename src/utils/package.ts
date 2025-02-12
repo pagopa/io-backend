@@ -1,8 +1,9 @@
-import * as O from "fp-ts/lib/Option";
 import * as E from "fp-ts/lib/Either";
-import * as t from "io-ts";
-import { pipe } from "fp-ts/lib/function";
+import * as O from "fp-ts/lib/Option";
 import { Option } from "fp-ts/lib/Option";
+import { pipe } from "fp-ts/lib/function";
+import * as t from "io-ts";
+
 import * as packageJson from "../../package.json";
 
 /**
@@ -28,7 +29,7 @@ export const getObjectFromPackageJson = <T>(
   pipe(
     type.decode(packageJson[key]),
     E.fold(
-      (_) => O.none,
+      () => O.none,
       (_) => O.some(_)
     )
   );

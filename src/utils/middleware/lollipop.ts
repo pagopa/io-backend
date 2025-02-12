@@ -1,21 +1,22 @@
-import { Request, Response, NextFunction } from "express";
-import * as TE from "fp-ts/TaskEither";
-import { pipe } from "fp-ts/lib/function";
 import { ResponseErrorInternal } from "@pagopa/ts-commons/lib/responses";
+import { NextFunction, Request, Response } from "express";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
+import * as TE from "fp-ts/TaskEither";
+import { pipe } from "fp-ts/lib/function";
+
+import { LollipopApiClient } from "../../clients/lollipop";
+import { ISessionStorage } from "../../services/ISessionStorage";
+import { withLollipopHeadersFromRequest } from "../../types/lollipop";
 import {
   withOptionalUserFromRequest,
-  withUserFromRequest,
+  withUserFromRequest
 } from "../../types/user";
-import { LollipopApiClient } from "../../clients/lollipop";
-import { withLollipopHeadersFromRequest } from "../../types/lollipop";
 import { log } from "../logger";
 import {
   extractLollipopLocalsFromLollipopHeaders,
-  extractLollipopLocalsFromLollipopHeadersLegacy,
+  extractLollipopLocalsFromLollipopHeadersLegacy
 } from "../lollipop";
-import { ISessionStorage } from "../../services/ISessionStorage";
 
 /**
  * @deprecated
@@ -38,7 +39,6 @@ export const expressLollipopMiddlewareLegacy: (
                   lollipopHeaders
                 ),
                 TE.map((lollipopLocals) => {
-                  // eslint-disable-next-line functional/immutable-data
                   res.locals = { ...res.locals, ...lollipopLocals };
                 }),
                 TE.toUnion
@@ -63,7 +63,6 @@ export const expressLollipopMiddlewareLegacy: (
       TE.toUnion
     )();
 
-/* eslint-disable sonarjs/no-identical-functions */
 export const expressLollipopMiddleware: (
   lollipopClient: ReturnType<typeof LollipopApiClient>,
   sessionStorage: ISessionStorage
@@ -82,7 +81,6 @@ export const expressLollipopMiddleware: (
                   O.toUndefined(user)?.fiscal_code
                 ),
                 TE.map((lollipopLocals) => {
-                  // eslint-disable-next-line functional/immutable-data
                   res.locals = { ...res.locals, ...lollipopLocals };
                 }),
                 TE.toUnion
@@ -106,4 +104,3 @@ export const expressLollipopMiddleware: (
       TE.map(() => next()),
       TE.toUnion
     )();
-/* eslint-enable sonarjs/no-identical-functions */

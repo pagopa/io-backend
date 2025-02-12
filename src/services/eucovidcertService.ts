@@ -1,3 +1,5 @@
+import { Certificate } from "@pagopa/io-functions-eucovidcerts-sdk/Certificate";
+import { PreferredLanguages } from "@pagopa/io-functions-eucovidcerts-sdk/PreferredLanguages";
 import {
   HttpStatusCodeEnum,
   IResponseErrorForbiddenNotAuthorized,
@@ -8,21 +10,18 @@ import {
   ResponseErrorGeneric,
   ResponseErrorInternal,
   ResponseErrorValidation,
-  ResponseSuccessJson,
+  ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 
-import { Certificate } from "@pagopa/io-functions-eucovidcerts-sdk/Certificate";
-import { PreferredLanguages } from "@pagopa/io-functions-eucovidcerts-sdk/PreferredLanguages";
-import { readableProblem } from "../utils/errorsFormatter";
 import { EUCovidCertAPIClient } from "../clients/eucovidcert.client";
-
+import { User } from "../types/user";
+import { readableProblem } from "../utils/errorsFormatter";
 import {
   ResponseErrorStatusNotDefinedInSpec,
   ResponseErrorUnexpectedAuthProblem,
   withCatchAsInternalError,
-  withValidatedOrInternalError,
+  withValidatedOrInternalError
 } from "../utils/responses";
-import { User } from "../types/user";
 
 /**
  * Returns a `504` `Gateway Timeout` error
@@ -36,7 +35,7 @@ export function ResponseGatewayTimeout(detail: string): IResponseErrorInternal {
       "Gateway Timeout",
       detail
     ),
-    kind: "IResponseErrorInternal",
+    kind: "IResponseErrorInternal"
   };
 }
 
@@ -54,7 +53,7 @@ export function ResponseErrorNotFound403(
       "Not Found",
       detail
     ),
-    kind: "IResponseErrorNotFound",
+    kind: "IResponseErrorNotFound"
   };
 }
 
@@ -82,8 +81,8 @@ export default class EUCovidCertService {
         accessData: {
           auth_code,
           fiscal_code: user.fiscal_code,
-          preferred_languages,
-        },
+          preferred_languages
+        }
       });
 
       return withValidatedOrInternalError(validated, (response) => {

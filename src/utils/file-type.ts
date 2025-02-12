@@ -1,7 +1,7 @@
-import { pipe } from "fp-ts/lib/function";
-import * as RS from "fp-ts/ReadonlySet";
-import { match } from "ts-pattern";
 import * as EQ from "fp-ts/Eq";
+import * as RS from "fp-ts/ReadonlySet";
+import { pipe } from "fp-ts/lib/function";
+import { match } from "ts-pattern";
 
 export type FileType = "pdf" | "any";
 
@@ -16,6 +16,7 @@ export const isPdf = (data: Buffer) => data.toString("binary", 0, 4) === "%PDF";
 /**
  * Allow any file type
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const isAny = (_: Buffer) => true;
 
 export const typeToCheck = (type: FileType) =>

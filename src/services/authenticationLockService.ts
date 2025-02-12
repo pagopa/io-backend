@@ -4,21 +4,17 @@
  */
 
 import { TableClient, TransactionAction, odata } from "@azure/data-tables";
-
-import * as t from "io-ts";
-
-import { flow, identity, pipe } from "fp-ts/lib/function";
+import { DateFromString } from "@pagopa/ts-commons/lib/dates";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import * as ROA from "fp-ts/ReadonlyArray";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/lib/Either";
-import * as ROA from "fp-ts/ReadonlyArray";
-
-import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
-import { DateFromString } from "@pagopa/ts-commons/lib/dates";
-
-import { errorsToError } from "../utils/errorsFormatter";
-import * as AI from "../utils/AsyncIterableTask";
+import { flow, identity, pipe } from "fp-ts/lib/function";
+import * as t from "io-ts";
 
 import { UnlockCode } from "../../generated/session/UnlockCode";
+import * as AI from "../utils/AsyncIterableTask";
+import { errorsToError } from "../utils/errorsFormatter";
 
 export type NotReleasedAuthenticationLockData = t.TypeOf<
   typeof NotReleasedAuthenticationLockData
@@ -28,7 +24,7 @@ const NotReleasedAuthenticationLockData = t.type({
   rowKey: UnlockCode,
 
   // eslint-disable-next-line sort-keys
-  CreatedAt: DateFromString,
+  CreatedAt: DateFromString
 });
 
 export default class AuthenticationLockService {
@@ -75,11 +71,11 @@ export default class AuthenticationLockService {
             rowKey: unlockCode,
 
             // eslint-disable-next-line sort-keys
-            CreatedAt: new Date(),
+            CreatedAt: new Date()
           }),
-        (_) => new Error("Something went wrong creating the record")
+        () => new Error("Something went wrong creating the record")
       ),
-      TE.map((_) => true as const)
+      TE.map(() => true as const)
     );
 
   /**
@@ -103,8 +99,8 @@ export default class AuthenticationLockService {
               partitionKey: fiscalCode,
               rowKey: unlockCode,
               // eslint-disable-next-line sort-keys
-              Released: true,
-            },
+              Released: true
+            }
           ] as TransactionAction
       ),
       (actions) =>
@@ -128,8 +124,8 @@ export default class AuthenticationLockService {
     pipe(
       this.tableClient.listEntities({
         queryOptions: {
-          filter: odata`PartitionKey eq ${fiscalCode} and not Released`,
-        },
+          filter: odata`PartitionKey eq ${fiscalCode} and not Released`
+        }
       }),
       AI.fromAsyncIterable,
       AI.foldTaskEither(E.toError),

@@ -1,4 +1,5 @@
 import nodeFetch from "node-fetch";
+
 import { Client, createClient } from "../../generated/io-fims-api/client";
 
 export function IoFimsAPIClient(
@@ -15,8 +16,8 @@ export function IoFimsAPIClient(
     withDefaults: (op) => (params) =>
       op({
         ...params,
-        FunctionsKey: token,
-      }),
+        FunctionsKey: token
+      })
   });
 }
 

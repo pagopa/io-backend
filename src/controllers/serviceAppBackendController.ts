@@ -2,23 +2,24 @@ import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
-  IResponseSuccessJson,
+  IResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as express from "express";
 import * as E from "fp-ts/lib/Either";
-import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
+import { pipe } from "fp-ts/lib/function";
+
 import { FeaturedServices } from "../../generated/services-app-backend/FeaturedServices";
-import { Institutions } from "../../generated/services-app-backend/Institutions";
 import { InstitutionServicesResource } from "../../generated/services-app-backend/InstitutionServicesResource";
+import { Institutions } from "../../generated/services-app-backend/Institutions";
 import { InstitutionsResource } from "../../generated/services-app-backend/InstitutionsResource";
 import { ScopeType } from "../../generated/services-app-backend/ScopeType";
 import { ServiceDetails } from "../../generated/services-app-backend/ServiceDetails";
 import ServicesAppBackendService from "../services/servicesAppBackendService";
 import {
   withValidatedOrInternalError,
-  withValidatedOrValidationError,
+  withValidatedOrValidationError
 } from "../utils/responses";
 
 const parseOptionalStringParam = (stringParam?: unknown) =>
@@ -70,11 +71,13 @@ export default class ServicesAppBackendController {
     );
 
   public readonly getFeaturedServices = async (
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _req: express.Request
   ): Promise<IResponseErrorInternal | IResponseSuccessJson<FeaturedServices>> =>
     this.servicesAppBackendService.getFeaturedServices();
 
   public readonly getFeaturedInstitutions = async (
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _req: express.Request
   ): Promise<IResponseErrorInternal | IResponseSuccessJson<Institutions>> =>
     this.servicesAppBackendService.getFeaturedInstitutions();

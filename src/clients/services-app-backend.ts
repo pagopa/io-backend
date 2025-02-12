@@ -1,7 +1,8 @@
 import nodeFetch from "node-fetch";
+
 import {
   Client,
-  createClient,
+  createClient
 } from "../../generated/services-app-backend/client";
 
 export function ServicesAppBackendAPIClient(
@@ -16,8 +17,8 @@ export function ServicesAppBackendAPIClient(
     fetchApi,
     withDefaults: (op) => (params) =>
       op({
-        ...params,
-      }),
+        ...params
+      })
   });
 }
 

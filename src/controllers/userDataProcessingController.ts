@@ -3,7 +3,6 @@
  * app by forwarding the call to the API system.
  */
 
-import * as express from "express";
 import {
   IResponseErrorConflict,
   IResponseErrorInternal,
@@ -11,8 +10,9 @@ import {
   IResponseErrorTooManyRequests,
   IResponseErrorValidation,
   IResponseSuccessAccepted,
-  IResponseSuccessJson,
+  IResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
+import * as express from "express";
 
 import { UserDataProcessing } from "../../generated/backend/UserDataProcessing";
 import { UserDataProcessingChoice } from "../../generated/backend/UserDataProcessingChoice";

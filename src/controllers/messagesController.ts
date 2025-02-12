@@ -3,7 +3,7 @@
  * forwarding the call to the API system.
  */
 
-import * as express from "express";
+import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import {
   IResponseErrorBadGateway,
   IResponseErrorInternal,
@@ -12,43 +12,42 @@ import {
   IResponseErrorTooManyRequests,
   IResponseErrorValidation,
   IResponseSuccessJson,
-  IResponseSuccessNoContent,
+  IResponseSuccessNoContent
 } from "@pagopa/ts-commons/lib/responses";
-
-import { CreatedMessageWithContentAndAttachments } from "generated/backend/CreatedMessageWithContentAndAttachments";
 import {
   IResponseErrorForbiddenNotAuthorized,
-  ResponseErrorInternal,
+  ResponseErrorInternal
 } from "@pagopa/ts-commons/lib/responses";
-import * as t from "io-ts";
-import { pipe } from "fp-ts/lib/function";
-import * as TE from "fp-ts/TaskEither";
-import * as E from "fp-ts/Either";
-import * as B from "fp-ts/boolean";
 import { NonEmptyString, Ulid } from "@pagopa/ts-commons/lib/strings";
-import NewMessagesService from "src/services/newMessagesService";
-import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
+import * as express from "express";
+import * as E from "fp-ts/Either";
+import * as TE from "fp-ts/TaskEither";
+import * as B from "fp-ts/boolean";
+import { pipe } from "fp-ts/lib/function";
+import { CreatedMessageWithContentAndAttachments } from "generated/backend/CreatedMessageWithContentAndAttachments";
+import * as t from "io-ts";
 import * as QueryString from "qs";
-import { User, withUserFromRequest } from "../types/user";
+import NewMessagesService from "src/services/newMessagesService";
 
-import { MessageStatusChange } from "../../generated/io-messages-api/MessageStatusChange";
-import { MessageStatusAttributes } from "../../generated/io-messages-api/MessageStatusAttributes";
 import { PaginatedPublicMessagesCollection } from "../../generated/backend/PaginatedPublicMessagesCollection";
-import { GetMessageParameters } from "../../generated/parameters/GetMessageParameters";
-import { GetMessagesParameters } from "../../generated/parameters/GetMessagesParameters";
 import { ThirdPartyMessagePrecondition } from "../../generated/backend/ThirdPartyMessagePrecondition";
 import { ThirdPartyMessageWithContent } from "../../generated/backend/ThirdPartyMessageWithContent";
-import {
-  withValidatedOrValidationError,
-  IResponseSuccessOctet,
-  IResponseErrorNotImplemented,
-  IResponseErrorUnsupportedMediaType,
-} from "../utils/responses";
-import { LollipopLocalsType, LollipopRequiredHeaders } from "../types/lollipop";
+import { MessageStatusAttributes } from "../../generated/io-messages-api/MessageStatusAttributes";
+import { MessageStatusChange } from "../../generated/io-messages-api/MessageStatusChange";
+import { GetMessageParameters } from "../../generated/parameters/GetMessageParameters";
+import { GetMessagesParameters } from "../../generated/parameters/GetMessagesParameters";
 import { LollipopApiClient } from "../clients/lollipop";
 import { ISessionStorage } from "../services/ISessionStorage";
+import { LollipopLocalsType, LollipopRequiredHeaders } from "../types/lollipop";
+import { User, withUserFromRequest } from "../types/user";
 import { extractLollipopLocalsFromLollipopHeadersLegacy } from "../utils/lollipop";
 import { checkIfLollipopIsEnabled } from "../utils/lollipop";
+import {
+  IResponseErrorNotImplemented,
+  IResponseErrorUnsupportedMediaType,
+  IResponseSuccessOctet,
+  withValidatedOrValidationError
+} from "../utils/responses";
 
 export const withGetThirdPartyAttachmentParams = async <T>(
   req: express.Request,
@@ -93,7 +92,7 @@ export default class MessagesController {
           enrichResultData: req.query.enrich_result_data,
           getArchivedMessages: req.query.archived,
           maximumId: req.query.maximum_id,
-          minimumId: req.query.minimum_id,
+          minimumId: req.query.minimum_id
           /* eslint-enable sort-keys */
         }),
         (params) => this.messageService.getMessagesByUser(user, params)
@@ -116,7 +115,7 @@ export default class MessagesController {
       withValidatedOrValidationError(
         GetMessageParameters.decode({
           id: req.params.id,
-          public_message: req.query.public_message,
+          public_message: req.query.public_message
         }),
         (params) => this.messageService.getMessage(user, params)
       )
@@ -196,7 +195,7 @@ export default class MessagesController {
                         user.fiscal_code,
                         lollipopHeaders
                       ),
-                      TE.mapLeft((_) =>
+                      TE.mapLeft(() =>
                         ResponseErrorInternal(
                           "Error extracting lollipop locals"
                         )
@@ -235,7 +234,7 @@ export default class MessagesController {
                   remoteContentConfiguration,
                   lollipopLocals as LollipopLocalsType
                 ),
-              (_) =>
+              () =>
                 ResponseErrorInternal(
                   "Error getting preconditions from third party service"
                 )
@@ -272,7 +271,7 @@ export default class MessagesController {
                   remoteContentConfiguration,
                   lollipopLocals as LollipopLocalsType
                 ),
-              (_) =>
+              () =>
                 ResponseErrorInternal(
                   "Error getting message from third party service"
                 )
@@ -312,7 +311,7 @@ export default class MessagesController {
                   remoteContentConfiguration,
                   lollipopLocals as LollipopLocalsType
                 ),
-              (_) =>
+              () =>
                 ResponseErrorInternal(
                   "Error getting attachment from third party service"
                 )

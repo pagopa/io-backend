@@ -4,8 +4,9 @@ import {
   IResponseErrorValidation,
   IResponseSuccessJson,
   ResponseErrorNotFound,
-  ResponseSuccessJson,
+  ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
+
 import { FeaturedServices } from "../../generated/services-app-backend/FeaturedServices";
 import { InstitutionServicesResource } from "../../generated/services-app-backend/InstitutionServicesResource";
 import { Institutions } from "../../generated/services-app-backend/Institutions";
@@ -16,7 +17,7 @@ import { ServicesAppBackendAPIClient } from "../clients/services-app-backend";
 import {
   unhandledResponseStatus,
   withCatchAsInternalError,
-  withValidatedOrInternalError,
+  withValidatedOrInternalError
 } from "../utils/responses";
 
 // TODO: Aggiungere le altre operazioni del service
@@ -40,7 +41,7 @@ export default class ServicesAppBackendService {
         limit,
         offset,
         scope,
-        search,
+        search
       });
 
       return withValidatedOrInternalError(validated, (response) =>
@@ -62,7 +63,7 @@ export default class ServicesAppBackendService {
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.apiClient.getServiceById({
-        serviceId,
+        serviceId
       });
 
       return withValidatedOrInternalError(validated, (response) =>
@@ -72,8 +73,8 @@ export default class ServicesAppBackendService {
               ResponseSuccessJson
             )
           : response.status === 404
-          ? ResponseErrorNotFound("Not found", "Service not found")
-          : unhandledResponseStatus(response.status)
+            ? ResponseErrorNotFound("Not found", "Service not found")
+            : unhandledResponseStatus(response.status)
       );
     });
 
@@ -123,7 +124,7 @@ export default class ServicesAppBackendService {
       const validated = await this.apiClient.findInstutionServices({
         institutionId,
         limit,
-        offset,
+        offset
       });
 
       // TODO: sistemare i vari return

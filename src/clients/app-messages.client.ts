@@ -1,4 +1,5 @@
 import nodeFetch from "node-fetch";
+
 import { Client, createClient } from "../../generated/io-messages-api/client";
 
 export function AppMessagesAPIClient(
@@ -19,8 +20,8 @@ export function AppMessagesAPIClient(
       // @ts-ignore
       op({
         ...params,
-        SubscriptionKey: token,
-      }),
+        SubscriptionKey: token
+      })
   });
 }
 

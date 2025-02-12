@@ -1,12 +1,13 @@
-import * as redis from "redis";
-import * as E from "fp-ts/lib/Either";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import * as E from "fp-ts/lib/Either";
 import { Either } from "fp-ts/lib/Either";
-import * as TE from "fp-ts/lib/TaskEither";
-import * as O from "fp-ts/lib/Option";
 import { parse } from "fp-ts/lib/Json";
+import * as O from "fp-ts/lib/Option";
+import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
+import * as redis from "redis";
+
 import { UserMetadata } from "../../generated/backend/UserMetadata";
 import { User } from "../types/user";
 import { log } from "../utils/logger";

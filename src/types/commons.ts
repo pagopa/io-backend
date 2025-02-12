@@ -6,7 +6,7 @@ import { PatternString } from "@pagopa/ts-commons/lib/strings";
 import * as t from "io-ts";
 
 export const SuccessResponse = t.interface({
-  message: t.string,
+  message: t.string
 });
 
 export type SuccessResponse = t.TypeOf<typeof SuccessResponse>;
@@ -14,6 +14,7 @@ export type SuccessResponse = t.TypeOf<typeof SuccessResponse>;
 export const STRINGS_RECORD = t.record(t.string, t.string);
 export type STRINGS_RECORD = t.TypeOf<typeof STRINGS_RECORD>;
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function assertUnreachable(_: never): never {
   throw new Error("Unexpected type error");
 }
@@ -39,8 +40,8 @@ export const CommaSeparatedListOf = (decoder: t.Mixed) =>
               .map((e) => e.trim())
               .filter(Boolean)
           : !input
-          ? [] // fallback to empty array in case of empty input
-          : input // it should not happen, but in case we let the decoder fail
+            ? [] // fallback to empty array in case of empty input
+            : input // it should not happen, but in case we let the decoder fail
       ),
     String
   );

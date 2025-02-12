@@ -2,18 +2,18 @@
  * This file contains the ProfileWithEmail and ProfileWithoutEmail models and
  * some functions to validate and convert type to and from them.
  */
-import * as O from "fp-ts/lib/Option";
+import { ExtendedProfile } from "@pagopa/io-functions-app-sdk/ExtendedProfile";
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
   IResponseSuccessJson,
-  ResponseErrorInternal,
+  ResponseErrorInternal
 } from "@pagopa/ts-commons/lib/responses";
+import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
-import { ExtendedProfile } from "@pagopa/io-functions-app-sdk/ExtendedProfile";
-import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 
+import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 import { formatDate } from "../utils/date";
 import { User } from "./user";
 
@@ -49,7 +49,7 @@ export const toInitializedProfile = (
   reminder_status: profile.reminder_status,
   service_preferences_settings: profile.service_preferences_settings,
   spid_email: user.spid_email,
-  version: profile.version,
+  version: profile.version
 });
 
 export const profileMissingErrorResponse =

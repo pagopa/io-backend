@@ -1,7 +1,7 @@
-import { Either } from "fp-ts/lib/Either";
-import { array, Errors } from "io-ts";
 import { CIDR, IPString } from "@pagopa/ts-commons/lib/strings";
 import * as express from "express";
+import { Either } from "fp-ts/lib/Either";
+import { Errors, array } from "io-ts";
 
 /**
  * Parse a comma separated string of CIDR(s) or IP(s) into an array

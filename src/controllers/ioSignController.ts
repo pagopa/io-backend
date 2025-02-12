@@ -3,12 +3,7 @@
  * app by forwarding the call to the API system.
  */
 
-import * as express from "express";
-import * as TE from "fp-ts/TaskEither";
-import * as E from "fp-ts/Either";
-import * as t from "io-ts";
-import { sequenceS } from "fp-ts/lib/Apply";
-
+import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
@@ -16,39 +11,40 @@ import {
   IResponseSuccessJson,
   IResponseSuccessRedirectToResource,
   ResponseErrorInternal,
-  ResponseErrorValidation,
+  ResponseErrorValidation
 } from "@pagopa/ts-commons/lib/responses";
-
-import { pipe } from "fp-ts/lib/function";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
+import * as express from "express";
+import * as E from "fp-ts/Either";
+import * as TE from "fp-ts/TaskEither";
+import { sequenceS } from "fp-ts/lib/Apply";
+import { pipe } from "fp-ts/lib/function";
+import * as t from "io-ts";
 import { Errors } from "io-ts";
-import {
-  withValidatedOrValidationError,
-  withCatchAsInternalError,
-} from "../utils/responses";
-import {
-  IssuerEnvironment,
-  IssuerEnvironmentEnum,
-} from "../../generated/io-sign/IssuerEnvironment";
-import IoSignService from "../services/ioSignService";
-import { ResLocals } from "../utils/express";
-import { LollipopLocalsType, withLollipopLocals } from "../types/lollipop";
-import { Id } from "../../generated/io-sign/Id";
-import { QtspClausesMetadataDetailView } from "../../generated/io-sign/QtspClausesMetadataDetailView";
-import { SignatureDetailView } from "../../generated/io-sign/SignatureDetailView";
-import { SignatureRequestDetailView } from "../../generated/io-sign/SignatureRequestDetailView";
-import { SignerDetailView } from "../../generated/io-sign-api/SignerDetailView";
-import { SignatureRequestList } from "../../generated/io-sign-api/SignatureRequestList";
-import { FilledDocumentDetailView } from "../../generated/io-sign/FilledDocumentDetailView";
 
 import { CreateFilledDocument } from "../../generated/io-sign/CreateFilledDocument";
 import { CreateSignatureBody } from "../../generated/io-sign/CreateSignatureBody";
-
-import { withUserFromRequest } from "../types/user";
+import { FilledDocumentDetailView } from "../../generated/io-sign/FilledDocumentDetailView";
+import { Id } from "../../generated/io-sign/Id";
+import {
+  IssuerEnvironment,
+  IssuerEnvironmentEnum
+} from "../../generated/io-sign/IssuerEnvironment";
+import { QtspClausesMetadataDetailView } from "../../generated/io-sign/QtspClausesMetadataDetailView";
+import { SignatureDetailView } from "../../generated/io-sign/SignatureDetailView";
+import { SignatureRequestDetailView } from "../../generated/io-sign/SignatureRequestDetailView";
+import { SignatureRequestList } from "../../generated/io-sign-api/SignatureRequestList";
+import { SignerDetailView } from "../../generated/io-sign-api/SignerDetailView";
+import IoSignService from "../services/ioSignService";
 import ProfileService from "../services/profileService";
-
+import { LollipopLocalsType, withLollipopLocals } from "../types/lollipop";
+import { withUserFromRequest } from "../types/user";
+import { ResLocals } from "../utils/express";
 import { profileWithEmailValidatedOrError } from "../utils/profile";
+import {
+  withCatchAsInternalError,
+  withValidatedOrValidationError
+} from "../utils/responses";
 
 const responseErrorValidation = (errs: Errors) =>
   ResponseErrorValidation(
@@ -60,8 +56,8 @@ export const IoSignLollipopLocalsType = t.intersection([
   LollipopLocalsType,
   t.type({
     ["x-pagopa-lollipop-custom-sign-challenge"]: NonEmptyString,
-    ["x-pagopa-lollipop-custom-tos-challenge"]: NonEmptyString,
-  }),
+    ["x-pagopa-lollipop-custom-tos-challenge"]: NonEmptyString
+  })
 ]);
 export type IoSignLollipopLocalsType = t.TypeOf<
   typeof IoSignLollipopLocalsType
@@ -78,7 +74,7 @@ export const withIoSignCustomLollipopLocalsFromRequest =
         ["x-pagopa-lollipop-custom-sign-challenge"]:
           req.headers["x-pagopa-lollipop-custom-sign-challenge"],
         ["x-pagopa-lollipop-custom-tos-challenge"]:
-          req.headers["x-pagopa-lollipop-custom-tos-challenge"],
+          req.headers["x-pagopa-lollipop-custom-tos-challenge"]
       },
       IoSignLollipopLocalsType.decode,
       E.mapLeft(responseErrorValidation)
@@ -156,7 +152,7 @@ export default class IoSignController {
                     "Error retrieving a user profile with validated email address"
                   )
                 )
-              ),
+              )
             }),
             TE.map(({ userProfile, signerId }) =>
               this.ioSignService.createFilledDocument(
@@ -208,7 +204,7 @@ export default class IoSignController {
                     "Error retrieving a user profile with validated email address"
                   )
                 )
-              ),
+              )
             }),
             TE.chainW(({ signerId, userProfile }) =>
               pipe(
@@ -219,9 +215,9 @@ export default class IoSignController {
                 TE.map((signatureBody) => ({
                   body: {
                     ...signatureBody,
-                    email: userProfile.email,
+                    email: userProfile.email
                   },
-                  signerId: signerId.value.id,
+                  signerId: signerId.value.id
                 }))
               )
             ),
@@ -256,7 +252,7 @@ export default class IoSignController {
             req.params.id,
             Id.decode,
             TE.fromEither,
-            TE.mapLeft((_) =>
+            TE.mapLeft(() =>
               ResponseErrorInternal(`Error validating the signature request id`)
             )
           ),
@@ -264,7 +260,7 @@ export default class IoSignController {
             retrieveSignerId(this.ioSignService, user.fiscal_code),
             TE.mapLeft(() => toErrorRetrievingTheSignerId),
             TE.map((response) => response.value.id)
-          ),
+          )
         }),
         TE.map(({ signerId, signatureRequestId: id }) =>
           this.ioSignService.getSignatureRequest(id, signerId)

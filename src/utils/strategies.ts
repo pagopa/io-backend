@@ -1,9 +1,10 @@
+import * as E from "fp-ts/Either";
+import * as O from "fp-ts/Option";
 import { Either } from "fp-ts/lib/Either";
 import { Option } from "fp-ts/lib/Option";
-import { IVerifyOptions } from "passport-http-bearer";
-import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
-import * as O from "fp-ts/Option";
+import { IVerifyOptions } from "passport-http-bearer";
+
 import { User } from "../types/user";
 
 export type StrategyDoneFunction = (

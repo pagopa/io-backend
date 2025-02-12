@@ -1,56 +1,67 @@
 /**
  * This service retrieves messages from the API system using an API client.
  */
-import * as t from "io-ts";
-import nodeFetch from "node-fetch";
 import {
+  IResponseErrorBadGateway,
   IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
-  IResponseErrorServiceUnavailable,
   IResponseErrorNotFound,
+  IResponseErrorServiceUnavailable,
   IResponseErrorTooManyRequests,
   IResponseErrorValidation,
   IResponseSuccessJson,
-  ResponseErrorNotFound,
-  ResponseErrorTooManyRequests,
-  ResponseSuccessJson,
-  ResponseErrorForbiddenNotAuthorized,
-  ResponseErrorInternal,
-  ResponseErrorValidation,
-  ResponseErrorServiceTemporarilyUnavailable,
   IResponseSuccessNoContent,
   ResponseErrorBadGateway,
-  IResponseErrorBadGateway,
+  ResponseErrorForbiddenNotAuthorized,
+  ResponseErrorInternal,
+  ResponseErrorNotFound,
+  ResponseErrorServiceTemporarilyUnavailable,
+  ResponseErrorTooManyRequests,
+  ResponseErrorValidation,
+  ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-import { AppMessagesAPIClient } from "src/clients/app-messages.client";
 import {
   FiscalCode,
   NonEmptyString,
-  Ulid,
+  Ulid
 } from "@pagopa/ts-commons/lib/strings";
-import { pipe, flow } from "fp-ts/lib/function";
-import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import * as T from "fp-ts/Task";
-import { LollipopLocalsType } from "src/types/lollipop";
+import * as TE from "fp-ts/TaskEither";
+import { flow, pipe } from "fp-ts/lib/function";
 import { RCConfigurationPublic } from "generated/io-messages-api/RCConfigurationPublic";
-import {
-  Fetch,
-  getThirdPartyServiceClient,
-} from "../clients/third-party-service-client";
-import { PN_SERVICE_ID } from "../config";
-import { MessageSubject } from "../../generated/backend/MessageSubject";
+import * as t from "io-ts";
+import nodeFetch from "node-fetch";
+import { AppMessagesAPIClient } from "src/clients/app-messages.client";
+import { LollipopLocalsType } from "src/types/lollipop";
+
+import { CreatedMessageWithContentAndAttachments } from "../../generated/backend/CreatedMessageWithContentAndAttachments";
 import { InvalidThirdPartyMessageTypeEnum } from "../../generated/backend/InvalidThirdPartyMessageType";
+import { MessageBodyMarkdown } from "../../generated/backend/MessageBodyMarkdown";
+import { MessageSubject } from "../../generated/backend/MessageSubject";
+import { ThirdPartyData } from "../../generated/backend/ThirdPartyData";
+import { ThirdPartyMessagePrecondition } from "../../generated/backend/ThirdPartyMessagePrecondition";
+import { ThirdPartyMessageWithContent } from "../../generated/backend/ThirdPartyMessageWithContent";
 import { CreatedMessageWithContent } from "../../generated/io-messages-api/CreatedMessageWithContent";
+import { MessageStatusAttributes } from "../../generated/io-messages-api/MessageStatusAttributes";
+import { MessageStatusChange } from "../../generated/io-messages-api/MessageStatusChange";
 import { PaginatedPublicMessagesCollection } from "../../generated/io-messages-api/PaginatedPublicMessagesCollection";
 import { GetMessageParameters } from "../../generated/parameters/GetMessageParameters";
 import { GetMessagesParameters } from "../../generated/parameters/GetMessagesParameters";
-import { ThirdPartyMessageWithContent } from "../../generated/backend/ThirdPartyMessageWithContent";
-import { ThirdPartyMessagePrecondition } from "../../generated/backend/ThirdPartyMessagePrecondition";
-import { CreatedMessageWithContentAndAttachments } from "../../generated/backend/CreatedMessageWithContentAndAttachments";
-import { getPrescriptionAttachments } from "../utils/attachments";
+import {
+  ThirdPartyMessage,
+  ThirdPartyMessageDetails
+} from "../../generated/third-party-service/ThirdPartyMessage";
+import {
+  Fetch,
+  getThirdPartyServiceClient
+} from "../clients/third-party-service-client";
+import { PN_SERVICE_ID } from "../config";
 import { User } from "../types/user";
+import { getPrescriptionAttachments } from "../utils/attachments";
+import { FileType, getIsFileTypeForTypes } from "../utils/file-type";
+import { log } from "../utils/logger";
 import {
   IResponseErrorUnsupportedMediaType,
   IResponseSuccessOctet,
@@ -61,18 +72,8 @@ import {
   unhandledResponseStatus,
   withCatchAsInternalError,
   withValidatedOrInternalError,
-  wrapValidationWithInternalError,
+  wrapValidationWithInternalError
 } from "../utils/responses";
-import { MessageStatusChange } from "../../generated/io-messages-api/MessageStatusChange";
-import { MessageStatusAttributes } from "../../generated/io-messages-api/MessageStatusAttributes";
-import {
-  ThirdPartyMessage,
-  ThirdPartyMessageDetails,
-} from "../../generated/third-party-service/ThirdPartyMessage";
-import { ThirdPartyData } from "../../generated/backend/ThirdPartyData";
-import { log } from "../utils/logger";
-import { FileType, getIsFileTypeForTypes } from "../utils/file-type";
-import { MessageBodyMarkdown } from "../../generated/backend/MessageBodyMarkdown";
 
 const ALLOWED_TYPES: ReadonlySet<FileType> = new Set(["pdf"]);
 
@@ -83,7 +84,7 @@ const ERROR_MESSAGE_400 = "Bad request";
 
 export const MessageWithThirdPartyData = t.intersection([
   CreatedMessageWithContent,
-  t.interface({ content: t.interface({ third_party_data: ThirdPartyData }) }),
+  t.interface({ content: t.interface({ third_party_data: ThirdPartyData }) })
 ]);
 export type MessageWithThirdPartyData = t.TypeOf<
   typeof MessageWithThirdPartyData
@@ -119,7 +120,7 @@ export default class NewMessagesService {
         enrich_result_data: params.enrichResultData,
         archived: params.getArchivedMessages,
         maximum_id: params.maximumId,
-        minimum_id: params.minimumId,
+        minimum_id: params.minimumId
         /* eslint-enable sort-keys */
       });
 
@@ -127,10 +128,10 @@ export default class NewMessagesService {
         response.status === 200
           ? ResponseSuccessJson(response.value)
           : response.status === 404
-          ? ResponseErrorNotFound("Not found", "User not found")
-          : response.status === 429
-          ? ResponseErrorTooManyRequests()
-          : unhandledResponseStatus(response.status)
+            ? ResponseErrorNotFound("Not found", "User not found")
+            : response.status === 429
+              ? ResponseErrorTooManyRequests()
+              : unhandledResponseStatus(response.status)
       );
     });
 
@@ -150,7 +151,7 @@ export default class NewMessagesService {
       const res = await this.apiClient.getMessage({
         fiscal_code: user.fiscal_code,
         id: params.id,
-        public_message: params.public_message,
+        public_message: params.public_message
       });
 
       const resMessageContent = pipe(
@@ -175,8 +176,8 @@ export default class NewMessagesService {
                     ...messageWithContent,
                     content: {
                       ...messageWithContent.content,
-                      attachments,
-                    },
+                      attachments
+                    }
                   })),
                   T.map(ResponseSuccessJson)
                 )();
@@ -185,8 +186,8 @@ export default class NewMessagesService {
           return response.status === 404
             ? ResponseErrorNotFound("Not found", "Message not found")
             : response.status === 429
-            ? ResponseErrorTooManyRequests()
-            : unhandledResponseStatus(response.status);
+              ? ResponseErrorTooManyRequests()
+              : unhandledResponseStatus(response.status);
         }
       );
     });
@@ -210,16 +211,15 @@ export default class NewMessagesService {
       const validated = await this.apiClient.upsertMessageStatusAttributes({
         body: messageStatusChange,
         fiscal_code: fiscalCode,
-        id: messageId,
+        id: messageId
       });
 
-      // eslint-disable-next-line sonarjs/no-identical-functions
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
           case 200:
             return ResponseSuccessJson({
               is_archived: response.value.is_archived,
-              is_read: response.value.is_read,
+              is_read: response.value.is_read
             });
           case 401:
             return ResponseErrorUnexpectedAuthProblem();
@@ -293,7 +293,7 @@ export default class NewMessagesService {
         ),
         TE.map((thirdPartyMessage) => ({
           ...message,
-          third_party_message: thirdPartyMessage,
+          third_party_message: thirdPartyMessage
         }))
       ),
       TE.map(ResponseSuccessJson),
@@ -352,7 +352,7 @@ export default class NewMessagesService {
         () =>
           this.apiClient.getMessage({
             fiscal_code: fiscalCode,
-            id: messageId,
+            id: messageId
           }),
         (e) => ResponseErrorInternal(E.toError(e).message)
       ),
@@ -414,7 +414,7 @@ export default class NewMessagesService {
       TE.tryCatch(
         () =>
           this.apiClient.getRCConfiguration({
-            id: configurationId,
+            id: configurationId
           }),
         (e) => ResponseErrorInternal(E.toError(e).message)
       ),
@@ -488,7 +488,7 @@ export default class NewMessagesService {
           () =>
             client.getThirdPartyMessagePrecondition({
               id: message.content.third_party_data.id,
-              ...lollipopLocals,
+              ...lollipopLocals
             }),
           (e) => ResponseErrorInternal(E.toError(e).message)
         )
@@ -504,7 +504,6 @@ export default class NewMessagesService {
               `newMessagesService|getThirdPartyMessagePreconditionFromThirdPartyService|invocation returned an error:${
                 response.status
               } [title: ${response.value?.title ?? "No title"}, detail: ${
-                // eslint-disable-next-line sonarjs/no-duplicate-string
                 response.value?.detail ?? "No details"
               }, type: ${response.value?.type ?? "No type"}]`
             );
@@ -570,7 +569,7 @@ export default class NewMessagesService {
           () =>
             client.getThirdPartyMessageDetails({
               id: message.content.third_party_data.id,
-              ...lollipopLocals,
+              ...lollipopLocals
             }),
           (e) => ResponseErrorInternal(E.toError(e).message)
         )
@@ -586,14 +585,12 @@ export default class NewMessagesService {
               `newMessagesService|getThirdPartyMessageFromThirdPartyService|invocation returned an error:${
                 response.status
               } [title: ${response.value?.title ?? "No title"}, detail: ${
-                // eslint-disable-next-line sonarjs/no-duplicate-string
                 response.value?.detail ?? "No details"
               }, type: ${response.value?.type ?? "No type"}]`
             );
             return response;
           }),
           TE.mapLeft(
-            // eslint-disable-next-line sonarjs/no-identical-functions
             flow((response) => {
               switch (response.status) {
                 case 400:
@@ -683,8 +680,8 @@ export default class NewMessagesService {
         : {
             ...response.details,
             markdown: message.content.markdown,
-            subject: message.content.subject,
-          },
+            subject: message.content.subject
+          }
     });
   };
 
@@ -720,7 +717,7 @@ export default class NewMessagesService {
             client.getThirdPartyMessageAttachment({
               attachment_url: attachmentUrl,
               id: message.content.third_party_data.id,
-              ...lollipopLocals,
+              ...lollipopLocals
             }),
           (e) => ResponseErrorInternal(E.toError(e).message)
         )
@@ -736,7 +733,6 @@ export default class NewMessagesService {
               `newMessagesService|getThirdPartyAttachmentFromThirdPartyService|invocation returned an error:${
                 response.status
               } [title: ${response.value?.title ?? "No title"}, detail: ${
-                // eslint-disable-next-line sonarjs/no-duplicate-string
                 response.value?.detail ?? "No details"
               }, type: ${response.value?.type ?? "No type"}])`
             );
@@ -761,6 +757,7 @@ export default class NewMessagesService {
                 case 500:
                   return ResponseErrorInternal(ERROR_MESSAGE_500);
                 case 503:
+                  // eslint-disable-next-line no-case-declarations
                   const retryAfter = response.headers["Retry-After"] ?? "10";
                   return ResponseErrorServiceTemporarilyUnavailable(
                     ERROR_MESSAGE_503,

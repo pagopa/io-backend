@@ -1,5 +1,6 @@
-import { NextFunction, Request, Response } from "express";
 import { ResponseErrorNotFound } from "@pagopa/ts-commons/lib/responses";
+import { NextFunction, Request, Response } from "express";
+
 import { log } from "../logger";
 
 /**

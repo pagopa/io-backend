@@ -2,7 +2,7 @@
  * This controller returns data about the current user session
  */
 
-import * as express from "express";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import {
   IResponseErrorConflict,
   IResponseErrorForbiddenNotAuthorized,
@@ -13,41 +13,40 @@ import {
   ResponseErrorForbiddenNotAuthorized,
   ResponseErrorInternal,
   ResponseErrorValidation,
-  ResponseSuccessJson,
+  ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-import * as E from "fp-ts/lib/Either";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import { addSeconds } from "date-fns";
+import * as express from "express";
 import * as AP from "fp-ts/lib/Apply";
-import * as TE from "fp-ts/lib/TaskEither";
+import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as ROA from "fp-ts/lib/ReadonlyArray";
-
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
-import { pipe, flow, constVoid } from "fp-ts/lib/function";
 import { ReadonlyNonEmptyArray } from "fp-ts/lib/ReadonlyNonEmptyArray";
+import * as TE from "fp-ts/lib/TaskEither";
+import { constVoid, flow, pipe } from "fp-ts/lib/function";
 import { OutputOf } from "io-ts";
-import { addSeconds } from "date-fns";
+
+import { AuthLockBody } from "../../generated/session/AuthLockBody";
+import { AuthUnlockBody } from "../../generated/session/AuthUnlockBody";
+import { TypeEnum as LoginTypeEnum } from "../../generated/session/SessionInfo";
+import { SessionState } from "../../generated/session/SessionState";
+import { UnlockCode } from "../../generated/session/UnlockCode";
+import { UserSessionInfo } from "../../generated/session/UserSessionInfo";
+import AuthenticationLockService, {
+  NotReleasedAuthenticationLockData
+} from "../services/authenticationLockService";
+import LollipopService from "../services/lollipopService";
+import { NotificationServiceFactory } from "../services/notificationServiceFactory";
+import RedisSessionStorage from "../services/redisSessionStorage";
+import RedisUserMetadataStorage from "../services/redisUserMetadataStorage";
+import { SuccessResponse } from "../types/commons";
+import { withFiscalCodeFromRequestParams } from "../types/fiscalCode";
 import {
   IResponseNoContent,
   ResponseNoContent,
-  withValidatedOrValidationError,
+  withValidatedOrValidationError
 } from "../utils/responses";
-import { SuccessResponse } from "../types/commons";
-import LollipopService from "../services/lollipopService";
-import { withFiscalCodeFromRequestParams } from "../types/fiscalCode";
-import RedisSessionStorage from "../services/redisSessionStorage";
-import RedisUserMetadataStorage from "../services/redisUserMetadataStorage";
-import AuthenticationLockService, {
-  NotReleasedAuthenticationLockData,
-} from "../services/authenticationLockService";
-import { NotificationServiceFactory } from "../services/notificationServiceFactory";
-
-import { UserSessionInfo } from "../../generated/session/UserSessionInfo";
-import { AuthLockBody } from "../../generated/session/AuthLockBody";
-import { AuthUnlockBody } from "../../generated/session/AuthUnlockBody";
-import { SessionState } from "../../generated/session/SessionState";
-import { TypeEnum as LoginTypeEnum } from "../../generated/session/SessionInfo";
-import { UnlockCode } from "../../generated/session/UnlockCode";
 
 const ERROR_CHECK_USER_AUTH_LOCK =
   "Something went wrong while checking the user authentication lock";
@@ -147,7 +146,7 @@ export default class SessionLockController {
           )
         ),
         TE.mapLeft((err) => ResponseErrorInternal(err.message)),
-        TE.map((_) => ResponseSuccessJson({ message: "ok" })),
+        TE.map(() => ResponseSuccessJson({ message: "ok" })),
         TE.toUnion
       )()
     );
@@ -173,7 +172,7 @@ export default class SessionLockController {
           this.buildInvalidateUserSessionTask(fiscalCode)
         ),
         TE.mapLeft((err) => ResponseErrorInternal(err.message)),
-        TE.map((_) => ResponseSuccessJson({ message: "ok" })),
+        TE.map(() => ResponseSuccessJson({ message: "ok" })),
         TE.toUnion
       )()
     );
@@ -210,7 +209,7 @@ export default class SessionLockController {
           TE.mapLeft((err) => ResponseErrorInternal(err.message))
         )
       ),
-      TE.map((_) => ResponseSuccessJson({ message: "ok" })),
+      TE.map(() => ResponseSuccessJson({ message: "ok" })),
       TE.toUnion
     )();
 
@@ -234,7 +233,7 @@ export default class SessionLockController {
         pipe(
           // lock the authentication
           this.authenticationLockService.isUserAuthenticationLocked(fiscalCode),
-          TE.mapLeft((_) => ResponseErrorInternal(ERROR_CHECK_USER_AUTH_LOCK)),
+          TE.mapLeft(() => ResponseErrorInternal(ERROR_CHECK_USER_AUTH_LOCK)),
           TE.filterOrElseW(
             (isUserAuthenticationLocked) => !isUserAuthenticationLocked,
             () =>
@@ -242,7 +241,7 @@ export default class SessionLockController {
                 "Another user authentication lock has already been applied"
               )
           ),
-          TE.chainW((_) =>
+          TE.chainW(() =>
             pipe(
               AP.sequenceT(TE.ApplicativeSeq)(
                 // clear session data
@@ -259,7 +258,7 @@ export default class SessionLockController {
               TE.mapLeft((err) => ResponseErrorInternal(err.message))
             )
           ),
-          TE.map((_) => ResponseNoContent()),
+          TE.map(() => ResponseNoContent()),
           TE.toUnion
         )()
       )
@@ -292,7 +291,7 @@ export default class SessionLockController {
               this.authenticationLockService.getUserAuthenticationLockData(
                 fiscalCode
               ),
-              TE.mapLeft((_) =>
+              TE.mapLeft(() =>
                 ResponseErrorInternal(ERROR_CHECK_USER_AUTH_LOCK)
               )
             )
@@ -308,7 +307,7 @@ export default class SessionLockController {
               : // User auth is NOT locked
                 TE.of(true)
           ),
-          TE.map((_) => ResponseNoContent()),
+          TE.map(() => ResponseNoContent()),
           TE.toUnion
         )()
       )
@@ -341,13 +340,13 @@ export default class SessionLockController {
                 `Error reading the session info: [${err.message}]`
               )
             )
-          ),
+          )
         }),
         TE.map(({ isUserAuthenticationLocked, maybeSessionRemaningTTL }) =>
           O.isNone(maybeSessionRemaningTTL)
             ? SessionState.encode({
                 access_enabled: !isUserAuthenticationLocked,
-                session_info: { active: false },
+                session_info: { active: false }
               })
             : SessionState.encode({
                 access_enabled: !isUserAuthenticationLocked,
@@ -357,8 +356,8 @@ export default class SessionLockController {
                     new Date(),
                     maybeSessionRemaningTTL.value.ttl
                   ),
-                  type: LoginTypeEnum[maybeSessionRemaningTTL.value.type],
-                },
+                  type: LoginTypeEnum[maybeSessionRemaningTTL.value.type]
+                }
               })
         ),
         TE.map(ResponseSuccessJson),
@@ -416,7 +415,7 @@ export default class SessionLockController {
           E.toError
         ),
         TE.chain(TE.fromEither)
-      ),
+      )
     ] as const;
 
   private readonly clearInstallation = (fiscalCode: FiscalCode) =>

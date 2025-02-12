@@ -1,7 +1,8 @@
 import nodeFetch from "node-fetch";
+
 import {
   Client,
-  createClient,
+  createClient
 } from "../../generated/io-cgn-operator-search-api/client";
 
 export function CgnOperatorSearchAPIClient(
@@ -18,8 +19,8 @@ export function CgnOperatorSearchAPIClient(
     withDefaults: (op) => (params) =>
       op({
         ...params,
-        ApiKey: token,
-      }),
+        ApiKey: token
+      })
   });
 }
 

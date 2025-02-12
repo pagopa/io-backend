@@ -1,19 +1,18 @@
-import { pipe } from "fp-ts/lib/function";
-
 import { FiscalCode } from "@pagopa/io-functions-app-sdk/FiscalCode";
-import { LollipopLocalsType } from "src/types/lollipop";
 import { eventLog } from "@pagopa/winston-ts";
-import { RCConfigurationPublic } from "generated/io-messages-api/RCConfigurationPublic";
-
+import { pipe } from "fp-ts/lib/function";
 import { RCAuthenticationConfig } from "generated/io-messages-api/RCAuthenticationConfig";
 import { RCConfigurationProdEnvironment } from "generated/io-messages-api/RCConfigurationProdEnvironment";
+import { RCConfigurationPublic } from "generated/io-messages-api/RCConfigurationPublic";
 import { RCConfigurationTestEnvironment } from "generated/io-messages-api/RCConfigurationTestEnvironment";
 import { Ulid } from "generated/parameters/Ulid";
-import { pnFetch } from "../adapters/pnFetch";
+import { LollipopLocalsType } from "src/types/lollipop";
+
 import {
   Client,
-  createClient,
+  createClient
 } from "../../generated/third-party-service/client";
+import { pnFetch } from "../adapters/pnFetch";
 
 // ---
 
@@ -38,8 +37,8 @@ const withApiKey =
       ...init,
       headers: {
         ...(init?.headers ?? {}),
-        ...{ [authConfig.header_key_name]: authConfig.key },
-      },
+        ...{ [authConfig.header_key_name]: authConfig.key }
+      }
     });
 
 /**
@@ -97,9 +96,9 @@ export const getThirdPartyServiceClient =
         fiscalCode
       )
         ? remoteContentConfiguration.test_environment
-        : remoteContentConfiguration.prod_environment ??
+        : (remoteContentConfiguration.prod_environment ??
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          remoteContentConfiguration.test_environment!;
+          remoteContentConfiguration.test_environment!);
 
     eventLog.peek.info(
       remoteContentConfiguration.test_environment?.test_users.includes(
@@ -107,11 +106,11 @@ export const getThirdPartyServiceClient =
       )
         ? [
             "Third party client pointing to test environment",
-            { name: "lollipop.third-party.test" },
+            { name: "lollipop.third-party.test" }
           ]
         : [
             "Third party client pointing to prod environment",
-            { name: "lollipop.third-party.prod" },
+            { name: "lollipop.third-party.prod" }
           ]
     );
     eventLog.peek.info(
@@ -120,11 +119,11 @@ export const getThirdPartyServiceClient =
       )
         ? [
             "Fiscal code included in testUsers",
-            { name: "lollipop.testUsers.fiscal-code" },
+            { name: "lollipop.testUsers.fiscal-code" }
           ]
         : [
             "Fiscal code not included in testUsers",
-            { name: "lollipop.testUsers.fiscal-code" },
+            { name: "lollipop.testUsers.fiscal-code" }
           ]
     );
 
@@ -146,7 +145,7 @@ export const getThirdPartyServiceClient =
       withDefaults: (op) => (params) =>
         op({
           ...params,
-          fiscal_code: fiscalCode,
-        }),
+          fiscal_code: fiscalCode
+        })
     });
   };

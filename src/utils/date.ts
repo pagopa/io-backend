@@ -1,10 +1,10 @@
 import { PatternString } from "@pagopa/ts-commons/lib/strings";
 import { addYears, format, isAfter } from "date-fns";
-import { pipe } from "fp-ts/lib/function";
+import * as E from "fp-ts/Either";
 import { Option, tryCatch } from "fp-ts/lib/Option";
+import { pipe } from "fp-ts/lib/function";
 import { FiscalCode } from "generated/backend/FiscalCode";
 import * as t from "io-ts";
-import * as E from "fp-ts/Either";
 
 /**
  * Returns a comparator of two dates that returns true if
@@ -16,7 +16,7 @@ export const isOlderThan = (years: number) => (dateOfBirth: Date, when: Date) =>
 export const isValidDate = (d: Date) =>
   d instanceof Date && !isNaN(d.getTime());
 
-const months: { readonly [k: string]: number } = {
+const months: Readonly<Record<string, number>> = {
   ["A"]: 1,
   ["B"]: 2,
   ["C"]: 3,
@@ -28,7 +28,7 @@ const months: { readonly [k: string]: number } = {
   ["P"]: 9,
   ["R"]: 10,
   ["S"]: 11,
-  ["T"]: 12,
+  ["T"]: 12
 };
 
 /**

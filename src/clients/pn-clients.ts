@@ -1,14 +1,15 @@
-import nodeFetch from "node-fetch";
 import { ValidUrl } from "@pagopa/ts-commons/lib/url";
-import { stripTrailingSlashIfPresent } from "../utils/url";
+import nodeFetch from "node-fetch";
+
 import {
   Client,
-  createClient,
+  createClient
 } from "../../generated/piattaforma-notifiche/client";
 import {
   Client as AddressBookClient,
-  createClient as createAddressBookClient,
+  createClient as createAddressBookClient
 } from "../../generated/piattaforma-notifiche-courtesy/client";
+import { stripTrailingSlashIfPresent } from "../utils/url";
 
 export function PnAPIClient(
   baseUrl: string,
@@ -17,7 +18,7 @@ export function PnAPIClient(
 ): Client {
   return createClient({
     baseUrl,
-    fetchApi,
+    fetchApi
   });
 }
 export type PnAPIClient = typeof PnAPIClient;
@@ -40,8 +41,8 @@ export const PnAddressBookIOClient = (
     withDefaults: (op) => (params) =>
       op({
         ...params,
-        ApiKeyAuth: apiKey,
-      }),
+        ApiKeyAuth: apiKey
+      })
   });
 export type PnAddressBookIOClient = typeof PnAddressBookIOClient;
 
@@ -51,7 +52,7 @@ export type PnAddressBookIOClient = typeof PnAddressBookIOClient;
 export enum PNEnvironment {
   PRODUCTION = "PRODUCTION",
   UAT = "UAT",
-  DEV = "DEV",
+  DEV = "DEV"
 }
 
 /**

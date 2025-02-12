@@ -1,7 +1,8 @@
-import * as http from "http";
-import * as https from "https";
 import { Express } from "express";
+import * as http from "http";
 import * as httpGracefulShutdown from "http-graceful-shutdown";
+import * as https from "https";
+
 import { log } from "./logger";
 
 export function initHttpGracefulShutdown(
@@ -17,6 +18,6 @@ export function initHttpGracefulShutdown(
         options.finally();
       }
       app.emit("server:stop");
-    },
+    }
   });
 }

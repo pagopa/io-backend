@@ -3,12 +3,11 @@ import * as B from "fp-ts/boolean";
 import { flow } from "fp-ts/lib/function";
 
 import { FiscalCode } from "../../generated/io-bonus-api/FiscalCode";
+import { toFiscalCodeHash } from "../types/notification";
 import {
   FeatureFlag,
-  getIsUserEligibleForNewFeature,
+  getIsUserEligibleForNewFeature
 } from "../utils/featureFlag";
-import { toFiscalCodeHash } from "../types/notification";
-
 import NotificationService from "./notificationService";
 
 /**

@@ -1,19 +1,20 @@
-import * as TE from "fp-ts/lib/TaskEither";
-import * as E from "fp-ts/lib/Either";
-import * as t from "io-ts";
 import { IResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
+import * as E from "fp-ts/lib/Either";
+import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
-import { User } from "../../src/types/user";
-import ProfileService from "../../src/services/profileService";
-import { InitializedProfile } from "../../generated/backend/InitializedProfile";
+import * as t from "io-ts";
+
 import { EmailAddress } from "../../generated/backend/EmailAddress";
+import { InitializedProfile } from "../../generated/backend/InitializedProfile";
+import ProfileService from "../../src/services/profileService";
+import { User } from "../../src/types/user";
 
 // define a type that represents a Profile with a non optional email address
 const ProfileWithEmail = t.intersection([
   t.type({
-    email: EmailAddress,
+    email: EmailAddress
   }),
-  InitializedProfile,
+  InitializedProfile
 ]);
 
 type ProfileWithEmail = t.TypeOf<typeof ProfileWithEmail>;
@@ -60,9 +61,7 @@ export const profileWithEmailValidatedOrError = (
       pipe(
         profile.value,
         ProfileWithEmailValidated.decode,
-        E.mapLeft(
-          (_) => new Error("Profile has not a validated email address")
-        ),
+        E.mapLeft(() => new Error("Profile has not a validated email address")),
         TE.fromEither
       )
     )

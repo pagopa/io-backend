@@ -3,22 +3,23 @@ import {
   IResponseErrorValidation,
   IResponseSuccessJson,
   ResponseErrorInternal,
-  ResponseSuccessJson,
+  ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import * as express from "express";
-import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
+import * as TE from "fp-ts/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+
+import { PNActivation } from "../../generated/api_piattaforma-notifiche-courtesy/PNActivation";
 import { PNEnvironment } from "../clients/pn-clients";
+import { PNService } from "../services/pnService";
 import { withUserFromRequest } from "../types/user";
 import {
   IResponseNoContent,
   ResponseNoContent,
-  withValidatedOrValidationError,
+  withValidatedOrValidationError
 } from "../utils/responses";
-import { PNActivation } from "../../generated/api_piattaforma-notifiche-courtesy/PNActivation";
-import { PNService } from "../services/pnService";
 
 /**
  * Upsert the Activation for `Avvisi di Cortesia` Piattaforma Notifiche
@@ -46,7 +47,7 @@ export const upsertPNActivationController =
               TE.tryCatch(
                 () =>
                   upsertPnActivation(pnEnvironment, user.fiscal_code, {
-                    activationStatus: payload.activation_status,
+                    activationStatus: payload.activation_status
                   }),
                 () => ResponseErrorInternal("Error calling the PN service")
               ),
@@ -109,13 +110,13 @@ export const getPNActivationController =
           switch (pnActivationResponse.status) {
             case 200:
               return ResponseSuccessJson({
-                activation_status: pnActivationResponse.value.activationStatus,
+                activation_status: pnActivationResponse.value.activationStatus
               });
             case 404:
               // When the activation is missing on PN
               // false default value was returned.
               return ResponseSuccessJson({
-                activation_status: false,
+                activation_status: false
               });
             case 400:
               return ResponseErrorInternal(

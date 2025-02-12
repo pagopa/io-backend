@@ -22,7 +22,7 @@ export const BooleanFromString: BooleanFromString = new t.Type<
     s === "true"
       ? t.success(true)
       : s === "false"
-      ? t.success(false)
-      : t.failure(s, c),
+        ? t.success(false)
+        : t.failure(s, c),
   String
 );
