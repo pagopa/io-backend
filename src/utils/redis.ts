@@ -6,6 +6,7 @@ import * as redis from "redis";
 
 import { keyPrefixes } from "../services/redisSessionStorage";
 import { log } from "./logger";
+import { createWrappedRedisClusterClient } from "./redis-trace-wrapper";
 
 export const obfuscateTokensInfo = (message: string) =>
   pipe(
@@ -36,29 +37,30 @@ export const createClusterRedisClient =
     const redisPort: number = parseInt(port || DEFAULT_REDIS_PORT, 10);
     log.info("Creating CLUSTER redis client", { url: completeRedisUrl });
 
-    const redisClient = redis.createCluster<
-      Record<string, never>,
-      Record<string, never>,
-      Record<string, never>
-    >({
-      defaults: {
-        legacyMode: false,
-        password,
-        socket: {
-          // TODO: We can add a whitelist with all the IP addresses of the redis clsuter
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          checkServerIdentity: (_hostname, _cert) => undefined,
-          keepAlive: 2000,
-          tls: enableTls
-        }
+    const redisClient = createWrappedRedisClusterClient(
+      {
+        defaults: {
+          legacyMode: false,
+          password,
+          socket: {
+            // TODO: We can add a whitelist with all the IP addresses of the redis clsuter
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            checkServerIdentity: (_hostname, _cert) => undefined,
+            keepAlive: 2000,
+            tls: enableTls
+          }
+        },
+        rootNodes: [
+          {
+            url: `${completeRedisUrl}:${redisPort}`
+          }
+        ],
+        useReplicas
       },
-      rootNodes: [
-        {
-          url: `${completeRedisUrl}:${redisPort}`
-        }
-      ],
-      useReplicas
-    });
+      useReplicas ? "FAST" : "SAFE",
+      appInsightsClient
+    );
+
     redisClient.on("error", (err) => {
       log.error("[REDIS Error] an error occurs on redis client: %s", err);
       appInsightsClient?.trackEvent({
