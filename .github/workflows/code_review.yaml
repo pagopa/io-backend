@@ -1,0 +1,90 @@
+name: Code Review
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - "src/*"
+      - "package.json"
+      - "yarn.lock"
+      - "*.yaml"
+      - ".node-version"
+      - "eslint.config.mjs"
+      - ".prettierrc"
+
+
+jobs:
+  js_code_review:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check-out code
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      # Corepack is an official tool by Node.js that manages package managers versions
+
+      # This is needed to avoid
+      # Error: Error when performing the request to https://registry.npmjs.org/yarn/latest;
+      - name: Setup target Node.js to enable Corepack
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        with:
+          node-version-file: ".node-version"
+
+      - name: Setup yarn
+        run: corepack enable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        with:
+          node-version-file: ".node-version"
+          cache: "yarn"
+
+      - name: Install dependencies
+        run: yarn install --immutable
+        working-directory: .
+
+      - name: Generate definitions
+        run: yarn generate
+
+      - name: Build
+        run: yarn build
+
+      - name: Lint
+        run: yarn lint
+
+      - name: OpenAPI Bundle
+        run: |
+          yarn openapi:bundle
+          [[ -z $(git status --porcelain) ]] && exit 0 || git diff && exit 1
+
+      - name: Lint API bundle
+        run: |
+          valid=1
+          for apispec in $(ls openapi/generated/*.yaml); do
+            echo "validating $apispec"
+            npx swagger-cli validate  $apispec
+            result=$?
+            if [ ! $result = 0 ]; then
+              valid=0
+              echo "$apispec failed with code $result"
+            fi
+          done
+          [[ $valid = 1 ]] && exit 0 || exit 1
+      
+      - name: Lint API root directory
+        run: |
+          valid=1
+          for apispec in $(ls api_*.yaml); do
+            echo "validating $apispec"
+            npx swagger-cli validate  $apispec
+            result=$?
+            if [ ! $result = 0 ]; then
+              valid=0
+              echo "$apispec failed with code $result"
+            fi
+          done
+          [[ $valid = 1 ]] && exit 0 || exit 1
+
+      - name: Unit tests exec
+        run: yarn test:coverage
