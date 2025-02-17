@@ -16,6 +16,9 @@ locals {
   }
 
   env_secrets_cd = {
-    "AZURE_CLIENT_ID_CD" = module.identity_cd.identity_client_id
+    "AZURE_CLIENT_ID_CD"  = module.identity_cd.identity_client_id
+    "ARM_CLIENT_ID"       = module.identity_cd.identity_client_id
+    "ARM_TENANT_ID"       = data.azurerm_subscription.current.tenant_id
+    "ARM_SUBSCRIPTION_ID" = data.azurerm_subscription.current.subscription_id
   }
 }
