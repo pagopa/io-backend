@@ -39,29 +39,27 @@ paths:
               version: 0.0.1
               min_app_version: 0.0.0
               min_app_version_pagopa: 0.0.0
-    /status:
-      x-swagger-router-controller: ServerStatusController
-      get:
-        summary: Get service statuses
-        description: Returns the current status of all microservices.
-        responses:
-          '200':
-            description: OK
-            content:
-              application/json:
-                schema:
-                  type: array
-                  items:
-                    $ref: '#/definitions/ServiceStatus'
-          '500':
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    error:
-                      type: string
+  /status:
+    x-swagger-router-controller: ServerStatusController
+    get:
+      summary: Get service statuses
+      description: Returns the current status of all microservices.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/ServicesStatus'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
 definitions:
   ServerInfo:
     type: object
@@ -88,6 +86,15 @@ definitions:
     required:
       - ios
       - android
+  ServicesStatus:
+    type: object
+    properties:
+      services:
+        type: array
+        items:
+          $ref: '#/definitions/ServiceStatus'
+    required:
+      - services
   ServiceStatus:
     type: object
     properties:
