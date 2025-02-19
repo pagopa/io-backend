@@ -35,8 +35,6 @@ import {
   EUCOVIDCERT_API_CLIENT,
   FF_BONUS_ENABLED,
   FF_CGN_ENABLED,
-  FF_ENABLE_NOTIFY_ENDPOINT,
-  FF_ENABLE_SESSION_ENDPOINTS,
   FF_EUCOVIDCERT_ENABLED,
   FF_IO_FIMS_ENABLED,
   FF_IO_SIGN_ENABLED,
@@ -55,8 +53,6 @@ import {
   LOLLIPOP_API_CLIENT,
   LOLLIPOP_REVOKE_QUEUE_NAME,
   LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING,
-  NOTIFICATION_DEFAULT_SUBJECT,
-  NOTIFICATION_DEFAULT_TITLE,
   NOTIFICATIONS_QUEUE_NAME,
   NOTIFICATIONS_STORAGE_CONNECTION_STRING,
   PAGOPA_CLIENT,
@@ -66,35 +62,30 @@ import {
   PUSH_NOTIFICATIONS_STORAGE_CONNECTION_STRING,
   ROOT_REDIRECT_URL,
   SERVICES_APP_BACKEND_CLIENT,
-  TEST_CGN_FISCAL_CODES,
   TRIAL_SYSTEM_CLIENT,
   URL_TOKEN_STRATEGY
 } from "./config";
 import { getUserIdentity } from "./controllers/authenticationController";
 import BonusController from "./controllers/bonusController";
-import CgnController from "./controllers/cgnController";
-import CgnOperatorSearchController from "./controllers/cgnOperatorSearchController";
 import EUCovidCertController from "./controllers/eucovidcertController";
 import IoFimsController from "./controllers/fimsController";
 import { firstLollipopSign } from "./controllers/firstLollipopConsumerController";
 import IoSignController from "./controllers/ioSignController";
 import IoWalletController from "./controllers/ioWalletController";
-import MessagesController from "./controllers/messagesController";
-import NotificationController from "./controllers/notificationController";
-import PagoPAProxyController from "./controllers/pagoPAProxyController";
 import {
   getPNActivationController,
   upsertPNActivationController
 } from "./controllers/pnController";
-import ProfileController from "./controllers/profileController";
-import ServicesAppBackendController from "./controllers/serviceAppBackendController";
-import ServicesController from "./controllers/servicesController";
-import SessionController from "./controllers/sessionController";
-import SessionLockController from "./controllers/sessionLockController";
-import { getUserForMyPortal } from "./controllers/ssoController";
+import { getStatusServices } from "./controllers/statusServicesController";
 import TrialController from "./controllers/trialController";
-import UserDataProcessingController from "./controllers/userDataProcessingController";
-import UserMetadataController from "./controllers/userMetadataController";
+import { registerAPIRoutes } from "./routes/apiRoutes";
+import {
+  registerCgnAPIRoutes,
+  registerCgnOperatorSearchAPIRoutes
+} from "./routes/cgnRoutes";
+import { registerMyPortalRoutes } from "./routes/myportalRoutes";
+import { registerServicesAppBackendRoutes } from "./routes/servicesAppBackendRoutes";
+import { registerSessionAPIRoutes } from "./routes/sessionRoutes";
 import { ISessionStorage } from "./services/ISessionStorage";
 import AuthenticationLockService from "./services/authenticationLockService";
 import BonusService from "./services/bonusService";
@@ -108,10 +99,7 @@ import IoWalletService from "./services/ioWalletService";
 import LollipopService from "./services/lollipopService";
 import NewMessagesService from "./services/newMessagesService";
 import NotificationService from "./services/notificationService";
-import {
-  NotificationServiceFactory,
-  getNotificationServiceFactory
-} from "./services/notificationServiceFactory";
+import { getNotificationServiceFactory } from "./services/notificationServiceFactory";
 import PagoPAProxyService from "./services/pagoPAProxyService";
 import { PNService } from "./services/pnService";
 import ProfileService from "./services/profileService";
@@ -127,7 +115,6 @@ import { attachTrackingData } from "./utils/appinsights";
 import { getRequiredENVVar } from "./utils/container";
 import { constantExpressHandler, toExpressHandler } from "./utils/express";
 import { log } from "./utils/logger";
-import checkIP from "./utils/middleware/checkIP";
 import { expressErrorMiddleware } from "./utils/middleware/express";
 import {
   expressLollipopMiddleware,
@@ -630,77 +617,6 @@ export async function newApp({
   )();
 }
 
-function registerMyPortalRoutes(
-  app: Express,
-  basePath: string,
-  allowMyPortalIPSourceRange: ReadonlyArray<CIDR>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerMyPortalTokenAuth: any
-): void {
-  app.get(
-    `${basePath}/user`,
-    checkIP(allowMyPortalIPSourceRange),
-    bearerMyPortalTokenAuth,
-    toExpressHandler(getUserForMyPortal)
-  );
-}
-
-function registerServicesAppBackendRoutes(
-  app: Express,
-  basePath: string,
-  servicesAppBackendService: ServicesAppBackendService,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any
-): void {
-  const servicesAppBackendController: ServicesAppBackendController =
-    new ServicesAppBackendController(servicesAppBackendService);
-
-  app.get(
-    `${basePath}/institutions`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      servicesAppBackendController.findInstitutions,
-      servicesAppBackendController
-    )
-  );
-
-  app.get(
-    `${basePath}/institutions/featured`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      servicesAppBackendController.getFeaturedInstitutions,
-      servicesAppBackendController
-    )
-  );
-
-  app.get(
-    `${basePath}/institutions/:institutionId/services`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      servicesAppBackendController.findInstutionServices,
-      servicesAppBackendController
-    )
-  );
-
-  app.get(
-    `${basePath}/services/featured`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      servicesAppBackendController.getFeaturedServices,
-      servicesAppBackendController
-    )
-  );
-
-  app.get(
-    `${basePath}/services/:serviceId`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      servicesAppBackendController.getServiceById,
-      servicesAppBackendController
-    )
-  );
-}
-
 function registerEUCovidCertAPIRoutes(
   app: Express,
   basePath: string,
@@ -718,406 +634,6 @@ function registerEUCovidCertAPIRoutes(
       eucovidCertController.getEUCovidCertificate,
       eucovidCertController
     )
-  );
-}
-
-// eslint-disable-next-line max-params, max-lines-per-function
-function registerAPIRoutes(
-  app: Express,
-  basePath: string,
-  _allowNotifyIPSourceRange: ReadonlyArray<CIDR>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  urlTokenAuth: any,
-  profileService: ProfileService,
-  fnAppService: FunctionsAppService,
-  appMessagesService: NewMessagesService,
-  notificationServiceFactory: NotificationServiceFactory,
-  sessionStorage: RedisSessionStorage,
-  pagoPaProxyService: PagoPAProxyService,
-  userMetadataStorage: RedisUserMetadataStorage,
-  userDataProcessingService: UserDataProcessingService,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any,
-  lollipopClient: ReturnType<typeof LollipopApiClient>
-): void {
-  const profileController: ProfileController = new ProfileController(
-    profileService,
-    sessionStorage
-  );
-
-  const messagesController: MessagesController = new MessagesController(
-    appMessagesService,
-    lollipopClient,
-    sessionStorage
-  );
-
-  const servicesController: ServicesController = new ServicesController(
-    fnAppService
-  );
-
-  const notificationController: NotificationController =
-    new NotificationController(notificationServiceFactory, sessionStorage, {
-      notificationDefaultSubject: NOTIFICATION_DEFAULT_SUBJECT,
-      notificationDefaultTitle: NOTIFICATION_DEFAULT_TITLE
-    });
-
-  const sessionController: SessionController = new SessionController(
-    sessionStorage
-  );
-
-  const pagoPAProxyController: PagoPAProxyController =
-    new PagoPAProxyController(pagoPaProxyService);
-
-  const userMetadataController: UserMetadataController =
-    new UserMetadataController(userMetadataStorage);
-
-  const userDataProcessingController: UserDataProcessingController =
-    new UserDataProcessingController(userDataProcessingService);
-
-  app.get(
-    `${basePath}/profile`,
-    bearerSessionTokenAuth,
-    toExpressHandler(profileController.getProfile, profileController)
-  );
-
-  app.get(
-    `${basePath}/api-profile`,
-    bearerSessionTokenAuth,
-    toExpressHandler(profileController.getApiProfile, profileController)
-  );
-
-  app.post(
-    `${basePath}/profile`,
-    bearerSessionTokenAuth,
-    toExpressHandler(profileController.updateProfile, profileController)
-  );
-
-  app.post(
-    `${basePath}/email-validation-process`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      profileController.startEmailValidationProcess,
-      profileController
-    )
-  );
-
-  app.get(
-    `${basePath}/user-metadata`,
-    bearerSessionTokenAuth,
-    toExpressHandler(userMetadataController.getMetadata, userMetadataController)
-  );
-
-  app.post(
-    `${basePath}/user-metadata`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      userMetadataController.upsertMetadata,
-      userMetadataController
-    )
-  );
-
-  app.post(
-    `${basePath}/user-data-processing`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      userDataProcessingController.upsertUserDataProcessing,
-      userDataProcessingController
-    )
-  );
-
-  app.get(
-    `${basePath}/user-data-processing/:choice`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      userDataProcessingController.getUserDataProcessing,
-      userDataProcessingController
-    )
-  );
-
-  app.delete(
-    `${basePath}/user-data-processing/:choice`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      userDataProcessingController.abortUserDataProcessing,
-      userDataProcessingController
-    )
-  );
-
-  app.get(
-    `${basePath}/messages`,
-    bearerSessionTokenAuth,
-    toExpressHandler(messagesController.getMessagesByUser, messagesController)
-  );
-
-  app.get(
-    `${basePath}/messages/:id`,
-    bearerSessionTokenAuth,
-    toExpressHandler(messagesController.getMessage, messagesController)
-  );
-
-  app.put(
-    `${basePath}/messages/:id/message-status`,
-    bearerSessionTokenAuth,
-    toExpressHandler(messagesController.upsertMessageStatus, messagesController)
-  );
-
-  app.get(
-    `${basePath}/third-party-messages/:id/precondition`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      messagesController.getThirdPartyMessagePrecondition,
-      messagesController
-    )
-  );
-
-  app.get(
-    `${basePath}/third-party-messages/:id`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      messagesController.getThirdPartyMessage,
-      messagesController
-    )
-  );
-
-  app.get(
-    `${basePath}/third-party-messages/:id/attachments/:attachment_url(*)`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      messagesController.getThirdPartyMessageAttachment,
-      messagesController
-    )
-  );
-
-  app.get(
-    `${basePath}/services/:id`,
-    bearerSessionTokenAuth,
-    toExpressHandler(servicesController.getService, servicesController)
-  );
-
-  app.get(
-    `${basePath}/services/:id/preferences`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      servicesController.getServicePreferences,
-      servicesController
-    )
-  );
-
-  app.post(
-    `${basePath}/services/:id/preferences`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      servicesController.upsertServicePreferences,
-      servicesController
-    )
-  );
-
-  app.get(
-    `${basePath}/services`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      () => Promise.resolve(ResponseSuccessJson({ items: [] })),
-      servicesController
-    )
-  );
-
-  app.put(
-    `${basePath}/installations/:id`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      notificationController.createOrUpdateInstallation,
-      notificationController
-    )
-  );
-
-  if (FF_ENABLE_NOTIFY_ENDPOINT) {
-    app.post(
-      `${basePath}/notify`,
-      urlTokenAuth,
-      toExpressHandler(notificationController.notify, notificationController)
-    );
-  }
-
-  app.get(
-    `${basePath}/sessions`,
-    bearerSessionTokenAuth,
-    toExpressHandler(sessionController.listSessions, sessionController)
-  );
-
-  app.get(
-    `${basePath}/payment-requests/:rptId`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      pagoPAProxyController.getPaymentInfo,
-      pagoPAProxyController
-    )
-  );
-
-  app.post(
-    `${basePath}/payment-activations`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      pagoPAProxyController.activatePayment,
-      pagoPAProxyController
-    )
-  );
-
-  app.get(
-    `${basePath}/payment-activations/:codiceContestoPagamento`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      pagoPAProxyController.getActivationStatus,
-      pagoPAProxyController
-    )
-  );
-}
-
-// eslint-disable-next-line max-params
-function registerSessionAPIRoutes(
-  app: Express,
-  basePath: string,
-  _allowSessionHandleIPSourceRange: ReadonlyArray<CIDR>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  urlTokenAuth: any,
-  sessionStorage: RedisSessionStorage,
-  userMetadataStorage: RedisUserMetadataStorage,
-  lollipopService: LollipopService,
-  authenticationLockService: AuthenticationLockService,
-  notificationServiceFactory: NotificationServiceFactory
-): void {
-  if (FF_ENABLE_SESSION_ENDPOINTS) {
-    const sessionLockController: SessionLockController =
-      new SessionLockController(
-        sessionStorage,
-        userMetadataStorage,
-        lollipopService,
-        authenticationLockService,
-        notificationServiceFactory
-      );
-
-    app.get(
-      `${basePath}/sessions/:fiscal_code`,
-      urlTokenAuth,
-      toExpressHandler(
-        sessionLockController.getUserSession,
-        sessionLockController
-      )
-    );
-
-    app.post(
-      `${basePath}/sessions/:fiscal_code/lock`,
-      urlTokenAuth,
-      toExpressHandler(
-        sessionLockController.lockUserSession,
-        sessionLockController
-      )
-    );
-
-    app.post(
-      `${basePath}/sessions/:fiscal_code/logout`,
-      urlTokenAuth,
-      toExpressHandler(
-        sessionLockController.deleteUserSession,
-        sessionLockController
-      )
-    );
-
-    app.delete(
-      `${basePath}/sessions/:fiscal_code/lock`,
-      urlTokenAuth,
-      toExpressHandler(
-        sessionLockController.unlockUserSession,
-        sessionLockController
-      )
-    );
-
-    app.post(
-      `${basePath}/auth/:fiscal_code/lock`,
-      urlTokenAuth,
-      toExpressHandler(
-        sessionLockController.lockUserAuthentication,
-        sessionLockController
-      )
-    );
-
-    app.post(
-      `${basePath}/auth/:fiscal_code/release-lock`,
-      urlTokenAuth,
-      toExpressHandler(
-        sessionLockController.unlockUserAuthentication,
-        sessionLockController
-      )
-    );
-
-    app.get(
-      `${basePath}/sessions/:fiscal_code/state`,
-      urlTokenAuth,
-      toExpressHandler(
-        sessionLockController.getUserSessionState,
-        sessionLockController
-      )
-    );
-  }
-}
-
-function registerCgnAPIRoutes(
-  app: Express,
-  basePath: string,
-  cgnService: CgnService,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any
-): void {
-  const cgnController: CgnController = new CgnController(
-    cgnService,
-    TEST_CGN_FISCAL_CODES
-  );
-
-  app.get(
-    `${basePath}/status`,
-    bearerSessionTokenAuth,
-    toExpressHandler(cgnController.getCgnStatus, cgnController)
-  );
-
-  app.get(
-    `${basePath}/eyca/status`,
-    bearerSessionTokenAuth,
-    toExpressHandler(cgnController.getEycaStatus, cgnController)
-  );
-
-  app.post(
-    `${basePath}/activation`,
-    bearerSessionTokenAuth,
-    toExpressHandler(cgnController.startCgnActivation, cgnController)
-  );
-
-  app.get(
-    `${basePath}/activation`,
-    bearerSessionTokenAuth,
-    toExpressHandler(cgnController.getCgnActivation, cgnController)
-  );
-
-  app.post(
-    `${basePath}/eyca/activation`,
-    bearerSessionTokenAuth,
-    toExpressHandler(cgnController.startEycaActivation, cgnController)
-  );
-
-  app.get(
-    `${basePath}/eyca/activation`,
-    bearerSessionTokenAuth,
-    toExpressHandler(cgnController.getEycaActivation, cgnController)
-  );
-
-  app.post(
-    `${basePath}/delete`,
-    bearerSessionTokenAuth,
-    toExpressHandler(cgnController.startCgnUnsubscription, cgnController)
-  );
-
-  app.post(
-    `${basePath}/otp`,
-    bearerSessionTokenAuth,
-    toExpressHandler(cgnController.generateOtp, cgnController)
   );
 }
 
@@ -1202,72 +718,6 @@ function registerIoFimsAPIRoutes(
     `${basePath}/export-requests`,
     bearerSessionTokenAuth,
     toExpressHandler(ioFimsController.requestExport, ioFimsController)
-  );
-}
-
-function registerCgnOperatorSearchAPIRoutes(
-  app: Express,
-  basePath: string,
-  cgnService: CgnService,
-  cgnOperatorSearchService: CgnOperatorSearchService,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any
-): void {
-  const cgnOperatorController: CgnOperatorSearchController =
-    new CgnOperatorSearchController(cgnService, cgnOperatorSearchService);
-
-  app.get(
-    `${basePath}/published-product-categories`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      cgnOperatorController.getPublishedProductCategories,
-      cgnOperatorController
-    )
-  );
-
-  app.get(
-    `${basePath}/merchants/:merchantId`,
-    bearerSessionTokenAuth,
-    toExpressHandler(cgnOperatorController.getMerchant, cgnOperatorController)
-  );
-
-  app.get(
-    `${basePath}/count`,
-    bearerSessionTokenAuth,
-    toExpressHandler(cgnOperatorController.count, cgnOperatorController)
-  );
-
-  app.post(
-    `${basePath}/search`,
-    bearerSessionTokenAuth,
-    toExpressHandler(cgnOperatorController.search, cgnOperatorController)
-  );
-
-  app.post(
-    `${basePath}/online-merchants`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      cgnOperatorController.getOnlineMerchants,
-      cgnOperatorController
-    )
-  );
-
-  app.post(
-    `${basePath}/offline-merchants`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      cgnOperatorController.getOfflineMerchants,
-      cgnOperatorController
-    )
-  );
-
-  app.get(
-    `${basePath}/discount-bucket-code/:discountId`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      cgnOperatorController.getDiscountBucketCode,
-      cgnOperatorController
-    )
   );
 }
 
@@ -1392,6 +842,8 @@ function registerPublicRoutes(app: Express): void {
   app.get("/ping", (_, res) => {
     res.status(200).send("ok");
   });
+
+  app.get("/status", toExpressHandler(getStatusServices));
 }
 
 // eslint-disable-next-line max-params

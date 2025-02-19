@@ -39,6 +39,29 @@ paths:
               version: 0.0.1
               min_app_version: 0.0.0
               min_app_version_pagopa: 0.0.0
+    /status:
+      x-swagger-router-controller: ServerStatusController
+      get:
+        summary: Get service statuses
+        description: Returns the current status of all microservices.
+        responses:
+          '200':
+            description: OK
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: '#/definitions/ServiceStatus'
+          '500':
+            description: Internal Server Error
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    error:
+                      type: string
 definitions:
   ServerInfo:
     type: object
@@ -65,6 +88,28 @@ definitions:
     required:
       - ios
       - android
+  ServiceStatus:
+    type: object
+    properties:
+      id:
+        type: string
+      status:
+        $ref: '#/definitions/StatusEnum'
+      details:
+        type: string
+    required:
+      - id
+      - status
+      - details
+  StatusEnum:
+    type: string
+    description: Status of a service
+    enum:
+      - OK
+      - WARNING
+      - CRITICAL
+      - PARTIAL_AVAILABILITY
+      - MANTAINANCE
 consumes:
   - application/json
 produces:
