@@ -1,5 +1,6 @@
 import { CIDR } from "@pagopa/ts-commons/lib/strings";
 import { Express } from "express";
+import * as passport from "passport";
 
 import { FF_ENABLE_SESSION_ENDPOINTS } from "../config";
 import SessionLockController from "../controllers/sessionLockController";
@@ -14,8 +15,7 @@ export const registerSessionAPIRoutes = (
   app: Express,
   basePath: string,
   _allowSessionHandleIPSourceRange: ReadonlyArray<CIDR>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  urlTokenAuth: any,
+  urlTokenAuth: ReturnType<passport.Authenticator["authenticate"]>,
   sessionStorage: RedisSessionStorage,
   userMetadataStorage: RedisUserMetadataStorage,
   lollipopService: LollipopService,

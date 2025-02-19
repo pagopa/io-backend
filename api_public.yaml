@@ -46,21 +46,16 @@ paths:
       description: Returns the current status of all microservices.
       responses:
         '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/definitions/ServicesStatus'
+          description: App backend microservices statuses.
+          schema:
+            $ref: '#/definitions/ServicesStatus'
         '500':
           description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
+          schema:
+            $ref: "#/definitions/ProblemJson"
 definitions:
+  ProblemJson:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v29.1.1/openapi/definitions.yaml#/ProblemJson"
   ServerInfo:
     type: object
     title: Server information

@@ -1,6 +1,7 @@
 import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { CIDR } from "@pagopa/ts-commons/lib/strings";
 import { Express } from "express";
+import * as passport from "passport";
 
 import { LollipopApiClient } from "../clients/lollipop";
 import {
@@ -31,8 +32,7 @@ export const registerAPIRoutes = (
   app: Express,
   basePath: string,
   _allowNotifyIPSourceRange: ReadonlyArray<CIDR>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  urlTokenAuth: any,
+  urlTokenAuth: ReturnType<passport.Authenticator["authenticate"]>,
   profileService: ProfileService,
   fnAppService: FunctionsAppService,
   appMessagesService: NewMessagesService,
@@ -41,8 +41,7 @@ export const registerAPIRoutes = (
   pagoPaProxyService: PagoPAProxyService,
   userMetadataStorage: RedisUserMetadataStorage,
   userDataProcessingService: UserDataProcessingService,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any,
+  bearerSessionTokenAuth: ReturnType<passport.Authenticator["authenticate"]>,
   lollipopClient: ReturnType<typeof LollipopApiClient>
 ): void => {
   const profileController: ProfileController = new ProfileController(

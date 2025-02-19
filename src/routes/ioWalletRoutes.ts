@@ -1,4 +1,5 @@
 import { Express } from "express";
+import * as passport from "passport";
 
 import IoWalletController from "../controllers/ioWalletController";
 import IoWalletService from "../services/ioWalletService";
@@ -8,8 +9,7 @@ export const registerIoWalletAPIRoutes = (
   app: Express,
   basePath: string,
   ioWalletService: IoWalletService,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any
+  bearerSessionTokenAuth: ReturnType<passport.Authenticator["authenticate"]>
 ): void => {
   const ioWalletController = new IoWalletController(ioWalletService);
 

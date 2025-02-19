@@ -1,6 +1,7 @@
 import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { Express } from "express";
+import * as passport from "passport";
 
 import { LollipopApiClient } from "../clients/lollipop";
 import { IO_SIGN_SERVICE_ID } from "../config";
@@ -16,8 +17,7 @@ export const registerIoSignAPIRoutes = (
   basePath: string,
   ioSignService: IoSignService,
   profileService: ProfileService,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any,
+  bearerSessionTokenAuth: ReturnType<passport.Authenticator["authenticate"]>,
   lollipopClient: ReturnType<typeof LollipopApiClient>,
   sessionStorage: ISessionStorage
 ): void => {

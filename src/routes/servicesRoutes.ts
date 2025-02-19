@@ -1,4 +1,5 @@
 import { Express } from "express";
+import * as passport from "passport";
 
 import ServicesAppBackendController from "../controllers/serviceAppBackendController";
 import ServicesAppBackendService from "../services/servicesAppBackendService";
@@ -8,8 +9,7 @@ export const registerServicesAppBackendRoutes = (
   app: Express,
   basePath: string,
   servicesAppBackendService: ServicesAppBackendService,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any
+  bearerSessionTokenAuth: ReturnType<passport.Authenticator["authenticate"]>
 ): void => {
   const servicesAppBackendController: ServicesAppBackendController =
     new ServicesAppBackendController(servicesAppBackendService);

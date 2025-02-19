@@ -1,4 +1,5 @@
 import { Express } from "express";
+import * as passport from "passport";
 
 import TrialController from "../controllers/trialController";
 import TrialService from "../services/trialService";
@@ -8,8 +9,7 @@ export const registerTrialSystemAPIRoutes = (
   app: Express,
   basePath: string,
   trialService: TrialService,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any
+  bearerSessionTokenAuth: ReturnType<passport.Authenticator["authenticate"]>
 ): void => {
   const trialController: TrialController = new TrialController(trialService);
 

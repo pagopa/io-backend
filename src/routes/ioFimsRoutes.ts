@@ -1,4 +1,5 @@
 import { Express } from "express";
+import * as passport from "passport";
 
 import IoFimsController from "../controllers/fimsController";
 import IoFimsService from "../services/fimsService";
@@ -10,8 +11,7 @@ export const registerIoFimsAPIRoutes = (
   basePath: string,
   ioFimsService: IoFimsService,
   profileService: ProfileService,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any
+  bearerSessionTokenAuth: ReturnType<passport.Authenticator["authenticate"]>
 ): void => {
   const ioFimsController: IoFimsController = new IoFimsController(
     ioFimsService,

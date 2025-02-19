@@ -1,4 +1,5 @@
 import { Express } from "express";
+import * as passport from "passport";
 
 import {
   getPNActivationController,
@@ -11,8 +12,7 @@ export const registerPNRoutes = (
   app: Express,
   pnBasePath: string,
   pnService: ReturnType<typeof PNService>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any
+  bearerSessionTokenAuth: ReturnType<passport.Authenticator["authenticate"]>
 ): void => {
   app.get(
     `${pnBasePath}/activation`,

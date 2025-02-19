@@ -1,4 +1,5 @@
 import { Express } from "express";
+import * as passport from "passport";
 
 import { TEST_CGN_FISCAL_CODES } from "../config";
 import CgnController from "../controllers/cgnController";
@@ -11,8 +12,7 @@ export const registerCgnAPIRoutes = (
   app: Express,
   basePath: string,
   cgnService: CgnService,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any
+  bearerSessionTokenAuth: ReturnType<passport.Authenticator["authenticate"]>
 ): void => {
   const cgnController: CgnController = new CgnController(
     cgnService,

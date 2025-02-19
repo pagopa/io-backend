@@ -1,4 +1,5 @@
 import { Express } from "express";
+import * as passport from "passport";
 
 import BonusController from "../controllers/bonusController";
 import BonusService from "../services/bonusService";
@@ -9,8 +10,7 @@ export const registerBonusAPIRoutes = (
   app: Express,
   basePath: string,
   bonusService: BonusService,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any
+  bearerSessionTokenAuth: ReturnType<passport.Authenticator["authenticate"]>
 ): void => {
   const bonusController: BonusController = new BonusController(bonusService);
 
