@@ -7,8 +7,7 @@ import {
   NodeEnvironment,
   NodeEnvironmentEnum
 } from "@pagopa/ts-commons/lib/environment";
-import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
-import { CIDR, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { CIDR } from "@pagopa/ts-commons/lib/strings";
 import * as appInsights from "applicationinsights";
 import * as bodyParser from "body-parser";
 import * as express from "express";
@@ -21,10 +20,6 @@ import * as helmet from "helmet";
 import * as morgan from "morgan";
 import * as passport from "passport";
 
-import { ServerInfo } from "../generated/public/ServerInfo";
-import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
-import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
-import { LollipopApiClient } from "./clients/lollipop";
 import {
   API_CLIENT,
   APP_MESSAGES_API_CLIENT,
@@ -46,7 +41,6 @@ import {
   FIRST_LOLLIPOP_CONSUMER_CLIENT,
   IO_FIMS_API_CLIENT,
   IO_SIGN_API_CLIENT,
-  IO_SIGN_SERVICE_ID,
   IO_WALLET_API_CLIENT,
   LOCKED_PROFILES_STORAGE_CONNECTION_STRING,
   LOCKED_PROFILES_TABLE_NAME,
@@ -60,33 +54,28 @@ import {
   PNAddressBookConfig,
   PUSH_NOTIFICATIONS_QUEUE_NAME,
   PUSH_NOTIFICATIONS_STORAGE_CONNECTION_STRING,
-  ROOT_REDIRECT_URL,
   SERVICES_APP_BACKEND_CLIENT,
   TRIAL_SYSTEM_CLIENT,
   URL_TOKEN_STRATEGY
 } from "./config";
-import { getUserIdentity } from "./controllers/authenticationController";
-import BonusController from "./controllers/bonusController";
-import EUCovidCertController from "./controllers/eucovidcertController";
-import IoFimsController from "./controllers/fimsController";
-import { firstLollipopSign } from "./controllers/firstLollipopConsumerController";
-import IoSignController from "./controllers/ioSignController";
-import IoWalletController from "./controllers/ioWalletController";
-import {
-  getPNActivationController,
-  upsertPNActivationController
-} from "./controllers/pnController";
-import { getStatusServices } from "./controllers/statusServicesController";
-import TrialController from "./controllers/trialController";
-import { registerAPIRoutes } from "./routes/apiRoutes";
+import { registerAuthenticationRoutes } from "./routes/authenticationRoutes";
+import { registerAPIRoutes } from "./routes/baseRoutes";
+import { registerBonusAPIRoutes } from "./routes/bonusRoutes";
 import {
   registerCgnAPIRoutes,
   registerCgnOperatorSearchAPIRoutes
 } from "./routes/cgnRoutes";
+import { registerEUCovidCertAPIRoutes } from "./routes/euCovidCertRoutes";
+import { registerFirstLollipopConsumer } from "./routes/firstLollipopConsumerRoutes";
+import { registerIoFimsAPIRoutes } from "./routes/ioFimsRoutes";
+import { registerIoSignAPIRoutes } from "./routes/ioSignRoutes";
+import { registerIoWalletAPIRoutes } from "./routes/ioWalletRoutes";
 import { registerMyPortalRoutes } from "./routes/myportalRoutes";
-import { registerServicesAppBackendRoutes } from "./routes/servicesAppBackendRoutes";
+import { registerPNRoutes } from "./routes/pnRoutes";
+import { registerPublicRoutes } from "./routes/publicRoutes";
+import { registerServicesAppBackendRoutes } from "./routes/servicesRoutes";
 import { registerSessionAPIRoutes } from "./routes/sessionRoutes";
-import { ISessionStorage } from "./services/ISessionStorage";
+import { registerTrialSystemAPIRoutes } from "./routes/trialSystemRoutes";
 import AuthenticationLockService from "./services/authenticationLockService";
 import BonusService from "./services/bonusService";
 import CgnOperatorSearchService from "./services/cgnOperatorSearchService";
@@ -113,19 +102,9 @@ import bearerSessionTokenStrategy from "./strategies/bearerSessionTokenStrategy"
 import { User } from "./types/user";
 import { attachTrackingData } from "./utils/appinsights";
 import { getRequiredENVVar } from "./utils/container";
-import { constantExpressHandler, toExpressHandler } from "./utils/express";
 import { log } from "./utils/logger";
 import { expressErrorMiddleware } from "./utils/middleware/express";
-import {
-  expressLollipopMiddleware,
-  expressLollipopMiddlewareLegacy
-} from "./utils/middleware/lollipop";
-import {
-  getCurrentBackendVersion,
-  getObjectFromPackageJson
-} from "./utils/package";
 import { RedisClientMode, RedisClientSelector } from "./utils/redis";
-import { ResponseErrorDismissed } from "./utils/responses";
 
 import expressEnforcesSsl = require("express-enforces-ssl");
 
@@ -404,10 +383,8 @@ export async function newApp({
 
         const TRIAL_SERVICE = new TrialService(TRIAL_SYSTEM_CLIENT);
 
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         registerPublicRoutes(app);
 
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         registerFirstLollipopConsumer(
           app,
           "/first-lollipop",
@@ -417,7 +394,6 @@ export async function newApp({
           authMiddlewares.bearerSession
         );
 
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         registerAuthenticationRoutes(
           app,
           authenticationBasePath,
@@ -436,7 +412,6 @@ export async function newApp({
         const USER_METADATA_STORAGE = new RedisUserMetadataStorage(
           REDIS_CLIENT_SELECTOR.selectOne(RedisClientMode.FAST)
         );
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         registerAPIRoutes(
           app,
           APIBasePath,
@@ -453,7 +428,6 @@ export async function newApp({
           authMiddlewares.bearerSession,
           LOLLIPOP_API_CLIENT
         );
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         registerSessionAPIRoutes(
           app,
           APIBasePath,
@@ -466,7 +440,6 @@ export async function newApp({
           notificationServiceFactory
         );
         if (FF_BONUS_ENABLED) {
-          // eslint-disable-next-line @typescript-eslint/no-use-before-define
           registerBonusAPIRoutes(
             app,
             BonusAPIBasePath,
@@ -475,7 +448,6 @@ export async function newApp({
           );
         }
         if (FF_CGN_ENABLED) {
-          // eslint-disable-next-line @typescript-eslint/no-use-before-define
           registerCgnAPIRoutes(
             app,
             CGNAPIBasePath,
@@ -483,7 +455,6 @@ export async function newApp({
             authMiddlewares.bearerSession
           );
 
-          // eslint-disable-next-line @typescript-eslint/no-use-before-define
           registerCgnOperatorSearchAPIRoutes(
             app,
             CGNOperatorSearchAPIBasePath,
@@ -494,7 +465,6 @@ export async function newApp({
         }
 
         if (FF_IO_SIGN_ENABLED) {
-          // eslint-disable-next-line @typescript-eslint/no-use-before-define
           registerIoSignAPIRoutes(
             app,
             IoSignAPIBasePath,
@@ -507,7 +477,6 @@ export async function newApp({
         }
 
         if (FF_IO_FIMS_ENABLED) {
-          // eslint-disable-next-line @typescript-eslint/no-use-before-define
           registerIoFimsAPIRoutes(
             app,
             IoFimsAPIBasePath,
@@ -518,7 +487,6 @@ export async function newApp({
         }
 
         if (FF_EUCOVIDCERT_ENABLED) {
-          // eslint-disable-next-line @typescript-eslint/no-use-before-define
           registerEUCovidCertAPIRoutes(
             app,
             EUCovidCertBasePath,
@@ -527,14 +495,13 @@ export async function newApp({
           );
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         registerMyPortalRoutes(
           app,
           MyPortalBasePath,
           allowMyPortalIPSourceRange,
           authMiddlewares.bearerMyPortal
         );
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+
         registerServicesAppBackendRoutes(
           app,
           ServicesAppBackendBasePath,
@@ -547,7 +514,6 @@ export async function newApp({
           O.isSome(PN_ADDRESS_BOOK_CLIENT_SELECTOR)
         ) {
           const pnService = PNService(PN_ADDRESS_BOOK_CLIENT_SELECTOR.value);
-          // eslint-disable-next-line @typescript-eslint/no-use-before-define
           registerPNRoutes(
             app,
             PNAddressBookConfig.PN_ACTIVATION_BASE_PATH,
@@ -557,7 +523,6 @@ export async function newApp({
         }
 
         if (FF_TRIAL_SYSTEM_ENABLED) {
-          // eslint-disable-next-line @typescript-eslint/no-use-before-define
           registerTrialSystemAPIRoutes(
             app,
             TrialSystemBasePath,
@@ -567,7 +532,6 @@ export async function newApp({
         }
 
         if (FF_IO_WALLET_ENABLED) {
-          // eslint-disable-next-line @typescript-eslint/no-use-before-define
           registerIoWalletAPIRoutes(
             app,
             IoWalletAPIBasePath,
@@ -615,337 +579,6 @@ export async function newApp({
       throw err;
     })
   )();
-}
-
-function registerEUCovidCertAPIRoutes(
-  app: Express,
-  basePath: string,
-  eucovidcertService: EUCovidCertService,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any
-): void {
-  const eucovidCertController: EUCovidCertController =
-    new EUCovidCertController(eucovidcertService);
-
-  app.post(
-    `${basePath}/certificate`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      eucovidCertController.getEUCovidCertificate,
-      eucovidCertController
-    )
-  );
-}
-
-// eslint-disable-next-line max-params
-function registerIoSignAPIRoutes(
-  app: Express,
-  basePath: string,
-  ioSignService: IoSignService,
-  profileService: ProfileService,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any,
-  lollipopClient: ReturnType<typeof LollipopApiClient>,
-  sessionStorage: ISessionStorage
-): void {
-  const ioSignController: IoSignController = new IoSignController(
-    ioSignService,
-    profileService
-  );
-
-  app.get(
-    `${basePath}/metadata`,
-    bearerSessionTokenAuth,
-    constantExpressHandler(
-      ResponseSuccessJson({
-        serviceId: IO_SIGN_SERVICE_ID as NonEmptyString
-      })
-    )
-  );
-
-  app.post(
-    `${basePath}/qtsp/clauses/filled_document`,
-    bearerSessionTokenAuth,
-    toExpressHandler(ioSignController.createFilledDocument, ioSignController)
-  );
-
-  app.get(
-    `${basePath}/qtsp/clauses`,
-    bearerSessionTokenAuth,
-    toExpressHandler(ioSignController.getQtspClausesMetadata, ioSignController)
-  );
-
-  app.post(
-    `${basePath}/signatures`,
-    bearerSessionTokenAuth,
-    expressLollipopMiddlewareLegacy(lollipopClient, sessionStorage),
-    toExpressHandler(ioSignController.createSignature, ioSignController)
-  );
-
-  app.get(
-    `${basePath}/signature-requests`,
-    bearerSessionTokenAuth,
-    toExpressHandler(ioSignController.getSignatureRequests, ioSignController)
-  );
-
-  app.get(
-    `${basePath}/signature-requests/:id`,
-    bearerSessionTokenAuth,
-    toExpressHandler(ioSignController.getSignatureRequest, ioSignController)
-  );
-}
-
-function registerIoFimsAPIRoutes(
-  app: Express,
-  basePath: string,
-  ioFimsService: IoFimsService,
-  profileService: ProfileService,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any
-): void {
-  const ioFimsController: IoFimsController = new IoFimsController(
-    ioFimsService,
-    profileService
-  );
-
-  app.get(
-    `${basePath}/accesses`,
-    bearerSessionTokenAuth,
-    toExpressHandler(ioFimsController.getAccessHistory, ioFimsController)
-  );
-
-  app.post(
-    `${basePath}/export-requests`,
-    bearerSessionTokenAuth,
-    toExpressHandler(ioFimsController.requestExport, ioFimsController)
-  );
-}
-
-function registerBonusAPIRoutes(
-  app: Express,
-  basePath: string,
-  bonusService: BonusService,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any
-): void {
-  const bonusController: BonusController = new BonusController(bonusService);
-
-  app.post(
-    `${basePath}/bonus/vacanze/eligibility`,
-    bearerSessionTokenAuth,
-    constantExpressHandler(ResponseErrorDismissed)
-  );
-
-  app.get(
-    `${basePath}/bonus/vacanze/eligibility`,
-    bearerSessionTokenAuth,
-    toExpressHandler(bonusController.getBonusEligibilityCheck, bonusController)
-  );
-
-  app.get(
-    `${basePath}/bonus/vacanze/activations/:bonus_id`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      bonusController.getLatestBonusActivationById,
-      bonusController
-    )
-  );
-
-  app.get(
-    `${basePath}/bonus/vacanze/activations`,
-    bearerSessionTokenAuth,
-    toExpressHandler(bonusController.getAllBonusActivations, bonusController)
-  );
-
-  app.post(
-    `${basePath}/bonus/vacanze/activations`,
-    bearerSessionTokenAuth,
-    constantExpressHandler(ResponseErrorDismissed)
-  );
-}
-
-// eslint-disable-next-line max-params
-function registerAuthenticationRoutes(
-  app: Express,
-  authBasePath: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any
-): void {
-  app.get(
-    `${authBasePath}/user-identity`,
-    bearerSessionTokenAuth,
-    toExpressHandler(getUserIdentity)
-  );
-}
-
-function registerPNRoutes(
-  app: Express,
-  pnBasePath: string,
-  pnService: ReturnType<typeof PNService>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any
-) {
-  app.get(
-    `${pnBasePath}/activation`,
-    bearerSessionTokenAuth,
-    toExpressHandler(getPNActivationController(pnService.getPnActivation))
-  );
-
-  app.post(
-    `${pnBasePath}/activation`,
-    bearerSessionTokenAuth,
-    toExpressHandler(upsertPNActivationController(pnService.upsertPnActivation))
-  );
-}
-
-function registerPublicRoutes(app: Express): void {
-  // Current Backend API version
-  const version = getCurrentBackendVersion();
-  // The minimum app version that support this API
-  const minAppVersion = getObjectFromPackageJson(
-    "min_app_version",
-    VersionPerPlatform
-  );
-  const minAppVersionPagoPa = getObjectFromPackageJson(
-    "min_app_version_pagopa",
-    VersionPerPlatform
-  );
-
-  app.get("/", (_, res) => {
-    res.redirect(ROOT_REDIRECT_URL.href);
-  });
-
-  app.get("/info", (_, res) => {
-    const serverInfo: ServerInfo = {
-      min_app_version: pipe(
-        minAppVersion,
-        O.getOrElse(() => ({
-          android: "UNKNOWN",
-          ios: "UNKNOWN"
-        }))
-      ),
-      min_app_version_pagopa: pipe(
-        minAppVersionPagoPa,
-        O.getOrElse(() => ({
-          android: "UNKNOWN",
-          ios: "UNKNOWN"
-        }))
-      ),
-      version
-    };
-    res.status(200).json(serverInfo);
-  });
-
-  // Liveness probe for Kubernetes.
-  // @see
-  // https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#define-a-liveness-http-request
-  app.get("/ping", (_, res) => {
-    res.status(200).send("ok");
-  });
-
-  app.get("/status", toExpressHandler(getStatusServices));
-}
-
-// eslint-disable-next-line max-params
-function registerFirstLollipopConsumer(
-  app: Express,
-  basePath: string,
-  lollipopClient: ReturnType<typeof LollipopApiClient>,
-  sessionStorage: ISessionStorage,
-  firstLollipopConsumerClient: ReturnType<typeof FirstLollipopConsumerClient>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any
-): void {
-  app.post(
-    `${basePath}/sign`,
-    bearerSessionTokenAuth,
-    expressLollipopMiddleware(lollipopClient, sessionStorage),
-    toExpressHandler(firstLollipopSign(firstLollipopConsumerClient))
-  );
-}
-
-function registerTrialSystemAPIRoutes(
-  app: Express,
-  basePath: string,
-  trialService: TrialService,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any
-): void {
-  const trialController: TrialController = new TrialController(trialService);
-
-  app.post(
-    `${basePath}/trials/:trialId/subscriptions`,
-    bearerSessionTokenAuth,
-    toExpressHandler(trialController.createTrialSubscription, trialController)
-  );
-
-  app.get(
-    `${basePath}/trials/:trialId/subscriptions`,
-    bearerSessionTokenAuth,
-    toExpressHandler(trialController.getTrialSubscription, trialController)
-  );
-}
-
-function registerIoWalletAPIRoutes(
-  app: Express,
-  basePath: string,
-  ioWalletService: IoWalletService,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any
-): void {
-  const ioWalletController = new IoWalletController(ioWalletService);
-
-  app.get(
-    `${basePath}/nonce`,
-    bearerSessionTokenAuth,
-    toExpressHandler(ioWalletController.getNonce, ioWalletController)
-  );
-
-  app.post(
-    `${basePath}/wallet-instances`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      ioWalletController.createWalletInstance,
-      ioWalletController
-    )
-  );
-
-  app.post(
-    `${basePath}/token`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      ioWalletController.createWalletAttestation,
-      ioWalletController
-    )
-  );
-
-  // TODO SIW-1843
-  app.put(
-    `${basePath}/wallet-instances/current/status`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      ioWalletController.setCurrentWalletInstanceStatus,
-      ioWalletController
-    )
-  );
-
-  app.get(
-    `${basePath}/wallet-instances/:walletInstanceId/status`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      ioWalletController.getWalletInstanceStatus,
-      ioWalletController
-    )
-  );
-
-  app.put(
-    `${basePath}/wallet-instances/:walletInstanceId/status`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      ioWalletController.setWalletInstanceStatus,
-      ioWalletController
-    )
-  );
 }
 
 export default defaultModule;
