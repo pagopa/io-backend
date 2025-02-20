@@ -6,8 +6,8 @@ import {
 import { Request } from "express";
 
 import { ServicesStatus } from "../../generated/public/ServicesStatus";
-import { StatusEnumEnum } from "../../generated/public/StatusEnum";
 import { withValidatedOrInternalError } from "../utils/responses";
+import { mockServicesStatus } from "./__mocks__/statusServices";
 
 /**
  * Returns the current status of all microservices.
@@ -19,14 +19,6 @@ export const getStatusServices = async (
   _req: Request
 ): Promise<IResponseErrorInternal | IResponseSuccessJson<ServicesStatus>> =>
   withValidatedOrInternalError(
-    ServicesStatus.decode({
-      services: [
-        {
-          id: "io-backend",
-          status: StatusEnumEnum.OK,
-          details: "IO Backend service is running"
-        }
-      ]
-    }),
+    ServicesStatus.decode(mockServicesStatus),
     (servicesStatus) => ResponseSuccessJson(servicesStatus)
   );
