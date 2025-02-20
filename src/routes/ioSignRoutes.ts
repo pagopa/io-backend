@@ -12,6 +12,17 @@ import ProfileService from "../services/profileService";
 import { constantExpressHandler, toExpressHandler } from "../utils/express";
 import { expressLollipopMiddlewareLegacy } from "../utils/middleware/lollipop";
 
+/**
+ * Mount the Io Sign routes into the Express application
+ *
+ * @param app The Express application
+ * @param basePath The base path for the Io Sign APIs
+ * @param ioSignService The service that handles the Io Sign requests
+ * @param profileService The service that provides user profiles
+ * @param bearerSessionTokenAuth The autentication middleware for user session token
+ * @param lollipopClient The Lollipop client used to communicate with the Lollipop APIs
+ * @param sessionStorage The session storage used to store user sessions
+ */
 export const registerIoSignAPIRoutes = (
   app: Express,
   basePath: string,

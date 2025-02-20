@@ -5,6 +5,14 @@ import IoWalletController from "../controllers/ioWalletController";
 import IoWalletService from "../services/ioWalletService";
 import { toExpressHandler } from "../utils/express";
 
+/**
+ * Mount the Wallet routes into the Express application
+ *
+ * @param app The Express application
+ * @param basePath The base path for the Wallet APIs
+ * @param ioWalletService The service that handles the Wallet operations
+ * @param bearerSessionTokenAuth The autentication middleware for user session token
+ */
 export const registerIoWalletAPIRoutes = (
   app: Express,
   basePath: string,

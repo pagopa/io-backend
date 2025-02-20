@@ -12,6 +12,11 @@ import {
   getObjectFromPackageJson
 } from "../utils/package";
 
+/**
+ * Register the public routes into the Express application.
+ *
+ * @param app The Express application
+ */
 export const registerPublicRoutes = (app: Express): void => {
   // Current Backend API version
   const version = getCurrentBackendVersion();

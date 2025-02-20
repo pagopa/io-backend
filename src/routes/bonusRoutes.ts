@@ -6,6 +6,14 @@ import BonusService from "../services/bonusService";
 import { constantExpressHandler, toExpressHandler } from "../utils/express";
 import { ResponseErrorDismissed } from "../utils/responses";
 
+/**
+ * Mount the bonus routes into the Express application
+ *
+ * @param app The Express application
+ * @param basePath The base path for the bonus APIs
+ * @param bonusService The service that handles the bonus requests
+ * @param bearerSessionTokenAuth The autentication middleware for user session token
+ */
 export const registerBonusAPIRoutes = (
   app: Express,
   basePath: string,

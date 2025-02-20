@@ -6,6 +6,15 @@ import IoFimsService from "../services/fimsService";
 import ProfileService from "../services/profileService";
 import { toExpressHandler } from "../utils/express";
 
+/**
+ * Mount the FIMS API routes into the Express application
+ *
+ * @param app The Express application
+ * @param basePath The base path for the FIMS APIs
+ * @param ioFimsService The service that handles the FIMS API requests
+ * @param profileService The service that handles the profile requests
+ * @param bearerSessionTokenAuth The autentication middleware for user session token
+ */
 export const registerIoFimsAPIRoutes = (
   app: Express,
   basePath: string,

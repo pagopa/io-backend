@@ -8,6 +8,14 @@ import {
 import { PNService } from "../services/pnService";
 import { toExpressHandler } from "../utils/express";
 
+/**
+ * Mount the Piattaforma Notifiche routes into the Express application
+ *
+ * @param app The Express application
+ * @param basePath The base path for the Piattaforma Notifiche APIs
+ * @param pnService The service that handles the Piattaforma Notifiche APIs
+ * @param bearerSessionTokenAuth The autentication middleware for user session token
+ */
 export const registerPNRoutes = (
   app: Express,
   pnBasePath: string,

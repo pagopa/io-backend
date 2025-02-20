@@ -27,6 +27,24 @@ import RedisUserMetadataStorage from "../services/redisUserMetadataStorage";
 import UserDataProcessingService from "../services/userDataProcessingService";
 import { toExpressHandler } from "../utils/express";
 
+/**
+ * Mount the base routes into the Express application
+ *
+ * @param app The Express application
+ * @param authBasePath The base path for the base API APIs
+ * @param _allowNotifyIPSourceRange The IP source range that is allowed to send notifications
+ * @param urlTokenAuth The middleware that autenticate the requests with a URL token
+ * @param profileService The service that handles the user profiles
+ * @param fnAppService The API Client for the Function App
+ * @param appMessagesService The service that handles the user messages
+ * @param notificationServiceFactory The factory that build the Service service to handle services
+ * @param sessionStorage The session storage service that handles the user sessions
+ * @param pagoPaProxyService The service that handles the PagoPA Proxy
+ * @param userMetadataStorage The user metadata storage service that handles the user metadata
+ * @param userDataProcessingService The service that handles the user request for data processing
+ * @param bearerSessionTokenAuth The autentication middleware for user session token
+ * @param lollipopClient The API Client that handles the Lollipop protocol requests
+ */
 // eslint-disable-next-line max-params, max-lines-per-function
 export const registerAPIRoutes = (
   app: Express,

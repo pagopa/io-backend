@@ -11,6 +11,19 @@ import RedisSessionStorage from "../services/redisSessionStorage";
 import RedisUserMetadataStorage from "../services/redisUserMetadataStorage";
 import { toExpressHandler } from "../utils/express";
 
+/**
+ * Mount the session routes into the Express application
+ *
+ * @param app The Express application
+ * @param basePath The base path for the session APIs
+ * @param _allowSessionHandleIPSourceRange The list of allowed IP source ranges for session handling
+ * @param urlTokenAuth The middleware that autenticate the requests with a URL token
+ * @param sessionStorage The storage service that handles the user sessions
+ * @param userMetadataStorage The storage service that handles the user metadata
+ * @param lollipopService The service that handles the lollipop requests
+ * @param authenticationLockService The service that handles the authentication lock requests
+ * @param notificationServiceFactory The factory that creates the notification service instances
+ */
 export const registerSessionAPIRoutes = (
   app: Express,
   basePath: string,

@@ -8,6 +8,14 @@ import CgnOperatorSearchService from "../services/cgnOperatorSearchService";
 import CgnService from "../services/cgnService";
 import { toExpressHandler } from "../utils/express";
 
+/**
+ * Mount the cgn routes into the Express application
+ *
+ * @param app The Express application
+ * @param basePath The base path for the cgn APIs
+ * @param cgnService The service that handles the cgn requests
+ * @param bearerSessionTokenAuth The autentication middleware for user session token
+ */
 export const registerCgnAPIRoutes = (
   app: Express,
   basePath: string,

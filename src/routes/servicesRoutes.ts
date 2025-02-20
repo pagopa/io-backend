@@ -5,6 +5,14 @@ import ServicesAppBackendController from "../controllers/serviceAppBackendContro
 import ServicesAppBackendService from "../services/servicesAppBackendService";
 import { toExpressHandler } from "../utils/express";
 
+/**
+ * Mount the services routes into the Express application
+ *
+ * @param app The Express application
+ * @param basePath The base path for the services APIs
+ * @param servicesAppBackendService The service that handles the services backend operations
+ * @param bearerSessionTokenAuth The autentication middleware for user session token
+ */
 export const registerServicesAppBackendRoutes = (
   app: Express,
   basePath: string,
