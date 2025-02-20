@@ -184,6 +184,7 @@
     "transform": {
       "^.+\\.(ts|tsx)$": "ts-jest"
     },
+    "modulePathIgnorePatterns": ["<rootDir>/dist/"],
     "testMatch": [
       "**/__tests__/*.ts"
     ],
