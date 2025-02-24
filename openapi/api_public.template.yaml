@@ -41,7 +41,23 @@ paths:
               version: "0.0.1"
               min_app_version: "0.0.0"
               min_app_version_pagopa: "0.0.0"
+  "/api/v1/status":
+    x-swagger-router-controller: ServerStatusController
+    get:
+      summary: Get service statuses
+      description: Returns the current status of all microservices.
+      responses:
+        '200':
+          description: App backend microservices statuses.
+          schema:
+            $ref: '#/definitions/ServicesStatus'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/ProblemJson"
 definitions:
+  ProblemJson:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ProblemJson"
   ServerInfo:
     type: object
     title: Server information
@@ -67,6 +83,37 @@ definitions:
     required:
       - ios
       - android
+  ServicesStatus:
+    type: object
+    properties:
+      services:
+        type: array
+        items:
+          $ref: "#/definitions/ServiceStatus"
+    required:
+      - services
+  ServiceStatus:
+    type: object
+    properties:
+      id:
+        type: string
+      status:
+        $ref: '#/definitions/StatusEnum'
+      details:
+        type: string
+    required:
+     - id
+     - status
+     - details
+  StatusEnum:
+    type: string
+    description: Status of a service
+    enum:
+      - OK
+      - WARNING
+      - CRITICAL
+      - PARTIAL_AVAILABILITY
+      - MANTAINANCE
 consumes:
   - application/json
 produces:
