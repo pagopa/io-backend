@@ -1,6 +1,6 @@
 {
   "name": "@pagopa/io-backend",
-  "version": "16.9.1",
+  "version": "16.10.0",
   "min_app_version": {
     "ios": "2.3.0",
     "android": "2.3.0"
@@ -184,7 +184,9 @@
     "transform": {
       "^.+\\.(ts|tsx)$": "ts-jest"
     },
-    "modulePathIgnorePatterns": ["<rootDir>/dist/"],
+    "modulePathIgnorePatterns": [
+      "<rootDir>/dist/"
+    ],
     "testMatch": [
       "**/__tests__/*.ts"
     ],
