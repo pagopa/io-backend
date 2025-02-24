@@ -62,5 +62,5 @@ export const registerPublicRoutes = (app: Express): void => {
     res.status(200).send("ok");
   });
 
-  app.get("/status", toExpressHandler(getStatusServices));
+  app.get("/api/v1/status", toExpressHandler(getStatusServices));
 };
