@@ -15,7 +15,6 @@ const mockHealthCheck = jest.fn();
 const mockGetWalletInstanceStatus = jest.fn();
 const mockGetCurrentWalletInstanceStatus = jest.fn();
 const mockSetWalletInstanceStatus = jest.fn();
-const mockSetCurrentWalletInstanceStatus = jest.fn();
 
 mockGetNonce.mockImplementation(() =>
   t.success({
@@ -56,12 +55,6 @@ mockSetWalletInstanceStatus.mockImplementation(() =>
   })
 );
 
-mockSetCurrentWalletInstanceStatus.mockImplementation(() =>
-  t.success({
-    status: 200,
-  })
-);
-
 const api = {
   getEntityConfiguration: mockGetEntityConfiguration,
   getNonce: mockGetNonce,
@@ -71,7 +64,6 @@ const api = {
   getWalletInstanceStatus: mockGetWalletInstanceStatus,
   getCurrentWalletInstanceStatus: mockGetCurrentWalletInstanceStatus,
   setWalletInstanceStatus: mockSetWalletInstanceStatus,
-  setCurrentWalletInstanceStatus: mockSetCurrentWalletInstanceStatus,
 };
 
 const mockCreateSubscription = jest.fn();
