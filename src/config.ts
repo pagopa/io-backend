@@ -9,6 +9,7 @@ import {
   setFetchTimeout,
   toFetch
 } from "@pagopa/ts-commons/lib/fetch";
+import { IntegerFromString } from "@pagopa/ts-commons/lib/numbers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString, Ulid } from "@pagopa/ts-commons/lib/strings";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
@@ -425,8 +426,21 @@ export const BARCODE_ALGORITHM = pipe(
   E.getOrElse(() => "code128" as NonEmptyString)
 );
 
-// Application insights sampling percentage
-export const DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE = 5;
+// Application insight
+export type AppInsightsConfig = t.TypeOf<typeof AppInsightsConfig>;
+export const AppInsightsConfig = t.intersection([
+  t.type({
+    APPINSIGHTS_CLOUD_ROLE_NAME: NonEmptyString,
+    APPINSIGHTS_CONNECTION_STRING: NonEmptyString
+  }),
+  t.partial({
+    APPINSIGHTS_DISABLE: NonEmptyString,
+    APPINSIGHTS_SAMPLING_PERCENTAGE: IntegerFromString
+  })
+]);
+
+export const errorOrAppInsightConfig: t.Validation<AppInsightsConfig> =
+  AppInsightsConfig.decode(process.env);
 
 // Feature flags
 export const FF_BONUS_ENABLED = process.env.FF_BONUS_ENABLED === "1";
