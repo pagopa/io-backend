@@ -58,7 +58,7 @@ mockSetWalletInstanceStatus.mockImplementation(() =>
 
 mockSetCurrentWalletInstanceStatus.mockImplementation(() =>
   t.success({
-    status: 200,
+    status: 204,
   })
 );
 
