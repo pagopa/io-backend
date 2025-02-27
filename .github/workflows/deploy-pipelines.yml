@@ -35,8 +35,6 @@ on:
         type: boolean
         required: false
         default: true
-  pull_request:
-    types: [opened, synchronize]
 
 env:
   BUNDLE_NAME: bundle
