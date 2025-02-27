@@ -65,7 +65,7 @@
     "generate:proxy:io-wallet-models": "rimraf generated/io-wallet && gen-api-models --api-spec api_io_wallet.yaml --out-dir generated/io-wallet",
     "postversion": "git push && git push --tags",
     "dist:modules": "modclean -r -n default:safe && yarn install --production",
-    "predeploy": "npm-run-all build dist:modules",
+    "predeploy": "npm-run-all generate build dist:modules",
     "preversion": "auto-changelog  --config .auto-changelog.json --unreleased --commit-limit false --stdout --template preview.hbs",
     "version": "npm-run-all bump:*",
     "bump:openapi": "npm run openapi:bundle && git add openapi/generated/*",
