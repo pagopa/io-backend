@@ -35,6 +35,8 @@ on:
         type: boolean
         required: false
         default: true
+  pull_request:
+    types: [opened, synchronize]
 
 env:
   BUNDLE_NAME: bundle
@@ -208,4 +210,3 @@ jobs:
             -n ${{ matrix.app_name }} \
             --slot staging \
             --target-slot production
-      
