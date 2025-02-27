@@ -6,6 +6,7 @@ on:
     types: [opened, synchronize]
     paths:
       - "src/*"
+      - ".github/workflows/*"
       - "package.json"
       - "yarn.lock"
       - "*.yaml"
