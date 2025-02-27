@@ -4,7 +4,7 @@ name: Deploy Pipelines - Legacy
 # and still use a legacy architecture that will be deprecated in the future.
 
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
       environment:
         description: Environment where the artifact will be deployed.
