@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: 3.0.2
 info:
   title: "Piattaforma Notifiche: API B2B per backend AppIO"
   description: |-
