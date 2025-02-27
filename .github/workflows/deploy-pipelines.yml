@@ -1,0 +1,210 @@
+name: Deploy Pipelines - Legacy
+
+# This workflow is used by functions that do not use the monorepo
+# and still use a legacy architecture that will be deprecated in the future.
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: Environment where the artifact will be deployed.
+        type: string
+        required: true
+      resource_group_name:
+        description: Web App resource group name.
+        type: string
+        required: true
+        default: 'io-p-rg-linux'
+      app_names:
+        description: Web App names.
+        type: string
+        required: true
+        default: "['io-p-app-appbackendli', 'io-p-app-appbackendl1', 'io-p-app-appbackendl2']"
+      health_check_path:
+        description: The health probe path exposed by the Function App.
+        type: string
+        required: false
+        default: '/info'
+      use_staging_slot:
+        description: True if artifact should be deployed to staging slot
+        type: boolean
+        required: false
+        default: true
+      use_private_agent:
+        description: Use a private agent to deploy the built artifact.
+        type: boolean
+        required: false
+        default: true
+
+env:
+  BUNDLE_NAME: bundle
+
+concurrency:
+  group: ${{ github.workflow }}-cd
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      WORKSPACE: ${{ github.workspace }}
+
+    steps:
+      - name: Check-out code
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        with:
+          node-version-file: ".node-version"
+          cache: "yarn"
+          cache-dependency-path: "yarn.lock"
+
+      - name: Install dependencies
+        run: yarn install --immutable
+        working-directory: .
+
+      - name: Build
+        run: yarn predeploy
+        working-directory: .
+
+      - name: Copy deploy files
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        env:
+          TARGET_FOLDER: "${{ github.workspace }}/${{ env.BUNDLE_NAME }}"
+          SOURCE_FOLDER: "${{ github.workspace }}"
+          CONTENTS: |
+            **/*
+            !.git/**/*
+            !**/*.js.map
+            !**/*.ts
+            !__*/**/*
+            !.github/**/*
+            !infra/**/*
+            !.vscode/**/*
+            !.devops/**/*
+            !azure-templates/**/*
+            !azure-pipelines.yml
+            !.prettierrc
+            !.gitignore
+            !.pre-commit-config.yaml
+            !.terraform-version
+            !README.md
+            !CODEOWNERS
+            !jest.config.js
+            !local.settings.json
+            !test
+            !tsconfig.json
+            !tslint.json
+            !yarn.lock
+            !Dangerfile.js
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          script: |-
+            const fs = require('fs').promises
+            const path = require('path')
+            const target = path.resolve(process.env.TARGET_FOLDER)
+
+            process.chdir(process.env.SOURCE_FOLDER || '.')
+
+            if (process.env.CLEAN_TARGET_FOLDER === 'true') await io.rmRF(target)
+            const flattenFolders = process.env.FLATTEN_FOLDERS === 'true'
+            const options = {force: process.env.OVERWRITE === 'true'}
+            const globber = await glob.create(process.env.CONTENTS || '**')
+
+            for await (const file of globber.globGenerator()) {
+              if ((await fs.lstat(file)).isDirectory()) continue
+              const filename = flattenFolders ? path.basename(file) : file.substring(process.cwd().length)
+              const dest = path.join(target, filename)
+              await io.mkdirP(path.dirname(dest))
+              await io.cp(file, dest, options)
+            }
+
+      - name: Make Zip File
+        run: |
+          cd ./${{ env.BUNDLE_NAME }}
+          zip -r ./${{ env.BUNDLE_NAME }}.zip .
+          mv ${{ env.BUNDLE_NAME }}.zip ../${{ env.BUNDLE_NAME }}.zip
+          cd ..
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
+        with:
+          name: ${{ env.BUNDLE_NAME }}
+          path: "${{ github.workspace }}/${{ env.BUNDLE_NAME }}.zip"
+          if-no-files-found: error
+          retention-days: 7
+
+  deploy:
+    if: ${{ !github.event.act }}
+    needs: [build]
+    strategy:
+      matrix:
+        app_name: ${{ fromJSON(inputs.app_names) }}
+    runs-on: ${{ inputs.use_private_agent == true && 'self-hosted' || 'ubuntu-latest' }}
+    environment: ${{ inputs.environment }}-cd
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Download Artifact
+        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
+        with:
+          name: ${{ env.BUNDLE_NAME }}
+
+      - name: Azure Login
+        uses: azure/login@a65d910e8af852a8061c627c456678983e180302 # v2
+        env:
+          ARM_USE_OIDC: true
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        with:
+          client-id: ${{ env.ARM_CLIENT_ID }}
+          tenant-id: ${{ env.ARM_TENANT_ID }}
+          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
+
+      - name: Deploy
+        if: ${{ inputs.use_staging_slot == false }}
+        run: |
+          az webapp deploy \
+            --resource-group ${{ inputs.resource_group_name }} \
+            --name ${{ matrix.app_name }} \
+            --src-path  ${{ github.workspace }}/${{ env.BUNDLE_NAME }}.zip \
+            --type zip \
+            --async false \
+            | grep -v "hidden-link:"
+
+      - name: Deploy to Staging Slot
+        if: ${{ inputs.use_staging_slot == true }}
+        run: |
+          az webapp deploy \
+            --resource-group ${{ inputs.resource_group_name }} \
+            --name ${{ matrix.app_name }} \
+            --slot staging \
+            --src-path  ${{ github.workspace }}/${{ env.BUNDLE_NAME }}.zip \
+            --type zip \
+            --async false \
+            | grep -v "hidden-link:"
+
+      - name: Ping Staging Health
+        if: ${{ inputs.use_staging_slot == true }}
+        run: |
+          curl \
+            --retry 5 \
+            --retry-max-time 120 \
+            --retry-all-errors \
+            -f 'https://${{ matrix.app_name }}-staging.azurewebsites.net${{ inputs.health_check_path }}'
+
+      - name: Swap Staging and Production Slots
+        if: ${{ inputs.use_staging_slot == true }}
+        run: |
+          az webapp deployment slot swap \
+            -g ${{ inputs.resource_group_name }} \
+            -n ${{ matrix.app_name }} \
+            --slot staging \
+            --target-slot production

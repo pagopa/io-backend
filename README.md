@@ -69,21 +69,20 @@ A Linux/macOS environment is required at the moment.
 ### Installation steps
 
 1. clone the project in a folder called `io-backend`
-1. go to the project's folder
-1. run `scripts/build-tools.sh` to build the `tools` Docker image
-1. run `scripts/yarn.sh` to install backend dependencies
-1. run `scripts/generate-proxy-api-models.sh` to generate the models defined in api_proxy.yaml and api_notifications.yaml
-1. run `scripts/build.sh` to compile the Typescript files
-2. run `scripts/generate-test-certs.sh` to create certificates needed to start the HTTPS server in DEV mode
-3. edit your `/etc/hosts` file by adding:
+2. go to the project's folder
+3. install dependencies with `yarn install`
+4. generate proxy models with `yarn generate`
+5. build the project with `yarn build`
+6. run `scripts/generate-test-certs.sh` to create certificates needed to start the HTTPS server in DEV mode
+7. edit your `/etc/hosts` file by adding:
 
     ```
     127.0.0.1    io-backend
     ```
 
-4. copy `.env.example` to `.env` and fill the variables with your values
-5. run `docker compose --env-file .env up -d` to start the containers
-6. point your browser to [https://io-backend/info](https://io-backend/info) to check that the server is started
+8. copy `.env.example` to `.env` and fill the variables with your values
+9. run `docker compose --env-file .env up -d` to start the containers
+10.  point your browser to [https://io-backend/info](https://io-backend/info) to check that the server is started
 
 If you are using Docker with a Docker Machine replace `localhost` with the IP of the Docker Machine
 ([More details here](https://docs.docker.com/machine/reference/ip/)).
