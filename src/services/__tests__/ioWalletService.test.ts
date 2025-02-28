@@ -15,6 +15,8 @@ const mockHealthCheck = jest.fn();
 const mockGetWalletInstanceStatus = jest.fn();
 const mockGetCurrentWalletInstanceStatus = jest.fn();
 const mockSetWalletInstanceStatus = jest.fn();
+const mockDeleteWalletInstances = jest.fn();
+const mockSetCurrentWalletInstanceStatus = jest.fn();
 
 mockGetNonce.mockImplementation(() =>
   t.success({
@@ -62,8 +64,10 @@ const api = {
   createWalletAttestation: mockCreateWalletAttestation,
   healthCheck: mockHealthCheck,
   getWalletInstanceStatus: mockGetWalletInstanceStatus,
-  getCurrentWalletInstanceStatus: mockGetCurrentWalletInstanceStatus,
   setWalletInstanceStatus: mockSetWalletInstanceStatus,
+  deleteWalletInstances: mockDeleteWalletInstances,
+  setCurrentWalletInstanceStatus: mockSetCurrentWalletInstanceStatus,
+  getCurrentWalletInstanceStatus: mockGetCurrentWalletInstanceStatus,
 };
 
 const mockCreateSubscription = jest.fn();
