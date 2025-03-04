@@ -15,7 +15,7 @@ on:
         description: Use a private agent to deploy the built artifact.
         type: boolean
         required: false
-        default: false
+        default: true
 
 env:
   BUNDLE_NAME: bundle
