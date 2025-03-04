@@ -4,7 +4,7 @@ name: Deploy Pipelines - Legacy
 # and still use a legacy architecture that will be deprecated in the future.
 
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
       app_names:
         description: Web App names.
@@ -21,8 +21,6 @@ env:
   BUNDLE_NAME: bundle
   resource_group_name: io-p-rg-linux
   health_check_path: /info
-  use_staging_slot: true
-
 
 concurrency:
   group: ${{ github.workflow }}-cd
@@ -153,19 +151,7 @@ jobs:
           tenant-id: ${{ env.ARM_TENANT_ID }}
           subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
 
-      - name: Deploy
-        if: ${{ env.use_staging_slot == false }}
-        run: |
-          az webapp deploy \
-            --resource-group ${{ env.resource_group_name }} \
-            --name ${{ matrix.app_name }} \
-            --src-path  ${{ github.workspace }}/${{ env.BUNDLE_NAME }}.zip \
-            --type zip \
-            --async false \
-            | grep -v "hidden-link:"
-
       - name: Deploy to Staging Slot
-        if: ${{ env.use_staging_slot == true }}
         run: |
           az webapp deploy \
             --resource-group ${{ env.resource_group_name }} \
@@ -177,7 +163,6 @@ jobs:
             | grep -v "hidden-link:"
 
       - name: Ping Staging Health
-        if: ${{ env.use_staging_slot == true }}
         run: |
           curl \
             --retry 5 \
@@ -186,7 +171,6 @@ jobs:
             -f 'https://${{ matrix.app_name }}-staging.azurewebsites.net${{ env.health_check_path }}'
 
       - name: Swap Staging and Production Slots
-        if: ${{ env.use_staging_slot == true }}
         run: |
           az webapp deployment slot swap \
             -g ${{ env.resource_group_name }} \
