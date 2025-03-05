@@ -46,6 +46,9 @@ environment_cd_roles = {
     ],
     "dashboards" = [
       "Contributor"
+    ],
+    "io-p-rg-linux" = [
+      "Contributor"
     ]
   }
 }
