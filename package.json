@@ -67,7 +67,8 @@
     "dist:modules": "modclean -r -n default:safe && yarn install --production",
     "predeploy": "npm-run-all generate build dist:modules",
     "preversion": "auto-changelog  --config .auto-changelog.json --unreleased --commit-limit false --stdout --template preview.hbs",
-    "version": "npm-run-all bump:*",
+    "version": "changeset version && npm-run-all bump:*",
+    "release": "changeset tag",
     "bump:openapi": "npm run openapi:bundle && git add openapi/generated/*",
     "bump:changelog": "auto-changelog -p --config .auto-changelog.json --unreleased && git add CHANGELOG.md"
   },
@@ -86,6 +87,7 @@
     "@azure/data-tables": "^13.2.2",
     "@azure/storage-queue": "^12.0.0",
     "@pagopa/io-functions-app-sdk": "x",
+    "@changesets/cli": "^2.27.1",
     "@pagopa/io-functions-cgn-sdk": "x",
     "@pagopa/io-functions-commons": "^29.3.0",
     "@pagopa/io-functions-eucovidcerts-sdk": "x",
