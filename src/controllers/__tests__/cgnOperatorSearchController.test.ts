@@ -106,6 +106,7 @@ const aMerchant: Merchant = {
   description: "a Merchant description" as NonEmptyString,
   id: aMerchantId,
   name: "A merchant name" as NonEmptyString,
+  fullName: "A merchant fullname" as NonEmptyString,
   discounts: [
     {
       id: aDiscountId,
