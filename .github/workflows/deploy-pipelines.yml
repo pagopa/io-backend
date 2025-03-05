@@ -6,30 +6,11 @@ name: Deploy Pipelines - Legacy
 on:
   workflow_dispatch:
     inputs:
-      environment:
-        description: Environment where the artifact will be deployed.
-        type: string
-        required: true
-      resource_group_name:
-        description: Web App resource group name.
-        type: string
-        required: true
-        default: 'io-p-rg-linux'
       app_names:
         description: Web App names.
         type: string
         required: true
         default: "['io-p-app-appbackendli', 'io-p-app-appbackendl1', 'io-p-app-appbackendl2']"
-      health_check_path:
-        description: The health probe path exposed by the Function App.
-        type: string
-        required: false
-        default: '/info'
-      use_staging_slot:
-        description: True if artifact should be deployed to staging slot
-        type: boolean
-        required: false
-        default: true
       use_private_agent:
         description: Use a private agent to deploy the built artifact.
         type: boolean
@@ -38,6 +19,8 @@ on:
 
 env:
   BUNDLE_NAME: bundle
+  resource_group_name: io-p-rg-linux
+  health_check_path: /info
 
 concurrency:
   group: ${{ github.workflow }}-cd
@@ -142,7 +125,7 @@ jobs:
       matrix:
         app_name: ${{ fromJSON(inputs.app_names) }}
     runs-on: ${{ inputs.use_private_agent == true && 'self-hosted' || 'ubuntu-latest' }}
-    environment: ${{ inputs.environment }}-cd
+    environment: prod-cd
     permissions:
       id-token: write
       contents: read
@@ -168,22 +151,10 @@ jobs:
           tenant-id: ${{ env.ARM_TENANT_ID }}
           subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
 
-      - name: Deploy
-        if: ${{ inputs.use_staging_slot == false }}
-        run: |
-          az webapp deploy \
-            --resource-group ${{ inputs.resource_group_name }} \
-            --name ${{ matrix.app_name }} \
-            --src-path  ${{ github.workspace }}/${{ env.BUNDLE_NAME }}.zip \
-            --type zip \
-            --async false \
-            | grep -v "hidden-link:"
-
       - name: Deploy to Staging Slot
-        if: ${{ inputs.use_staging_slot == true }}
         run: |
           az webapp deploy \
-            --resource-group ${{ inputs.resource_group_name }} \
+            --resource-group ${{ env.resource_group_name }} \
             --name ${{ matrix.app_name }} \
             --slot staging \
             --src-path  ${{ github.workspace }}/${{ env.BUNDLE_NAME }}.zip \
@@ -192,19 +163,17 @@ jobs:
             | grep -v "hidden-link:"
 
       - name: Ping Staging Health
-        if: ${{ inputs.use_staging_slot == true }}
         run: |
           curl \
             --retry 5 \
             --retry-max-time 120 \
             --retry-all-errors \
-            -f 'https://${{ matrix.app_name }}-staging.azurewebsites.net${{ inputs.health_check_path }}'
+            -f 'https://${{ matrix.app_name }}-staging.azurewebsites.net${{ env.health_check_path }}'
 
       - name: Swap Staging and Production Slots
-        if: ${{ inputs.use_staging_slot == true }}
         run: |
           az webapp deployment slot swap \
-            -g ${{ inputs.resource_group_name }} \
+            -g ${{ env.resource_group_name }} \
             -n ${{ matrix.app_name }} \
             --slot staging \
             --target-slot production
