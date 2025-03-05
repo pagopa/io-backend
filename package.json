@@ -87,7 +87,6 @@
     "@azure/data-tables": "^13.2.2",
     "@azure/storage-queue": "^12.0.0",
     "@pagopa/io-functions-app-sdk": "x",
-    "@changesets/cli": "^2.27.1",
     "@pagopa/io-functions-cgn-sdk": "x",
     "@pagopa/io-functions-commons": "^29.3.0",
     "@pagopa/io-functions-eucovidcerts-sdk": "x",
@@ -124,6 +123,7 @@
     "winston": "^3.3.3"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.27.1",
     "@pagopa/eslint-config": "^4.0.0",
     "@pagopa/openapi-codegen-ts": "^14.0.0",
     "@types/dotenv": "^4.0.2",
