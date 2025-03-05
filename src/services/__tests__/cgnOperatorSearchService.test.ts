@@ -30,6 +30,7 @@ const aMerchantProfileWithStaticDiscountTypeModel = {
   description: "description something",
   image_url: "/images/1.png",
   name: "PagoPa",
+  full_name: "PagoPA SpA",
   profile_k: 123,
   website_url: "https://pagopa.it",
   discount_code_type: "static",
@@ -96,6 +97,7 @@ const anExpectedSearchResponse = {
 const anExpectedResponse = {
   description: aMerchantProfileWithStaticDiscountTypeModel.description,
   name: aMerchantProfileWithStaticDiscountTypeModel.name,
+  fullName: aMerchantProfileWithStaticDiscountTypeModel.full_name,
   id: anAgreementId,
   imageUrl: `/${aMerchantProfileWithStaticDiscountTypeModel.image_url}`,
   websiteUrl: aMerchantProfileWithStaticDiscountTypeModel.website_url,
