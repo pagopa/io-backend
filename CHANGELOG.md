@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 16.10.4
+
+### Patch Changes
+
+- da05ca1: Fix CHANGELOG file format for changeset
+
 ## v16.10.3
 
 ### Patch Changes
@@ -1319,7 +1325,7 @@
 
 > 9 October 2023
 
-- [#IOPID-858]  fix `api_session.yaml` openapi [`#1060`](https://github.com/pagopa/io-backend/pull/1060)
+- [#IOPID-858] fix `api_session.yaml` openapi [`#1060`](https://github.com/pagopa/io-backend/pull/1060)
 - Bump version to 13.12.1 [skip ci] [`adf8c45`](https://github.com/pagopa/io-backend/commit/adf8c45a83aaf3cd114dff0fd69f6ba0ca6004d4)
 
 ## v13.12.0
@@ -1574,7 +1580,7 @@
 
 > 13 July 2023
 
-- [#IOPID-385]  Call notify login endpoint [`#1040`](https://github.com/pagopa/io-backend/pull/1040)
+- [#IOPID-385] Call notify login endpoint [`#1040`](https://github.com/pagopa/io-backend/pull/1040)
 - Bump version to 13.1.0 [skip ci] [`ad358fe`](https://github.com/pagopa/io-backend/commit/ad358fe9aaa594dda14d20537d59f3ea61bcb442)
 
 ## v13.0.0
@@ -1803,7 +1809,7 @@
 
 > 14 June 2023
 
-- [#IOCOM-272] Integrated Lollipop with Remote Content  [`#1021`](https://github.com/pagopa/io-backend/pull/1021)
+- [#IOCOM-272] Integrated Lollipop with Remote Content [`#1021`](https://github.com/pagopa/io-backend/pull/1021)
 - Bump version to 12.2.1 [skip ci] [`52cd552`](https://github.com/pagopa/io-backend/commit/52cd5525d54e448a4c0028bf2802a27c9e43b42a)
 
 ## v12.2.0
@@ -2073,7 +2079,7 @@
 
 > 3 April 2023
 
-- [#ICC-370]  Update PN swagger and attachment path [`#999`](https://github.com/pagopa/io-backend/pull/999)
+- [#ICC-370] Update PN swagger and attachment path [`#999`](https://github.com/pagopa/io-backend/pull/999)
 - Bump version to 10.7.1 [skip ci] [`6c4b681`](https://github.com/pagopa/io-backend/commit/6c4b681162b684668be0895d15f765e6a9f460e7)
 
 ## v10.7.0
@@ -2302,9 +2308,9 @@
 > 21 February 2023
 
 - [#IOCIT-323] Add support for pubKey reservation [`#978`](https://github.com/pagopa/io-backend/pull/978)
-- [#IOCIT-355]  Add LolliPoP Consumer openapi sample [`#977`](https://github.com/pagopa/io-backend/pull/977)
+- [#IOCIT-355] Add LolliPoP Consumer openapi sample [`#977`](https://github.com/pagopa/io-backend/pull/977)
 - [#IOCIT-324] generate lollipop client [`#976`](https://github.com/pagopa/io-backend/pull/976)
-- [#ICC-296]  Add LolliPoP header definitions [`#973`](https://github.com/pagopa/io-backend/pull/973)
+- [#ICC-296] Add LolliPoP header definitions [`#973`](https://github.com/pagopa/io-backend/pull/973)
 - Bump version to 9.14.0 [skip ci] [`95d2ced`](https://github.com/pagopa/io-backend/commit/95d2ced04e68f8b5ae7118133367dc9fa4a51826)
 
 ## v9.13.1
@@ -2334,7 +2340,7 @@
 
 > 3 February 2023
 
-- [#ICC-266]  Update PN client [`#974`](https://github.com/pagopa/io-backend/pull/974)
+- [#ICC-266] Update PN client [`#974`](https://github.com/pagopa/io-backend/pull/974)
 - Add Support for Backend on AKS [`#971`](https://github.com/pagopa/io-backend/pull/971)
 - [#IOCIT-280] fix invalid glob patterns inside jest configuration [`#968`](https://github.com/pagopa/io-backend/pull/968)
 - Bump version to 9.13.0 [skip ci] [`bd0c6be`](https://github.com/pagopa/io-backend/commit/bd0c6be016f0a4b875ba2e114aea1d57b73f428e)
@@ -2366,7 +2372,7 @@
 
 > 25 January 2023
 
-- [#ICC-310]  Return 415 in `getThirdPartyMessageAttachment` endpoint [`#964`](https://github.com/pagopa/io-backend/pull/964)
+- [#ICC-310] Return 415 in `getThirdPartyMessageAttachment` endpoint [`#964`](https://github.com/pagopa/io-backend/pull/964)
 - Remove danger [`#965`](https://github.com/pagopa/io-backend/pull/965)
 - Bump version to 9.11.0 [skip ci] [`d7dc36b`](https://github.com/pagopa/io-backend/commit/d7dc36b6a81c6c1cd1e0da51e8df09a2cdd741b0)
 
@@ -2478,7 +2484,7 @@
 
 > 23 December 2022
 
-- [#IOCIT-177]  Enable canary for new pushnotif [`#953`](https://github.com/pagopa/io-backend/pull/953)
+- [#IOCIT-177] Enable canary for new pushnotif [`#953`](https://github.com/pagopa/io-backend/pull/953)
 - Bump version to 9.7.0 [skip ci] [`91ece7c`](https://github.com/pagopa/io-backend/commit/91ece7c4dd29c7a1568c515e6059ae6fdb7c4f66)
 
 ## v9.6.0
@@ -2493,7 +2499,7 @@
 
 > 14 December 2022
 
-- feat(io-sign): [SFEQS-1209, SFEQS-1226] Add getSignatureRequest and createSignature endpoint  [`#950`](https://github.com/pagopa/io-backend/pull/950)
+- feat(io-sign): [SFEQS-1209, SFEQS-1226] Add getSignatureRequest and createSignature endpoint [`#950`](https://github.com/pagopa/io-backend/pull/950)
 - Bump version to 9.6.0 [skip ci] [`b4c00bc`](https://github.com/pagopa/io-backend/commit/b4c00bc4a6a5a5938789e13b822bfa7a2a5b67f9)
 
 ## v9.5.0
@@ -2541,7 +2547,7 @@
 
 > 7 November 2022
 
-- [IOCIT-144]  Add PDF check to get third party attachment to limit the downloadable file type from an external service [`#937`](https://github.com/pagopa/io-backend/pull/937)
+- [IOCIT-144] Add PDF check to get third party attachment to limit the downloadable file type from an external service [`#937`](https://github.com/pagopa/io-backend/pull/937)
 - Bump version to 9.3.0 [skip ci] [`07c7d6c`](https://github.com/pagopa/io-backend/commit/07c7d6cd6c27c10bf733faa490d1c2cf69aae374)
 
 ## v9.2.0
@@ -2788,7 +2794,7 @@
 
 > 8 July 2022
 
-- [ICC-88]  Add getThirdPartyAttachments implementation [`#912`](https://github.com/pagopa/io-backend/pull/912)
+- [ICC-88] Add getThirdPartyAttachments implementation [`#912`](https://github.com/pagopa/io-backend/pull/912)
 - Bump version to 8.7.0 [skip ci] [`5c72375`](https://github.com/pagopa/io-backend/commit/5c723755a173bf49632e86781cb709717d0f70a6)
 
 ## v8.6.0
@@ -2864,9 +2870,9 @@
 
 > 28 June 2022
 
-- [#ICC-97]  Add getThirdPartyMessage implementation [`#899`](https://github.com/pagopa/io-backend/pull/899)
-- [#ICC-81]  Add PN Category to message and messages endpoints [`#894`](https://github.com/pagopa/io-backend/pull/894)
-- [#ICC-80]  Add adapter from thirdparty message to pn messsage [`#901`](https://github.com/pagopa/io-backend/pull/901)
+- [#ICC-97] Add getThirdPartyMessage implementation [`#899`](https://github.com/pagopa/io-backend/pull/899)
+- [#ICC-81] Add PN Category to message and messages endpoints [`#894`](https://github.com/pagopa/io-backend/pull/894)
+- [#ICC-80] Add adapter from thirdparty message to pn messsage [`#901`](https://github.com/pagopa/io-backend/pull/901)
 - Bump version to 8.4.0 [skip ci] [`323f866`](https://github.com/pagopa/io-backend/commit/323f86616bf943f25328f34a0890a4d7ea10b3ce)
 
 ## v8.3.0
@@ -2911,7 +2917,7 @@
 
 > 20 June 2022
 
-- [#ICC-117]  fix after fn-app cleanup [`#900`](https://github.com/pagopa/io-backend/pull/900)
+- [#ICC-117] fix after fn-app cleanup [`#900`](https://github.com/pagopa/io-backend/pull/900)
 - Bump version to 8.1.0 [skip ci] [`7765d9e`](https://github.com/pagopa/io-backend/commit/7765d9edc3e07f783673c7dabc1a4cf45c05d8cc)
 
 ## v8.0.0
@@ -2926,9 +2932,9 @@
 
 > 16 June 2022
 
-- [#IP-331]  Migrate fp-ts version from 1.x to 2.x [`#826`](https://github.com/pagopa/io-backend/pull/826)
+- [#IP-331] Migrate fp-ts version from 1.x to 2.x [`#826`](https://github.com/pagopa/io-backend/pull/826)
 - chore(deps): bump ajv from 6.12.0 to 6.12.6 [`#872`](https://github.com/pagopa/io-backend/pull/872)
-- [#ICC-78]  Add openapi for Third Party services [`#893`](https://github.com/pagopa/io-backend/pull/893)
+- [#ICC-78] Add openapi for Third Party services [`#893`](https://github.com/pagopa/io-backend/pull/893)
 - Bump version to 8.0.0 [skip ci] [`65f11fa`](https://github.com/pagopa/io-backend/commit/65f11fa546af0cf3f64e17533f7bd8b0ac853c01)
 
 ## v7.43.2
@@ -2989,7 +2995,7 @@
 > 9 June 2022
 
 - [#ICC-87] New Third party get message and attachments endpoints definition [`#892`](https://github.com/pagopa/io-backend/pull/892)
-- [#ICC-73]  Add ThirdPartyConfiguration [`#890`](https://github.com/pagopa/io-backend/pull/890)
+- [#ICC-73] Add ThirdPartyConfiguration [`#890`](https://github.com/pagopa/io-backend/pull/890)
 - Bump version to 7.42.0 [skip ci] [`3643ad2`](https://github.com/pagopa/io-backend/commit/3643ad23bf1990fd89b6dcc9df956d552e997c9b)
 - [ICC-109] Disable ip filter for notification [`fd31dfd`](https://github.com/pagopa/io-backend/commit/fd31dfd6b24c6e9dd8ca2b7d0b842dbe41e391be)
 
@@ -3082,9 +3088,9 @@
 
 > 29 March 2022
 
-- [#IC-388]  Add new fn-app-messages client + A/B testing [`#882`](https://github.com/pagopa/io-backend/pull/882)
+- [#IC-388] Add new fn-app-messages client + A/B testing [`#882`](https://github.com/pagopa/io-backend/pull/882)
 - upgrade min app version to 1.38.0 [`#881`](https://github.com/pagopa/io-backend/pull/881)
-- [IC-377]  Add upsert message status [`#879`](https://github.com/pagopa/io-backend/pull/879)
+- [IC-377] Add upsert message status [`#879`](https://github.com/pagopa/io-backend/pull/879)
 - [#IC-378] Fix unit test RedisSessionStorage#set [`#880`](https://github.com/pagopa/io-backend/pull/880)
 - Bump version to 7.38.0 [skip ci] [`910d38d`](https://github.com/pagopa/io-backend/commit/910d38dff8c9094a2125071e2a5da71490813d0c)
 - configure https for App Messages Client [`1ce2b09`](https://github.com/pagopa/io-backend/commit/1ce2b09513ce22bec79a92bbda462fda4d8bde15)
@@ -3195,7 +3201,7 @@
 > 27 January 2022
 
 - Changed functions operator search version [`#866`](https://github.com/pagopa/io-backend/pull/866)
-- [#IC-69] Add unit tests for MVL  [`#850`](https://github.com/pagopa/io-backend/pull/850)
+- [#IC-69] Add unit tests for MVL [`#850`](https://github.com/pagopa/io-backend/pull/850)
 - Bump version to 7.32.1 [skip ci] [`9bbccf4`](https://github.com/pagopa/io-backend/commit/9bbccf43b43568bb7a673fedeec4892a6f605f1e)
 
 ## v7.32.0
@@ -3543,7 +3549,7 @@
 
 > 28 September 2021
 
-- [IP-415]  Fix Healthcheck [`#833`](https://github.com/pagopa/io-backend/pull/833)
+- [IP-415] Fix Healthcheck [`#833`](https://github.com/pagopa/io-backend/pull/833)
 - Bump version to 7.20.1 [skip ci] [`fced6bd`](https://github.com/pagopa/io-backend/commit/fced6bdc62bdd700c818a6731e3300e3bbe24e49)
 
 ## v7.20.0
@@ -3671,8 +3677,8 @@
 
 > 5 July 2021
 
-- [#IP-271]  Add Upsert Service Preferences endpoint [`#818`](https://github.com/pagopa/io-backend/pull/818)
-- [#IP-272]  Add GetServicePreference endpoint [`#817`](https://github.com/pagopa/io-backend/pull/817)
+- [#IP-271] Add Upsert Service Preferences endpoint [`#818`](https://github.com/pagopa/io-backend/pull/818)
+- [#IP-272] Add GetServicePreference endpoint [`#817`](https://github.com/pagopa/io-backend/pull/817)
 - [#IP-263] Update API specs for Service opt-in [`#816`](https://github.com/pagopa/io-backend/pull/816)
 - Bump version to 7.18.0 [skip ci] [`c981c06`](https://github.com/pagopa/io-backend/commit/c981c06669f4a069a4a5ef7e06d7bbc05a5605c5)
 
@@ -4295,7 +4301,7 @@
 
 > 7 June 2020
 
-- hotfix: align tolatest version of  bonus api [`59ed705`](https://github.com/pagopa/io-backend/commit/59ed7053554f1a9864a888ca050ca421e6349447)
+- hotfix: align tolatest version of bonus api [`59ed705`](https://github.com/pagopa/io-backend/commit/59ed7053554f1a9864a888ca050ca421e6349447)
 - chore: release 6.3.0 [`c7de883`](https://github.com/pagopa/io-backend/commit/c7de8839642e1a6174fbecae0a88f77b7f63cdd5)
 
 ## v6.2.0
@@ -4536,7 +4542,7 @@
 - [#170944582] removed [`#630`](https://github.com/pagopa/io-backend/pull/630)
 - [#172179161] refactor keepalive (#631) [`#172179161`](https://www.pivotaltracker.com/story/show/172179161)
 - [#170944582] removed (#630) [`#170944582`](https://www.pivotaltracker.com/story/show/170944582)
-- [#172124428]  hotfix: appinsights https agent [`#172124428`](https://www.pivotaltracker.com/story/show/172124428)
+- [#172124428] hotfix: appinsights https agent [`#172124428`](https://www.pivotaltracker.com/story/show/172124428)
 - [#172123296] pipeline deploy to staging slot [`#172123296`](https://www.pivotaltracker.com/story/show/172123296)
 - [#172123296] add pipeline staging slot [`#172123296`](https://www.pivotaltracker.com/story/show/172123296)
 - chore: release 5.12.0 [`18942d6`](https://github.com/pagopa/io-backend/commit/18942d6681b6d1a620ac9c180f4d23d005193357)
@@ -5110,8 +5116,8 @@
 
 > 29 August 2019
 
-- [#166152893] Gracefully shutdown on SIGTERM and SIGINT  [`#431`](https://github.com/pagopa/io-backend/pull/431)
-- [#166152893] Gracefully shutdown on SIGTERM and SIGINT  (#431) [`#166152893`](https://www.pivotaltracker.com/story/show/166152893)
+- [#166152893] Gracefully shutdown on SIGTERM and SIGINT [`#431`](https://github.com/pagopa/io-backend/pull/431)
+- [#166152893] Gracefully shutdown on SIGTERM and SIGINT (#431) [`#166152893`](https://www.pivotaltracker.com/story/show/166152893)
 
 ## v1.7.3
 
