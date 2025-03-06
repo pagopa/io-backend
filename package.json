@@ -1,6 +1,6 @@
 {
   "name": "@pagopa/io-backend",
-  "version": "16.10.2",
+  "version": "16.10.3",
   "min_app_version": {
     "ios": "2.3.0",
     "android": "2.3.0"
@@ -10,7 +10,7 @@
     "android": "0.0.0"
   },
   "description": "IO app and web backend",
-  "main": "index.js",
+  "main": "dist/src/server.js",
   "engines": {
     "node": "20.17.0"
   },
