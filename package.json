@@ -67,8 +67,7 @@
     "predeploy": "npm-run-all generate build dist:modules",
     "version": "changeset version && npm-run-all bump:*",
     "release": "changeset tag",
-    "bump:openapi": "npm run openapi:bundle && git add openapi/generated/*",
-    "bump:changelog": "auto-changelog -p --config .auto-changelog.json --unreleased && git add CHANGELOG.md"
+    "bump:openapi": "npm run openapi:bundle && git add openapi/generated/*"
   },
   "repository": {
     "type": "git",
@@ -148,7 +147,6 @@
     "@types/swagger-parser": "^4.0.2",
     "@types/validator": "^9.4.2",
     "@types/xml2js": "^0.4.5",
-    "auto-changelog": "^2.2.1",
     "dotenv-cli": "^3.1.0",
     "eslint": "8.57.0",
     "eslint-plugin-prettier": "^4.2.1",
