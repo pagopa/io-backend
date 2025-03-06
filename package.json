@@ -67,7 +67,8 @@
     "dist:modules": "modclean -r -n default:safe && yarn install --production",
     "predeploy": "npm-run-all generate build dist:modules",
     "preversion": "auto-changelog  --config .auto-changelog.json --unreleased --commit-limit false --stdout --template preview.hbs",
-    "version": "npm-run-all bump:*",
+    "version": "changeset version && npm-run-all bump:*",
+    "release": "changeset tag",
     "bump:openapi": "npm run openapi:bundle && git add openapi/generated/*",
     "bump:changelog": "auto-changelog -p --config .auto-changelog.json --unreleased && git add CHANGELOG.md"
   },
@@ -122,6 +123,7 @@
     "winston": "^3.3.3"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.27.1",
     "@pagopa/eslint-config": "^4.0.0",
     "@pagopa/openapi-codegen-ts": "^14.0.0",
     "@types/dotenv": "^4.0.2",
