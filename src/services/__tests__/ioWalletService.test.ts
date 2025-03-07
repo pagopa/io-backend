@@ -785,7 +785,7 @@ describe("IoWalletService#getCurrentWalletInstanceStatus", () => {
 
     await service.getCurrentWalletInstanceStatus(aFiscalCode);
 
-    expect(mockGetWalletInstanceStatus).toHaveBeenCalledWith({
+    expect(mockGetCurrentWalletInstanceStatus).toHaveBeenCalledWith({
       "fiscal-code": aFiscalCode,
     });
   });
