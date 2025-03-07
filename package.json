@@ -1,6 +1,6 @@
 {
   "name": "@pagopa/io-backend",
-  "version": "16.10.2",
+  "version": "16.10.4",
   "min_app_version": {
     "ios": "2.3.0",
     "android": "2.3.0"
@@ -10,7 +10,7 @@
     "android": "0.0.0"
   },
   "description": "IO app and web backend",
-  "main": "index.js",
+  "main": "dist/src/server.js",
   "engines": {
     "node": "20.17.0"
   },
@@ -63,13 +63,11 @@
     "generate:lollipop-first-sign": "rimraf generated/lollipop-first-consumer && gen-api-models --api-spec openapi/consumed/lollipop_first_consumer.yaml --out-dir generated/lollipop-first-consumer --request-types --response-decoders --client",
     "generate:api:io-wallet": "rimraf generated/io-wallet-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-wallet/io-wallet-user-func@3.0.3/apps/io-wallet-user-func/openapi.yaml --no-strict --out-dir generated/io-wallet-api --request-types --response-decoders --client",
     "generate:proxy:io-wallet-models": "rimraf generated/io-wallet && gen-api-models --api-spec api_io_wallet.yaml --out-dir generated/io-wallet",
-    "postversion": "git push && git push --tags",
     "dist:modules": "modclean -r -n default:safe && yarn install --production",
     "predeploy": "npm-run-all generate build dist:modules",
-    "preversion": "auto-changelog  --config .auto-changelog.json --unreleased --commit-limit false --stdout --template preview.hbs",
-    "version": "npm-run-all bump:*",
-    "bump:openapi": "npm run openapi:bundle && git add openapi/generated/*",
-    "bump:changelog": "auto-changelog -p --config .auto-changelog.json --unreleased && git add CHANGELOG.md"
+    "version": "changeset version && npm-run-all bump:*",
+    "release": "changeset tag",
+    "bump:openapi": "npm run openapi:bundle && git add openapi/generated/*"
   },
   "repository": {
     "type": "git",
@@ -122,6 +120,7 @@
     "winston": "^3.3.3"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.27.1",
     "@pagopa/eslint-config": "^4.0.0",
     "@pagopa/openapi-codegen-ts": "^14.0.0",
     "@types/dotenv": "^4.0.2",
@@ -148,7 +147,6 @@
     "@types/swagger-parser": "^4.0.2",
     "@types/validator": "^9.4.2",
     "@types/xml2js": "^0.4.5",
-    "auto-changelog": "^2.2.1",
     "dotenv-cli": "^3.1.0",
     "eslint": "8.57.0",
     "eslint-plugin-prettier": "^4.2.1",

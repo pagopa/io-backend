@@ -14,9 +14,8 @@ on:
       - "eslint.config.mjs"
       - ".prettierrc"
 
-
 jobs:
-  js_code_review:
+  code_review:
     runs-on: ubuntu-latest
 
     steps:
@@ -72,7 +71,7 @@ jobs:
             fi
           done
           [[ $valid = 1 ]] && exit 0 || exit 1
-      
+
       - name: Lint API root directory
         run: |
           valid=1
