@@ -786,7 +786,6 @@ describe("IoWalletService#getCurrentWalletInstanceStatus", () => {
     await service.getCurrentWalletInstanceStatus(aFiscalCode);
 
     expect(mockGetWalletInstanceStatus).toHaveBeenCalledWith({
-      id: aId,
       "fiscal-code": aFiscalCode,
     });
   });
@@ -802,7 +801,7 @@ describe("IoWalletService#getCurrentWalletInstanceStatus", () => {
   });
 
   it("should handle an internal error when the API client returns 400", async () => {
-    mockGetWalletInstanceStatus.mockImplementationOnce(() =>
+    mockGetCurrentWalletInstanceStatus.mockImplementationOnce(() =>
       t.success({ status: 400 })
     );
 
@@ -816,7 +815,7 @@ describe("IoWalletService#getCurrentWalletInstanceStatus", () => {
   });
 
   it("should handle a not found error when the API client returns 404", async () => {
-    mockGetWalletInstanceStatus.mockImplementationOnce(() =>
+    mockGetCurrentWalletInstanceStatus.mockImplementationOnce(() =>
       t.success({ status: 404 })
     );
 
@@ -830,7 +829,7 @@ describe("IoWalletService#getCurrentWalletInstanceStatus", () => {
   });
 
   it("should handle an internal error when the API client returns 422", async () => {
-    mockGetWalletInstanceStatus.mockImplementationOnce(() =>
+    mockGetCurrentWalletInstanceStatus.mockImplementationOnce(() =>
       t.success({ status: 422 })
     );
 
@@ -845,7 +844,7 @@ describe("IoWalletService#getCurrentWalletInstanceStatus", () => {
 
   it("should handle an internal error when the API client returns 500", async () => {
     const aGenericProblem = {};
-    mockGetWalletInstanceStatus.mockImplementationOnce(() =>
+    mockGetCurrentWalletInstanceStatus.mockImplementationOnce(() =>
       t.success({ status: 500, value: aGenericProblem })
     );
 
@@ -860,7 +859,7 @@ describe("IoWalletService#getCurrentWalletInstanceStatus", () => {
 
   it("should handle a service unavailable error when the API client returns 503", async () => {
     const aGenericProblem = {};
-    mockGetWalletInstanceStatus.mockImplementationOnce(() =>
+    mockGetCurrentWalletInstanceStatus.mockImplementationOnce(() =>
       t.success({ status: 503, value: aGenericProblem })
     );
 
@@ -875,7 +874,7 @@ describe("IoWalletService#getCurrentWalletInstanceStatus", () => {
 
   it("should handle an internal error when the API client returns a code not specified in spec", async () => {
     const aGenericProblem = {};
-    mockGetWalletInstanceStatus.mockImplementationOnce(() =>
+    mockGetCurrentWalletInstanceStatus.mockImplementationOnce(() =>
       t.success({ status: 599, value: aGenericProblem })
     );
 
@@ -889,7 +888,7 @@ describe("IoWalletService#getCurrentWalletInstanceStatus", () => {
   });
 
   it("should return an error if the api call throws an error", async () => {
-    mockGetWalletInstanceStatus.mockImplementationOnce(() => {
+    mockGetCurrentWalletInstanceStatus.mockImplementationOnce(() => {
       throw new Error();
     });
     const service = new IoWalletService(api, trialSystemApi);
