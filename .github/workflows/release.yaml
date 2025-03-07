@@ -1,0 +1,73 @@
+
+name: Release
+
+on:
+  push:
+    branches:
+      - master
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    outputs:
+      published: ${{ steps.release.outputs.published }}
+      publishedPackages: ${{ steps.release.outputs.publishedPackages }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.node-version'
+          cache: 'yarn'
+          cache-dependency-path: "yarn.lock"
+
+      - name: Install Dependencies
+        run: yarn
+
+      - name: Create Release Pull Request or Tag
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          version: yarn run version
+          publish: yarn run release
+          commit: 'ci(changesets): version packages'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release output
+        id: release
+        run: |
+          # intermediate variable necessary to avoid quotes around the array
+          # that prevented the fromJson function to work correctly
+          publishedPackages=${{toJSON(steps.changesets.outputs.publishedPackages)}}
+
+          echo 'published=${{steps.changesets.outputs.published}}' >> "$GITHUB_OUTPUT"
+          echo "publishedPackages=$publishedPackages" >> "$GITHUB_OUTPUT"
+
+  publish:
+    name: Publish
+    needs: [release]
+    if: needs.release.outputs.published == 'true'
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      matrix:
+        package: ${{ fromJson(needs.release.outputs.publishedPackages) }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: false
+          tag_name: ${{ matrix.package.name }}@${{ matrix.package.version }}

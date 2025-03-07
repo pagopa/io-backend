@@ -11,11 +11,6 @@ on:
         type: string
         required: true
         default: "['io-p-app-appbackendli', 'io-p-app-appbackendl1', 'io-p-app-appbackendl2']"
-      use_private_agent:
-        description: Use a private agent to deploy the built artifact.
-        type: boolean
-        required: false
-        default: true
 
 env:
   BUNDLE_NAME: bundle
@@ -124,7 +119,7 @@ jobs:
     strategy:
       matrix:
         app_name: ${{ fromJSON(inputs.app_names) }}
-    runs-on: ${{ inputs.use_private_agent == true && 'self-hosted' || 'ubuntu-latest' }}
+    runs-on: "self-hosted"
     environment: prod-cd
     permissions:
       id-token: write
