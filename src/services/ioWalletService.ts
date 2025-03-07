@@ -281,7 +281,7 @@ export default class IoWalletService {
     });
 
   /**
-   * Get current Wallet Instance status.
+   * Get Wallet Instance status by ID.
    */
   public readonly getWalletInstanceStatus = (
     id: NonEmptyString,
@@ -297,6 +297,48 @@ export default class IoWalletService {
         "fiscal-code": fiscal_code,
         id
       });
+      return withValidatedOrInternalError(validated, (response) => {
+        switch (response.status) {
+          case 200:
+            return ResponseSuccessJson(response.value);
+          case 404:
+            return ResponseErrorNotFound(
+              "Not Found",
+              "Wallet instance not found"
+            );
+          case 400:
+          case 422:
+          case 500:
+            return ResponseErrorInternal(
+              `Internal server error | ${response.value}`
+            );
+          case 503:
+            return ResponseErrorServiceTemporarilyUnavailable(
+              serviceUnavailableDetail,
+              "10"
+            );
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
+  /**
+   * Get Current Wallet Instance Status
+   */
+  public readonly getCurrentWalletInstanceStatus = (
+    fiscal_code: FiscalCode
+  ): Promise<
+    | IResponseSuccessJson<WalletInstanceData>
+    | IResponseErrorNotFound
+    | IResponseErrorInternal
+    | IResponseErrorServiceUnavailable
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated =
+        await this.ioWalletApiClient.getCurrentWalletInstanceStatus({
+          "fiscal-code": fiscal_code
+        });
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
           case 200:
