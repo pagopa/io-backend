@@ -199,6 +199,29 @@ export default class IoWalletController {
       )()
     );
 
+  /**
+   * Get Current Wallet Instance Status
+   */
+  public readonly getCurrentWalletInstanceStatus = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseSuccessJson<WalletInstanceData>
+    | IResponseErrorNotFound
+    | IResponseErrorServiceUnavailable
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+  > =>
+    withUserFromRequest(req, async (user) =>
+      pipe(
+        this.ensureFiscalCodeIsAllowed(user.fiscal_code),
+        TE.map(() =>
+          this.ioWalletService.getCurrentWalletInstanceStatus(user.fiscal_code)
+        ),
+        TE.toUnion
+      )()
+    );
+
   private readonly ensureUserIsAllowed = (
     userId: NonEmptyString
   ): TE.TaskEither<Error, void> =>
