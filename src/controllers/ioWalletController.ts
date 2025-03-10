@@ -167,41 +167,7 @@ export default class IoWalletController {
     );
 
   /**
-   * Update current Wallet Instance status.
-   */
-  public readonly setCurrentWalletInstanceStatus = (
-    req: express.Request
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorGeneric
-    | IResponseSuccessNoContent
-    | IResponseErrorServiceUnavailable
-    | IResponseErrorValidation
-    | IResponseErrorForbiddenNotAuthorized
-  > =>
-    withUserFromRequest(req, async (user) =>
-      pipe(
-        this.ensureFiscalCodeIsAllowed(user.fiscal_code),
-        TE.chainW(() =>
-          pipe(
-            req.body,
-            SetWalletInstanceStatusBody.decode,
-            E.mapLeft(toValidationError),
-            TE.fromEither
-          )
-        ),
-        TE.map(({ status }) =>
-          this.ioWalletService.setCurrentWalletInstanceStatus(
-            status,
-            user.fiscal_code
-          )
-        ),
-        TE.toUnion
-      )()
-    );
-
-  /**
-   * Get Wallet Instance status by ID.
+   * Get current Wallet Instance status.
    */
   public readonly getWalletInstanceStatus = (
     req: express.Request
