@@ -213,13 +213,7 @@ export default class IoWalletController {
     | IResponseErrorForbiddenNotAuthorized
   > =>
     withUserFromRequest(req, async (user) =>
-      pipe(
-        TE.right(undefined),
-        TE.map(() =>
-          this.ioWalletService.getCurrentWalletInstanceStatus(user.fiscal_code)
-        ),
-        TE.toUnion
-      )()
+      this.ioWalletService.getCurrentWalletInstanceStatus(user.fiscal_code)
     );
 
   private readonly ensureUserIsAllowed = (
