@@ -214,7 +214,7 @@ export default class IoWalletController {
   > =>
     withUserFromRequest(req, async (user) =>
       pipe(
-        this.ensureFiscalCodeIsAllowed(user.fiscal_code),
+        TE.right(undefined),
         TE.map(() =>
           this.ioWalletService.getCurrentWalletInstanceStatus(user.fiscal_code)
         ),
