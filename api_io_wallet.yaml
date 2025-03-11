@@ -85,7 +85,7 @@ paths:
   /wallet-instances/current/status:
     get:
       summary: Retrieve the current Wallet Instance status
-      operationId: getWalletInstanceStatus
+      operationId: getCurrentWalletInstanceStatus
       responses:
         "200":
           description: Wallet Instance status successfully retrieved
