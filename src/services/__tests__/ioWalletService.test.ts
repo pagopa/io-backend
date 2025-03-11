@@ -56,6 +56,7 @@ mockGetCurrentWalletInstanceStatus.mockImplementation(() =>
     value: {
       id: "bar",
       is_revoked: "false",
+      revocation_reason: "NEW_WALLET_INSTANCE_CREATED"
     },
   })
 );
