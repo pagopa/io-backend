@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 16.11.0
+
+### Minor Changes
+
+- 7ead61f: Added getCurrentWalletInstanceStatus endpoint
+
 ## 16.10.4
 
 ### Patch Changes
