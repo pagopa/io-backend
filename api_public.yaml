@@ -40,15 +40,15 @@ paths:
               min_app_version: "0.0.0"
               min_app_version_pagopa: "0.0.0"
   "/api/v1/ping":
-    x-swagger-router-controller: ServerPingController
+    x-swagger-router-controller: ServerStatusController
     get:
-      operationId: ping
+      operationId: getPing
       summary: Check online status
       description: >
         Returns no content.
       responses:
         "204":
-          description: Device is online.
+          description: Service is alive.
   "/api/v1/status":
     x-swagger-router-controller: ServerStatusController
     get:

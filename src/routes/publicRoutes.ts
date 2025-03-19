@@ -5,8 +5,10 @@ import { pipe } from "fp-ts/function";
 import { ServerInfo } from "../../generated/public/ServerInfo";
 import { VersionPerPlatform } from "../../generated/public/VersionPerPlatform";
 import { ROOT_REDIRECT_URL } from "../config";
-import { getPing } from "../controllers/pingController";
-import { getStatusServices } from "../controllers/statusServicesController";
+import {
+  getPing,
+  getStatusServices
+} from "../controllers/statusServicesController";
 import { toExpressHandler } from "../utils/express";
 import {
   getCurrentBackendVersion,
