@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 16.12.0
+
+### Minor Changes
+
+- fff3b7c: Added new ping endpoint
+
 ## 16.11.0
 
 ### Minor Changes
