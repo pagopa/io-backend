@@ -407,6 +407,62 @@ paths:
           description: Not Implemented
         '504':
           description: Gateway Timeout
+  /third-party-messages/{id}/precondition:
+    x-swagger-router-controller: MessagesController
+    get:
+      operationId: getThirdPartyMessagePrecondition
+      summary: >-
+        Retrieve Third Party message precondition to receive the third party
+        content
+      description: >-
+        Returns the Third Party message precondition associated to the provided
+        message ID to receive the third party content.
+      parameters:
+        - $ref: '#/parameters/MessageId'
+      responses:
+        '200':
+          description: Found.
+          schema:
+            $ref: '#/definitions/ThirdPartyMessagePrecondition'
+          examples:
+            text/json: >
+              "title": "Questo messaggio contiene una comunicazione a valore
+              legale",
+
+              "markdown": "Se continui, la notifica risulterà legalmente
+              recapitata a te. Aprire il messaggio su IO equivale infatti a
+              firmare la ricevuta di ritorno di una raccomandata
+              tradizionale.\n**Mittente**: Comune di Xxxxxxx  \n**Oggetto**:
+              Infrazione al codice della strada  \n**Data e ora**: 12 Luglio
+              2022 - 12.36  \n**Codice IUN**: YYYYMM-1-ABCD-EFGH-X"
+        '204':
+          description: Pre conditions not needed
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+        '403':
+          description: Forbidden
+        '404':
+          description: No message found for the provided ID.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '410':
+          description: Third Party Service no longer available
+        '429':
+          description: Too many requests
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '500':
+          description: There was an error in retrieving the message.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '501':
+          description: Not Implemented
+        '504':
+          description: Gateway Timeout
   /profile:
     x-swagger-router-controller: ProfileController
     get:
@@ -580,54 +636,6 @@ paths:
             $ref: '#/definitions/ProblemJson'
         '500':
           description: There was an error starting email validation process
-          schema:
-            $ref: '#/definitions/ProblemJson'
-  /user-metadata:
-    x-swagger-router-controller: userMetadataController
-    get:
-      operationId: getUserMetadata
-      summary: Get user's metadata
-      description: Returns metadata for the current authenticated user.
-      responses:
-        '200':
-          description: Found.
-          schema:
-            $ref: '#/definitions/UserMetadata'
-        '204':
-          description: No Content.
-        '401':
-          description: Bearer token null or expired.
-        '500':
-          description: There was an error in retrieving the user metadata.
-          schema:
-            $ref: '#/definitions/ProblemJson'
-    post:
-      operationId: upsertUserMetadata
-      summary: Set User's metadata
-      description: Create or update metadata for the current authenticated user.
-      parameters:
-        - in: body
-          name: body
-          schema:
-            $ref: '#/definitions/UserMetadata'
-          required: true
-      responses:
-        '200':
-          description: User Metadata updated.
-          schema:
-            $ref: '#/definitions/UserMetadata'
-        '400':
-          description: Invalid payload.
-          schema:
-            $ref: '#/definitions/ProblemJson'
-        '401':
-          description: Bearer token null or expired.
-        '409':
-          description: Conflict.
-          schema:
-            $ref: '#/definitions/ProblemJson'
-        '500':
-          description: Profile cannot be updated.
           schema:
             $ref: '#/definitions/ProblemJson'
   /installations/{installationID}:
@@ -1863,11 +1871,7 @@ definitions:
         type: boolean
         default: false
       has_precondition:
-        type: string
-        x-extensible-enum:
-          - ALWAYS
-          - ONCE
-          - NEVER
+        $ref: '#/definitions/HasPrecondition'
       summary:
         type: string
         minLength: 1
@@ -1915,6 +1919,24 @@ definitions:
     required:
       - id
       - url
+  ThirdPartyMessagePrecondition:
+    type: object
+    title: ThirdPartyMessagePrecondition
+    description: Describes a message precondition
+    properties:
+      title:
+        type: string
+      markdown:
+        type: string
+    required:
+      - title
+      - markdown
+  HasPrecondition:
+    type: string
+    x-extensible-enum:
+      - ALWAYS
+      - ONCE
+      - NEVER
   LegalMessageEml:
     type: object
     properties:
@@ -2699,17 +2721,6 @@ definitions:
       - name
       - service_preferences_settings
       - version
-  UserMetadata:
-    type: object
-    title: User Metadata information
-    properties:
-      version:
-        type: number
-      metadata:
-        type: string
-    required:
-      - version
-      - metadata
   SessionInfo:
     type: object
     title: Session info of a user
