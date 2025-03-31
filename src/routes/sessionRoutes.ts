@@ -8,7 +8,6 @@ import AuthenticationLockService from "../services/authenticationLockService";
 import LollipopService from "../services/lollipopService";
 import { NotificationServiceFactory } from "../services/notificationServiceFactory";
 import RedisSessionStorage from "../services/redisSessionStorage";
-import RedisUserMetadataStorage from "../services/redisUserMetadataStorage";
 import { toExpressHandler } from "../utils/express";
 
 /**
@@ -19,7 +18,6 @@ import { toExpressHandler } from "../utils/express";
  * @param _allowSessionHandleIPSourceRange The list of allowed IP source ranges for session handling
  * @param urlTokenAuth The middleware that autenticate the requests with a URL token
  * @param sessionStorage The storage service that handles the user sessions
- * @param userMetadataStorage The storage service that handles the user metadata
  * @param lollipopService The service that handles the lollipop requests
  * @param authenticationLockService The service that handles the authentication lock requests
  * @param notificationServiceFactory The factory that creates the notification service instances
@@ -30,7 +28,6 @@ export const registerSessionAPIRoutes = (
   _allowSessionHandleIPSourceRange: ReadonlyArray<CIDR>,
   urlTokenAuth: ReturnType<passport.Authenticator["authenticate"]>,
   sessionStorage: RedisSessionStorage,
-  userMetadataStorage: RedisUserMetadataStorage,
   lollipopService: LollipopService,
   authenticationLockService: AuthenticationLockService,
   notificationServiceFactory: NotificationServiceFactory
@@ -39,7 +36,6 @@ export const registerSessionAPIRoutes = (
     const sessionLockController: SessionLockController =
       new SessionLockController(
         sessionStorage,
-        userMetadataStorage,
         lollipopService,
         authenticationLockService,
         notificationServiceFactory
