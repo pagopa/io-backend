@@ -4,7 +4,7 @@ import { Either } from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { Option } from "fp-ts/lib/Option";
 import { flow, pipe } from "fp-ts/lib/function";
-import { FF_IO_X_USER_TOKEN_ENABLED } from "src/config";
+import { FF_IO_X_USER_TOKEN_ENABLED } from "../config";
 
 import { UserIdentity } from "../../generated/io-auth/UserIdentity";
 

@@ -8,7 +8,7 @@ import { Either } from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { Option } from "fp-ts/lib/Option";
 import * as passport from "passport-http-bearer";
-import { getByXUserToken } from "src/utils/x-user-token";
+import { getByXUserToken } from "../utils/x-user-token";
 
 import { UserIdentity } from "../../generated/io-auth/UserIdentity";
 import { ISessionStorage } from "../services/ISessionStorage";
