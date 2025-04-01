@@ -11,12 +11,32 @@ import * as passport from "passport-http-bearer";
 
 import { ISessionStorage } from "../services/ISessionStorage";
 import { SessionToken } from "../types/token";
-import { User } from "../types/user";
 import { StrategyDoneFunction, fulfill } from "../utils/strategies";
+import { getByXUserToken } from "src/utils/x-user-token";
+import { UserIdentity } from "../../generated/io-auth/UserIdentity";
+
+const getUser = async (
+  sessionStorage: ISessionStorage,
+  x_user_token: string,
+  token: string
+): Promise<Either<Error, Option<UserIdentity>>> => {
+  const userFromToken = getByXUserToken(x_user_token);
+  
+  if (E.isLeft(userFromToken)) {
+    return userFromToken;
+  }
+
+  if (O.isSome(userFromToken.right)) {
+    return E.right(O.some(userFromToken.right.value));
+  }
+
+  return sessionStorage.getBySessionToken(token as SessionToken);
+};
+
 
 const bearerSessionTokenStrategy = (
   sessionStorage: ISessionStorage,
-  onValidUser?: (user: User) => void
+  onValidUser?: (user: UserIdentity) => void
 ): passport.Strategy<passport.VerifyFunctionWithRequest> => {
   const options = {
     passReqToCallback: true,
@@ -25,9 +45,9 @@ const bearerSessionTokenStrategy = (
   };
   return new passport.Strategy<passport.VerifyFunctionWithRequest>(
     options,
-    (_: express.Request, token: string, done: StrategyDoneFunction) => {
-      sessionStorage.getBySessionToken(token as SessionToken).then(
-        (errorOrUser: Either<Error, Option<User>>) => {
+    (req: express.Request, token: string, done: StrategyDoneFunction) => {
+      getUser(sessionStorage, req.headers["x-user"] as string, token).then(
+        (errorOrUser: Either<Error, Option<UserIdentity>>) => {
           try {
             if (
               onValidUser !== undefined &&
