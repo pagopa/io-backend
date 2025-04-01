@@ -8,12 +8,12 @@ import { Either } from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { Option } from "fp-ts/lib/Option";
 import * as passport from "passport-http-bearer";
+import { getByXUserToken } from "src/utils/x-user-token";
 
+import { UserIdentity } from "../../generated/io-auth/UserIdentity";
 import { ISessionStorage } from "../services/ISessionStorage";
 import { SessionToken } from "../types/token";
 import { StrategyDoneFunction, fulfill } from "../utils/strategies";
-import { getByXUserToken } from "src/utils/x-user-token";
-import { UserIdentity } from "../../generated/io-auth/UserIdentity";
 
 const getUser = async (
   sessionStorage: ISessionStorage,
@@ -21,7 +21,7 @@ const getUser = async (
   token: string
 ): Promise<Either<Error, Option<UserIdentity>>> => {
   const userFromToken = getByXUserToken(x_user_token);
-  
+
   if (E.isLeft(userFromToken)) {
     return userFromToken;
   }
@@ -32,7 +32,6 @@ const getUser = async (
 
   return sessionStorage.getBySessionToken(token as SessionToken);
 };
-
 
 const bearerSessionTokenStrategy = (
   sessionStorage: ISessionStorage,

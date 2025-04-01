@@ -603,5 +603,5 @@ export const FF_IO_WALLET_TRIAL_ENABLED =
 export const FF_IO_X_USER_TOKEN_ENABLED = pipe(
   process.env.FF_IO_X_USER_TOKEN_ENABLED?.split(","),
   CommaSeparatedListOf(FiscalCode).decode,
-  E.getOrElseW(() => [] as FiscalCode[])
+  E.getOrElseW(() => [] as Array<FiscalCode>)
 );

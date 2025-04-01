@@ -13,9 +13,9 @@ import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
 import { AppInsightsConfig } from "src/config";
 
+import { UserIdentity } from "../../generated/io-auth/UserIdentity";
 import { LollipopLocalsType } from "../types/lollipop";
 import { toFiscalCodeHash } from "../types/notification";
-import { UserIdentity } from "../../generated/io-auth/UserIdentity";
 import { getCurrentBackendVersion } from "./package";
 
 // the internal function runtime has MaxTelemetryItem per second set to 20 by default
