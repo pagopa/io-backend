@@ -34,9 +34,9 @@ paths:
             $ref: "#/definitions/ProblemJson"
 definitions:
   LimitedFederatedUser:
-    $ref: "api_backend.template.yaml#/definitions/LimitedFederatedUser"
+    $ref: "api_backend.template.yaml#/components/schemas/LimitedFederatedUser"
   MyPortalUser:
-    $ref: "api_backend.template.yaml#/definitions/FederatedUser"
+    $ref: "api_backend.template.yaml#/components/schemas/FederatedUser"
   ProblemJson:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ProblemJson"
   FiscalCode:
