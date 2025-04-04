@@ -8,10 +8,10 @@ import {
   OrganizationFiscalCode
 } from "@pagopa/ts-commons/lib/strings";
 
-import { DepartmentName } from "../../../generated/backend/DepartmentName";
-import { OrganizationName } from "../../../generated/backend/OrganizationName";
-import { ServiceName } from "../../../generated/backend/ServiceName";
-import { ServicePublic } from "../../../generated/backend/ServicePublic";
+import { DepartmentName } from "../../../generated/services/DepartmentName";
+import { OrganizationName } from "../../../generated/services/OrganizationName";
+import { ServiceName } from "../../../generated/services/ServiceName";
+import { ServicePublic } from "../../../generated/services/ServicePublic";
 import { NotificationChannelEnum } from "@pagopa/io-functions-app-sdk/NotificationChannel";
 import mockReq from "../../__mocks__/request";
 import ApiClient from "../../services/apiClientFactory";
