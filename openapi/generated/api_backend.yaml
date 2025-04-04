@@ -8,60 +8,6 @@ servers:
 security:
   - Bearer: []
 paths:
-  /services/{service_id}:
-    get:
-      summary: Get Service
-      description: A previously created service with the provided service ID is returned.
-      operationId: getService
-      parameters:
-        - name: service_id
-          in: path
-          description: The ID of an existing Service.
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Service found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ServicePublic'
-              example:
-                department_name: IO
-                organization_fiscal_code: '00000000000'
-                organization_name: IO
-                service_id: 5a563817fcc896087002ea46c49a
-                service_name: App IO
-                version: 1
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemJson'
-        '401':
-          description: Bearer token null or expired.
-          content: {}
-        '404':
-          description: No service found for the provided ID.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemJson'
-        '429':
-          description: Too many requests
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemJson'
-        '500':
-          description: There was an error in retrieving the service.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemJson'
-    x-swagger-router-controller: ServicesController
   /services/{service_id}/preferences:
     get:
       summary: GetServicePreferences
@@ -162,48 +108,6 @@ paths:
           description: Internal Server Error
           content: {}
       x-codegen-request-body-name: body
-  /services:
-    get:
-      summary: Get all visible services
-      description: Returns the description of all visible services.
-      operationId: getVisibleServices
-      parameters:
-        - name: cursor
-          in: query
-          description: An opaque identifier that points to the next item in the collection.
-          schema:
-            minimum: 1
-            type: string
-      responses:
-        '200':
-          description: Found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedServiceTupleCollection'
-              example:
-                items:
-                  - service_id: AzureDeployc49a
-                    version: 1
-                  - service_id: 5a25abf4fcc89605c082f042c49a
-                    version: 0
-                page_size: 1
-        '401':
-          description: Bearer token null or expired.
-          content: {}
-        '429':
-          description: Too many requests
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemJson'
-        '500':
-          description: There was an error in retrieving the services.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemJson'
-    x-swagger-router-controller: ServicesController
   /messages:
     get:
       summary: Get user's messages
@@ -300,7 +204,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-    x-swagger-router-controller: MessagesController
   /messages/{id}:
     get:
       summary: Get message
@@ -366,7 +269,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-    x-swagger-router-controller: MessagesController
   /messages/{id}/message-status:
     put:
       summary: UpsertMessageStatusAttributes
@@ -429,7 +331,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
       x-codegen-request-body-name: body
-    x-swagger-router-controller: MessagesController
   /third-party-messages/{id}:
     get:
       summary: Retrieve Third Party message
@@ -507,7 +408,6 @@ paths:
         '504':
           description: Gateway Timeout
           content: {}
-    x-swagger-router-controller: MessagesController
   /third-party-messages/{id}/attachments/{attachment_url}:
     get:
       summary: Retrieve an attachment of a Thrid Party message
@@ -566,7 +466,6 @@ paths:
         '504':
           description: Gateway Timeout
           content: {}
-    x-swagger-router-controller: MessagesController
   /third-party-messages/{id}/precondition:
     get:
       summary: >-
@@ -646,7 +545,6 @@ paths:
         '504':
           description: Gateway Timeout
           content: {}
-    x-swagger-router-controller: MessagesController
   /profile:
     get:
       summary: Get user's profile
@@ -765,7 +663,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
       x-codegen-request-body-name: body
-    x-swagger-router-controller: ProfileController
   /api-profile:
     get:
       summary: Get user's profile stored into the API
@@ -817,7 +714,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-    x-swagger-router-controller: ProfileController
   /email-validation-process:
     post:
       summary: Start the Email Validation Process
@@ -856,7 +752,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-    x-swagger-router-controller: ProfileController
   /installations/{installationID}:
     put:
       summary: Create or update an Installation
@@ -896,7 +791,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
       x-codegen-request-body-name: body
-    x-swagger-router-controller: NotificationController
   /sessions:
     get:
       summary: List sessions of a User
@@ -924,7 +818,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-    x-swagger-router-controller: AuthenticationController
   /payment-requests/{rptId}:
     get:
       summary: Get Payment Info
@@ -973,7 +866,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaymentProblemJson'
-    x-swagger-router-controller: PagoPAProxyController
   /payment-activations:
     post:
       summary: Activate Payment
@@ -1022,7 +914,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaymentProblemJson'
       x-codegen-request-body-name: body
-    x-swagger-router-controller: PagoPAProxyController
   /payment-activations/{codiceContestoPagamento}:
     get:
       summary: Get Activation status
@@ -1070,7 +961,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-    x-swagger-router-controller: PagoPAProxyController
   /user-data-processing:
     post:
       summary: Set User's data processing choices
@@ -1116,7 +1006,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
       x-codegen-request-body-name: body
-    x-swagger-router-controller: UserDataProcessingController
   /user-data-processing/{choice}:
     get:
       summary: Get User's data processing
@@ -1200,7 +1089,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-    x-swagger-router-controller: UserDataProcessingController
 components:
   schemas:
     AcceptedTosVersion:
@@ -1209,7 +1097,7 @@ components:
       description: Version of latest terms of service accepted by the user.
     AppVersion:
       type: string
-      pattern: ^((0|[1-9]\\d*)\\.){2}(0|[1-9]\\d*)(\\.(0|[1-9]\\d*)){0,1}$
+      pattern: ^((0|[1-9]\d*)\.){2}(0|[1-9]\d*)(\.(0|[1-9]\d*)){0,1}$
       description: A string field in Semantic Versioning format
       example: 1.10.11
     BlockedInboxOrChannels:
@@ -1576,18 +1464,6 @@ components:
         The organization that runs the service. Will be added to the content
         of sent messages to identify the sender.
       minLength: 1
-    PaginationResponse:
-      type: object
-      description: Pagination response parameters.
-      properties:
-        prev:
-          type: string
-          description: Contains a value useful to get the previous page
-          example: first_id_of_the_page
-        next:
-          type: string
-          description: Contains a value useful to get the next page
-          example: last_id_of_the_page
     PrescriptionData:
       type: object
       description: Metadata needed to process medical prescriptions.
@@ -1665,133 +1541,6 @@ components:
         The ID of the Service. Equals the subscriptionId of a registered
         API user.
       minLength: 1
-    ServiceName:
-      type: string
-      description: The name of the service. Will be added to the content of sent messages.
-      minLength: 1
-    ServicePublic:
-      title: Service (public)
-      description: A Service associated to an user's subscription.
-      type: object
-      properties:
-        service_id:
-          $ref: '#/components/schemas/ServiceId'
-        service_name:
-          $ref: '#/components/schemas/ServiceName'
-        organization_name:
-          $ref: '#/components/schemas/OrganizationName'
-        department_name:
-          $ref: '#/components/schemas/DepartmentName'
-        organization_fiscal_code:
-          $ref: '#/components/schemas/OrganizationFiscalCode'
-        available_notification_channels:
-          description: All the notification channels available for a service.
-          type: array
-          items:
-            $ref: '#/components/schemas/NotificationChannel'
-        version:
-          type: integer
-        service_metadata:
-          $ref: '#/components/schemas/ServiceMetadata'
-      required:
-        - service_id
-        - service_name
-        - organization_name
-        - department_name
-        - organization_fiscal_code
-        - version
-    ServiceMetadata:
-      x-one-of: true
-      allOf:
-        - $ref: '#/components/schemas/StandardServiceMetadata'
-        - $ref: '#/components/schemas/SpecialServiceMetadata'
-        - $ref: '#/components/schemas/CommonServiceMetadata'
-    CommonServiceMetadata:
-      type: object
-      description: A set of metadata properties related to this service.
-      properties:
-        description:
-          type: string
-          minLength: 1
-        web_url:
-          type: string
-          minLength: 1
-        app_ios:
-          type: string
-          minLength: 1
-        app_android:
-          type: string
-          minLength: 1
-        tos_url:
-          type: string
-          minLength: 1
-        privacy_url:
-          type: string
-          minLength: 1
-        address:
-          type: string
-          minLength: 1
-        phone:
-          type: string
-          minLength: 1
-        email:
-          type: string
-          minLength: 1
-        pec:
-          type: string
-          minLength: 1
-        cta:
-          type: string
-          minLength: 1
-        token_name:
-          type: string
-          minLength: 1
-        support_url:
-          type: string
-          minLength: 1
-        scope:
-          $ref: '#/components/schemas/ServiceScope'
-      required:
-        - scope
-    StandardServiceMetadata:
-      allOf:
-        - $ref: '#/components/schemas/CommonServiceMetadata'
-        - type: object
-          properties:
-            category:
-              $ref: '#/components/schemas/StandardServiceCategory'
-          required:
-            - category
-    SpecialServiceMetadata:
-      allOf:
-        - $ref: '#/components/schemas/CommonServiceMetadata'
-        - type: object
-          properties:
-            category:
-              $ref: '#/components/schemas/SpecialServiceCategory'
-            custom_special_flow:
-              type: string
-              minLength: 1
-          required:
-            - category
-    ServiceTuple:
-      description: Service identifier and version used to return list of services.
-      type: object
-      properties:
-        service_id:
-          $ref: '#/components/schemas/ServiceId'
-        scope:
-          $ref: '#/components/schemas/ServiceScope'
-        version:
-          type: integer
-      required:
-        - service_id
-        - version
-    ServiceScope:
-      type: string
-      x-extensible-enum:
-        - NATIONAL
-        - LOCAL
     ServiceCategory:
       x-one-of: true
       allOf:
@@ -1805,19 +1554,6 @@ components:
       type: string
       x-extensible-enum:
         - STANDARD
-    PaginatedServiceTupleCollection:
-      description: A paginated collection of services tuples
-      allOf:
-        - description: A collection of services tuples (service and version)
-          type: object
-          properties:
-            items:
-              type: array
-              items:
-                $ref: '#/components/schemas/ServiceTuple'
-          required:
-            - items
-        - $ref: '#/components/schemas/PaginationResponse'
     Timestamp:
       type: string
       format: UTCISODateFromString
@@ -1826,7 +1562,7 @@ components:
       example: '2018-10-13T00:00:00.000Z'
     PaymentNoticeNumber:
       description: >-
-        The field "Numero Avviso" of pagoPa, needed to identify the payment. 
+        The field "Numero Avviso" of pagoPa, needed to identify the payment.
         Format is `<aux digit(1n)>[<application code> (2n)]<codice IUV
         (15|17n)>`. See [pagoPa
         specs](https://docs.pagopa.it/saci/specifiche-attuative-dei-codici-identificativi-di-versamento-riversamento-e-rendicontazione/premessa)
@@ -2443,12 +2179,30 @@ components:
       allOf:
         - $ref: '#/components/schemas/CreatedMessageWithContent'
         - $ref: '#/components/schemas/EnrichedMessage'
+    PaginationResponse:
+      type: object
+      description: Pagination response parameters.
+      properties:
+        prev:
+          type: string
+          description: Contains a value useful to get the previous page
+          example: first_id_of_the_page
+        next:
+          type: string
+          description: Contains a value useful to get the next page
+          example: last_id_of_the_page
     Ulid:
       type: string
       description: Ulid string.
       format: Ulid
       x-import: '@pagopa/ts-commons/lib/strings'
       example: 01ARZ3NDEKTSV4RRFFQ69G5FAV
+    PathTraversalSafePathParam:
+      description: >-
+        A non empty string that is safe to be used in an url parameter to avoid
+        path traversal attacks
+      type: string
+      pattern: ^[0-9a-zA-Z\-\._\/+]+$
     PaymentProblemJson:
       description: >-
         A ProblemJson-like type specific for the GetPayment and ActivatePayment
@@ -3130,6 +2884,15 @@ components:
             - name
             - family_name
         - $ref: '#/components/schemas/LimitedFederatedUser'
+    InvalidThirdPartyMessageType:
+      type: string
+      x-extensible-enum:
+        - ATTACHMENTS_NOT_PRESENT
+        - REMOTE_CONTENT_NOT_PRESENT
+        - MARKDOWN_VALIDATION_ERROR
+        - SUBJECT_VALIDATION_ERROR
+      description: A representation of all the error type for an invalid ThirdPartyMessage
+      x-example: ATTACHMENTS_NOT_PRESENT
   parameters:
     MessageId:
       name: id
@@ -3215,6 +2978,5 @@ components:
       required: true
   securitySchemes:
     Bearer:
-      type: apiKey
-      name: Authorization
-      in: header
+      type: http
+      scheme: bearer
