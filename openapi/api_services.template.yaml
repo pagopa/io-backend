@@ -1,6 +1,6 @@
 openapi: 3.0.2
 servers:
-  - url: https://api-app.io.pagopa.it/api/v2
+  - url: https://api-app.io.pagopa.it/api
 info:
   title: Services App Backend API
   version: 16.7.0
@@ -14,7 +14,7 @@ tags:
 security:
   - Bearer: []
 paths:
-  /institutions:
+  /v2/institutions:
     get:
       tags:
         - search
@@ -68,12 +68,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
         "502":
           description: Bad gateway
         "504":
           description: Gateway timeout
-  /institutions/featured:
+  /v2/institutions/featured:
     get:
       tags:
         - featured
@@ -85,7 +85,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Institutions'
+                $ref: "#/components/schemas/Institutions"
         "401":
           description: Bearer token null or expired
         "500":
@@ -93,12 +93,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
         "502":
           description: Bad gateway
         "504":
           description: Gateway timeout
-  /institutions/{institutionId}/services:
+  /v2/institutions/{institutionId}/services:
     get:
       tags:
         - search
@@ -151,7 +151,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ProblemJson"
-  /services/featured:
+  /v2/services/featured:
     get:
       tags:
         - featured
@@ -163,7 +163,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FeaturedServices'
+                $ref: "#/components/schemas/FeaturedServices"
         "401":
           description: Bearer token null or expired
         "500":
@@ -171,12 +171,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
         "502":
           description: Bad gateway
         "504":
           description: Gateway timeout
-  /services/{serviceId}:
+  /v2/services/{serviceId}:
     get:
       tags:
         - details
@@ -207,6 +207,100 @@ paths:
           description: Gateway timeout
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+  /v1/services/{service_id}:
+    get:
+      summary: Get Service
+      description: A previously created service with the provided service ID is returned.
+      operationId: getService
+      parameters:
+        - name: service_id
+          in: path
+          description: The ID of an existing Service.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Service found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServicePublic"
+              example:
+                department_name: IO
+                organization_fiscal_code: "00000000000"
+                organization_name: IO
+                service_id: 5a563817fcc896087002ea46c49a
+                service_name: App IO
+                version: 1
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+        "401":
+          description: Bearer token null or expired.
+          content: {}
+        "404":
+          description: No service found for the provided ID.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+        "500":
+          description: There was an error in retrieving the service.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+  /v1/services:
+    get:
+      summary: Get all visible services
+      description: Returns the description of all visible services.
+      operationId: getVisibleServices
+      parameters:
+        - name: cursor
+          in: query
+          description: An opaque identifier that points to the next item in the collection.
+          schema:
+            minimum: 1
+            type: string
+      responses:
+        "200":
+          description: Found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedServiceTupleCollection"
+              example:
+                items:
+                  - service_id: AzureDeployc49a
+                    version: 1
+                  - service_id: 5a25abf4fcc89605c082f042c49a
+                    version: 0
+                page_size: 1
+        "401":
+          description: Bearer token null or expired.
+          content: {}
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+        "500":
+          description: There was an error in retrieving the services.
           content:
             application/json:
               schema:
@@ -290,7 +384,7 @@ components:
         organization:
           $ref: "#/components/schemas/Organization"
         metadata:
-          $ref: "#/components/schemas/ServiceMetadata"
+          $ref: "#/components/schemas/ServiceMetadataV2"
       required:
         - id
         - name
@@ -303,26 +397,26 @@ components:
         services:
           type: array
           items:
-            $ref: '#/components/schemas/FeaturedService'
+            $ref: "#/components/schemas/FeaturedService"
       required:
         - services
     FeaturedService:
       allOf:
-        - $ref: '#/components/schemas/ServiceMinified'
+        - $ref: "#/components/schemas/ServiceMinified"
         - type: object
           properties:
             organization_name:
               type: string
               description: Organization Name
-    ServiceMetadata:
+    ServiceMetadataV2:
       description: A set of service metadata properties
       x-one-of: true
       allOf:
-        - $ref: '#/components/schemas/StandardServiceMetadata'
-        - $ref: '#/components/schemas/SpecialServiceMetadata'
-    StandardServiceMetadata:
+        - $ref: '#/components/schemas/StandardServiceMetadataV2'
+        - $ref: '#/components/schemas/SpecialServiceMetadataV2'
+    StandardServiceMetadataV2:
       allOf:
-        - $ref: '#/components/schemas/ServiceBaseMetadata'
+        - $ref: "#/components/schemas/ServiceBaseMetadata"
         - type: object
           properties:
             category:
@@ -333,7 +427,7 @@ components:
       type: string
       x-extensible-enum:
         - STANDARD
-    SpecialServiceMetadata:
+    SpecialServiceMetadataV2:
       allOf:
         - $ref: '#/components/schemas/ServiceBaseMetadata'
         - type: object
@@ -406,7 +500,7 @@ components:
         - fiscal_code
     OrganizationFiscalCode:
       type: string
-      x-import: '@pagopa/ts-commons/lib/strings'
+      x-import: "@pagopa/ts-commons/lib/strings"
       format: OrganizationFiscalCode
     PaginationResultSet:
       type: object
@@ -431,6 +525,34 @@ components:
         - NATIONAL
         - LOCAL
     ServiceId:
-      $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServiceId"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/ServiceId"
     ProblemJson:
-      $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ProblemJson"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/ProblemJson"
+    ServiceMetadata:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/ServiceMetadata"
+    ServicePublic:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/ServicePublic"
+    ServiceName:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/ServiceName"
+    StandardServiceMetadata:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/StandardServiceMetadata"
+    SpecialServiceMetadata:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/SpecialServiceMetadata"
+    CommonServiceMetadata:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/CommonServiceMetadata"
+    MaxAllowedPaymentAmount:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/MaxAllowedPaymentAmount"
+    OrganizationName:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/OrganizationName"
+    DepartmentName:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/DepartmentName"
+    PaginatedServiceTupleCollection:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/PaginatedServiceTupleCollection"
+    PaginationResponse:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/PaginationResponse"
+    ServiceTupleCollection:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/ServiceTupleCollection"
+    ServiceTuple:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/ServiceTuple"
+    ServiceScope:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/ServiceScope"
