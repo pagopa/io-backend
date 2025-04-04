@@ -328,25 +328,29 @@ components:
         - type: object
           properties:
             category:
-              type: string
-              enum:
-                - STANDARD
+              $ref: '#/components/schemas/StandardServiceCategory'
           required:
             - category
+    StandardServiceCategory:
+      type: string
+      x-extensible-enum:
+        - STANDARD
     SpecialServiceMetadata:
       allOf:
         - $ref: '#/components/schemas/ServiceBaseMetadata'
         - type: object
           properties:
             category:
-              type: string
-              enum:
-                - SPECIAL
+              $ref: '#/components/schemas/SpecialServiceCategory'
             custom_special_flow:
               type: string
               minLength: 1
           required:
             - category
+    SpecialServiceCategory:
+      type: string
+      x-extensible-enum:
+        - SPECIAL
     ServiceBaseMetadata:
       type: object
       description: A set of common service metadata properties

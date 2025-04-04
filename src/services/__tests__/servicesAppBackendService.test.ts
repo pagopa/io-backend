@@ -1,10 +1,9 @@
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { NotificationChannelEnum } from "../../../generated/services-app-backend/NotificationChannel";
-import { OrganizationFiscalCode } from "../../../generated/services-app-backend/OrganizationFiscalCode";
-import { ServicesAppBackendAPIClient } from "../../clients/services-app-backend";
-import { ScopeTypeEnum } from "../../../generated/services-app-backend/ScopeType";
-import { CategoryEnum } from "../../../generated/services-app-backend/ServiceMetadata";
 import * as t from "io-ts";
+import { OrganizationFiscalCode } from "../../../generated/services-app-backend/OrganizationFiscalCode";
+import { ScopeTypeEnum } from "../../../generated/services-app-backend/ScopeType";
+import { StandardServiceCategoryEnum } from "../../../generated/services-app-backend/StandardServiceCategory";
+import { ServicesAppBackendAPIClient } from "../../clients/services-app-backend";
 import ServicesAppBackendService from "../servicesAppBackendService";
 
 const mockFindInstitutionsResult = {
@@ -12,17 +11,17 @@ const mockFindInstitutionsResult = {
     {
       id: "01234567891",
       name: "Institution 1",
-      fiscal_code: "01234567891" as OrganizationFiscalCode,
+      fiscal_code: "01234567891" as OrganizationFiscalCode
     },
     {
       id: "21234567891",
       name: "Institution 2",
-      fiscal_code: "21234567891" as OrganizationFiscalCode,
-    },
+      fiscal_code: "21234567891" as OrganizationFiscalCode
+    }
   ],
   count: 2,
   offset: 1,
-  limit: 20,
+  limit: 20
 };
 
 const aValidInstitutionId = "aInstitutionId";
@@ -32,33 +31,30 @@ const mockFindInstitutionsServicesResult = {
     {
       id: "01234567891",
       name: "service 1",
-      version: 1,
+      version: 1
     },
     {
       id: "21234567891",
       name: "service 2",
-      version: 2,
-    },
+      version: 2
+    }
   ],
   count: 2,
   offset: 1,
-  limit: 20,
+  limit: 20
 };
 
 const aValidServiceId = "aServiceId";
 
-const mockGetServiceByIdResult = (
-  available_notification_channels?: NotificationChannelEnum[]
-) => ({
+const mockGetServiceByIdResult = () => ({
   id: "aServiceId",
   name: "aServiceName",
   version: 1,
   description: "aServiceDescription",
   organization: {
     name: "aServiceOrganization" as NonEmptyString,
-    fiscal_code: "01234567890" as OrganizationFiscalCode,
+    fiscal_code: "01234567890" as OrganizationFiscalCode
   },
-  available_notification_channels,
   metadata: {
     scope: ScopeTypeEnum.LOCAL,
     web_url: "aServiceWebUrl" as NonEmptyString,
@@ -73,8 +69,8 @@ const mockGetServiceByIdResult = (
     cta: "aServiceCta" as NonEmptyString,
     token_name: "aServiceTokenName" as NonEmptyString,
     support_url: "aServiceSupportUrl" as NonEmptyString,
-    category: CategoryEnum.STANDARD,
-  },
+    category: StandardServiceCategoryEnum.STANDARD
+  }
 });
 
 const mockFeaturedServicesResponse = {
@@ -82,15 +78,15 @@ const mockFeaturedServicesResponse = {
     {
       id: "aServiceId",
       name: "aServiceName",
-      version: 1,
+      version: 1
     },
     {
       id: "anotherServiceId",
       name: "anotherServiceName",
       version: 1,
-      organization_name: "anOrganizationName",
-    },
-  ],
+      organization_name: "anOrganizationName"
+    }
+  ]
 };
 
 const mockFeaturedInstitutionsResponse = {
@@ -98,28 +94,28 @@ const mockFeaturedInstitutionsResponse = {
     {
       id: "12345678901",
       name: "anInstitutionName",
-      fiscal_code: "12345678901",
+      fiscal_code: "12345678901"
     },
     {
       id: "15345478961",
       name: "anotherInstitutionName",
-      fiscal_code: "10385778507",
-    },
-  ],
+      fiscal_code: "10385778507"
+    }
+  ]
 };
 
 const problemJson = {
-  status: 500,
+  status: 500
 };
 
 const notFoundApiServiceResponse = {
   status: 404,
-  value: {},
+  value: {}
 };
 
 const invalidApiServiceResponse = {
   status: 500,
-  value: { random: "notGood" },
+  value: { random: "notGood" }
 };
 
 const mockFindInstitutions = jest.fn();
@@ -139,7 +135,7 @@ const api: ReturnType<typeof ServicesAppBackendAPIClient> = {
   getFeaturedServices: mockGetFeaturedServices,
   getFeaturedInstitutions: mockGetFeaturedInstitutions,
   findInstutionServices: mockFindInstutionServices,
-  info: mockInfo,
+  info: mockInfo
 };
 
 describe("FunctionsServicesAppBackendService#getServiceById", () => {
@@ -148,11 +144,8 @@ describe("FunctionsServicesAppBackendService#getServiceById", () => {
       t.success({
         status: 200,
         value: {
-          ...mockGetServiceByIdResult([
-            NotificationChannelEnum.EMAIL,
-            NotificationChannelEnum.WEBHOOK,
-          ]),
-        },
+          ...mockGetServiceByIdResult()
+        }
       })
     );
 
@@ -161,16 +154,13 @@ describe("FunctionsServicesAppBackendService#getServiceById", () => {
     const res = await service.getServiceById(aValidServiceId);
 
     expect(mockGetServiceById).toHaveBeenCalledWith({
-      serviceId: aValidServiceId,
+      serviceId: aValidServiceId
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
       value: {
-        ...mockGetServiceByIdResult([
-          NotificationChannelEnum.EMAIL,
-          NotificationChannelEnum.WEBHOOK,
-        ]),
-      },
+        ...mockGetServiceByIdResult()
+      }
     });
   });
 
@@ -180,7 +170,7 @@ describe("FunctionsServicesAppBackendService#getServiceById", () => {
     const service = new ServicesAppBackendService(api);
     const res = await service.getServiceById(aValidServiceId);
     expect(mockGetServiceById).toHaveBeenCalledWith({
-      serviceId: aValidServiceId,
+      serviceId: aValidServiceId
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
@@ -194,7 +184,7 @@ describe("FunctionsServicesAppBackendService#getServiceById", () => {
 
     const res = await service.getServiceById(aValidServiceId);
     expect(mockGetServiceById).toHaveBeenCalledWith({
-      serviceId: aValidServiceId,
+      serviceId: aValidServiceId
     });
     expect(res.kind).toEqual("IResponseErrorNotFound");
   });
@@ -208,7 +198,7 @@ describe("FunctionsServicesAppBackendService#getServiceById", () => {
 
     const res = await service.getServiceById(aValidServiceId);
     expect(mockGetServiceById).toHaveBeenCalledWith({
-      serviceId: aValidServiceId,
+      serviceId: aValidServiceId
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
@@ -219,7 +209,7 @@ describe("FunctionsServicesAppBackendService#getFeaturedServices", () => {
     mockGetFeaturedServices.mockImplementation(() =>
       t.success({
         status: 200,
-        value: mockFeaturedServicesResponse,
+        value: mockFeaturedServicesResponse
       })
     );
 
@@ -230,7 +220,7 @@ describe("FunctionsServicesAppBackendService#getFeaturedServices", () => {
     expect(mockGetFeaturedServices).toHaveBeenCalledWith({});
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
-      value: mockFeaturedServicesResponse,
+      value: mockFeaturedServicesResponse
     });
   });
 
@@ -260,7 +250,7 @@ describe("FunctionsServicesAppBackendService#getFeaturedInstitutions", () => {
     mockGetFeaturedInstitutions.mockImplementation(() =>
       t.success({
         status: 200,
-        value: mockFeaturedInstitutionsResponse,
+        value: mockFeaturedInstitutionsResponse
       })
     );
 
@@ -271,7 +261,7 @@ describe("FunctionsServicesAppBackendService#getFeaturedInstitutions", () => {
     expect(mockGetFeaturedInstitutions).toHaveBeenCalledWith({});
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
-      value: mockFeaturedInstitutionsResponse,
+      value: mockFeaturedInstitutionsResponse
     });
   });
 
@@ -303,7 +293,7 @@ describe("FunctionsServicesAppBackendService#findInstitutions", () => {
     mockFindInstitutions.mockImplementation(() =>
       t.success({
         status: 200,
-        value: mockFindInstitutionsResult,
+        value: mockFindInstitutionsResult
       })
     );
 
@@ -314,7 +304,7 @@ describe("FunctionsServicesAppBackendService#findInstitutions", () => {
     expect(mockFindInstitutions).toHaveBeenCalledWith({});
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
-      value: mockFindInstitutionsResult,
+      value: mockFindInstitutionsResult
     });
   });
 
@@ -344,7 +334,7 @@ describe("FunctionsServicesAppBackendService#findInstutionServices", () => {
     mockFindInstutionServices.mockImplementation(() =>
       t.success({
         status: 200,
-        value: mockFindInstitutionsServicesResult,
+        value: mockFindInstitutionsServicesResult
       })
     );
 
@@ -353,11 +343,11 @@ describe("FunctionsServicesAppBackendService#findInstutionServices", () => {
     const res = await service.findInstutionServices(aValidInstitutionId);
 
     expect(mockFindInstutionServices).toHaveBeenCalledWith({
-      institutionId: aValidInstitutionId,
+      institutionId: aValidInstitutionId
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
-      value: mockFindInstitutionsServicesResult,
+      value: mockFindInstitutionsServicesResult
     });
   });
 
@@ -367,7 +357,7 @@ describe("FunctionsServicesAppBackendService#findInstutionServices", () => {
     const service = new ServicesAppBackendService(api);
     const res = await service.findInstutionServices(aValidInstitutionId);
     expect(mockFindInstutionServices).toHaveBeenCalledWith({
-      institutionId: aValidInstitutionId,
+      institutionId: aValidInstitutionId
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
@@ -380,7 +370,7 @@ describe("FunctionsServicesAppBackendService#findInstutionServices", () => {
     const service = new ServicesAppBackendService(api);
     const res = await service.findInstutionServices(aValidInstitutionId);
     expect(mockFindInstutionServices).toHaveBeenCalledWith({
-      institutionId: aValidInstitutionId,
+      institutionId: aValidInstitutionId
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
