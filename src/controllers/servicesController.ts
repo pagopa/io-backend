@@ -15,8 +15,8 @@ import * as express from "express";
 
 import { PathTraversalSafePathParam } from "../../generated/backend/PathTraversalSafePathParam";
 import { ServicePreference } from "../../generated/backend/ServicePreference";
-import { ServicePublic } from "../../generated/backend/ServicePublic";
 import { UpsertServicePreference } from "../../generated/backend/UpsertServicePreference";
+import { ServicePublic } from "../../generated/services/ServicePublic";
 import { withUserFromRequest } from "../../src/types/user";
 import { withValidatedOrValidationError } from "../../src/utils/responses";
 import FunctionsAppService from "../services/functionAppService";
