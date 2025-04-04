@@ -406,10 +406,7 @@ components:
           type: string
           minLength: 1
         scope:
-          type: string
-          enum:
-            - NATIONAL
-            - LOCAL
+          $ref: '#/components/schemas/ScopeType'
       required:
         - scope
     Organization:
