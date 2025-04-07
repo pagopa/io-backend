@@ -1,8 +1,7 @@
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as B from "fp-ts/boolean";
 import { flow } from "fp-ts/lib/function";
 
-import { FiscalCode } from "../../generated/io-bonus-api/FiscalCode";
 import { toFiscalCodeHash } from "../types/notification";
 import {
   FeatureFlag,
