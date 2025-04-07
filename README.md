@@ -162,6 +162,9 @@ Those are all Environment variables needed by the application:
 | TRIAL_SYSTEM_API_BASE_PATH                | Trial System Api Base path                                                                           | string |
 | TRIAL_SYSTEM_API_URL                      | Trial System FunctionApp Api url                                                                     | string |
 | TRIAL_SYSTEM_API_KEY                      | The key used to authenticate to the Trial System API                                                 | string |
+| FF_IO_X_USER_TOKEN                        | Enables/disables the use of the x-user header                                                        | string (enum: NONE, BETA, ALL) |
+| FF_IO_X_USER_TOKEN_BETA_TESTER_SHA_LIST   | List of hashed fiscal codes enabled for the feature                                                  | csv     |
+| FF_IO_X_USER_TOKEN_CANARY_SHA_USERS_REGEX | Regex used to check the correct format of the fiscal codes                                           | regex   |
 
 Notes:
  * `FETCH_KEEPALIVE_ENABLED` should be enabled when deploying on Azure App Service to avoid [SNAT Exhaustion](https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-outbound-connections)
