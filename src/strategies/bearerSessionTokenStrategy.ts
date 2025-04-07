@@ -46,8 +46,8 @@ const getUserService = (
   return flow(
     isUserEligible,
     B.fold(
-      () => oldUserService(),
-      () => newUserService()
+      oldUserService,
+      newUserService
     )
   );
 };
@@ -62,22 +62,18 @@ const getUser = async (
 ): Promise<Either<Error, Option<UserIdentity>>> => {
   const userFromToken = getByXUserToken(x_user_token);
 
-  if (E.isLeft(userFromToken)) {
+  if (E.isLeft(userFromToken) || O.isNone(userFromToken.right)) {
     return sessionStorage.getBySessionToken(token as SessionToken);
   }
 
-  if (O.isSome(userFromToken.right)) {
-    const user = userFromToken.right.value;
-    return getUserService(
-      betaTesters,
-      canaryTestUserRegex,
-      ff,
-      () => sessionStorage.getBySessionToken(token as SessionToken),
-      () => Promise.resolve(E.right(O.some(user)))
-    )(user.fiscal_code);
-  }
-
-  return sessionStorage.getBySessionToken(token as SessionToken);
+  const user = userFromToken.right.value;
+  return getUserService(
+    betaTesters,
+    canaryTestUserRegex,
+    ff,
+    () => sessionStorage.getBySessionToken(token as SessionToken),
+    () => Promise.resolve(E.right(O.some(user)))
+  )(user.fiscal_code);
 };
 
 const bearerSessionTokenStrategy = (
