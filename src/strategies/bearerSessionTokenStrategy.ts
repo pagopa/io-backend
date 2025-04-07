@@ -24,34 +24,6 @@ import {
 import { StrategyDoneFunction, fulfill } from "../utils/strategies";
 import { getByXUserToken } from "../utils/x-user-token";
 
-type getUserServiceFunctionType = () => Promise<
-  Either<Error, Option<UserIdentity>>
->;
-
-const getUserService = (
-  betaTesters: ReadonlyArray<FiscalCode>,
-  canaryTestUserRegex: NonEmptyString,
-  ff: FeatureFlag,
-  oldUserService: getUserServiceFunctionType,
-  newUserService: getUserServiceFunctionType
-) => {
-  const isUserACanaryTestUser = getIsUserACanaryTestUser(canaryTestUserRegex);
-
-  const isUserEligible = getIsUserEligibleForNewFeature<FiscalCode>(
-    (cf) => betaTesters.includes(cf),
-    (cf) => isUserACanaryTestUser(toFiscalCodeHash(cf)),
-    ff
-  );
-
-  return flow(
-    isUserEligible,
-    B.fold(
-      oldUserService,
-      newUserService
-    )
-  );
-};
-
 const getUser = async (
   betaTesters: ReadonlyArray<FiscalCode>,
   canaryTestUserRegex: NonEmptyString,
@@ -60,6 +32,14 @@ const getUser = async (
   x_user_token: string,
   token: string
 ): Promise<Either<Error, Option<UserIdentity>>> => {
+  const isUserACanaryTestUser = getIsUserACanaryTestUser(canaryTestUserRegex);
+
+  const isUserEligible = getIsUserEligibleForNewFeature<FiscalCode>(
+    (cf) => betaTesters.includes(cf),
+    (cf) => isUserACanaryTestUser(toFiscalCodeHash(cf)),
+    ff
+  );
+
   const userFromToken = getByXUserToken(x_user_token);
 
   if (E.isLeft(userFromToken) || O.isNone(userFromToken.right)) {
@@ -67,12 +47,12 @@ const getUser = async (
   }
 
   const user = userFromToken.right.value;
-  return getUserService(
-    betaTesters,
-    canaryTestUserRegex,
-    ff,
-    () => sessionStorage.getBySessionToken(token as SessionToken),
-    () => Promise.resolve(E.right(O.some(user)))
+  return flow(
+    isUserEligible,
+    B.fold(
+      () => sessionStorage.getBySessionToken(token as SessionToken),
+      () => Promise.resolve(E.right(O.some(user)))
+    )
   )(user.fiscal_code);
 };
 
