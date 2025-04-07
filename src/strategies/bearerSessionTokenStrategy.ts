@@ -22,6 +22,22 @@ import {
 import { StrategyDoneFunction, fulfill } from "../utils/strategies";
 import { getByXUserToken } from "../utils/x-user-token";
 
+/**
+ * Retrieves a user identity from either an x-user token or a session token.
+ *
+ * This function first attempts to retrieve and validate a user from the x-user token.
+ * If the user is eligible based on feature flag settings (beta testers or canary users),
+ * it returns that user. Otherwise, it falls back to retrieving the user from the session token.
+ *
+ * @param betaTesters - Array of fiscal codes representing beta test users
+ * @param canaryTestUserRegex - Regex pattern to identify canary test users
+ * @param ff - Feature flag configuration determining eligibility
+ * @param sessionStorage - Storage interface for retrieving session information
+ * @param x_user_token - The x-user token from request headers
+ * @param token - The session token to use as fallback
+ *
+ * @returns A promise that resolves to Either an Error or an Option containing UserIdentity
+ */
 const getUser = async (
   betaTesters: ReadonlyArray<FiscalCode>,
   canaryTestUserRegex: NonEmptyString,
