@@ -39,9 +39,6 @@ export const getByXUserToken = (
   const errorOrUser = decodeApiKey(token);
 
   if (E.isLeft(errorOrUser)) {
-    if (errorOrUser.left.message === "User not found") {
-      return E.right(O.none);
-    }
     return E.left(errorOrUser.left);
   }
 
