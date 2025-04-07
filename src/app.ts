@@ -23,12 +23,10 @@ import * as passport from "passport";
 import {
   API_CLIENT,
   APP_MESSAGES_API_CLIENT,
-  BONUS_API_CLIENT,
   CGN_API_CLIENT,
   CGN_OPERATOR_SEARCH_API_CLIENT,
   ENV,
   EUCOVIDCERT_API_CLIENT,
-  FF_BONUS_ENABLED,
   FF_CGN_ENABLED,
   FF_EUCOVIDCERT_ENABLED,
   FF_IO_FIMS_ENABLED,
@@ -63,7 +61,6 @@ import {
 } from "./config";
 import { registerAuthenticationRoutes } from "./routes/authenticationRoutes";
 import { registerAPIRoutes } from "./routes/baseRoutes";
-import { registerBonusAPIRoutes } from "./routes/bonusRoutes";
 import {
   registerCgnAPIRoutes,
   registerCgnOperatorSearchAPIRoutes
@@ -79,7 +76,6 @@ import { registerServicesAppBackendRoutes } from "./routes/servicesRoutes";
 import { registerSessionAPIRoutes } from "./routes/sessionRoutes";
 import { registerTrialSystemAPIRoutes } from "./routes/trialSystemRoutes";
 import AuthenticationLockService from "./services/authenticationLockService";
-import BonusService from "./services/bonusService";
 import CgnOperatorSearchService from "./services/cgnOperatorSearchService";
 import CgnService from "./services/cgnService";
 import EUCovidCertService from "./services/eucovidcertService";
@@ -120,7 +116,6 @@ export interface IAppFactoryParameters {
   readonly allowSessionHandleIPSourceRange: ReadonlyArray<CIDR>;
   readonly authenticationBasePath: string;
   readonly APIBasePath: string;
-  readonly BonusAPIBasePath: string;
   readonly CGNAPIBasePath: string;
   readonly CGNOperatorSearchAPIBasePath: string;
   readonly IoSignAPIBasePath: string;
@@ -138,7 +133,6 @@ export async function newApp({
   appInsightsClient,
   authenticationBasePath,
   APIBasePath,
-  BonusAPIBasePath,
   CGNAPIBasePath,
   IoSignAPIBasePath,
   IoFimsAPIBasePath,
@@ -283,9 +277,6 @@ export async function newApp({
           tableClient
         );
 
-        // Create the bonus service
-        const BONUS_SERVICE = new BonusService(BONUS_API_CLIENT);
-
         // Create the cgn service
         const CGN_SERVICE = new CgnService(CGN_API_CLIENT);
 
@@ -429,14 +420,6 @@ export async function newApp({
           AUTHENTICATION_LOCK_SERVICE,
           notificationServiceFactory
         );
-        if (FF_BONUS_ENABLED) {
-          registerBonusAPIRoutes(
-            app,
-            BonusAPIBasePath,
-            BONUS_SERVICE,
-            authMiddlewares.bearerSession
-          );
-        }
         if (FF_CGN_ENABLED) {
           registerCgnAPIRoutes(
             app,
