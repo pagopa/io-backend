@@ -11,16 +11,16 @@ import * as O from "fp-ts/lib/Option";
 import { Option } from "fp-ts/lib/Option";
 import { flow } from "fp-ts/lib/function";
 import * as passport from "passport-http-bearer";
+
+import { UserIdentity } from "../../generated/io-auth/UserIdentity";
+import { ISessionStorage } from "../services/ISessionStorage";
 import { toFiscalCodeHash } from "../types/notification";
+import { SessionToken } from "../types/token";
 import {
   FeatureFlag,
   getIsUserACanaryTestUser,
   getIsUserEligibleForNewFeature
 } from "../utils/featureFlag";
-
-import { UserIdentity } from "../../generated/io-auth/UserIdentity";
-import { ISessionStorage } from "../services/ISessionStorage";
-import { SessionToken } from "../types/token";
 import { StrategyDoneFunction, fulfill } from "../utils/strategies";
 import { getByXUserToken } from "../utils/x-user-token";
 
