@@ -6,7 +6,6 @@ import { Option } from "fp-ts/lib/Option";
 import { flow, pipe } from "fp-ts/lib/function";
 
 import { UserIdentity } from "../../generated/io-auth/UserIdentity";
-import { FF_IO_X_USER_TOKEN_ENABLED } from "../config";
 
 const parseUser = (value: string): Either<Error, UserIdentity> =>
   pipe(
@@ -26,17 +25,13 @@ const decodeApiKey = (apiKey: string): Either<Error, UserIdentity> =>
       (err) => E.toError(err)
     ),
     E.chain(
-      flow(
-        O.fromNullable,
-        E.fromOption(() => new Error("User not found")),
-        E.chain(parseUser)
+      E.fromPredicate(
+        (decodedToken: string) => decodedToken !== "",
+        () => new Error("Invalid token")
       )
-    )
+    ),
+    E.chain(parseUser)
   );
-
-const isUserEnabled = (user: UserIdentity): boolean =>
-  Array.isArray(FF_IO_X_USER_TOKEN_ENABLED) &&
-  FF_IO_X_USER_TOKEN_ENABLED.includes(user.fiscal_code);
 
 export const getByXUserToken = (
   token: string
@@ -48,10 +43,6 @@ export const getByXUserToken = (
       return E.right(O.none);
     }
     return E.left(errorOrUser.left);
-  }
-
-  if (!isUserEnabled(errorOrUser.right)) {
-    return E.right(O.none);
   }
 
   const user = errorOrUser.right;

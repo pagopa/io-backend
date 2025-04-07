@@ -2,12 +2,21 @@
  * Builds and configure a Passport strategy to authenticate the proxy clients.
  */
 
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as express from "express";
+import * as B from "fp-ts/boolean";
 import * as E from "fp-ts/lib/Either";
 import { Either } from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { Option } from "fp-ts/lib/Option";
+import { flow } from "fp-ts/lib/function";
 import * as passport from "passport-http-bearer";
+import { toFiscalCodeHash } from "src/types/notification";
+import {
+  FeatureFlag,
+  getIsUserACanaryTestUser,
+  getIsUserEligibleForNewFeature
+} from "src/utils/featureFlag";
 
 import { UserIdentity } from "../../generated/io-auth/UserIdentity";
 import { ISessionStorage } from "../services/ISessionStorage";
@@ -15,7 +24,38 @@ import { SessionToken } from "../types/token";
 import { StrategyDoneFunction, fulfill } from "../utils/strategies";
 import { getByXUserToken } from "../utils/x-user-token";
 
+type getUserServiceFunctionType = () => Promise<
+  Either<Error, Option<UserIdentity>>
+>;
+
+const getUserService = (
+  betaTesters: ReadonlyArray<FiscalCode>,
+  canaryTestUserRegex: NonEmptyString,
+  ff: FeatureFlag,
+  oldUserService: getUserServiceFunctionType,
+  newUserService: getUserServiceFunctionType
+) => {
+  const isUserACanaryTestUser = getIsUserACanaryTestUser(canaryTestUserRegex);
+
+  const isUserEligible = getIsUserEligibleForNewFeature<FiscalCode>(
+    (cf) => betaTesters.includes(cf),
+    (cf) => isUserACanaryTestUser(toFiscalCodeHash(cf)),
+    ff
+  );
+
+  return flow(
+    isUserEligible,
+    B.fold(
+      () => oldUserService(),
+      () => newUserService()
+    )
+  );
+};
+
 const getUser = async (
+  betaTesters: ReadonlyArray<FiscalCode>,
+  canaryTestUserRegex: NonEmptyString,
+  ff: FeatureFlag,
   sessionStorage: ISessionStorage,
   x_user_token: string,
   token: string
@@ -23,17 +63,27 @@ const getUser = async (
   const userFromToken = getByXUserToken(x_user_token);
 
   if (E.isLeft(userFromToken)) {
-    return userFromToken;
+    return sessionStorage.getBySessionToken(token as SessionToken);
   }
 
   if (O.isSome(userFromToken.right)) {
-    return E.right(O.some(userFromToken.right.value));
+    const user = userFromToken.right.value;
+    return getUserService(
+      betaTesters,
+      canaryTestUserRegex,
+      ff,
+      () => sessionStorage.getBySessionToken(token as SessionToken),
+      () => Promise.resolve(E.right(O.some(user)))
+    )(user.fiscal_code);
   }
 
   return sessionStorage.getBySessionToken(token as SessionToken);
 };
 
 const bearerSessionTokenStrategy = (
+  betaTesters: ReadonlyArray<FiscalCode>,
+  canaryTestUserRegex: NonEmptyString,
+  ff: FeatureFlag,
   sessionStorage: ISessionStorage,
   onValidUser?: (user: UserIdentity) => void
 ): passport.Strategy<passport.VerifyFunctionWithRequest> => {
@@ -45,7 +95,14 @@ const bearerSessionTokenStrategy = (
   return new passport.Strategy<passport.VerifyFunctionWithRequest>(
     options,
     (req: express.Request, token: string, done: StrategyDoneFunction) => {
-      getUser(sessionStorage, req.headers["x-user"] as string, token).then(
+      getUser(
+        betaTesters,
+        canaryTestUserRegex,
+        ff,
+        sessionStorage,
+        req.headers["x-user"] as string,
+        token
+      ).then(
         (errorOrUser: Either<Error, Option<UserIdentity>>) => {
           try {
             if (

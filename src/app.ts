@@ -34,6 +34,9 @@ import {
   FF_IO_FIMS_ENABLED,
   FF_IO_SIGN_ENABLED,
   FF_IO_WALLET_ENABLED,
+  FF_IO_X_USER_TOKEN,
+  FF_IO_X_USER_TOKEN_BETA_TESTER_SHA_LIST,
+  FF_IO_X_USER_TOKEN_CANARY_SHA_USERS_REGEX,
   FF_ROUTING_PUSH_NOTIF,
   FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST,
   FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX,
@@ -162,7 +165,13 @@ export async function newApp({
   // Add the strategy to authenticate proxy clients.
   passport.use(
     "bearer.session",
-    bearerSessionTokenStrategy(SESSION_STORAGE, attachTrackingData)
+    bearerSessionTokenStrategy(
+      FF_IO_X_USER_TOKEN_BETA_TESTER_SHA_LIST,
+      FF_IO_X_USER_TOKEN_CANARY_SHA_USERS_REGEX,
+      FF_IO_X_USER_TOKEN,
+      SESSION_STORAGE,
+      attachTrackingData
+    )
   );
 
   // Add the strategy to authenticate webhook calls.
