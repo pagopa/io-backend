@@ -11,12 +11,12 @@ import * as O from "fp-ts/lib/Option";
 import { Option } from "fp-ts/lib/Option";
 import { flow } from "fp-ts/lib/function";
 import * as passport from "passport-http-bearer";
-import { toFiscalCodeHash } from "src/types/notification";
+import { toFiscalCodeHash } from "../types/notification";
 import {
   FeatureFlag,
   getIsUserACanaryTestUser,
   getIsUserEligibleForNewFeature
-} from "src/utils/featureFlag";
+} from "../utils/featureFlag";
 
 import { UserIdentity } from "../../generated/io-auth/UserIdentity";
 import { ISessionStorage } from "../services/ISessionStorage";
