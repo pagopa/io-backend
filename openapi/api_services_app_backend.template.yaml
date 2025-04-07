@@ -264,8 +264,7 @@ components:
       description: Service data (minified)
       properties:
         id:
-          type: string
-          description: Service ID
+          $ref: "#/components/schemas/ServiceId"
         name:
           type: string
           description: Service Name
@@ -281,8 +280,7 @@ components:
       type: object
       properties:
         id:
-          type: string
-          description: Service ID
+          $ref: "#/components/schemas/ServiceId"
         name:
           type: string
           description: Service name
@@ -432,5 +430,7 @@ components:
       enum:
         - NATIONAL
         - LOCAL
+    ServiceId:
+      $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServiceId"
     ProblemJson:
       $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v26.3.0/openapi/definitions.yaml#/ProblemJson"

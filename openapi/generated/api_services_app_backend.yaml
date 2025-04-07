@@ -278,8 +278,7 @@ components:
       description: Service data (minified)
       properties:
         id:
-          type: string
-          description: Service ID
+          $ref: '#/components/schemas/ServiceId'
         name:
           type: string
           description: Service Name
@@ -295,8 +294,7 @@ components:
       type: object
       properties:
         id:
-          type: string
-          description: Service ID
+          $ref: '#/components/schemas/ServiceId'
         name:
           type: string
           description: Service name
@@ -446,6 +444,12 @@ components:
       enum:
         - NATIONAL
         - LOCAL
+    ServiceId:
+      type: string
+      description: |-
+        The ID of the Service. Equals the subscriptionId of a registered
+        API user.
+      minLength: 1
     ProblemJson:
       type: object
       properties:
