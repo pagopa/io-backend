@@ -4,12 +4,10 @@
 
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as express from "express";
-import * as B from "fp-ts/boolean";
 import * as E from "fp-ts/lib/Either";
 import { Either } from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { Option } from "fp-ts/lib/Option";
-import { flow } from "fp-ts/lib/function";
 import * as passport from "passport-http-bearer";
 
 import { UserIdentity } from "../../generated/io-auth/UserIdentity";
@@ -42,18 +40,15 @@ const getUser = async (
 
   const userFromToken = getByXUserToken(x_user_token);
 
-  if (E.isLeft(userFromToken) || O.isNone(userFromToken.right)) {
+  if (
+    E.isLeft(userFromToken) ||
+    O.isNone(userFromToken.right) ||
+    !isUserEligible(userFromToken.right.value.fiscal_code)
+  ) {
     return sessionStorage.getBySessionToken(token as SessionToken);
   }
 
-  const user = userFromToken.right.value;
-  return flow(
-    isUserEligible,
-    B.fold(
-      () => sessionStorage.getBySessionToken(token as SessionToken),
-      () => Promise.resolve(E.right(O.some(user)))
-    )
-  )(user.fiscal_code);
+  return Promise.resolve(E.right(O.some(userFromToken.right.value)));
 };
 
 const bearerSessionTokenStrategy = (
