@@ -94,20 +94,6 @@ export const ALLOW_NOTIFY_IP_SOURCE_RANGE = pipe(
   })
 );
 
-// IP(s) or CIDR(s) allowed for myportal endpoint
-export const ALLOW_MYPORTAL_IP_SOURCE_RANGE = pipe(
-  process.env.ALLOW_MYPORTAL_IP_SOURCE_RANGE,
-  decodeCIDRs,
-  E.getOrElseW((errs) => {
-    log.error(
-      `Missing or invalid ALLOW_MYPORTAL_IP_SOURCE_RANGE environment variable: ${readableReport(
-        errs
-      )}`
-    );
-    return process.exit(1);
-  })
-);
-
 // IP(s) or CIDR(s) allowed for handling sessions
 export const ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE = pipe(
   process.env.ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE,
@@ -353,8 +339,6 @@ export const PAGOPA_CLIENT = new PagoPAClientFactory(
 export const AUTHENTICATION_BASE_PATH = getRequiredENVVar(
   "AUTHENTICATION_BASE_PATH"
 );
-
-export const MYPORTAL_BASE_PATH = getRequiredENVVar("MYPORTAL_BASE_PATH");
 
 export const SERVICES_APP_BACKEND_BASE_PATH = getRequiredENVVar(
   "SERVICES_APP_BACKEND_BASE_PATH"
@@ -615,3 +599,26 @@ export const IO_WALLET_API_CLIENT = IoWalletAPIClient(
 export const FF_IO_WALLET_ENABLED = process.env.FF_IO_WALLET_ENABLED === "1";
 export const FF_IO_WALLET_TRIAL_ENABLED =
   process.env.FF_IO_WALLET_TRIAL_ENABLED === "1";
+
+export const FF_IO_X_USER_TOKEN = pipe(
+  process.env.FF_IO_X_USER_TOKEN,
+  FeatureFlag.decode,
+  E.getOrElse(() => FeatureFlagEnum.NONE)
+);
+export const FF_IO_X_USER_TOKEN_BETA_TESTER_SHA_LIST = pipe(
+  process.env.FF_IO_X_USER_TOKEN_BETA_TESTER_SHA_LIST,
+  CommaSeparatedListOf(NonEmptyString).decode,
+  E.getOrElseW((errs) => {
+    log.error(
+      `Missing or invalid FF_IO_X_USER_TOKEN_BETA_TESTER_SHA_LIST environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
+export const FF_IO_X_USER_TOKEN_CANARY_SHA_USERS_REGEX = pipe(
+  process.env.FF_IO_X_USER_TOKEN_CANARY_SHA_USERS_REGEX,
+  NonEmptyString.decode,
+  E.getOrElse(() => "XYZ" as NonEmptyString)
+);

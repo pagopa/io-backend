@@ -114,14 +114,12 @@ Those are all Environment variables needed by the application:
 | ALLOW_NOTIFY_IP_SOURCE_RANGE              | The range in CIDR form of allowed IPs for the webhook notifications                                  | string |
 | NOTIFICATIONS_STORAGE_CONNECTION_STRING   | Connection string to Azure queue storage for notification hub messages                               | string |
 | NOTIFICATIONS_QUEUE_NAME                  | Queue name of Azure queue storage for notification hub messages                                      | string |
-| ALLOW_MYPORTAL_IP_SOURCE_RANGE            | The range in CIDR form of allowed IPs for the MyPortal API                                           | string |
 | ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE     | The range in CIDR form of IPs of service allowed to handle user sessions                             | string |
 | AUTHENTICATION_BASE_PATH                  | The root path for the authentication endpoints                                                       | string |
 | PAGOPA_API_URL_PROD                       | The url for the PagoPA api endpoints in prod mode                                                    | string |
 | PAGOPA_API_KEY_PROD                       | The api-key needed to call the pagopa proxy API                                                      | string |
 | PAGOPA_API_URL_TEST                       | The url for the PagoPA api endpoints in test mode                                                    | string |
 | PAGOPA_API_KEY_UAT                        | The api-key needed to call the pagopa proxy API for UAT instance                                     | string |
-| MYPORTAL_BASE_PATH                        | The root path for the MyPortal endpoints                                                             | string |
 | CACHE_MAX_AGE_SECONDS                     | The value in seconds for duration of in-memory api cache                                             | int    |
 | APICACHE_DEBUG                            | When is `true` enable the apicache debug mode                                                        | boolean |
 | GITHUB_TOKEN                              | The value of your Github Api Key, used in build phase                                                | string |
@@ -164,6 +162,9 @@ Those are all Environment variables needed by the application:
 | TRIAL_SYSTEM_API_BASE_PATH                | Trial System Api Base path                                                                           | string |
 | TRIAL_SYSTEM_API_URL                      | Trial System FunctionApp Api url                                                                     | string |
 | TRIAL_SYSTEM_API_KEY                      | The key used to authenticate to the Trial System API                                                 | string |
+| FF_IO_X_USER_TOKEN                        | Enables/disables the use of the x-user header                                                        | string (enum: NONE, BETA, ALL) |
+| FF_IO_X_USER_TOKEN_BETA_TESTER_SHA_LIST   | List of fiscal codes enabled for the feature                                                         | csv     |
+| FF_IO_X_USER_TOKEN_CANARY_SHA_USERS_REGEX | Regex used to identify canary users enabled for the feature                                          | regex   |
 
 Notes:
  * `FETCH_KEEPALIVE_ENABLED` should be enabled when deploying on Azure App Service to avoid [SNAT Exhaustion](https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-outbound-connections)

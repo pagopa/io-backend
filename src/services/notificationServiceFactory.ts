@@ -6,23 +6,10 @@ import { FiscalCode } from "../../generated/io-bonus-api/FiscalCode";
 import { toFiscalCodeHash } from "../types/notification";
 import {
   FeatureFlag,
+  getIsUserACanaryTestUser,
   getIsUserEligibleForNewFeature
 } from "../utils/featureFlag";
 import NotificationService from "./notificationService";
-
-/**
- *
- * @param regex The regex to use
- * @returns
- */
-const getIsUserACanaryTestUser = (
-  regex: string
-): ((sha: NonEmptyString) => boolean) => {
-  const regExp = new RegExp(regex);
-  return (sha: NonEmptyString): boolean => regExp.test(sha);
-};
-
-// ------------------------------------------
 
 export type NotificationServiceFactory = (
   fiscalCode: FiscalCode

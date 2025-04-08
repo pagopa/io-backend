@@ -19,6 +19,7 @@ import {
   ZendeskToken,
 } from "../types/token";
 import { User } from "../types/user";
+import { UserIdentity } from "../../generated/io-auth/UserIdentity";
 
 export const aTimestamp = 1518010929530;
 export const aFiscalCode = "GRBGPP87L04L741X" as FiscalCode;
@@ -57,6 +58,16 @@ export const mockedUser: User = {
   bpd_token: mockBPDToken,
   zendesk_token: mockZendeskToken,
   fims_token: mockFIMSToken,
+  session_tracking_id: aSessionTrackingId,
+};
+
+export const mockedUserIdentity: UserIdentity = {
+  family_name: aValidFamilyname,
+  fiscal_code: aFiscalCode,
+  name: aValidName,
+  date_of_birth: aValidDateofBirth,
+  spid_email: aSpidEmailAddress,
+  spid_level: aValidSpidLevel,
   session_tracking_id: aSessionTrackingId,
 };
 

@@ -34,6 +34,9 @@ import {
   FF_IO_FIMS_ENABLED,
   FF_IO_SIGN_ENABLED,
   FF_IO_WALLET_ENABLED,
+  FF_IO_X_USER_TOKEN,
+  FF_IO_X_USER_TOKEN_BETA_TESTER_SHA_LIST,
+  FF_IO_X_USER_TOKEN_CANARY_SHA_USERS_REGEX,
   FF_ROUTING_PUSH_NOTIF,
   FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST,
   FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX,
@@ -70,7 +73,6 @@ import { registerFirstLollipopConsumer } from "./routes/firstLollipopConsumerRou
 import { registerIoFimsAPIRoutes } from "./routes/ioFimsRoutes";
 import { registerIoSignAPIRoutes } from "./routes/ioSignRoutes";
 import { registerIoWalletAPIRoutes } from "./routes/ioWalletRoutes";
-import { registerMyPortalRoutes } from "./routes/myportalRoutes";
 import { registerPNRoutes } from "./routes/pnRoutes";
 import { registerPublicRoutes } from "./routes/publicRoutes";
 import { registerServicesAppBackendRoutes } from "./routes/servicesRoutes";
@@ -97,7 +99,6 @@ import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import ServicesAppBackendService from "./services/servicesAppBackendService";
 import TrialService from "./services/trialService";
 import UserDataProcessingService from "./services/userDataProcessingService";
-import bearerMyPortalTokenStrategy from "./strategies/bearerMyPortalTokenStrategy";
 import bearerSessionTokenStrategy from "./strategies/bearerSessionTokenStrategy";
 import { User } from "./types/user";
 import { attachTrackingData } from "./utils/appinsights";
@@ -117,12 +118,10 @@ export interface IAppFactoryParameters {
   readonly env: NodeEnvironment;
   readonly appInsightsClient?: appInsights.TelemetryClient;
   readonly allowNotifyIPSourceRange: ReadonlyArray<CIDR>;
-  readonly allowMyPortalIPSourceRange: ReadonlyArray<CIDR>;
   readonly allowSessionHandleIPSourceRange: ReadonlyArray<CIDR>;
   readonly authenticationBasePath: string;
   readonly APIBasePath: string;
   readonly BonusAPIBasePath: string;
-  readonly MyPortalBasePath: string;
   readonly CGNAPIBasePath: string;
   readonly CGNOperatorSearchAPIBasePath: string;
   readonly IoSignAPIBasePath: string;
@@ -136,13 +135,11 @@ export interface IAppFactoryParameters {
 export async function newApp({
   env,
   allowNotifyIPSourceRange,
-  allowMyPortalIPSourceRange,
   allowSessionHandleIPSourceRange,
   appInsightsClient,
   authenticationBasePath,
   APIBasePath,
   BonusAPIBasePath,
-  MyPortalBasePath,
   CGNAPIBasePath,
   IoSignAPIBasePath,
   IoFimsAPIBasePath,
@@ -168,20 +165,20 @@ export async function newApp({
   // Add the strategy to authenticate proxy clients.
   passport.use(
     "bearer.session",
-    bearerSessionTokenStrategy(SESSION_STORAGE, attachTrackingData)
+    bearerSessionTokenStrategy(
+      FF_IO_X_USER_TOKEN_BETA_TESTER_SHA_LIST,
+      FF_IO_X_USER_TOKEN_CANARY_SHA_USERS_REGEX,
+      FF_IO_X_USER_TOKEN,
+      SESSION_STORAGE,
+      attachTrackingData
+    )
   );
-
-  // Add the strategy to authenticate MyPortal clients.
-  passport.use("bearer.myportal", bearerMyPortalTokenStrategy(SESSION_STORAGE));
 
   // Add the strategy to authenticate webhook calls.
   passport.use(URL_TOKEN_STRATEGY);
 
   // Creates middlewares for each implemented strategy
   const authMiddlewares = {
-    bearerMyPortal: passport.authenticate("bearer.myportal", {
-      session: false
-    }),
     bearerSession: passport.authenticate("bearer.session", {
       session: false
     }),
@@ -494,13 +491,6 @@ export async function newApp({
             authMiddlewares.bearerSession
           );
         }
-
-        registerMyPortalRoutes(
-          app,
-          MyPortalBasePath,
-          allowMyPortalIPSourceRange,
-          authMiddlewares.bearerMyPortal
-        );
 
         registerServicesAppBackendRoutes(
           app,
