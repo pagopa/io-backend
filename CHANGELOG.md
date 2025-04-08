@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 16.12.1
+
+### Patch Changes
+
+- 1ab5efa: Update app_backend getServiceById openapi spec
+
 ## 16.12.0
 
 ### Minor Changes
