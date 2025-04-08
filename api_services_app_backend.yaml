@@ -278,8 +278,7 @@ components:
       description: Service data (minified)
       properties:
         id:
-          type: string
-          description: Service ID
+          $ref: "#/components/schemas/ServiceId"
         name:
           type: string
           description: Service Name
@@ -295,8 +294,7 @@ components:
       type: object
       properties:
         id:
-          type: string
-          description: Service ID
+          $ref: "#/components/schemas/ServiceId"
         name:
           type: string
           description: Service name
@@ -305,17 +303,12 @@ components:
           description: Service description
         organization:
           $ref: '#/components/schemas/Organization'
-        available_notification_channels:
-          $ref: '#/components/schemas/AvailableNotificationChannels'
         metadata:
           $ref: '#/components/schemas/ServiceMetadata'
-        version:
-          type: integer
-          description: Service version
       required:
         - id
         - name
-        - version
+        - description
         - organization
         - metadata
     FeaturedServices:
@@ -337,26 +330,39 @@ components:
               description: Organization Name
     ServiceMetadata:
       description: A set of service metadata properties
+      x-one-of: true
+      allOf:
+        - $ref: '#/components/schemas/StandardServiceMetadata'
+        - $ref: '#/components/schemas/SpecialServiceMetadata'
+    StandardServiceMetadata:
       allOf:
         - $ref: '#/components/schemas/ServiceBaseMetadata'
         - type: object
           properties:
-            topic:
-              $ref: '#/components/schemas/ServiceTopic'
-    ServiceTopic:
-      type: object
-      properties:
-        id:
-          type: number
-          description: The topic id
-          example: 3
-        name:
-          type: string
-          description: The topic name
-          example: Benessere sociale
-      required:
-        - id
-        - name
+            category:
+              $ref: '#/components/schemas/StandardServiceCategory'
+          required:
+            - category
+    StandardServiceCategory:
+      type: string
+      x-extensible-enum:
+        - STANDARD
+    SpecialServiceMetadata:
+      allOf:
+        - $ref: '#/components/schemas/ServiceBaseMetadata'
+        - type: object
+          properties:
+            category:
+              $ref: '#/components/schemas/SpecialServiceCategory'
+            custom_special_flow:
+              type: string
+              minLength: 1
+          required:
+            - category
+    SpecialServiceCategory:
+      type: string
+      x-extensible-enum:
+        - SPECIAL  
     ServiceBaseMetadata:
       type: object
       description: A set of common service metadata properties
@@ -397,19 +403,8 @@ components:
         support_url:
           type: string
           minLength: 1
-        category:
-          type: string
-          enum:
-            - SPECIAL
-            - STANDARD
-        custom_special_flow:
-          type: string
-          minLength: 1
         scope:
-          type: string
-          enum:
-            - NATIONAL
-            - LOCAL
+          $ref: "#/components/schemas/ScopeType"
       required:
         - scope
     Organization:
@@ -419,13 +414,7 @@ components:
           type: string
           minLength: 1
         fiscal_code:
-          type: string
-          description: Organization's fiscal code.
-          pattern: ^[0-9]{11}$
-          example: 12345678901
-        department_name:
-          type: string
-          minLength: 1
+          $ref: '#/components/schemas/OrganizationFiscalCode'
       required:
         - name
         - fiscal_code
@@ -449,69 +438,14 @@ components:
         - offset
         - limit
         - count
-    AvailableNotificationChannels:
-      description: All the notification channels available for a service
-      type: array
-      items:
-        $ref: '#/components/schemas/NotificationChannel'
-    NotificationChannel:
-      type: string
-      description: All notification channels
-      enum:
-        - EMAIL
-        - WEBHOOK
-      example:
-        - EMAIL
     ScopeType:
       type: string
       description: Institutions/Services Scopes
       enum:
         - NATIONAL
         - LOCAL
+    ServiceId:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v29.1.1/openapi/definitions.yaml#/ServiceId"
     ProblemJson:
-      type: object
-      properties:
-        type:
-          type: string
-          format: uri
-          description: |-
-            An absolute URI that identifies the problem type. When dereferenced,
-            it SHOULD provide human-readable documentation for the problem type
-            (e.g., using HTML).
-          default: about:blank
-          example: https://example.com/problem/constraint-violation
-        title:
-          type: string
-          description: >-
-            A short, summary of the problem type. Written in english and
-            readable
-
-            for engineers (usually not suited for non technical stakeholders and
-
-            not localized); example: Service Unavailable
-        status:
-          type: integer
-          format: int32
-          description: >-
-            The HTTP status code generated by the origin server for this
-            occurrence
-
-            of the problem.
-          minimum: 100
-          maximum: 600
-          exclusiveMaximum: true
-          example: 200
-        detail:
-          type: string
-          description: |-
-            A human readable explanation specific to this occurrence of the
-            problem.
-          example: There was an error processing the request
-        instance:
-          type: string
-          format: uri
-          description: >-
-            An absolute URI that identifies the specific occurrence of the
-            problem.
-
-            It may or may not yield further information if dereferenced.
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v29.1.1/openapi/definitions.yaml#/ProblemJson"
+      
