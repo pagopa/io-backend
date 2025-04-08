@@ -22,7 +22,6 @@ import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
 import { AppMessagesAPIClient } from "./clients/app-messages.client";
-import { BonusAPIClient } from "./clients/bonus";
 import { CgnAPIClient } from "./clients/cgn";
 import { CgnOperatorSearchAPIClient } from "./clients/cgn-operator-search";
 import { EUCovidCertAPIClient } from "./clients/eucovidcert.client";
@@ -165,15 +164,6 @@ export const APP_MESSAGES_API_URL = getRequiredENVVar("APP_MESSAGES_API_URL");
 export const APP_MESSAGES_API_CLIENT = AppMessagesAPIClient(
   APP_MESSAGES_API_KEY,
   APP_MESSAGES_API_URL,
-  httpOrHttpsApiFetch
-);
-
-export const BONUS_API_KEY = getRequiredENVVar("BONUS_API_KEY");
-export const BONUS_API_URL = getRequiredENVVar("BONUS_API_URL");
-export const BONUS_API_BASE_PATH = getRequiredENVVar("BONUS_API_BASE_PATH");
-export const BONUS_API_CLIENT = BonusAPIClient(
-  BONUS_API_KEY,
-  BONUS_API_URL,
   httpOrHttpsApiFetch
 );
 
@@ -443,7 +433,6 @@ export const errorOrAppInsightConfig: t.Validation<AppInsightsConfig> =
   AppInsightsConfig.decode(process.env);
 
 // Feature flags
-export const FF_BONUS_ENABLED = process.env.FF_BONUS_ENABLED === "1";
 export const FF_CGN_ENABLED = process.env.FF_CGN_ENABLED === "1";
 export const FF_IO_SIGN_ENABLED = process.env.FF_IO_SIGN_ENABLED === "1";
 export const FF_IO_FIMS_ENABLED = process.env.FF_IO_FIMS_ENABLED === "1";

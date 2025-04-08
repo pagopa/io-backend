@@ -39,7 +39,11 @@ definitions:
     type: object
     properties:
       fiscal_code:
-        $ref: '#/definitions/FiscalCode'
+        type: string
+        description: User's fiscal code.
+        format: FiscalCode
+        x-import: '@pagopa/ts-commons/lib/strings'
+        example: SPNDNL80R13C555X
     required:
       - fiscal_code
   MyPortalUser:

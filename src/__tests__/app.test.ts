@@ -15,7 +15,6 @@ jest.mock("@azure/storage-queue");
 jest.mock("@azure/data-tables");
 
 jest.mock("../services/redisSessionStorage");
-jest.mock("../services/redisUserMetadataStorage");
 jest.mock("../services/apiClientFactory");
 jest
   .spyOn(redisUtils, "createClusterRedisClient")
@@ -25,14 +24,14 @@ const mockNotify = jest.fn();
 jest.mock("../controllers/notificationController", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
-      notify: mockNotify,
-    })),
+      notify: mockNotify
+    }))
   };
 });
 const mockNotificationService = jest.fn().mockImplementation(() => ({}));
 jest.mock("../services/notificationService", () => {
   return {
-    default: mockNotificationService,
+    default: mockNotificationService
   };
 });
 
@@ -60,7 +59,6 @@ const aValidCIDR = "192.168.0.0/16" as CIDR;
 const X_FORWARDED_PROTO_HEADER = "X-Forwarded-Proto";
 
 const aAPIBasePath = "/api/v1";
-const aBonusAPIBasePath = "/bonus/api/v1";
 const aMyPortalBasePath = "/myportal/api/v1";
 const aCgnAPIBasePath = "/api/v1/cgn";
 const aCgnOperatorSearchAPIBasePath = "/api/v1/cgn-operator-search";
@@ -77,7 +75,6 @@ describe("Success app start", () => {
   beforeAll(async () => {
     app = await appModule.newApp({
       APIBasePath: aAPIBasePath,
-      BonusAPIBasePath: aBonusAPIBasePath,
       CGNAPIBasePath: aCgnAPIBasePath,
       CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
       EUCovidCertBasePath: aEuCovidCertAPIBasePath,
@@ -91,7 +88,7 @@ describe("Success app start", () => {
       allowNotifyIPSourceRange: [aValidCIDR],
       allowSessionHandleIPSourceRange: [aValidCIDR],
       authenticationBasePath: "",
-      env: NodeEnvironmentEnum.PRODUCTION,
+      env: NodeEnvironmentEnum.PRODUCTION
     });
   });
 
@@ -107,11 +104,13 @@ describe("Success app start", () => {
 
     // test case: https forced. Already set: it trust the proxy and accept the header: X-Forwarded-Proto.
     it("should respond 200 if forwarded from an HTTPS connection", () => {
-      return request(app)
-        // Using "/info" instead of "/" since the latter returns a redirect 
-        .get("/info")
-        .set(X_FORWARDED_PROTO_HEADER, "https")
-        .expect(200);
+      return (
+        request(app)
+          // Using "/info" instead of "/" since the latter returns a redirect
+          .get("/info")
+          .set(X_FORWARDED_PROTO_HEADER, "https")
+          .expect(200)
+      );
     });
 
     // test case: https forced. If proxy hasn't set X-Forwarded-Proto it should be forwarded to https.
@@ -186,7 +185,6 @@ describe("Failure app start", () => {
     try {
       await appModule.newApp({
         APIBasePath: aAPIBasePath,
-        BonusAPIBasePath: aBonusAPIBasePath,
         CGNAPIBasePath: aCgnAPIBasePath,
         CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
         EUCovidCertBasePath: aEuCovidCertAPIBasePath,
@@ -200,7 +198,7 @@ describe("Failure app start", () => {
         allowNotifyIPSourceRange: [aValidCIDR],
         allowSessionHandleIPSourceRange: [aValidCIDR],
         authenticationBasePath: "",
-        env: NodeEnvironmentEnum.PRODUCTION,
+        env: NodeEnvironmentEnum.PRODUCTION
       });
     } catch (err) {
       expect(mockNotificationService).toBeCalledTimes(1);
