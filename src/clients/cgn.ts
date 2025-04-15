@@ -1,4 +1,4 @@
-import { Client, createClient } from "@pagopa/io-functions-cgn-sdk/client";
+import { Client, createClient } from "../../generated/io-cgn-api/client";
 import nodeFetch from "node-fetch";
 
 export function CgnAPIClient(

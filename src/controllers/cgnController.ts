@@ -3,9 +3,9 @@
  * app by forwarding the call to the API system.
  */
 
-import { CgnActivationDetail } from "@pagopa/io-functions-cgn-sdk/CgnActivationDetail";
-import { EycaActivationDetail } from "@pagopa/io-functions-cgn-sdk/EycaActivationDetail";
-import { EycaCard } from "@pagopa/io-functions-cgn-sdk/EycaCard";
+import { CgnActivationDetail } from "generated/cgn/CgnActivationDetail";
+import { EycaActivationDetail } from "generated/cgn/EycaActivationDetail";
+import { EycaCard } from "generated/cgn/EycaCard";
 import {
   IResponseErrorConflict,
   IResponseErrorForbiddenNotAuthorized,
