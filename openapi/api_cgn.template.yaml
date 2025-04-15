@@ -505,47 +505,47 @@ components:
     ProductCategoryWithNewDiscountsCount:
       $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/ProductCategoryWithNewDiscountsCount"
     InstanceId:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/heads/main/apps/card-func/openapi/index.yaml#/definitions/InstanceId"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/InstanceId"
     CommonCard:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/heads/main/apps/card-func/openapi/index.yaml#/definitions/CommonCard"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/CommonCard"
     CardPending:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/heads/main/apps/card-func/openapi/index.yaml#/definitions/CardPending"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/CardPending"
     CardPendingDelete:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/heads/main/apps/card-func/openapi/index.yaml#/definitions/CardPendingDelete"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/CardPendingDelete"
     CardActivated:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/heads/main/apps/card-func/openapi/index.yaml#/definitions/CardActivated"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/CardActivated"
     CardRevoked:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/heads/main/apps/card-func/openapi/index.yaml#/definitions/CardRevoked"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/CardRevoked"
     CardExpired:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/heads/main/apps/card-func/openapi/index.yaml#/definitions/CardExpired"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/CardExpired"
     Card:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/heads/main/apps/card-func/openapi/index.yaml#/definitions/Card"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/Card"
     CgnActivationDetail:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/heads/main/apps/card-func/openapi/index.yaml#/definitions/CgnActivationDetail"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/CgnActivationDetail"
     EycaActivationDetail:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/heads/main/apps/card-func/openapi/index.yaml#/definitions/EycaActivationDetail"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/EycaActivationDetail"
     EycaCard:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/heads/main/apps/card-func/openapi/index.yaml#/definitions/EycaCard"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/EycaCard"
     EycaCardActivated:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/heads/main/apps/card-func/openapi/index.yaml#/definitions/EycaCardActivated"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/EycaCardActivated"
     EycaCardExpired:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/heads/main/apps/card-func/openapi/index.yaml#/definitions/EycaCardExpired"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/EycaCardExpired"
     EycaCardRevoked:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/heads/main/apps/card-func/openapi/index.yaml#/definitions/EycaCardRevoked"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/EycaCardRevoked"
     EycaCardPendingDelete:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/heads/main/apps/card-func/openapi/index.yaml#/definitions/EycaCardPendingDelete"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/EycaCardPendingDelete"
     CcdbNumber:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/heads/main/apps/card-func/openapi/index.yaml#/definitions/CcdbNumber"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/CcdbNumber"
     Otp:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/heads/main/apps/card-func/openapi/index.yaml#/definitions/Otp"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/Otp"
     OtpCode:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/heads/main/apps/card-func/openapi/index.yaml#/definitions/OtpCode"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/OtpCode"
     ProblemJson:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/heads/main/apps/card-func/openapi/index.yaml#/definitions/ProblemJson"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/ProblemJson"
     Timestamp:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/heads/main/apps/card-func/openapi/index.yaml#/definitions/Timestamp"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/Timestamp"
     FiscalCode:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/heads/main/apps/card-func/openapi/index.yaml#/definitions/FiscalCode"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/FiscalCode"
   parameters:
     CountNewDiscounts:
       name: count_new_discounts
