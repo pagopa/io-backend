@@ -340,10 +340,6 @@ export const PAGOPA_CLIENT = new PagoPAClientFactory(
 );
 
 // API endpoint mount.
-export const AUTHENTICATION_BASE_PATH = getRequiredENVVar(
-  "AUTHENTICATION_BASE_PATH"
-);
-
 export const MYPORTAL_BASE_PATH = getRequiredENVVar("MYPORTAL_BASE_PATH");
 
 export const SERVICES_APP_BACKEND_BASE_PATH = getRequiredENVVar(

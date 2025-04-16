@@ -56,7 +56,6 @@ import {
   TRIAL_SYSTEM_CLIENT,
   URL_TOKEN_STRATEGY
 } from "./config";
-import { registerAuthenticationRoutes } from "./routes/authenticationRoutes";
 import { registerAPIRoutes } from "./routes/baseRoutes";
 import {
   registerCgnAPIRoutes,
@@ -114,7 +113,6 @@ export interface IAppFactoryParameters {
   readonly allowNotifyIPSourceRange: ReadonlyArray<CIDR>;
   readonly allowMyPortalIPSourceRange: ReadonlyArray<CIDR>;
   readonly allowSessionHandleIPSourceRange: ReadonlyArray<CIDR>;
-  readonly authenticationBasePath: string;
   readonly APIBasePath: string;
   readonly MyPortalBasePath: string;
   readonly CGNAPIBasePath: string;
@@ -133,7 +131,6 @@ export async function newApp({
   allowMyPortalIPSourceRange,
   allowSessionHandleIPSourceRange,
   appInsightsClient,
-  authenticationBasePath,
   APIBasePath,
   MyPortalBasePath,
   CGNAPIBasePath,
@@ -381,12 +378,6 @@ export async function newApp({
           LOLLIPOP_API_CLIENT,
           SESSION_STORAGE,
           FIRST_LOLLIPOP_CONSUMER_CLIENT,
-          authMiddlewares.bearerSession
-        );
-
-        registerAuthenticationRoutes(
-          app,
-          authenticationBasePath,
           authMiddlewares.bearerSession
         );
 

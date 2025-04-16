@@ -87,7 +87,6 @@ describe("Success app start", () => {
       allowMyPortalIPSourceRange: [aValidCIDR],
       allowNotifyIPSourceRange: [aValidCIDR],
       allowSessionHandleIPSourceRange: [aValidCIDR],
-      authenticationBasePath: "",
       env: NodeEnvironmentEnum.PRODUCTION
     });
   });
@@ -197,7 +196,6 @@ describe("Failure app start", () => {
         allowMyPortalIPSourceRange: [aValidCIDR],
         allowNotifyIPSourceRange: [aValidCIDR],
         allowSessionHandleIPSourceRange: [aValidCIDR],
-        authenticationBasePath: "",
         env: NodeEnvironmentEnum.PRODUCTION
       });
     } catch (err) {
