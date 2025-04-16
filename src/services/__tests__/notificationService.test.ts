@@ -4,9 +4,9 @@ import * as E from "fp-ts/lib/Either";
 
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
-import { FiscalCode } from "../../../generated/backend/FiscalCode";
-import { MessageBodyMarkdown } from "../../../generated/backend/MessageBodyMarkdown";
-import { MessageSubject } from "../../../generated/backend/MessageSubject";
+import { FiscalCode } from "../../../generated/communication/FiscalCode";
+import { MessageBodyMarkdown } from "../../../generated/communication/MessageBodyMarkdown";
+import { MessageSubject } from "../../../generated/communication/MessageSubject";
 import { PlatformEnum } from "../../../generated/backend/Platform";
 import {
   CreateOrUpdateInstallationMessage,
