@@ -305,6 +305,69 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ProblemJson"
+  /v1/pn/activation:
+    get:
+      summary: Get Piattaforma Notifiche Activation
+      description: |
+        Get the Piattaforma Notifiche activation for Special Service "Avvisi di Cortesia"
+      operationId: getPNActivation
+      parameters:
+      - name: isTest
+        in: query
+        schema:
+          type: boolean
+      responses:
+        "200":
+          description: Request created.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PNActivation'
+        "401":
+          description: Bearer token null or expired.
+          content: {}
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+    post:
+      summary: Upsert Piattaforma Notifiche Activation
+      description: |
+        Upsert the Piattaforma Notifiche activation for Special Service "Avvisi di Cortesia"
+      operationId: upsertPNActivation
+      parameters:
+      - name: isTest
+        in: query
+        schema:
+          type: boolean
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/PNActivation'
+        required: true
+      responses:
+        "204":
+          description: Request created.
+          content: {}
+        "400":
+          description: Bad request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        "401":
+          description: Bearer token null or expired.
+          content: {}
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+      x-codegen-request-body-name: body
 components:
   securitySchemes:
     Bearer:
@@ -556,3 +619,10 @@ components:
       $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/ServiceTuple"
     ServiceScope:
       $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/ServiceScope"
+    PNActivation:
+      required:
+        - activation_status
+      type: object
+      properties:
+        activation_status:
+          type: boolean
