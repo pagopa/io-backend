@@ -51,7 +51,6 @@ microservice-chart:
     API_BASE_PATH: '/api/v1'
     API_URL: 'https://io-p-app-fn-1.azurewebsites.net/api/v1'
     APP_MESSAGES_API_URL: 'https://io-p-app-messages-fn-1.azurewebsites.net/api/v1'
-    AUTHENTICATION_BASE_PATH: ""
     CGN_API_BASE_PATH: '/api/v1/cgn'
     CGN_API_URL: 'https://io-p-cgn-fn.azurewebsites.net'
     CGN_OPERATOR_SEARCH_API_BASE_PATH: '/api/v1/cgn/operator-search'
