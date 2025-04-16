@@ -1,0 +1,319 @@
+openapi: 3.0.2
+info:
+  title: IO Wallet
+  version: 16.12.0
+servers:
+  - url: https://api-app.io.pagopa.it/api/v1/wallet
+security:
+  - Bearer: []
+paths:
+  /nonce:
+    get:
+      operationId: getNonce
+      summary: Returns a randomly generated nonce
+      responses:
+        '200':
+          description: Nonce successfully generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NonceDetailView'
+        '500':
+          $ref: '#/components/responses/Unexpected'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /wallet-instances:
+    post:
+      operationId: createWalletInstance
+      summary: Create a wallet instance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWalletInstanceBody'
+      responses:
+        '204':
+          description: Wallet instance successfully created
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
+        '500':
+          $ref: '#/components/responses/Unexpected'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /token:
+    description: This is a token endpoint (as defined in RFC 7523 section 4)
+    post:
+      operationId: createWalletAttestation
+      summary: Create and return a Wallet Attestation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWalletAttestationBody'
+      responses:
+        '200':
+          description: Wallet Attestation generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletAttestationView'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
+        '500':
+          $ref: '#/components/responses/Unexpected'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /wallet-instances/current/status:
+    get:
+      summary: Retrieve the current Wallet Instance status
+      operationId: getCurrentWalletInstanceStatus
+      responses:
+        '200':
+          description: Wallet Instance status successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletInstanceData'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
+        '500':
+          $ref: '#/components/responses/Unexpected'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /wallet-instances/{id}/status:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Retrieve a Wallet Instance status
+      operationId: getWalletInstanceStatus
+      responses:
+        '200':
+          description: Wallet Instance status successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletInstanceData'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/Unexpected'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    put:
+      summary: Revoke a Wallet Instance
+      operationId: setWalletInstanceStatus
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetWalletInstanceStatusBody'
+      responses:
+        '204':
+          description: Wallet Instance status successfully set
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/Unexpected'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+components:
+  securitySchemes:
+    Bearer:
+      type: apiKey
+      name: Authorization
+      in: header
+  responses:
+    Forbidden:
+      description: The server understands the request but refuses to authorize it
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+    UnprocessableContent:
+      description: Unprocessable Content
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+    BadRequest:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+    Conflict:
+      description: There has been a conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+    Unexpected:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+  schemas:
+    NonceDetailView:
+      type: object
+      properties:
+        nonce:
+          type: string
+      required:
+        - nonce
+    WalletAttestationView:
+      type: object
+      properties:
+        wallet_attestation:
+          type: string
+          minLength: 1
+          format: binary
+      required:
+        - wallet_attestation
+    CreateWalletInstanceBody:
+      type: object
+      properties:
+        challenge:
+          type: string
+          minLength: 1
+          format: binary
+        key_attestation:
+          type: string
+          minLength: 1
+          format: binary
+        hardware_key_tag:
+          type: string
+          minLength: 1
+      required:
+        - challenge
+        - key_attestation
+        - hardware_key_tag
+    CreateWalletAttestationBody:
+      type: object
+      properties:
+        grant_type:
+          type: string
+          enum:
+            - urn:ietf:params:oauth:grant-type:jwt-bearer
+        assertion:
+          type: string
+          minLength: 1
+          format: binary
+          example: >-
+            eyJhbGciOiJFUzI1NiIsImtpZCI6InZiZVhKa3NNNDV4cGh0QU5uQ2lHNm1DeXVVNGpmR056b3BHdUt2b2dnOWMiLCJ0eXAiOiJ3YXIrand0In0.eyJpc3MiOiJodHRwczovL3dhbGxldC1wcm92aWRlci5leGFtcGxlLm9yZy9pbnN0YW5jZS92YmVYSmtzTTQ1eHBodEFObkNpRzZtQ3l1VTRqZkdOem9wR3VLdm9nZzljIiwic3ViIjoiaHR0cHM6Ly93YWxsZXQtcHJvdmlkZXIuZXhhbXBsZS5vcmcvIiwiY2hhbGxlbmdlIjoiNmVjNjkzMjQtNjBhOC00ZTViLWE2OTctYTc2NmQ4NTc5MGVhIiwiaGFyZHdhcmVfc2lnbmF0dXJlIjoiS29aSWh2Y05BUWNDb0lBd2dBSUIuLi5yZWRhY3RlZCIsImludGVncml0eV9hc3NlcnRpb24iOiJvMk5tYlhSdllYQndiR1V0WVhCd1lYLi4ucmVkYWN0ZWQiLCJoYXJkd2FyZV9rZXlfdGFnIjoiV1FoeUR5bUZLc1A5NWlGcXB6ZEVEV1c0bDdhVm5hMkZuNEpDZVdIWXRiVT0iLCJjbmYiOnsiandrIjp7ImNydiI6IlAtMjU2Iiwia3R5IjoiRUMiLCJ4IjoiNEhOcHRJLXhyMnBqeVJKS0dNbno0V21kblFEX3VKU3E0Ujk1Tmo5OGI0NCIsInkiOiJMSVpuU0IzOXZGSmhZZ1MzazdqWEU0cjMtQ29HRlF3WnRQQklScXBObHJnIiwia2lkIjoidmJlWEprc000NXhwaHRBTm5DaUc2bUN5dVU0amZHTnpvcEd1S3ZvZ2c5YyJ9fSwidnBfZm9ybWF0c19zdXBwb3J0ZWQiOnsiand0X3ZjX2pzb24iOnsiYWxnX3ZhbHVlc19zdXBwb3J0ZWQiOlsiRVMyNTZLIiwiRVMzODQiXX0sImp3dF92cF9qc29uIjp7ImFsZ192YWx1ZXNfc3VwcG9ydGVkIjpbIkVTMjU2SyIsIkVkRFNBIl19fSwiaWF0IjoxNjg2NjQ1MTE1LCJleHAiOjE2ODY2NTIzMTV9.F32bisVth4eDdGxDjB9ByENT-oZLtSY_89uwTSePo2GMEKaeEedpXZE_9mrX7t0_Fmc5m6LNVvIIBqotqsYJYQ
+      required:
+        - grant_type
+        - assertion
+    SetWalletInstanceStatusBody:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - REVOKED
+      required:
+        - status
+    WalletInstanceData:
+      description: Describes the status of the wallet.
+      type: object
+      properties:
+        id:
+          type: string
+        is_revoked:
+          type: boolean
+        revocation_reason:
+          $ref: '#/components/schemas/RevocationReason'
+      required:
+        - id
+        - is_revoked
+    RevocationReason:
+      type: string
+      enum:
+        - CERTIFICATE_REVOKED_BY_ISSUER
+        - NEW_WALLET_INSTANCE_CREATED
+        - REVOKED_BY_USER
+    ProblemDetail:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+          description: |-
+            An absolute URI that identifies the problem type. When dereferenced,
+            it SHOULD provide human-readable documentation for the problem type
+            (e.g., using HTML).
+          default: about:blank
+          example: https://example.com/problem/constraint-violation
+        title:
+          type: string
+          description: >-
+            A short, summary of the problem type. Written in english and
+            readable for engineers (usually not suited for non technical
+            stakeholders and not localized); example: Service Unavailable
+        status:
+          type: integer
+          format: int32
+          description: >-
+            The HTTP status code generated by the origin server for this
+            occurrence of the problem.
+          minimum: 100
+          maximum: 600
+          exclusiveMaximum: true
+          example: 200
+        detail:
+          type: string
+          description: |-
+            A human readable explanation specific to this occurrence of the
+            problem.
+          example: There was an error processing the request
+        instance:
+          type: string
+          format: uri
+          description: >-
+            An absolute URI that identifies the specific occurrence of the
+            problem. It may or may not yield further information if
+            dereferenced.
