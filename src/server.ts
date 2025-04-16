@@ -16,7 +16,6 @@ import * as path from "path";
 
 import { newApp } from "./app";
 import {
-  ALLOW_MYPORTAL_IP_SOURCE_RANGE,
   ALLOW_NOTIFY_IP_SOURCE_RANGE,
   ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE,
   API_BASE_PATH,
@@ -27,7 +26,6 @@ import {
   IO_FIMS_API_BASE_PATH,
   IO_SIGN_API_BASE_PATH,
   IO_WALLET_API_BASE_PATH,
-  MYPORTAL_BASE_PATH,
   SERVER_PORT,
   SERVICES_APP_BACKEND_BASE_PATH,
   TRIAL_SYSTEM_API_BASE_PATH,
@@ -43,7 +41,6 @@ import { log } from "./utils/logger";
 import { TimeTracer } from "./utils/timer";
 
 const APIBasePath = API_BASE_PATH;
-const MyPortalBasePath = MYPORTAL_BASE_PATH;
 const CGNAPIBasePath = CGN_API_BASE_PATH;
 const IoSignAPIBasePath = IO_SIGN_API_BASE_PATH;
 const IoFimsAPIBasePath = IO_FIMS_API_BASE_PATH;
@@ -98,10 +95,8 @@ newApp({
   IoFimsAPIBasePath,
   IoSignAPIBasePath,
   IoWalletAPIBasePath,
-  MyPortalBasePath,
   ServicesAppBackendBasePath,
   TrialSystemBasePath,
-  allowMyPortalIPSourceRange: ALLOW_MYPORTAL_IP_SOURCE_RANGE,
   allowNotifyIPSourceRange: ALLOW_NOTIFY_IP_SOURCE_RANGE,
   allowSessionHandleIPSourceRange: ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE,
   appInsightsClient: O.toUndefined(maybeAppInsightsClient),

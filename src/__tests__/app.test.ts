@@ -59,7 +59,6 @@ const aValidCIDR = "192.168.0.0/16" as CIDR;
 const X_FORWARDED_PROTO_HEADER = "X-Forwarded-Proto";
 
 const aAPIBasePath = "/api/v1";
-const aMyPortalBasePath = "/myportal/api/v1";
 const aCgnAPIBasePath = "/api/v1/cgn";
 const aCgnOperatorSearchAPIBasePath = "/api/v1/cgn-operator-search";
 const aEuCovidCertAPIBasePath = "/api/v1/eucovidcert";
@@ -81,10 +80,8 @@ describe("Success app start", () => {
       IoFimsAPIBasePath: aIoFimsAPIBasePath,
       IoSignAPIBasePath: aIoSignAPIBasePath,
       IoWalletAPIBasePath: aIoWalletAPIBasePath,
-      MyPortalBasePath: aMyPortalBasePath,
       ServicesAppBackendBasePath: aServicesAppBackendBasePath,
       TrialSystemBasePath: aTrialSystemBasePath,
-      allowMyPortalIPSourceRange: [aValidCIDR],
       allowNotifyIPSourceRange: [aValidCIDR],
       allowSessionHandleIPSourceRange: [aValidCIDR],
       env: NodeEnvironmentEnum.PRODUCTION
@@ -190,10 +187,8 @@ describe("Failure app start", () => {
         IoFimsAPIBasePath: aIoFimsAPIBasePath,
         IoSignAPIBasePath: aIoSignAPIBasePath,
         IoWalletAPIBasePath: aIoWalletAPIBasePath,
-        MyPortalBasePath: aMyPortalBasePath,
         ServicesAppBackendBasePath: aServicesAppBackendBasePath,
         TrialSystemBasePath: aTrialSystemBasePath,
-        allowMyPortalIPSourceRange: [aValidCIDR],
         allowNotifyIPSourceRange: [aValidCIDR],
         allowSessionHandleIPSourceRange: [aValidCIDR],
         env: NodeEnvironmentEnum.PRODUCTION
