@@ -1,6 +1,6 @@
 import { NonEmptyString, Ulid } from "@pagopa/ts-commons/lib/strings";
 import { RCConfigurationBase } from "../../generated/io-messages-api/RCConfigurationBase";
-import { HasPreconditionEnum } from "../../generated/backend/HasPrecondition";
+import { HasPreconditionEnum } from "../../generated/communication/HasPrecondition";
 import { RCConfigurationPublic } from "../../generated/io-messages-api/RCConfigurationPublic";
 import { aFiscalCode } from "./user_mock";
 
