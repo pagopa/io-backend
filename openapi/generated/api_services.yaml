@@ -3,7 +3,7 @@ servers:
   - url: https://api-app.io.pagopa.it/api
 info:
   title: Services App Backend API
-  version: 16.12.0
+  version: 16.12.1
 tags:
   - name: search
     description: Search APIs
@@ -319,6 +319,71 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
+  /v1/pn/activation:
+    get:
+      summary: Get Piattaforma Notifiche Activation
+      description: >
+        Get the Piattaforma Notifiche activation for Special Service "Avvisi di
+        Cortesia"
+      operationId: getPNActivation
+      parameters:
+        - name: isTest
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Request created.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PNActivation'
+        '401':
+          description: Bearer token null or expired.
+          content: {}
+        '500':
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+    post:
+      summary: Upsert Piattaforma Notifiche Activation
+      description: >
+        Upsert the Piattaforma Notifiche activation for Special Service "Avvisi
+        di Cortesia"
+      operationId: upsertPNActivation
+      parameters:
+        - name: isTest
+          in: query
+          schema:
+            type: boolean
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/PNActivation'
+        required: true
+      responses:
+        '204':
+          description: Request created.
+          content: {}
+        '400':
+          description: Bad request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+          content: {}
+        '500':
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+      x-codegen-request-body-name: body
 components:
   securitySchemes:
     Bearer:
@@ -372,8 +437,7 @@ components:
       description: Service data (minified)
       properties:
         id:
-          type: string
-          description: Service ID
+          $ref: '#/components/schemas/ServiceId'
         name:
           type: string
           description: Service Name
@@ -389,8 +453,7 @@ components:
       type: object
       properties:
         id:
-          type: string
-          description: Service ID
+          $ref: '#/components/schemas/ServiceId'
         name:
           type: string
           description: Service name
@@ -399,17 +462,12 @@ components:
           description: Service description
         organization:
           $ref: '#/components/schemas/Organization'
-        available_notification_channels:
-          $ref: '#/components/schemas/AvailableNotificationChannels'
         metadata:
           $ref: '#/components/schemas/ServiceMetadataV2'
-        version:
-          type: integer
-          description: Service version
       required:
         - id
         - name
-        - version
+        - description
         - organization
         - metadata
     FeaturedServices:
@@ -431,26 +489,39 @@ components:
               description: Organization Name
     ServiceMetadataV2:
       description: A set of service metadata properties
+      x-one-of: true
+      allOf:
+        - $ref: '#/components/schemas/StandardServiceMetadataV2'
+        - $ref: '#/components/schemas/SpecialServiceMetadataV2'
+    StandardServiceMetadataV2:
       allOf:
         - $ref: '#/components/schemas/ServiceBaseMetadata'
         - type: object
           properties:
-            topic:
-              $ref: '#/components/schemas/ServiceTopic'
-    ServiceTopic:
-      type: object
-      properties:
-        id:
-          type: number
-          description: The topic id
-          example: 3
-        name:
-          type: string
-          description: The topic name
-          example: Benessere sociale
-      required:
-        - id
-        - name
+            category:
+              $ref: '#/components/schemas/StandardServiceCategory'
+          required:
+            - category
+    StandardServiceCategory:
+      type: string
+      x-extensible-enum:
+        - STANDARD
+    SpecialServiceMetadataV2:
+      allOf:
+        - $ref: '#/components/schemas/ServiceBaseMetadata'
+        - type: object
+          properties:
+            category:
+              $ref: '#/components/schemas/SpecialServiceCategory'
+            custom_special_flow:
+              type: string
+              minLength: 1
+          required:
+            - category
+    SpecialServiceCategory:
+      type: string
+      x-extensible-enum:
+        - SPECIAL
     ServiceBaseMetadata:
       type: object
       description: A set of common service metadata properties
@@ -491,19 +562,8 @@ components:
         support_url:
           type: string
           minLength: 1
-        category:
-          type: string
-          enum:
-            - SPECIAL
-            - STANDARD
-        custom_special_flow:
-          type: string
-          minLength: 1
         scope:
-          type: string
-          enum:
-            - NATIONAL
-            - LOCAL
+          $ref: '#/components/schemas/ScopeType'
       required:
         - scope
     Organization:
@@ -513,13 +573,7 @@ components:
           type: string
           minLength: 1
         fiscal_code:
-          type: string
-          description: Organization's fiscal code.
-          pattern: ^[0-9]{11}$
-          example: 12345678901
-        department_name:
-          type: string
-          minLength: 1
+          $ref: '#/components/schemas/OrganizationFiscalCode'
       required:
         - name
         - fiscal_code
@@ -543,25 +597,69 @@ components:
         - offset
         - limit
         - count
-    AvailableNotificationChannels:
-      description: All the notification channels available for a service
-      type: array
-      items:
-        $ref: '#/components/schemas/NotificationChannel'
-    NotificationChannel:
-      type: string
-      description: All notification channels
-      enum:
-        - EMAIL
-        - WEBHOOK
-      example:
-        - EMAIL
     ScopeType:
       type: string
       description: Institutions/Services Scopes
       enum:
         - NATIONAL
         - LOCAL
+    ServiceId:
+      type: string
+      description: |-
+        The ID of the Service. Equals the subscriptionId of a registered
+        API user.
+      minLength: 1
+    ProblemJson:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+          description: |-
+            An absolute URI that identifies the problem type. When dereferenced,
+            it SHOULD provide human-readable documentation for the problem type
+            (e.g., using HTML).
+          default: about:blank
+          example: https://example.com/problem/constraint-violation
+        title:
+          type: string
+          description: >-
+            A short, summary of the problem type. Written in english and
+            readable
+
+            for engineers (usually not suited for non technical stakeholders and
+
+            not localized); example: Service Unavailable
+        status:
+          type: integer
+          format: int32
+          description: >-
+            The HTTP status code generated by the origin server for this
+            occurrence of the problem.
+          minimum: 100
+          maximum: 600
+          exclusiveMaximum: true
+          example: 200
+        detail:
+          type: string
+          description: |-
+            A human readable explanation specific to this occurrence of the
+            problem.
+          example: There was an error processing the request
+        instance:
+          type: string
+          format: uri
+          description: >-
+            An absolute URI that identifies the specific occurrence of the
+            problem.
+
+            It may or may not yield further information if dereferenced.
+    ServiceMetadata:
+      x-one-of: true
+      allOf:
+        - $ref: '#/components/schemas/StandardServiceMetadata'
+        - $ref: '#/components/schemas/SpecialServiceMetadata'
+        - $ref: '#/components/schemas/CommonServiceMetadata'
     ServicePublic:
       title: Service (public)
       description: A Service associated to an user's subscription.
@@ -602,22 +700,35 @@ components:
         - department_name
         - organization_fiscal_code
         - version
-    ServiceId:
-      type: string
-      description: |-
-        The ID of the Service. Equals the subscriptionId of a registered
-        API user.
-      minLength: 1
     ServiceName:
       type: string
       description: The name of the service. Will be added to the content of sent messages.
       minLength: 1
-    ServiceMetadata:
-      x-one-of: true
+    StandardServiceMetadata:
       allOf:
-        - $ref: '#/components/schemas/StandardServiceMetadata'
-        - $ref: '#/components/schemas/SpecialServiceMetadata'
         - $ref: '#/components/schemas/CommonServiceMetadata'
+        - type: object
+          properties:
+            category:
+              type: string
+              x-extensible-enum:
+                - STANDARD
+          required:
+            - category
+    SpecialServiceMetadata:
+      allOf:
+        - $ref: '#/components/schemas/CommonServiceMetadata'
+        - type: object
+          properties:
+            category:
+              type: string
+              x-extensible-enum:
+                - SPECIAL
+            custom_special_flow:
+              type: string
+              minLength: 1
+          required:
+            - category
     CommonServiceMetadata:
       type: object
       description: A set of metadata properties related to this service.
@@ -665,31 +776,6 @@ components:
           $ref: '#/components/schemas/ServiceScope'
       required:
         - scope
-    StandardServiceMetadata:
-      allOf:
-        - $ref: '#/components/schemas/CommonServiceMetadata'
-        - type: object
-          properties:
-            category:
-              type: string
-              x-extensible-enum:
-                - STANDARD
-          required:
-            - category
-    SpecialServiceMetadata:
-      allOf:
-        - $ref: '#/components/schemas/CommonServiceMetadata'
-        - type: object
-          properties:
-            category:
-              type: string
-              x-extensible-enum:
-                - SPECIAL
-            custom_special_flow:
-              type: string
-              minLength: 1
-          required:
-            - category
     MaxAllowedPaymentAmount:
       description: >-
         Maximum amount in euro cents that a service is allowed to charge to a
@@ -755,48 +841,10 @@ components:
       x-extensible-enum:
         - NATIONAL
         - LOCAL
-    ProblemJson:
+    PNActivation:
+      required:
+        - activation_status
       type: object
       properties:
-        type:
-          type: string
-          format: uri
-          description: |-
-            An absolute URI that identifies the problem type. When dereferenced,
-            it SHOULD provide human-readable documentation for the problem type
-            (e.g., using HTML).
-          default: about:blank
-          example: https://example.com/problem/constraint-violation
-        title:
-          type: string
-          description: >-
-            A short, summary of the problem type. Written in english and
-            readable
-
-            for engineers (usually not suited for non technical stakeholders and
-
-            not localized); example: Service Unavailable
-        status:
-          type: integer
-          format: int32
-          description: >-
-            The HTTP status code generated by the origin server for this
-            occurrence of the problem.
-          minimum: 100
-          maximum: 600
-          exclusiveMaximum: true
-          example: 200
-        detail:
-          type: string
-          description: |-
-            A human readable explanation specific to this occurrence of the
-            problem.
-          example: There was an error processing the request
-        instance:
-          type: string
-          format: uri
-          description: >-
-            An absolute URI that identifies the specific occurrence of the
-            problem.
-
-            It may or may not yield further information if dereferenced.
+        activation_status:
+          type: boolean

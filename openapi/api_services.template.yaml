@@ -305,6 +305,69 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ProblemJson"
+  /v1/pn/activation:
+    get:
+      summary: Get Piattaforma Notifiche Activation
+      description: |
+        Get the Piattaforma Notifiche activation for Special Service "Avvisi di Cortesia"
+      operationId: getPNActivation
+      parameters:
+      - name: isTest
+        in: query
+        schema:
+          type: boolean
+      responses:
+        "200":
+          description: Request created.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PNActivation'
+        "401":
+          description: Bearer token null or expired.
+          content: {}
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+    post:
+      summary: Upsert Piattaforma Notifiche Activation
+      description: |
+        Upsert the Piattaforma Notifiche activation for Special Service "Avvisi di Cortesia"
+      operationId: upsertPNActivation
+      parameters:
+      - name: isTest
+        in: query
+        schema:
+          type: boolean
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/PNActivation'
+        required: true
+      responses:
+        "204":
+          description: Request created.
+          content: {}
+        "400":
+          description: Bad request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        "401":
+          description: Bearer token null or expired.
+          content: {}
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+      x-codegen-request-body-name: body
 components:
   securitySchemes:
     Bearer:
@@ -358,8 +421,7 @@ components:
       description: Service data (minified)
       properties:
         id:
-          type: string
-          description: Service ID
+          $ref: "#/components/schemas/ServiceId"
         name:
           type: string
           description: Service Name
@@ -375,8 +437,7 @@ components:
       type: object
       properties:
         id:
-          type: string
-          description: Service ID
+          $ref: "#/components/schemas/ServiceId"
         name:
           type: string
           description: Service name
@@ -385,17 +446,12 @@ components:
           description: Service description
         organization:
           $ref: "#/components/schemas/Organization"
-        available_notification_channels:
-          $ref: "#/components/schemas/AvailableNotificationChannels"
         metadata:
           $ref: "#/components/schemas/ServiceMetadataV2"
-        version:
-          type: integer
-          description: Service version
       required:
         - id
         - name
-        - version
+        - description
         - organization
         - metadata
     FeaturedServices:
@@ -417,26 +473,39 @@ components:
               description: Organization Name
     ServiceMetadataV2:
       description: A set of service metadata properties
+      x-one-of: true
+      allOf:
+        - $ref: '#/components/schemas/StandardServiceMetadataV2'
+        - $ref: '#/components/schemas/SpecialServiceMetadataV2'
+    StandardServiceMetadataV2:
       allOf:
         - $ref: "#/components/schemas/ServiceBaseMetadata"
         - type: object
           properties:
-            topic:
-              $ref: "#/components/schemas/ServiceTopic"
-    ServiceTopic:
-      type: object
-      properties:
-        id:
-          type: number
-          description: The topic id
-          example: 3
-        name:
-          type: string
-          description: The topic name
-          example: "Benessere sociale"
-      required:
-        - id
-        - name
+            category:
+              $ref: '#/components/schemas/StandardServiceCategory'
+          required:
+            - category
+    StandardServiceCategory:
+      type: string
+      x-extensible-enum:
+        - STANDARD
+    SpecialServiceMetadataV2:
+      allOf:
+        - $ref: "#/components/schemas/ServiceBaseMetadata"
+        - type: object
+          properties:
+            category:
+              $ref: '#/components/schemas/SpecialServiceCategory'
+            custom_special_flow:
+              type: string
+              minLength: 1
+          required:
+            - category
+    SpecialServiceCategory:
+      type: string
+      x-extensible-enum:
+        - SPECIAL
     ServiceBaseMetadata:
       type: object
       description: A set of common service metadata properties
@@ -477,15 +546,8 @@ components:
         support_url:
           type: string
           minLength: 1
-        category:
-          type: string
-          enum: [SPECIAL, STANDARD]
-        custom_special_flow:
-          type: string
-          minLength: 1
         scope:
-          type: string
-          enum: [NATIONAL, LOCAL]
+          $ref: "#/components/schemas/ScopeType"
       required:
         - scope
     Organization:
@@ -495,10 +557,7 @@ components:
           type: string
           minLength: 1
         fiscal_code:
-          $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/OrganizationFiscalCode"
-        department_name:
-          type: string
-          minLength: 1
+          $ref: '#/components/schemas/OrganizationFiscalCode'
       required:
         - name
         - fiscal_code
@@ -522,38 +581,28 @@ components:
         - offset
         - limit
         - count
-    AvailableNotificationChannels:
-      description: All the notification channels available for a service
-      type: array
-      items:
-        $ref: "#/components/schemas/NotificationChannel"
-    NotificationChannel:
-      type: string
-      description: All notification channels
-      enum:
-        - EMAIL
-        - WEBHOOK
-      example: [EMAIL]
     ScopeType:
       type: string
       description: Institutions/Services Scopes
       enum:
         - NATIONAL
         - LOCAL
-    ServicePublic:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/ServicePublic"
     ServiceId:
       $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/ServiceId"
-    ServiceName:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/ServiceName"
+    ProblemJson:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/ProblemJson"
     ServiceMetadata:
       $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/ServiceMetadata"
-    CommonServiceMetadata:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/CommonServiceMetadata"
+    ServicePublic:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/ServicePublic"
+    ServiceName:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/ServiceName"
     StandardServiceMetadata:
       $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/StandardServiceMetadata"
     SpecialServiceMetadata:
       $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/SpecialServiceMetadata"
+    CommonServiceMetadata:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/CommonServiceMetadata"
     MaxAllowedPaymentAmount:
       $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/MaxAllowedPaymentAmount"
     OrganizationName:
@@ -570,5 +619,10 @@ components:
       $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/ServiceTuple"
     ServiceScope:
       $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/ServiceScope"
-    ProblemJson:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/ProblemJson"
+    PNActivation:
+      required:
+        - activation_status
+      type: object
+      properties:
+        activation_status:
+          type: boolean

@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: Proxy API
   description: Mobile and web proxy API gateway.
-  version: 16.12.0
+  version: 16.12.1
 servers:
   - url: https://localhost/api/v1
 security:

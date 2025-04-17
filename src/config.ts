@@ -93,20 +93,6 @@ export const ALLOW_NOTIFY_IP_SOURCE_RANGE = pipe(
   })
 );
 
-// IP(s) or CIDR(s) allowed for myportal endpoint
-export const ALLOW_MYPORTAL_IP_SOURCE_RANGE = pipe(
-  process.env.ALLOW_MYPORTAL_IP_SOURCE_RANGE,
-  decodeCIDRs,
-  E.getOrElseW((errs) => {
-    log.error(
-      `Missing or invalid ALLOW_MYPORTAL_IP_SOURCE_RANGE environment variable: ${readableReport(
-        errs
-      )}`
-    );
-    return process.exit(1);
-  })
-);
-
 // IP(s) or CIDR(s) allowed for handling sessions
 export const ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE = pipe(
   process.env.ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE,
@@ -340,12 +326,6 @@ export const PAGOPA_CLIENT = new PagoPAClientFactory(
 );
 
 // API endpoint mount.
-export const AUTHENTICATION_BASE_PATH = getRequiredENVVar(
-  "AUTHENTICATION_BASE_PATH"
-);
-
-export const MYPORTAL_BASE_PATH = getRequiredENVVar("MYPORTAL_BASE_PATH");
-
 export const SERVICES_APP_BACKEND_BASE_PATH = getRequiredENVVar(
   "SERVICES_APP_BACKEND_BASE_PATH"
 );

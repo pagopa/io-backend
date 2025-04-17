@@ -11,7 +11,7 @@ import * as O from "fp-ts/Option";
 import * as TE from "fp-ts/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 
-import { PNActivation } from "../../generated/api_piattaforma-notifiche-courtesy/PNActivation";
+import { PNActivation } from "../../generated/services/PNActivation";
 import { PNEnvironment } from "../clients/pn-clients";
 import { PNService } from "../services/pnService";
 import { withUserFromRequest } from "../types/user";
