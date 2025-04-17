@@ -3,11 +3,11 @@ info:
   title: Carta Giovani Nazionale API
   version: 16.12.1
 servers:
-  - url: https://localhost/api/v1
+  - url: https://localhost/api/v1/cgn
 security:
   - Bearer: []
 paths:
-  /cgn/status:
+  /status:
     get:
       summary: Get the CGN status details
       description: |
@@ -36,7 +36,7 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-  /cgn/activation:
+  /activation:
     get:
       summary: |
         Get CGN activation process status
@@ -115,7 +115,7 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-  /cgn/eyca/activation:
+  /eyca/activation:
     get:
       summary: |
         Get EYCA activation process' status
@@ -194,7 +194,7 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-  /cgn/eyca/status:
+  /eyca/status:
     get:
       summary: Get the Eyca Card status details
       description: |
@@ -225,7 +225,58 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-  /cgn/otp:
+  /delete:
+    post:
+      summary: Start a CGN unsubscription procedure
+      description: |
+        Start a new CGN unsubscription procedure
+        for the logged user
+      operationId: startCgnUnsubscription
+      responses:
+        '201':
+          description: Request created.
+          headers:
+            Location:
+              description: >
+                Location (URL) of created request resource
+
+                This location actually points to a not existing api, but
+                semantically 201
+
+                means that the request has been taken in charge
+              schema:
+                type: string
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/InstanceId'
+        '202':
+          description: Processing request.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/InstanceId'
+        '401':
+          description: Bearer token null or expired.
+          content: {}
+        '403':
+          description: |
+            Cannot unsubscribe because the user is ineligible to get the CGN
+          content: {}
+        '409':
+          description: >
+            Cannot unsubscribe the user's cgn because another updateCgn request
+            was found
+
+            for this user
+          content: {}
+        '500':
+          description: Service unavailable.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+  /otp:
     post:
       summary: |
         Generate a new Otp related to a CGN
@@ -252,7 +303,7 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-  /cgn/operator-search/published-product-categories:
+  /operator-search/published-product-categories:
     get:
       summary: List of published product categories
       description: |
@@ -282,7 +333,7 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-  /cgn/operator-search/count:
+  /operator-search/count:
     get:
       summary: Count merchants and discounts to search within
       description: |
@@ -307,7 +358,7 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-  /cgn/operator-search/search:
+  /operator-search/search:
     post:
       summary: Search merchants or discounts
       description: >
@@ -340,7 +391,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
       x-codegen-request-body-name: body
-  /cgn/operator-search/online-merchants:
+  /operator-search/online-merchants:
     post:
       summary: List of online merchants
       description: |
@@ -369,7 +420,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
       x-codegen-request-body-name: body
-  /cgn/operator-search/offline-merchants:
+  /operator-search/offline-merchants:
     post:
       summary: List of merchants with a physical address
       description: >
@@ -399,7 +450,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
       x-codegen-request-body-name: body
-  /cgn/operator-search/merchants/{merchantId}:
+  /operator-search/merchants/{merchantId}:
     get:
       summary: Retrieve merchant details
       description: |
@@ -432,7 +483,7 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-  /cgn/operator-search/discount-bucket-code/{discountId}:
+  /operator-search/discount-bucket-code/{discountId}:
     get:
       summary: Retrieve a discount bucket code
       description: |
