@@ -2,12 +2,6 @@
  * This service interactsnwith the Bonus API
  */
 
-import { Card } from "../../generated/cgn/Card";
-import { CgnActivationDetail } from "../../generated/cgn/CgnActivationDetail";
-import { EycaActivationDetail } from "../../generated/cgn/EycaActivationDetail";
-import { EycaCard } from "../../generated/cgn/EycaCard";
-import { InstanceId } from "../../generated/cgn/InstanceId";
-import { Otp } from "../../generated/cgn/Otp";
 import {
   IResponseErrorConflict,
   IResponseErrorForbiddenNotAuthorized,
@@ -29,6 +23,12 @@ import {
 import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
 
+import { Card } from "../../generated/cgn/Card";
+import { CgnActivationDetail } from "../../generated/cgn/CgnActivationDetail";
+import { EycaActivationDetail } from "../../generated/cgn/EycaActivationDetail";
+import { EycaCard } from "../../generated/cgn/EycaCard";
+import { InstanceId } from "../../generated/cgn/InstanceId";
+import { Otp } from "../../generated/cgn/Otp";
 import { CgnAPIClient } from "../../src/clients/cgn";
 import { User } from "../types/user";
 import { readableProblem } from "../utils/errorsFormatter";
@@ -67,7 +67,9 @@ export default class CgnService {
           case 404:
             return ResponseErrorNotFound("Not Found", "CGN not found");
           case 500:
-            return ResponseErrorInternal(readableProblem(response.value as ProblemJson));
+            return ResponseErrorInternal(
+              readableProblem(response.value as ProblemJson)
+            );
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
@@ -107,7 +109,9 @@ export default class CgnService {
               "EYCA Card is missing while citizen is eligible to obtain it or a CGN is already activated"
             );
           case 500:
-            return ResponseErrorInternal(readableProblem(response.value as ProblemJson));
+            return ResponseErrorInternal(
+              readableProblem(response.value as ProblemJson)
+            );
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
@@ -155,7 +159,9 @@ export default class CgnService {
               "Cannot start a new CGN activation because the CGN is already active, revoked or expired"
             );
           case 500:
-            return ResponseErrorInternal(readableProblem(response.value as ProblemJson));
+            return ResponseErrorInternal(
+              readableProblem(response.value as ProblemJson)
+            );
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
@@ -190,7 +196,9 @@ export default class CgnService {
               "No User CGN activation found"
             );
           case 500:
-            return ResponseErrorInternal(readableProblem(response.value as ProblemJson));
+            return ResponseErrorInternal(
+              readableProblem(response.value as ProblemJson)
+            );
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
@@ -238,7 +246,9 @@ export default class CgnService {
               "Cannot start a new EYCA activation because EYCA card is already active, revoked or expired"
             );
           case 500:
-            return ResponseErrorInternal(readableProblem(response.value as ProblemJson));
+            return ResponseErrorInternal(
+              readableProblem(response.value as ProblemJson)
+            );
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
@@ -273,7 +283,9 @@ export default class CgnService {
               "No EYCA Card activation found"
             );
           case 500:
-            return ResponseErrorInternal(readableProblem(response.value as ProblemJson));
+            return ResponseErrorInternal(
+              readableProblem(response.value as ProblemJson)
+            );
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
@@ -321,7 +333,9 @@ export default class CgnService {
               "Cannot start a new CGN unsubscription"
             );
           case 500:
-            return ResponseErrorInternal(readableProblem(response.value as ProblemJson));
+            return ResponseErrorInternal(
+              readableProblem(response.value as ProblemJson)
+            );
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
@@ -353,7 +367,9 @@ export default class CgnService {
           case 403:
             return ResponseErrorForbiddenNotAuthorized;
           case 500:
-            return ResponseErrorInternal(readableProblem(response.value as ProblemJson));
+            return ResponseErrorInternal(
+              readableProblem(response.value as ProblemJson)
+            );
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }

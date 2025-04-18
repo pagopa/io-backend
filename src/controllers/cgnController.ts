@@ -3,9 +3,6 @@
  * app by forwarding the call to the API system.
  */
 
-import { CgnActivationDetail } from "generated/cgn/CgnActivationDetail";
-import { EycaActivationDetail } from "generated/cgn/EycaActivationDetail";
-import { EycaCard } from "generated/cgn/EycaCard";
 import {
   IResponseErrorConflict,
   IResponseErrorForbiddenNotAuthorized,
@@ -19,6 +16,9 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import * as express from "express";
+import { CgnActivationDetail } from "generated/cgn/CgnActivationDetail";
+import { EycaActivationDetail } from "generated/cgn/EycaActivationDetail";
+import { EycaCard } from "generated/cgn/EycaCard";
 import { Otp } from "generated/cgn/Otp";
 
 import { Card } from "../../generated/cgn/Card";
