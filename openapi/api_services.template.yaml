@@ -492,7 +492,7 @@ components:
         - STANDARD
     SpecialServiceMetadataV2:
       allOf:
-        - $ref: '#/components/schemas/ServiceBaseMetadata'
+        - $ref: "#/components/schemas/ServiceBaseMetadata"
         - type: object
           properties:
             category:

@@ -1,0 +1,142 @@
+openapi: 3.0.1
+info:
+  version: 1.0.1
+  title: IO FIMS - Backend API
+servers:
+  - url: https://api-app.io.pagopa.it/api/v1/fims
+security:
+  - Bearer: []
+
+paths:
+  /accesses:
+    get:
+      summary: Get access history
+      description: Get the access history for the specified user
+      operationId: getAccessHistory
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: string
+          description: The page identifier
+        - in: header
+          name: Accept-Language
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: An access history page
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccessHistoryPage"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+
+  /export-requests:
+    post:
+      summary: Request export
+      description: Request the export of the access history for the specified user
+      operationId: requestExport
+      responses:
+        "202":
+          description: The export request has been accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportRequest"
+        "409":
+          description: The export request has already been requested
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+
+components:
+  securitySchemes:
+    Bearer:
+      type: apiKey
+      name: Authorization
+      in: header
+
+  schemas:
+    Timestamp:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v26.3.0/openapi/definitions.yaml#/Timestamp"
+
+    ProblemJson:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v26.3.0/openapi/definitions.yaml#/ProblemJson"
+
+    Redirect:
+      type: object
+      properties:
+        display_name:
+          type: string
+        uri:
+          type: string
+          format: uri
+      required:
+        - display_name
+        - uri
+
+    Access:
+      type: object
+      properties:
+        id:
+          type: string
+          format: ulid
+        redirect:
+          $ref: "#/components/schemas/Redirect"
+        service_id:
+          type: string
+          format: ulid
+        timestamp:
+          $ref: "#/components/schemas/Timestamp"
+      required:
+        - id
+        - redirect
+        - service_id
+        - timestamp
+
+    AccessHistoryPage:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Access"
+        next:
+          type: string
+      required:
+        - data
+
+    ExportRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: ulid
+      required:
+        - id
