@@ -8,7 +8,7 @@ import * as E from "fp-ts/lib/Either";
 import { NodeEnvironmentEnum } from "@pagopa/ts-commons/lib/environment";
 import { CIDR } from "@pagopa/ts-commons/lib/strings";
 import * as request from "supertest";
-import { ServerInfo } from "../../generated/public/ServerInfo";
+import { ServerInfo } from "../../generated/platform/ServerInfo";
 import * as redisUtils from "../utils/redis";
 
 jest.mock("@azure/storage-queue");
