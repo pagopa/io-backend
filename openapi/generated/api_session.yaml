@@ -1,348 +1,396 @@
-swagger: '2.0'
+openapi: 3.0.1
 info:
   version: 16.15.0
   title: Session API
   description: Collection of enpoints to interact with user session.
-host: localhost
-basePath: /api/v1
-schemes:
-  - https
+servers:
+  - url: https://localhost/api/v1
 paths:
   /sessions/{fiscalcode}:
     get:
-      operationId: getSession
       summary: Get available user info from session
       description: Use this operation if you want to known the state of user session
+      operationId: getSession
       parameters:
-        - $ref: '#/parameters/FiscalCode'
-        - $ref: '#/parameters/Token'
+        - $ref: '#/components/parameters/FiscalCode'
+        - $ref: '#/components/parameters/Token'
       responses:
         '200':
           description: Success.
-          schema:
-            $ref: '#/definitions/UserSessionInfo'
-          examples:
+          content:
             application/json:
-              active: true
+              schema:
+                $ref: '#/components/schemas/UserSessionInfo'
+              example:
+                active: true
         '400':
           description: Bad request
+          content: {}
         '401':
           description: Token null or invalid.
+          content: {}
         '404':
           description: User not found.
+          content: {}
         '429':
           description: Throttling.
+          content: {}
         '500':
           description: There was an error
-          schema:
-            $ref: '#/definitions/ProblemJson'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
   /sessions/{fiscalcode}/lock:
     post:
-      operationId: lockUserSession
       summary: Lock a user session and delete session data
       description: >-
         Use this operation if you want to block a user to log in. The operation
         succeed if the user is already blocked
+      operationId: lockUserSession
       parameters:
-        - $ref: '#/parameters/FiscalCode'
-        - $ref: '#/parameters/Token'
+        - $ref: '#/components/parameters/FiscalCode'
+        - $ref: '#/components/parameters/Token'
       responses:
         '200':
           description: Success.
-          schema:
-            $ref: '#/definitions/SuccessResponse'
-          examples:
+          content:
             application/json:
-              message: ok
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              example:
+                message: ok
         '400':
           description: Bad request
+          content: {}
         '401':
           description: Token null or invalid.
+          content: {}
         '404':
           description: User not found.
+          content: {}
         '500':
           description: There was an error
-          schema:
-            $ref: '#/definitions/ProblemJson'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
     delete:
-      operationId: unlockUserSession
       summary: Remove a lock to a user session
       description: >-
         Use this operation if you want to unblock a user and re-allow to login.
         The operation succeed if the user wasn't blocked
+      operationId: unlockUserSession
       parameters:
-        - $ref: '#/parameters/FiscalCode'
-        - $ref: '#/parameters/Token'
+        - $ref: '#/components/parameters/FiscalCode'
+        - $ref: '#/components/parameters/Token'
       responses:
         '200':
           description: Success.
-          schema:
-            $ref: '#/definitions/SuccessResponse'
-          examples:
+          content:
             application/json:
-              message: ok
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              example:
+                message: ok
         '400':
           description: Bad request
+          content: {}
         '401':
           description: Token null or invalid.
+          content: {}
         '500':
           description: There was an error
-          schema:
-            $ref: '#/definitions/ProblemJson'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
   /sessions/{fiscalcode}/logout:
     post:
-      operationId: deleteUserSession
       summary: Delete user session and invalidate lollipop data
       description: >-
         Use this operation to invalidate the user session and disable the
         lollipop params to prevent Fast Login token refresh
+      operationId: deleteUserSession
       parameters:
-        - $ref: '#/parameters/FiscalCode'
-        - $ref: '#/parameters/Token'
+        - $ref: '#/components/parameters/FiscalCode'
+        - $ref: '#/components/parameters/Token'
       responses:
         '200':
           description: Success.
-          schema:
-            $ref: '#/definitions/SuccessResponse'
-          examples:
+          content:
             application/json:
-              message: ok
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              example:
+                message: ok
         '400':
           description: Bad request
+          content: {}
         '401':
           description: Token null or invalid.
+          content: {}
         '500':
           description: There was an error
-          schema:
-            $ref: '#/definitions/ProblemJson'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
   /auth/{fiscalcode}/lock:
     post:
-      operationId: authLock
       description: |-
         Locks the user for the IO app.
         This is intended to use with ioweb-profile lock functionality.
+      operationId: authLock
       parameters:
-        - $ref: '#/parameters/FiscalCode'
-        - $ref: '#/parameters/Token'
-        - in: body
-          name: body
-          required: true
-          schema:
-            $ref: '#/definitions/AuthLockBody'
+        - $ref: '#/components/parameters/FiscalCode'
+        - $ref: '#/components/parameters/Token'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthLockBody'
+        required: true
       responses:
         '204':
           description: Lock created.
+          content: {}
         '400':
           description: Bad request
-          schema:
-            $ref: '#/definitions/ProblemJson'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
         '401':
           description: Token null or invalid.
-          schema:
-            $ref: '#/definitions/ProblemJson'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
         '409':
           description: The user lock has been already created.
-          schema:
-            $ref: '#/definitions/ProblemJson'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
         '500':
           description: There was an error
-          schema:
-            $ref: '#/definitions/ProblemJson'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+      x-codegen-request-body-name: body
   /auth/{fiscalcode}/release-lock:
     post:
-      operationId: releaseAuthLock
       description: |-
         Release the user authentication lock for the IO app.
         This is intended to use with ioweb-profile unlock functionality.
+      operationId: releaseAuthLock
       parameters:
-        - $ref: '#/parameters/FiscalCode'
-        - $ref: '#/parameters/Token'
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/AuthUnlockBody'
+        - $ref: '#/components/parameters/FiscalCode'
+        - $ref: '#/components/parameters/Token'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthUnlockBody'
+        required: true
       responses:
         '204':
           description: Lock successfully released.
+          content: {}
         '400':
           description: Bad request
-          schema:
-            $ref: '#/definitions/ProblemJson'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
         '401':
           description: Token null or invalid.
-          schema:
-            $ref: '#/definitions/ProblemJson'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
         '403':
           description: Operation forbidden.
+          content: {}
         '500':
           description: There was an error
-          schema:
-            $ref: '#/definitions/ProblemJson'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+      x-codegen-request-body-name: body
   /sessions/{fiscalcode}/state:
     get:
-      operationId: getUserSessionState
       summary: Get User Session State on IO App
+      operationId: getUserSessionState
       parameters:
-        - $ref: '#/parameters/FiscalCode'
-        - $ref: '#/parameters/Token'
+        - $ref: '#/components/parameters/FiscalCode'
+        - $ref: '#/components/parameters/Token'
       responses:
         '200':
           description: Success.
-          schema:
-            $ref: '#/definitions/SessionState'
-          examples:
+          content:
             application/json:
-              access_enabled: true
-              session_info:
-                active: true
-                expiration_date: '2011-10-05T14:48:00.000Z'
-                type: LV
+              schema:
+                $ref: '#/components/schemas/SessionState'
+              example:
+                access_enabled: true
+                session_info:
+                  active: true
+                  expiration_date: '2011-10-05T14:48:00.000Z'
+                  type: LV
         '400':
           description: Bad request
+          content: {}
         '401':
           description: Unauthorized
+          content: {}
         '500':
           description: There was an error
-          schema:
-            $ref: '#/definitions/ProblemJson'
-parameters:
-  FiscalCode:
-    name: fiscalcode
-    in: path
-    type: string
-    maxLength: 16
-    minLength: 16
-    required: true
-    description: The fiscal code of the user, all upper case.
-    x-example: SPNDNL80R13C555X
-  Token:
-    name: token
-    in: query
-    type: string
-    required: true
-    description: The API key used to access this webhooks.
-definitions:
-  FiscalCode:
-    type: string
-    description: User's fiscal code.
-    format: FiscalCode
-    x-import: '@pagopa/ts-commons/lib/strings'
-    example: SPNDNL80R13C555X
-  ProblemJson:
-    type: object
-    properties:
-      type:
-        type: string
-        format: uri
-        description: |-
-          An absolute URI that identifies the problem type. When dereferenced,
-          it SHOULD provide human-readable documentation for the problem type
-          (e.g., using HTML).
-        default: about:blank
-        example: https://example.com/problem/constraint-violation
-      title:
-        type: string
-        description: |-
-          A short, summary of the problem type. Written in english and readable
-          for engineers (usually not suited for non technical stakeholders and
-          not localized); example: Service Unavailable
-      status:
-        type: integer
-        format: int32
-        description: >-
-          The HTTP status code generated by the origin server for this
-          occurrence of the problem.
-        minimum: 100
-        maximum: 600
-        exclusiveMaximum: true
-        example: 200
-      detail:
-        type: string
-        description: |-
-          A human readable explanation specific to this occurrence of the
-          problem.
-        example: There was an error processing the request
-      instance:
-        type: string
-        format: uri
-        description: >-
-          An absolute URI that identifies the specific occurrence of the
-          problem.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+components:
+  schemas:
+    FiscalCode:
+      type: string
+      description: User's fiscal code.
+      format: FiscalCode
+      x-import: '@pagopa/ts-commons/lib/strings'
+      example: SPNDNL80R13C555X
+    ProblemJson:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+          description: |-
+            An absolute URI that identifies the problem type. When dereferenced,
+            it SHOULD provide human-readable documentation for the problem type
+            (e.g., using HTML).
+          default: about:blank
+          example: https://example.com/problem/constraint-violation
+        title:
+          type: string
+          description: >-
+            A short, summary of the problem type. Written in english and
+            readable
 
-          It may or may not yield further information if dereferenced.
-  UnlockCode:
-    type: string
-    pattern: ^\\d{9}$
-  AuthLockBody:
-    type: object
-    properties:
-      unlock_code:
-        $ref: '#/definitions/UnlockCode'
-    required:
-      - unlock_code
-  AuthUnlockBody:
-    type: object
-    properties:
-      unlock_code:
-        $ref: '#/definitions/UnlockCode'
-  SuccessResponse:
-    type: object
-    properties:
-      message:
+            for engineers (usually not suited for non technical stakeholders and
+
+            not localized); example: Service Unavailable
+        status:
+          type: integer
+          format: int32
+          description: >-
+            The HTTP status code generated by the origin server for this
+            occurrence of the problem.
+          minimum: 100
+          maximum: 600
+          exclusiveMaximum: true
+          example: 200
+        detail:
+          type: string
+          description: |-
+            A human readable explanation specific to this occurrence of the
+            problem.
+          example: There was an error processing the request
+        instance:
+          type: string
+          format: uri
+          description: >-
+            An absolute URI that identifies the specific occurrence of the
+            problem.
+
+            It may or may not yield further information if dereferenced.
+    UnlockCode:
+      type: string
+      pattern: ^\d{9}$
+    AuthLockBody:
+      required:
+        - unlock_code
+      type: object
+      properties:
+        unlock_code:
+          $ref: '#/components/schemas/UnlockCode'
+    AuthUnlockBody:
+      type: object
+      properties:
+        unlock_code:
+          $ref: '#/components/schemas/UnlockCode'
+    SuccessResponse:
+      type: object
+      properties:
+        message:
+          type: string
+    UserSessionInfo:
+      required:
+        - active
+      type: object
+      properties:
+        active:
+          type: boolean
+    SessionInfo:
+      description: Info about an user session
+      allOf:
+        - required:
+            - active
+          type: object
+          properties:
+            active:
+              type: boolean
+              enum:
+                - false
+          description: Inactive session
+        - required:
+            - active
+            - expiration_date
+            - type
+          type: object
+          properties:
+            active:
+              type: boolean
+              enum:
+                - true
+            expiration_date:
+              type: string
+              format: date
+            type:
+              type: string
+              enum:
+                - LV
+                - LEGACY
+          description: Active session
+      x-one-of: true
+    SessionState:
+      required:
+        - access_enabled
+        - session_info
+      type: object
+      properties:
+        access_enabled:
+          type: boolean
+        session_info:
+          $ref: '#/components/schemas/SessionInfo'
+      description: The state of the user' session
+  parameters:
+    FiscalCode:
+      name: fiscalcode
+      in: path
+      description: The fiscal code of the user, all upper case.
+      required: true
+      schema:
+        maxLength: 16
+        minLength: 16
         type: string
-  UserSessionInfo:
-    type: object
-    properties:
-      active:
-        type: boolean
-    required:
-      - active
-  SessionInfo:
-    description: Info about an user session
-    x-one-of: true
-    allOf:
-      - type: object
-        description: Inactive session
-        properties:
-          active:
-            type: boolean
-            enum:
-              - false
-        required:
-          - active
-      - type: object
-        description: Active session
-        properties:
-          active:
-            type: boolean
-            enum:
-              - true
-          expiration_date:
-            type: string
-            format: date
-          type:
-            type: string
-            enum:
-              - LV
-              - LEGACY
-        required:
-          - active
-          - expiration_date
-          - type
-  SessionState:
-    description: The state of the user' session
-    type: object
-    properties:
-      access_enabled:
-        type: boolean
-      session_info:
-        $ref: '#/definitions/SessionInfo'
-    required:
-      - access_enabled
-      - session_info
-responses: {}
-consumes:
-  - application/json
-produces:
-  - application/json
+      example: SPNDNL80R13C555X
+    Token:
+      name: token
+      in: query
+      description: The API key used to access this webhooks.
+      required: true
+      schema:
+        type: string

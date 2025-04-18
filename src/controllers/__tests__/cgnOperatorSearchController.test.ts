@@ -7,17 +7,17 @@ import {
   ResponseErrorInternal,
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
-import { Merchant } from "../../../generated/cgn-operator-search/Merchant";
-import { ProductCategoryEnum } from "../../../generated/cgn-operator-search/ProductCategory";
+import { Merchant } from "../../../generated/cgn/Merchant";
+import { ProductCategoryEnum } from "../../../generated/cgn/ProductCategory";
 import { CgnAPIClient } from "../../clients/cgn";
 import CgnService from "../../services/cgnService";
 import { CgnOperatorSearchAPIClient } from "../../clients/cgn-operator-search";
 import mockRes from "../../__mocks__/response";
-import { OnlineMerchantSearchRequest } from "../../../generated/cgn-operator-search/OnlineMerchantSearchRequest";
+import { OnlineMerchantSearchRequest } from "../../../generated/cgn/OnlineMerchantSearchRequest";
 import {
   OfflineMerchantSearchRequest,
   OrderingEnum,
-} from "../../../generated/cgn-operator-search/OfflineMerchantSearchRequest";
+} from "../../../generated/cgn/OfflineMerchantSearchRequest";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {
   CardActivated,
@@ -28,7 +28,7 @@ import {
   StatusEnum as ExpiredStatusEnum,
 } from "@pagopa/io-functions-cgn-sdk/CardExpired";
 import { DiscountBucketCode } from "../../../generated/io-cgn-operator-search-api/DiscountBucketCode";
-import { SupportTypeEnum } from "../../../generated/cgn-operator-search/SupportType";
+import { SupportTypeEnum } from "../../../generated/cgn/SupportType";
 import { SearchRequest } from "../../../generated/io-cgn-operator-search-api/SearchRequest";
 
 const anAPIKey = "";

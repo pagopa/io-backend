@@ -17,8 +17,8 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as express from "express";
 import TrialService from "src/services/trialService";
 
-import { Subscription } from "../../generated/trial-system/Subscription";
-import { SubscriptionStateEnum } from "../../generated/trial-system/SubscriptionState";
+import { Subscription } from "../../generated/platform/Subscription";
+import { SubscriptionStateEnum } from "../../generated/platform/SubscriptionState";
 import { TrialId } from "../../generated/trial-system-api/TrialId";
 import {
   FF_IO_WALLET_TRIAL_ENABLED,

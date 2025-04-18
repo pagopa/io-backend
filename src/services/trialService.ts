@@ -22,7 +22,7 @@ import * as O from "fp-ts/Option";
 import { pipe } from "fp-ts/lib/function";
 import { TrialSystemAPIClient } from "src/clients/trial-system.client";
 
-import { Subscription } from "../../generated/trial-system/Subscription";
+import { Subscription } from "../../generated/platform/Subscription";
 import { TrialId } from "../../generated/trial-system-api/TrialId";
 import {
   ResponseErrorStatusNotDefinedInSpec,
