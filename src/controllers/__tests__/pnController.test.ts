@@ -1,7 +1,7 @@
 import { IResponseType } from "@pagopa/ts-commons/lib/requests";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { right, left } from "fp-ts/lib/Either";
-import { PNActivation } from "../../../generated/api_piattaforma-notifiche-courtesy/PNActivation";
+import { PNActivation } from "../../../generated/services/PNActivation";
 import { IoCourtesyDigitalAddressActivation } from "../../../generated/piattaforma-notifiche-courtesy/IoCourtesyDigitalAddressActivation";
 import { PNEnvironment } from "../../clients/pn-clients";
 import mockReq from "../../__mocks__/request";
