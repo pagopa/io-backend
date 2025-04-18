@@ -1,7 +1,7 @@
 openapi: 3.0.2
 info:
   title: IO Wallet
-  version: 16.12.1
+  version: 16.14.0
 servers:
   - url: https://api-app.io.pagopa.it/api/v1/wallet
 security:
@@ -148,6 +148,23 @@ paths:
           $ref: '#/components/responses/Unexpected'
         '503':
           $ref: '#/components/responses/ServiceUnavailable'
+  /whitelisted-fiscal-code:
+    get:
+      operationId: isFiscalCodeWhitelisted
+      summary: Used to check if the fiscal code is in the whitelist
+      responses:
+        '200':
+          description: >-
+            Returned when no issues were found in either case (fiscal code
+            whitelisted, or not)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WhitelistedFiscalCodeData'
+        '500':
+          $ref: '#/components/responses/Unexpected'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
 components:
   securitySchemes:
     Bearer:
@@ -270,6 +287,27 @@ components:
       required:
         - id
         - is_revoked
+    WhitelistedFiscalCodeData:
+      type: object
+      required:
+        - whitelisted
+        - fiscalCode
+      properties:
+        whitelisted:
+          type: boolean
+          description: >-
+            Boolean value that specifies whether the tax code is whitelisted or
+            not.
+        whitelistedAt:
+          type: string
+          description: >-
+            Date, expressed in ISO 8601 format, when the fiscal code was added
+            to the whitelist.
+
+            Only present if the fiscal code is whitelisted.
+        fiscalCode:
+          type: string
+          description: The fiscal code, the same one passed in input.
     RevocationReason:
       type: string
       enum:

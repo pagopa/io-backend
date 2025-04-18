@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: Proxy API
   description: Mobile and web proxy API gateway.
-  version: 16.12.1
+  version: 16.14.0
 servers:
   - url: https://api-app.io.pagopa.it/api/v1
 security:

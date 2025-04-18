@@ -1,8 +1,8 @@
 openapi: 3.0.1
 info:
-  version: 16.14.0
   title: Session API
   description: Collection of enpoints to interact with user session.
+  version: 16.14.0
 servers:
   - url: https://localhost/api/v1
 paths:
