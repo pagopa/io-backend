@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: Public API & Trial System API
   description: Mobile and web proxy API gateway.
-  version: 16.12.1
+  version: 16.14.0
 servers:
   - url: https://localhost/
 paths:

@@ -108,11 +108,11 @@ paths:
 
   /wallet-instances/{id}/status:
     parameters:
-    - in: path
-      name: id
-      required: true
-      schema:
-        type: string
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
     get:
       summary: Retrieve a Wallet Instance status
       operationId: getWalletInstanceStatus
@@ -148,6 +148,22 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "403":
           $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/Unexpected"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /whitelisted-fiscal-code:
+    get:
+      operationId: isFiscalCodeWhitelisted
+      summary: Used to check if the fiscal code is in the whitelist
+      responses:
+        "200":
+          description: Returned when no issues were found in either case (fiscal code whitelisted, or not)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WhitelistedFiscalCodeData"
         "500":
           $ref: "#/components/responses/Unexpected"
         "503":
@@ -287,15 +303,35 @@ components:
         - id
         - is_revoked
 
+    WhitelistedFiscalCodeData:
+      type: object
+      required:
+        - whitelisted
+        - fiscalCode
+      properties:
+        whitelisted:
+          type: boolean
+          description: |-
+            Boolean value that specifies whether the tax code is whitelisted or not.
+        whitelistedAt:
+          type: string
+          description: |-
+            Date, expressed in ISO 8601 format, when the fiscal code was added to the whitelist.
+            Only present if the fiscal code is whitelisted.
+        fiscalCode:
+          type: string
+          description: |-
+            The fiscal code, the same one passed in input.
+
     RevocationReason:
       type: string
       enum:
         [
           "CERTIFICATE_REVOKED_BY_ISSUER",
           "NEW_WALLET_INSTANCE_CREATED",
-          "REVOKED_BY_USER",
+          "REVOKED_BY_USER"
         ]
-        
+
     ProblemDetail:
       type: object
       properties:

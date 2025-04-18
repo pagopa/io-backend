@@ -11,7 +11,7 @@ paths:
     get:
       summary: Get the CGN status details
       description: |
-        Get the CGN status details 
+        Get the CGN status details
         by the provided fiscal code
       operationId: getCgnStatus
       responses:
