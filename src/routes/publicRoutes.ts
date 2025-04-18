@@ -2,8 +2,8 @@ import { Express } from "express";
 import * as O from "fp-ts/Option";
 import { pipe } from "fp-ts/function";
 
-import { ServerInfo } from "../../generated/public/ServerInfo";
-import { VersionPerPlatform } from "../../generated/public/VersionPerPlatform";
+import { ServerInfo } from "../../generated/platform/ServerInfo";
+import { VersionPerPlatform } from "../../generated/platform/VersionPerPlatform";
 import { ROOT_REDIRECT_URL } from "../config";
 import {
   getPing,

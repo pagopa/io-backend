@@ -23,12 +23,10 @@ import * as passport from "passport";
 import {
   API_CLIENT,
   APP_MESSAGES_API_CLIENT,
-  BONUS_API_CLIENT,
   CGN_API_CLIENT,
   CGN_OPERATOR_SEARCH_API_CLIENT,
   ENV,
   EUCOVIDCERT_API_CLIENT,
-  FF_BONUS_ENABLED,
   FF_CGN_ENABLED,
   FF_EUCOVIDCERT_ENABLED,
   FF_IO_FIMS_ENABLED,
@@ -58,9 +56,7 @@ import {
   TRIAL_SYSTEM_CLIENT,
   URL_TOKEN_STRATEGY
 } from "./config";
-import { registerAuthenticationRoutes } from "./routes/authenticationRoutes";
 import { registerAPIRoutes } from "./routes/baseRoutes";
-import { registerBonusAPIRoutes } from "./routes/bonusRoutes";
 import {
   registerCgnAPIRoutes,
   registerCgnOperatorSearchAPIRoutes
@@ -70,14 +66,12 @@ import { registerFirstLollipopConsumer } from "./routes/firstLollipopConsumerRou
 import { registerIoFimsAPIRoutes } from "./routes/ioFimsRoutes";
 import { registerIoSignAPIRoutes } from "./routes/ioSignRoutes";
 import { registerIoWalletAPIRoutes } from "./routes/ioWalletRoutes";
-import { registerMyPortalRoutes } from "./routes/myportalRoutes";
 import { registerPNRoutes } from "./routes/pnRoutes";
 import { registerPublicRoutes } from "./routes/publicRoutes";
 import { registerServicesAppBackendRoutes } from "./routes/servicesRoutes";
 import { registerSessionAPIRoutes } from "./routes/sessionRoutes";
 import { registerTrialSystemAPIRoutes } from "./routes/trialSystemRoutes";
 import AuthenticationLockService from "./services/authenticationLockService";
-import BonusService from "./services/bonusService";
 import CgnOperatorSearchService from "./services/cgnOperatorSearchService";
 import CgnService from "./services/cgnService";
 import EUCovidCertService from "./services/eucovidcertService";
@@ -93,11 +87,9 @@ import PagoPAProxyService from "./services/pagoPAProxyService";
 import { PNService } from "./services/pnService";
 import ProfileService from "./services/profileService";
 import RedisSessionStorage from "./services/redisSessionStorage";
-import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import ServicesAppBackendService from "./services/servicesAppBackendService";
 import TrialService from "./services/trialService";
 import UserDataProcessingService from "./services/userDataProcessingService";
-import bearerMyPortalTokenStrategy from "./strategies/bearerMyPortalTokenStrategy";
 import bearerSessionTokenStrategy from "./strategies/bearerSessionTokenStrategy";
 import { User } from "./types/user";
 import { attachTrackingData } from "./utils/appinsights";
@@ -117,12 +109,8 @@ export interface IAppFactoryParameters {
   readonly env: NodeEnvironment;
   readonly appInsightsClient?: appInsights.TelemetryClient;
   readonly allowNotifyIPSourceRange: ReadonlyArray<CIDR>;
-  readonly allowMyPortalIPSourceRange: ReadonlyArray<CIDR>;
   readonly allowSessionHandleIPSourceRange: ReadonlyArray<CIDR>;
-  readonly authenticationBasePath: string;
   readonly APIBasePath: string;
-  readonly BonusAPIBasePath: string;
-  readonly MyPortalBasePath: string;
   readonly CGNAPIBasePath: string;
   readonly CGNOperatorSearchAPIBasePath: string;
   readonly IoSignAPIBasePath: string;
@@ -136,13 +124,9 @@ export interface IAppFactoryParameters {
 export async function newApp({
   env,
   allowNotifyIPSourceRange,
-  allowMyPortalIPSourceRange,
   allowSessionHandleIPSourceRange,
   appInsightsClient,
-  authenticationBasePath,
   APIBasePath,
-  BonusAPIBasePath,
-  MyPortalBasePath,
   CGNAPIBasePath,
   IoSignAPIBasePath,
   IoFimsAPIBasePath,
@@ -171,17 +155,11 @@ export async function newApp({
     bearerSessionTokenStrategy(SESSION_STORAGE, attachTrackingData)
   );
 
-  // Add the strategy to authenticate MyPortal clients.
-  passport.use("bearer.myportal", bearerMyPortalTokenStrategy(SESSION_STORAGE));
-
   // Add the strategy to authenticate webhook calls.
   passport.use(URL_TOKEN_STRATEGY);
 
   // Creates middlewares for each implemented strategy
   const authMiddlewares = {
-    bearerMyPortal: passport.authenticate("bearer.myportal", {
-      session: false
-    }),
     bearerSession: passport.authenticate("bearer.session", {
       session: false
     }),
@@ -287,9 +265,6 @@ export async function newApp({
           tableClient
         );
 
-        // Create the bonus service
-        const BONUS_SERVICE = new BonusService(BONUS_API_CLIENT);
-
         // Create the cgn service
         const CGN_SERVICE = new CgnService(CGN_API_CLIENT);
 
@@ -394,12 +369,6 @@ export async function newApp({
           authMiddlewares.bearerSession
         );
 
-        registerAuthenticationRoutes(
-          app,
-          authenticationBasePath,
-          authMiddlewares.bearerSession
-        );
-
         // Create the function app service.
         const FN_APP_SERVICE = new FunctionsAppService(API_CLIENT);
         // Create the new messages service.
@@ -408,10 +377,6 @@ export async function newApp({
         );
 
         const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT);
-        // Register the user metadata storage service.
-        const USER_METADATA_STORAGE = new RedisUserMetadataStorage(
-          REDIS_CLIENT_SELECTOR.selectOne(RedisClientMode.FAST)
-        );
         registerAPIRoutes(
           app,
           APIBasePath,
@@ -423,7 +388,6 @@ export async function newApp({
           notificationServiceFactory,
           SESSION_STORAGE,
           PAGOPA_PROXY_SERVICE,
-          USER_METADATA_STORAGE,
           USER_DATA_PROCESSING_SERVICE,
           authMiddlewares.bearerSession,
           LOLLIPOP_API_CLIENT
@@ -434,19 +398,10 @@ export async function newApp({
           allowSessionHandleIPSourceRange,
           authMiddlewares.urlToken,
           SESSION_STORAGE,
-          USER_METADATA_STORAGE,
           LOLLIPOP_SERVICE,
           AUTHENTICATION_LOCK_SERVICE,
           notificationServiceFactory
         );
-        if (FF_BONUS_ENABLED) {
-          registerBonusAPIRoutes(
-            app,
-            BonusAPIBasePath,
-            BONUS_SERVICE,
-            authMiddlewares.bearerSession
-          );
-        }
         if (FF_CGN_ENABLED) {
           registerCgnAPIRoutes(
             app,
@@ -494,13 +449,6 @@ export async function newApp({
             authMiddlewares.bearerSession
           );
         }
-
-        registerMyPortalRoutes(
-          app,
-          MyPortalBasePath,
-          allowMyPortalIPSourceRange,
-          authMiddlewares.bearerMyPortal
-        );
 
         registerServicesAppBackendRoutes(
           app,

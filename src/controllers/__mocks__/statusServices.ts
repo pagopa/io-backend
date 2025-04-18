@@ -1,5 +1,5 @@
-import { ServicesStatus } from "../../../generated/public/ServicesStatus";
-import { StatusEnumEnum } from "../../../generated/public/StatusEnum";
+import { ServicesStatus } from "../../../generated/platform/ServicesStatus";
+import { StatusEnumEnum } from "../../../generated/platform/StatusEnum";
 
 export const mockServicesStatus: ServicesStatus = {
   services: [
