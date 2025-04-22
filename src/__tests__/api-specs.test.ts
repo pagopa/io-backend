@@ -1,7 +1,7 @@
 import * as SwaggerParser from "swagger-parser";
 
 describe("API proxy specs", () => {
-  const specFilePath = `${__dirname}/../../api_backend.yaml`;
+  const specFilePath = `${__dirname}/../../openapi/generated/api_auth.yaml`;
 
   it("should be valid", async () => {
     const api = await SwaggerParser.bundle(specFilePath);
@@ -19,7 +19,7 @@ describe("API notifications specs", () => {
 });
 
 describe("API EUCovidCert specs", () => {
-  const specFilePath = `${__dirname}/../../api_eucovidcert.yaml`;
+  const specFilePath = `${__dirname}/../../openapi/generated/api_eucovidcert.yaml`;
 
   it("should be valid", async () => {
     const api = await SwaggerParser.bundle(specFilePath);
