@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
-  title: Proxy API
-  description: Mobile and web proxy API gateway.
+  title: API for Auth & Identity domain
+  description: Mobile and web backend API for the Auth and Identity domain.
   version: 16.7.0
 servers:
   - url: https://api-app.io.pagopa.it/api/v1
@@ -319,45 +319,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ProblemJson"
-  /installations/{installationID}:
-    put:
-      summary: Create or update an Installation
-      description: Create or update an Installation to the Azure Notification hub.
-      operationId: createOrUpdateInstallation
-      parameters:
-        - name: installationID
-          in: path
-          description: The ID of the message.
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Installation"
-        required: true
-      responses:
-        "200":
-          description: Success.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SuccessResponse"
-              example:
-                message: ok
-        "401":
-          description: Bearer token null or expired.
-          content: {}
-        "500":
-          description:
-            There was an error in registering the device to the Notification
-            Hub.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ProblemJson"
-      x-codegen-request-body-name: body
   /sessions:
     get:
       summary: List sessions of a User
@@ -379,149 +340,6 @@ paths:
         "401":
           description: Bearer token null or expired.
           content: {}
-        "500":
-          description: Unavailable service
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ProblemJson"
-  /payment-requests/{rptId}:
-    get:
-      summary: Get Payment Info
-      description: Retrieve information about a payment
-      operationId: getPaymentInfo
-      parameters:
-        - name: rptId
-          in: path
-          description: Unique identifier for payments.
-          required: true
-          schema:
-            type: string
-        - name: test
-          in: query
-          description: Use test environment of PagoPAClient
-          schema:
-            type: boolean
-      responses:
-        "200":
-          description: Payment information retrieved
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PaymentRequestsGetResponse"
-              example:
-                importoSingoloVersamento: "200,"
-                codiceContestoPagamento: ABC123
-        "400":
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ProblemJson"
-        "401":
-          description: Bearer token null or expired.
-          content: {}
-        "500":
-          description: PagoPA services are not available or request is rejected
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PaymentProblemJson"
-        "504":
-          description: gateway timeout.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PaymentProblemJson"
-  /payment-activations:
-    post:
-      summary: Activate Payment
-      description: Require a lock (activation) for a payment
-      operationId: activatePayment
-      parameters:
-        - name: test
-          in: query
-          description: Use test environment of PagoPAClient
-          schema:
-            type: boolean
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/PaymentActivationsPostRequest"
-        required: true
-      responses:
-        "200":
-          description: Payment activation process started
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PaymentActivationsPostResponse"
-              example:
-                importoSingoloVersamento: 200
-        "400":
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ProblemJson"
-        "401":
-          description: Bearer token null or expired.
-          content: {}
-        "500":
-          description: PagoPA services are not available or request is rejected
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PaymentProblemJson"
-        "504":
-          description: gateway timeout.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PaymentProblemJson"
-      x-codegen-request-body-name: body
-  /payment-activations/{codiceContestoPagamento}:
-    get:
-      summary: Get Activation status
-      description: Check the activation status to retrieve the paymentId
-      operationId: getActivationStatus
-      parameters:
-        - name: codiceContestoPagamento
-          in: path
-          description: Transaction Id used to identify the communication flow.
-          required: true
-          schema:
-            type: string
-        - name: test
-          in: query
-          description: Use test environment of PagoPAClient
-          schema:
-            type: boolean
-      responses:
-        "200":
-          description: Payment information
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PaymentActivationsGetResponse"
-              example:
-                idPagamento: "123455"
-        "400":
-          description: Invalid input
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ProblemJson"
-        "401":
-          description: Bearer token null or expired.
-          content: {}
-        "404":
-          description: Activation status not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ProblemJson"
         "500":
           description: Unavailable service
           content:
@@ -753,33 +571,6 @@ components:
       $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/Ulid"
     PathTraversalSafePathParam:
       $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/PathTraversalSafePathParam"
-    # Definitions from pagopa-proxy
-    PaymentProblemJson:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-for-io.yaml#/definitions/PaymentProblemJson"
-    CodiceContestoPagamento:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-for-io.yaml#/definitions/CodiceContestoPagamento"
-    EnteBeneficiario:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-for-io.yaml#/definitions/EnteBeneficiario"
-    Iban:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-for-io.yaml#/definitions/Iban"
-    ImportoEuroCents:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-for-io.yaml#/definitions/ImportoEuroCents"
-    PaymentActivationsGetResponse:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-for-io.yaml#/definitions/PaymentActivationsGetResponse"
-    PaymentActivationsPostRequest:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-for-io.yaml#/definitions/PaymentActivationsPostRequest"
-    PaymentActivationsPostResponse:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-for-io.yaml#/definitions/PaymentActivationsPostResponse"
-    PaymentRequestsGetResponse:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-for-io.yaml#/definitions/PaymentRequestsGetResponse"
-    RptId:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-for-io.yaml#/definitions/RptId"
-    SpezzoneStrutturatoCausaleVersamento:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-for-io.yaml#/definitions/SpezzoneStrutturatoCausaleVersamento"
-    SpezzoniCausaleVersamento:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-for-io.yaml#/definitions/SpezzoniCausaleVersamento"
-    SpezzoniCausaleVersamentoItem:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-for-io.yaml#/definitions/SpezzoniCausaleVersamentoItem"
     # AssertionRef possible inputs
     AssertionRefSha256:
       type: string
@@ -796,18 +587,6 @@ components:
         - $ref: "#/components/schemas/AssertionRefSha512"
         - $ref: "#/components/schemas/AssertionRefSha384"
         - $ref: "#/components/schemas/AssertionRefSha256"
-    Installation:
-      type: object
-      title: Installation
-      description: Describes an app installation.
-      properties:
-        platform:
-          $ref: "#/components/schemas/Platform"
-        pushChannel:
-          $ref: "#/components/schemas/PushChannel"
-      required:
-        - platform
-        - pushChannel
     InitializedProfile:
       type: object
       title: Initialized profile
@@ -886,14 +665,6 @@ components:
             $ref: "#/components/schemas/SessionInfo"
       required:
         - sessions
-    InstallationID:
-      type: string
-      description: |-
-        The sixteen octets of an Installation ID are represented as 32 hexadecimal (base 16) digits, displayed in five groups
-        separated by hyphens, in the form 8-4-4-4-12 for a total of 36 characters (32 alphanumeric characters and four
-        hyphens).
-        See https://en.wikipedia.org/wiki/Universally_unique_identifier
-      minLength: 1
     HasProfile:
       type: boolean
       default: false
@@ -905,17 +676,6 @@ components:
     Version:
       type: integer
       description: The entity version.
-    Platform:
-      type: string
-      description: The platform type where the installation happened.
-      x-extensible-enum:
-        - apns
-        - gcm
-    PushChannel:
-      type: string
-      description: |-
-        The Push Notification Service handle for this Installation.
-        See https://docs.microsoft.com/en-us/azure/notification-hubs/notification-hubs-push-notification-registration-management
     SpidLevel:
       type: string
       description: A SPID level.
@@ -923,11 +683,6 @@ components:
         - https://www.spid.gov.it/SpidL1
         - https://www.spid.gov.it/SpidL2
         - https://www.spid.gov.it/SpidL3
-    SuccessResponse:
-      type: object
-      properties:
-        message:
-          type: string
     LimitedFederatedUser:
       title: Federated user
       description: User data needed by federated applications.

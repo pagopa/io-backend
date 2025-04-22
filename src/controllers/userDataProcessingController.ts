@@ -14,9 +14,9 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import * as express from "express";
 
-import { UserDataProcessing } from "../../generated/backend/UserDataProcessing";
-import { UserDataProcessingChoice } from "../../generated/backend/UserDataProcessingChoice";
-import { UserDataProcessingChoiceRequest } from "../../generated/backend/UserDataProcessingChoiceRequest";
+import { UserDataProcessing } from "../../generated/auth/UserDataProcessing";
+import { UserDataProcessingChoice } from "../../generated/auth/UserDataProcessingChoice";
+import { UserDataProcessingChoiceRequest } from "../../generated/auth/UserDataProcessingChoiceRequest";
 import UserDataProcessingService from "../../src/services/userDataProcessingService";
 import { withUserFromRequest } from "../types/user";
 import { withValidatedOrValidationError } from "../utils/responses";

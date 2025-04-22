@@ -14,7 +14,7 @@ import mockRes from "../../__mocks__/response";
 import { ProblemJson } from "@pagopa/io-functions-app-sdk/ProblemJson";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { UpsertServicePreference } from "@pagopa/io-functions-app-sdk/UpsertServicePreference";
-import { PathTraversalSafePathParam } from "../../../generated/backend/PathTraversalSafePathParam";
+import { PathTraversalSafePathParam } from "../../../generated/auth/PathTraversalSafePathParam";
 
 const aValidDepartmentName = "Department name";
 const aValidOrganizationName = "Organization name";

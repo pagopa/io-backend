@@ -10,9 +10,9 @@ import * as O from "fp-ts/Option";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
-import { EmailAddress } from "../../generated/backend/EmailAddress";
-import { FiscalCode } from "../../generated/backend/FiscalCode";
-import { SpidLevel } from "../../generated/backend/SpidLevel";
+import { EmailAddress } from "../../generated/auth/EmailAddress";
+import { FiscalCode } from "../../generated/auth/FiscalCode";
+import { SpidLevel } from "../../generated/auth/SpidLevel";
 import { withValidatedOrValidationError } from "../utils/responses";
 import {
   BPDToken,
