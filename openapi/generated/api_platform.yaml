@@ -55,6 +55,7 @@ paths:
     get:
       summary: Get service statuses
       description: Returns the current status of all microservices.
+      operationId: getServicesStatus
       responses:
         '200':
           description: App backend microservices statuses.
