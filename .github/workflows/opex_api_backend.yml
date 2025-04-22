@@ -5,7 +5,7 @@ on:
     branches:
       - master
     paths:
-      - 'openapi/generated/api_backend.yaml'
+      - 'openapi/generated/api_auth.yaml'
       - '.github/workflows/opex_api_backend.yml'
       - '.opex/api_backend/**'
 
