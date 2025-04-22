@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
-  title: Proxy API
-  description: Mobile and web proxy API gateway.
+  title: API for Communication domain.
+  description: Mobile and web backend API for communication domain.
   version: 16.14.0
 servers:
   - url: https://api-app.io.pagopa.it/api/v1
@@ -445,6 +445,45 @@ paths:
         '504':
           description: Gateway Timeout
           content: {}
+  /installations/{installationID}:
+    put:
+      summary: Create or update an Installation
+      description: Create or update an Installation to the Azure Notification hub.
+      operationId: createOrUpdateInstallation
+      parameters:
+        - name: installationID
+          in: path
+          description: The ID of the message.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Installation'
+        required: true
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              example:
+                message: ok
+        '401':
+          description: Bearer token null or expired.
+          content: {}
+        '500':
+          description: >-
+            There was an error in registering the device to the Notification
+            Hub.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+      x-codegen-request-body-name: body
 components:
   schemas:
     FiscalCode:
@@ -1048,6 +1087,49 @@ components:
         - SUBJECT_VALIDATION_ERROR
       description: A representation of all the error type for an invalid ThirdPartyMessage
       x-example: ATTACHMENTS_NOT_PRESENT
+    SuccessResponse:
+      type: object
+      properties:
+        message:
+          type: string
+    InstallationID:
+      type: string
+      description: >-
+        The sixteen octets of an Installation ID are represented as 32
+        hexadecimal (base 16) digits, displayed in five groups
+
+        separated by hyphens, in the form 8-4-4-4-12 for a total of 36
+        characters (32 alphanumeric characters and four
+
+        hyphens).
+
+        See https://en.wikipedia.org/wiki/Universally_unique_identifier
+      minLength: 1
+    Installation:
+      type: object
+      title: Installation
+      description: Describes an app installation.
+      properties:
+        platform:
+          $ref: '#/components/schemas/Platform'
+        pushChannel:
+          $ref: '#/components/schemas/PushChannel'
+      required:
+        - platform
+        - pushChannel
+    Platform:
+      type: string
+      description: The platform type where the installation happened.
+      x-extensible-enum:
+        - apns
+        - gcm
+    PushChannel:
+      type: string
+      description: >-
+        The Push Notification Service handle for this Installation.
+
+        See
+        https://docs.microsoft.com/en-us/azure/notification-hubs/notification-hubs-push-notification-registration-management
   securitySchemes:
     Bearer:
       type: http

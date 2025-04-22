@@ -6,7 +6,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as crypto from "crypto";
 import * as t from "io-ts";
 
-import { FiscalCode } from "../../generated/backend/FiscalCode";
+import { FiscalCode } from "../../generated/auth/FiscalCode";
 
 /**
  * An hashed fiscal code.

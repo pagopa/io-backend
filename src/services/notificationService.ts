@@ -12,8 +12,8 @@ import {
 import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
 
-import { FiscalCode } from "../../generated/backend/FiscalCode";
-import { Installation } from "../../generated/backend/Installation";
+import { FiscalCode } from "../../generated/auth/FiscalCode";
+import { Installation } from "../../generated/communication/Installation";
 import {
   CreateOrUpdateInstallationMessage,
   KindEnum as CreateOrUpdateKind

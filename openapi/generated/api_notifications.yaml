@@ -1,8 +1,8 @@
 openapi: 3.0.1
 info:
+  title: Internal API for Communication domain
+  description: Internal API for Communication domain to handle push notifications.
   version: 16.15.0
-  title: Proxy API
-  description: Mobile and web proxy API gateway.
 servers:
   - url: https://localhost/api/v1
 security:

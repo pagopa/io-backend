@@ -7,7 +7,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { FiscalCode } from "../../../generated/communication/FiscalCode";
 import { MessageBodyMarkdown } from "../../../generated/communication/MessageBodyMarkdown";
 import { MessageSubject } from "../../../generated/communication/MessageSubject";
-import { PlatformEnum } from "../../../generated/backend/Platform";
+import { PlatformEnum } from "../../../generated/communication/Platform";
 import {
   CreateOrUpdateInstallationMessage,
   KindEnum as CreateOrUpdateKind
