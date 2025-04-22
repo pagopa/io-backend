@@ -474,7 +474,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ProblemJson"
-  /sign:
+  /first-lollipop/sign:
     post:
       operationId: signMessage
       summary: POST a signed request with Lollipop
