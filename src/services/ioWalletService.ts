@@ -379,7 +379,7 @@ export default class IoWalletService {
     | IResponseErrorServiceUnavailable
   > =>
     withCatchAsInternalError(async () => {
-      const validated = await this.ioWalletApiClient.IsFiscalCodeWhitelisted({
+      const validated = await this.ioWalletApiClient.isFiscalCodeWhitelisted({
         fiscalCode
       });
       return withValidatedOrInternalError(validated, (response) => {

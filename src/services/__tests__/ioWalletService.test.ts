@@ -92,7 +92,7 @@ const api = {
   setWalletInstanceStatus: mockSetWalletInstanceStatus,
   deleteWalletInstances: mockDeleteWalletInstances,
   getCurrentWalletInstanceStatus: mockGetCurrentWalletInstanceStatus,
-  IsFiscalCodeWhitelisted: mockIsFiscalCodeWhitelisted,
+  isFiscalCodeWhitelisted: mockIsFiscalCodeWhitelisted,
 };
 
 const mockCreateSubscription = jest.fn();
