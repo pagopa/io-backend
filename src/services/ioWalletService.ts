@@ -369,7 +369,7 @@ export default class IoWalletService {
     });
 
   /**
-   * Check if the fiscal code is whitelisted, or not.
+   * Check if the fiscal code is whitelisted or not.
    */
   public readonly isFiscalCodeWhitelisted = (
     fiscalCode: FiscalCode
