@@ -30,7 +30,7 @@ import { NonceDetailView } from "../../generated/io-wallet/NonceDetailView";
 import { SetWalletInstanceStatusBody } from "../../generated/io-wallet/SetWalletInstanceStatusBody";
 import { WalletAttestationView } from "../../generated/io-wallet/WalletAttestationView";
 import { WalletInstanceData } from "../../generated/io-wallet/WalletInstanceData";
-import { WhitelistedFiscalCodeData } from "../../generated/io-wallet-api/WhitelistedFiscalCodeData";
+import { WhitelistedFiscalCodeData } from "../../generated/io-wallet/WhitelistedFiscalCodeData";
 import { FF_IO_WALLET_TRIAL_ENABLED } from "../config";
 import IoWalletService from "../services/ioWalletService";
 import { withUserFromRequest } from "../types/user";

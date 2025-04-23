@@ -21,9 +21,9 @@ import {
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/Option";
 import { pipe } from "fp-ts/lib/function";
+import { WhitelistedFiscalCodeData } from "generated/io-wallet/WhitelistedFiscalCodeData";
 import { Grant_typeEnum } from "generated/io-wallet-api/CreateWalletAttestationBody";
 import { NonceDetailView } from "generated/io-wallet-api/NonceDetailView";
-import { WhitelistedFiscalCodeData } from "generated/io-wallet-api/WhitelistedFiscalCodeData";
 
 import { SetWalletInstanceStatusWithFiscalCodeData } from "../../generated/io-wallet-api/SetWalletInstanceStatusWithFiscalCodeData";
 import { WalletAttestationView } from "../../generated/io-wallet-api/WalletAttestationView";
