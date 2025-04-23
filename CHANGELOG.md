@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 16.13.0
+
+### Minor Changes
+
+- cf5da80: Add support for x-user token in bearerSessionTokenStrategy
+
 ## 16.12.1
 
 ### Patch Changes
