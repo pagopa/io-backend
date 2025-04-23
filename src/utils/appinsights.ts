@@ -13,9 +13,9 @@ import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
 import { AppInsightsConfig } from "src/config";
 
+import { UserIdentity } from "../../generated/io-auth/UserIdentity";
 import { LollipopLocalsType } from "../types/lollipop";
 import { toFiscalCodeHash } from "../types/notification";
-import { User } from "../types/user";
 import { getCurrentBackendVersion } from "./package";
 
 // the internal function runtime has MaxTelemetryItem per second set to 20 by default
@@ -38,7 +38,7 @@ const USER_TRACKING_ID_KEY = "user_tracking_id";
  *
  * @see https://github.com/microsoft/ApplicationInsights-node.js/issues/392#issuecomment-387532917
  */
-export function attachTrackingData(user: User): void {
+export function attachTrackingData(user: UserIdentity): void {
   const correlationContext = ai.getCorrelationContext();
 
   // may happen when developing locally

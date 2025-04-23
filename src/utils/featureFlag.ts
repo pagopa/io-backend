@@ -1,3 +1,4 @@
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { enumType } from "@pagopa/ts-commons/lib/types";
 import * as t from "io-ts";
 
@@ -35,3 +36,15 @@ export const getIsUserEligibleForNewFeature =
         return false;
     }
   };
+
+/**
+ *
+ * @param regex The regex to use
+ * @returns
+ */
+export const getIsUserACanaryTestUser = (
+  regex: string
+): ((sha: NonEmptyString) => boolean) => {
+  const regExp = new RegExp(regex);
+  return (sha: NonEmptyString): boolean => regExp.test(sha);
+};

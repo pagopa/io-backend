@@ -5,7 +5,7 @@ import { Option } from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
 import { IVerifyOptions } from "passport-http-bearer";
 
-import { User } from "../types/user";
+import { UserIdentity } from "../../generated/io-auth/UserIdentity";
 
 export type StrategyDoneFunction = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -21,7 +21,7 @@ export type StrategyDoneFunction = (
  * methods getBySessionToken.
  */
 export function fulfill(
-  errorOrUser: Either<Error, Option<User>>,
+  errorOrUser: Either<Error, Option<UserIdentity>>,
   done: StrategyDoneFunction
 ): void {
   pipe(
