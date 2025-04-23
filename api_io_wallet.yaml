@@ -161,7 +161,7 @@ paths:
         schema:
           $ref: "#/components/schemas/FiscalCode"
     get:
-      operationId: IsFiscalCodeWhitelisted
+      operationId: isFiscalCodeWhitelisted
       summary: Used to check if the fiscal code is in the whitelist
       responses:
         "200":
