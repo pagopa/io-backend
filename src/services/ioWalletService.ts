@@ -23,6 +23,7 @@ import * as O from "fp-ts/Option";
 import { pipe } from "fp-ts/lib/function";
 import { Grant_typeEnum } from "generated/io-wallet-api/CreateWalletAttestationBody";
 import { NonceDetailView } from "generated/io-wallet-api/NonceDetailView";
+import { WhitelistedFiscalCodeData } from "generated/io-wallet-api/WhitelistedFiscalCodeData";
 
 import { SetWalletInstanceStatusWithFiscalCodeData } from "../../generated/io-wallet-api/SetWalletInstanceStatusWithFiscalCodeData";
 import { WalletAttestationView } from "../../generated/io-wallet-api/WalletAttestationView";
@@ -360,6 +361,36 @@ export default class IoWalletService {
                 O.fromNullable,
                 O.getOrElse(() => "Cannot get subscription")
               )
+            );
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
+  /**
+   * Check if the fiscal code is whitelisted, or not.
+   */
+  public readonly isFiscalCodeWhitelisted = (
+    fiscalCode: FiscalCode
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseSuccessJson<WhitelistedFiscalCodeData>
+    | IResponseErrorServiceUnavailable
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.ioWalletApiClient.IsFiscalCodeWhitelisted({
+        fiscalCode
+      });
+      return withValidatedOrInternalError(validated, (response) => {
+        switch (response.status) {
+          case 200:
+            return ResponseSuccessJson(response.value);
+          case 400:
+          case 422:
+          case 500:
+            return ResponseErrorInternal(
+              `Internal server error | ${response.value}`
             );
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
