@@ -153,13 +153,7 @@ paths:
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
   
-  /whitelisted-fiscal-code/{fiscalCode}:
-    parameters:
-      - in: path
-        name: fiscalCode
-        required: true
-        schema:
-          $ref: "#/components/schemas/FiscalCode"
+  /whitelisted-fiscal-code:
     get:
       operationId: isFiscalCodeWhitelisted
       summary: Used to check if the fiscal code is in the whitelist
@@ -378,10 +372,3 @@ components:
             An absolute URI that identifies the specific occurrence of the
             problem. It may or may not yield further information if
             dereferenced.
-
-    FiscalCode:
-        type: string
-        description: User's fiscal code.
-        format: FiscalCode
-        x-import: "@pagopa/ts-commons/lib/strings"
-        example: SPNDNL80R13C555X

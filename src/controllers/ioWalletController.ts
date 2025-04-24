@@ -235,7 +235,7 @@ export default class IoWalletController {
     );
 
   /**
-   * Check if a fiscal code is whitelisted, or not.
+   * Check if a fiscal code is whitelisted or not.
    */
   public readonly isFiscalCodeWhitelisted = (
     req: express.Request
@@ -244,21 +244,9 @@ export default class IoWalletController {
     | IResponseErrorInternal
     | IResponseErrorServiceUnavailable
     | IResponseErrorValidation
-    | IResponseErrorForbiddenNotAuthorized
   > =>
-    withUserFromRequest(req, async () =>
-      pipe(
-        pipe(
-          req.params.fiscalCode,
-          FiscalCode.decode,
-          E.mapLeft(toValidationError),
-          TE.fromEither
-        ),
-        TE.map((fiscalCode) =>
-          this.ioWalletService.isFiscalCodeWhitelisted(fiscalCode)
-        ),
-        TE.toUnion
-      )()
+    withUserFromRequest(req, async (user) =>
+      this.ioWalletService.isFiscalCodeWhitelisted(user.fiscal_code)
     );
 
   private readonly ensureFiscalCodeIsAllowed = (fiscalCode: FiscalCode) =>
