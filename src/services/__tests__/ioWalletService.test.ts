@@ -911,11 +911,40 @@ describe("IoWalletService#getSubscription", () => {
         kind: "IResponseSuccessJson",
       });
     });
-  
+
     it("should handle an internal error when the API client returns 500", async () => {
       const aGenericProblem = {};
       mockIsFiscalCodeWhitelisted.mockImplementationOnce(() =>
         t.success({ status: 500, value: aGenericProblem })
+      );
+  
+      const service = new IoWalletService(api, trialSystemApi);
+  
+      const res = await service.isFiscalCodeWhitelisted(aFiscalCode);
+  
+      expect(res).toMatchObject({
+        kind: "IResponseErrorInternal",
+      });
+    });
+  
+    it("should handle a bad request when the API client returns 400", async () => {
+      const aGenericProblem = {};
+      mockIsFiscalCodeWhitelisted.mockImplementationOnce(() =>
+        t.success({ status: 400, value: aGenericProblem })
+      );
+  
+      const service = new IoWalletService(api, trialSystemApi);
+  
+      const res = await service.isFiscalCodeWhitelisted(aFiscalCode);
+  
+      expect(res).toMatchObject({
+        kind: "IResponseErrorInternal",
+      });
+    });
+
+    it("should handle a bad request when the API client returns 422", async () => {
+      mockIsFiscalCodeWhitelisted.mockImplementationOnce(() =>
+        t.success({ status: 422 })
       );
   
       const service = new IoWalletService(api, trialSystemApi);
