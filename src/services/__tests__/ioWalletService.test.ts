@@ -895,17 +895,17 @@ describe("IoWalletService#getSubscription", () => {
     it("should make the correct api call", async () => {
       const service = new IoWalletService(api, trialSystemApi);
   
-      await service.isFiscalCodeWhitelisted("fiscalCode" as FiscalCode);
+      await service.isFiscalCodeWhitelisted(aFiscalCode);
   
       expect(mockIsFiscalCodeWhitelisted).toHaveBeenCalledWith({
-        fiscalCode: "fiscalCode",
+        fiscalCode: aFiscalCode,
       });
     });
   
     it("should handle a success response", async () => {
       const service = new IoWalletService(api, trialSystemApi);
   
-      const res = await service.isFiscalCodeWhitelisted("fiscalCode" as FiscalCode);
+      const res = await service.isFiscalCodeWhitelisted(aFiscalCode);
   
       expect(res).toMatchObject({
         kind: "IResponseSuccessJson",
@@ -920,7 +920,7 @@ describe("IoWalletService#getSubscription", () => {
   
       const service = new IoWalletService(api, trialSystemApi);
   
-      const res = await service.isFiscalCodeWhitelisted("fiscalCode" as FiscalCode);
+      const res = await service.isFiscalCodeWhitelisted(aFiscalCode);
   
       expect(res).toMatchObject({
         kind: "IResponseErrorInternal",
@@ -935,7 +935,7 @@ describe("IoWalletService#getSubscription", () => {
   
       const service = new IoWalletService(api, trialSystemApi);
   
-      const res = await service.isFiscalCodeWhitelisted("fiscalCode" as FiscalCode);
+      const res = await service.isFiscalCodeWhitelisted(aFiscalCode);
   
       expect(res).toMatchObject({
         kind: "IResponseErrorInternal",
@@ -948,7 +948,7 @@ describe("IoWalletService#getSubscription", () => {
       });
       const service = new IoWalletService(api, trialSystemApi);
   
-      const res = await service.isFiscalCodeWhitelisted("fiscalCode" as FiscalCode);
+      const res = await service.isFiscalCodeWhitelisted(aFiscalCode);
   
       expect(res).toMatchObject({
         kind: "IResponseErrorInternal",

@@ -246,16 +246,13 @@ export default class IoWalletController {
     | IResponseErrorValidation
     | IResponseErrorForbiddenNotAuthorized
   > =>
-    withUserFromRequest(req, async (user) =>
+    withUserFromRequest(req, async () =>
       pipe(
-        this.ensureFiscalCodeIsAllowed(user.fiscal_code),
-        TE.chainW(() =>
-          pipe(
-            req.params.fiscalCode,
-            FiscalCode.decode,
-            E.mapLeft(toValidationError),
-            TE.fromEither
-          )
+        pipe(
+          req.params.fiscalCode,
+          FiscalCode.decode,
+          E.mapLeft(toValidationError),
+          TE.fromEither
         ),
         TE.map((fiscalCode) =>
           this.ioWalletService.isFiscalCodeWhitelisted(fiscalCode)
