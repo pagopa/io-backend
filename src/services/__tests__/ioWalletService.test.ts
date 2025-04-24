@@ -927,7 +927,7 @@ describe("IoWalletService#getSubscription", () => {
       });
     });
   
-    it("should handle a bad request when the API client returns 400", async () => {
+    it("should handle an internal error when the API client returns 400", async () => {
       const aGenericProblem = {};
       mockIsFiscalCodeWhitelisted.mockImplementationOnce(() =>
         t.success({ status: 400, value: aGenericProblem })
@@ -942,7 +942,7 @@ describe("IoWalletService#getSubscription", () => {
       });
     });
 
-    it("should handle a bad request when the API client returns 422", async () => {
+    it("should handle an internal error when the API client returns 422", async () => {
       mockIsFiscalCodeWhitelisted.mockImplementationOnce(() =>
         t.success({ status: 422 })
       );
