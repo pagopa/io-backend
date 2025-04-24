@@ -30,6 +30,7 @@ import { NonceDetailView } from "../../generated/io-wallet/NonceDetailView";
 import { SetWalletInstanceStatusBody } from "../../generated/io-wallet/SetWalletInstanceStatusBody";
 import { WalletAttestationView } from "../../generated/io-wallet/WalletAttestationView";
 import { WalletInstanceData } from "../../generated/io-wallet/WalletInstanceData";
+import { WhitelistedFiscalCodeData } from "../../generated/io-wallet/WhitelistedFiscalCodeData";
 import { FF_IO_WALLET_TRIAL_ENABLED } from "../config";
 import IoWalletService from "../services/ioWalletService";
 import { withUserFromRequest } from "../types/user";
@@ -231,6 +232,21 @@ export default class IoWalletController {
           ? TE.right(undefined)
           : TE.left(new Error())
       )
+    );
+
+  /**
+   * Check if a fiscal code is whitelisted or not.
+   */
+  public readonly isFiscalCodeWhitelisted = (
+    req: express.Request
+  ): Promise<
+    | IResponseSuccessJson<WhitelistedFiscalCodeData>
+    | IResponseErrorInternal
+    | IResponseErrorServiceUnavailable
+    | IResponseErrorValidation
+  > =>
+    withUserFromRequest(req, async (user) =>
+      this.ioWalletService.isFiscalCodeWhitelisted(user.fiscal_code)
     );
 
   private readonly ensureFiscalCodeIsAllowed = (fiscalCode: FiscalCode) =>

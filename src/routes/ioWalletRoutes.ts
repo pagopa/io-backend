@@ -71,4 +71,13 @@ export const registerIoWalletAPIRoutes = (
       ioWalletController
     )
   );
+
+  app.get(
+    `${basePath}/whitelisted-fiscal-code`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      ioWalletController.isFiscalCodeWhitelisted,
+      ioWalletController
+    )
+  );
 };
