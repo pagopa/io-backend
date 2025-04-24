@@ -956,7 +956,7 @@ describe("IoWalletService#getSubscription", () => {
       });
     });
 
-    it("should handle a bad request when the API client returns 503", async () => {
+    it("should handle a service unavailable error when the API client returns 503", async () => {
       mockIsFiscalCodeWhitelisted.mockImplementationOnce(() =>
         t.success({ status: 503 })
       );
