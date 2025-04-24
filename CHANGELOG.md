@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 16.14.0
+
+### Minor Changes
+
+- 7a544ee: Added GET /whitelisted-fiscal-code/{fiscalCode} IO Wallet endpoint to check if the fiscal code is whitelisted
+
 ## 16.13.0
 
 ### Minor Changes
