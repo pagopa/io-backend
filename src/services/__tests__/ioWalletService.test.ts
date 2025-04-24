@@ -955,6 +955,20 @@ describe("IoWalletService#getSubscription", () => {
         kind: "IResponseErrorInternal",
       });
     });
+
+    it("should handle a bad request when the API client returns 503", async () => {
+      mockIsFiscalCodeWhitelisted.mockImplementationOnce(() =>
+        t.success({ status: 503 })
+      );
+  
+      const service = new IoWalletService(api, trialSystemApi);
+  
+      const res = await service.isFiscalCodeWhitelisted(aFiscalCode);
+  
+      expect(res).toMatchObject({
+        kind: "IResponseErrorServiceUnavailable",
+      });
+    });
   
     it("should handle an internal error when the API client returns a code not specified in spec", async () => {
       const aGenericProblem = {};

@@ -392,6 +392,11 @@ export default class IoWalletService {
             return ResponseErrorInternal(
               `Internal server error | ${response.value}`
             );
+          case 503:
+            return ResponseErrorServiceTemporarilyUnavailable(
+              serviceUnavailableDetail,
+              "10"
+            );
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
