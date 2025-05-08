@@ -105,7 +105,6 @@ paths:
         "500":
           description: Internal Server Error
           content: {}
-      x-codegen-request-body-name: body
   /api/v1/profile:
     get:
       summary: Get user's profile
@@ -227,7 +226,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ProblemJson"
-      x-codegen-request-body-name: body
   /api/v1/api-profile:
     get:
       summary: Get user's profile stored into the API
@@ -390,7 +388,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ProblemJson"
-      x-codegen-request-body-name: body
   /api/v1/user-data-processing/{choice}:
     get:
       summary: Get User's data processing

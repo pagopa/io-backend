@@ -179,7 +179,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-      x-codegen-request-body-name: body
   /auth/{fiscalcode}/release-lock:
     post:
       description: |-
@@ -220,7 +219,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-      x-codegen-request-body-name: body
   /sessions/{fiscalcode}/state:
     get:
       summary: Get User Session State on IO App

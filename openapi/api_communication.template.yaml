@@ -227,7 +227,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ProblemJson"
-      x-codegen-request-body-name: body
   /third-party-messages/{id}:
     get:
       summary: Retrieve Third Party message
@@ -468,7 +467,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ProblemJson"
-      x-codegen-request-body-name: body
 components:
   schemas:
     FiscalCode:

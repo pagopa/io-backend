@@ -312,41 +312,41 @@ paths:
         Get the Piattaforma Notifiche activation for Special Service "Avvisi di Cortesia"
       operationId: getPNActivation
       parameters:
-      - name: isTest
-        in: query
-        schema:
-          type: boolean
+        - name: isTest
+          in: query
+          schema:
+            type: boolean
       responses:
         "200":
           description: Request created.
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/PNActivation'
+                $ref: "#/components/schemas/PNActivation"
         "401":
           description: Bearer token null or expired.
           content: {}
         "500":
           description: Internal Server Error
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
     post:
       summary: Upsert Piattaforma Notifiche Activation
       description: |
         Upsert the Piattaforma Notifiche activation for Special Service "Avvisi di Cortesia"
       operationId: upsertPNActivation
       parameters:
-      - name: isTest
-        in: query
-        schema:
-          type: boolean
+        - name: isTest
+          in: query
+          schema:
+            type: boolean
       requestBody:
         content:
-          '*/*':
+          "*/*":
             schema:
-              $ref: '#/components/schemas/PNActivation'
+              $ref: "#/components/schemas/PNActivation"
         required: true
       responses:
         "204":
@@ -355,19 +355,18 @@ paths:
         "400":
           description: Bad request
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
         "401":
           description: Bearer token null or expired.
           content: {}
         "500":
           description: Internal Server Error
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/ProblemJson'
-      x-codegen-request-body-name: body
+                $ref: "#/components/schemas/ProblemJson"
 components:
   securitySchemes:
     Bearer:
@@ -475,15 +474,15 @@ components:
       description: A set of service metadata properties
       x-one-of: true
       allOf:
-        - $ref: '#/components/schemas/StandardServiceMetadataV2'
-        - $ref: '#/components/schemas/SpecialServiceMetadataV2'
+        - $ref: "#/components/schemas/StandardServiceMetadataV2"
+        - $ref: "#/components/schemas/SpecialServiceMetadataV2"
     StandardServiceMetadataV2:
       allOf:
         - $ref: "#/components/schemas/ServiceBaseMetadata"
         - type: object
           properties:
             category:
-              $ref: '#/components/schemas/StandardServiceCategory'
+              $ref: "#/components/schemas/StandardServiceCategory"
           required:
             - category
     StandardServiceCategory:
@@ -496,7 +495,7 @@ components:
         - type: object
           properties:
             category:
-              $ref: '#/components/schemas/SpecialServiceCategory'
+              $ref: "#/components/schemas/SpecialServiceCategory"
             custom_special_flow:
               type: string
               minLength: 1
@@ -557,7 +556,7 @@ components:
           type: string
           minLength: 1
         fiscal_code:
-          $ref: '#/components/schemas/OrganizationFiscalCode'
+          $ref: "#/components/schemas/OrganizationFiscalCode"
       required:
         - name
         - fiscal_code
