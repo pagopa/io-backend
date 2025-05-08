@@ -13,7 +13,7 @@ import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 
-import { SignMessageResponse } from "../../generated/first-lc-proxy-models/SignMessageResponse";
+import { SignMessageResponse } from "../../generated/auth/SignMessageResponse";
 import { FirstLollipopConsumerClient } from "../clients/firstLollipopConsumer";
 import { withLollipopLocals, withRequiredRawBody } from "../types/lollipop";
 import { logLollipopSignRequest } from "../utils/appinsights";

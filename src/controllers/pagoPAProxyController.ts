@@ -7,10 +7,10 @@ import {
 import * as express from "express";
 import * as t from "io-ts";
 
-import { PaymentActivationsGetResponse } from "../../generated/backend/PaymentActivationsGetResponse";
-import { PaymentActivationsPostResponse } from "../../generated/backend/PaymentActivationsPostResponse";
-import { PaymentRequestsGetResponse } from "../../generated/backend/PaymentRequestsGetResponse";
 import { PaymentActivationsPostRequest } from "../../generated/pagopa-proxy/PaymentActivationsPostRequest";
+import { PaymentActivationsGetResponse } from "../../generated/payments/PaymentActivationsGetResponse";
+import { PaymentActivationsPostResponse } from "../../generated/payments/PaymentActivationsPostResponse";
+import { PaymentRequestsGetResponse } from "../../generated/payments/PaymentRequestsGetResponse";
 import PagoPAProxyService from "../services/pagoPAProxyService";
 import { withValidatedOrInternalError } from "../utils/responses";
 

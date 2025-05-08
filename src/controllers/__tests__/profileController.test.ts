@@ -6,16 +6,16 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import * as E from "fp-ts/lib/Either";
 import { mockedUser } from "../../__mocks__/user_mock";
-import { EmailAddress } from "../../../generated/backend/EmailAddress";
-import { ExtendedProfile } from "../../../generated/backend/ExtendedProfile";
-import { FiscalCode } from "../../../generated/backend/FiscalCode";
-import { IsInboxEnabled } from "../../../generated/backend/IsInboxEnabled";
-import { IsWebhookEnabled } from "../../../generated/backend/IsWebhookEnabled";
+import { EmailAddress } from "../../../generated/auth/EmailAddress";
+import { ExtendedProfile } from "../../../generated/auth/ExtendedProfile";
+import { FiscalCode } from "../../../generated/auth/FiscalCode";
+import { IsInboxEnabled } from "../../../generated/auth/IsInboxEnabled";
+import { IsWebhookEnabled } from "../../../generated/auth/IsWebhookEnabled";
 import {
   PreferredLanguage,
   PreferredLanguageEnum,
-} from "../../../generated/backend/PreferredLanguage";
-import { Profile } from "../../../generated/backend/Profile";
+} from "../../../generated/auth/PreferredLanguage";
+import { Profile } from "../../../generated/auth/Profile";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
@@ -23,11 +23,11 @@ import ProfileService from "../../services/profileService";
 import RedisSessionStorage from "../../services/redisSessionStorage";
 import { profileMissingErrorResponse } from "../../types/profile";
 import ProfileController from "../profileController";
-import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
-import { ServicesPreferencesModeEnum } from "../../../generated/backend/ServicesPreferencesMode";
-import { AppVersion } from "../../../generated/backend/AppVersion";
-import { PushNotificationsContentTypeEnum } from "../../../generated/backend/PushNotificationsContentType";
-import { ReminderStatusEnum } from "../../../generated/backend/ReminderStatus";
+import { ServicePreferencesSettings } from "../../../generated/auth/ServicePreferencesSettings";
+import { ServicesPreferencesModeEnum } from "../../../generated/auth/ServicesPreferencesMode";
+import { AppVersion } from "../../../generated/auth/AppVersion";
+import { PushNotificationsContentTypeEnum } from "../../../generated/auth/PushNotificationsContentType";
+import { ReminderStatusEnum } from "../../../generated/auth/ReminderStatus";
 import { mockRedisClientSelector } from "../../__mocks__/redis";
 
 const aTimestamp = 1518010929530;
