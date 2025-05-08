@@ -4,7 +4,7 @@ info:
   description: Collection of enpoints to interact with user session.
   version: 16.12.1
 servers:
-- url: https://localhost/api/v1
+  - url: https://localhost/api/v1
 paths:
   /sessions/{fiscalcode}:
     get:
@@ -20,7 +20,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserSessionInfo'
+                $ref: "#/components/schemas/UserSessionInfo"
               example:
                 active: true
         "400":
@@ -40,11 +40,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
   /sessions/{fiscalcode}/lock:
     post:
       summary: Lock a user session and delete session data
-      description: Use this operation if you want to block a user to log in. The operation
+      description:
+        Use this operation if you want to block a user to log in. The operation
         succeed if the user is already blocked
       operationId: lockUserSession
       parameters:
@@ -56,7 +57,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
+                $ref: "#/components/schemas/SuccessResponse"
               example:
                 message: ok
         "400":
@@ -73,10 +74,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
     delete:
       summary: Remove a lock to a user session
-      description: Use this operation if you want to unblock a user and re-allow to
+      description:
+        Use this operation if you want to unblock a user and re-allow to
         login. The operation succeed if the user wasn't blocked
       operationId: unlockUserSession
       parameters:
@@ -88,7 +90,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
+                $ref: "#/components/schemas/SuccessResponse"
               example:
                 message: ok
         "400":
@@ -102,11 +104,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
   /sessions/{fiscalcode}/logout:
     post:
       summary: Delete user session and invalidate lollipop data
-      description: Use this operation to invalidate the user session and disable the
+      description:
+        Use this operation to invalidate the user session and disable the
         lollipop params to prevent Fast Login token refresh
       operationId: deleteUserSession
       parameters:
@@ -118,7 +121,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
+                $ref: "#/components/schemas/SuccessResponse"
               example:
                 message: ok
         "400":
@@ -132,7 +135,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
   /auth/{fiscalcode}/lock:
     post:
       description: |-
@@ -146,7 +149,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AuthLockBody'
+              $ref: "#/components/schemas/AuthLockBody"
         required: true
       responses:
         "204":
@@ -157,26 +160,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
         "401":
           description: Token null or invalid.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
         "409":
           description: The user lock has been already created.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
         "500":
           description: There was an error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProblemJson'
-      x-codegen-request-body-name: body
+                $ref: "#/components/schemas/ProblemJson"
   /auth/{fiscalcode}/release-lock:
     post:
       description: |-
@@ -190,7 +192,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AuthUnlockBody'
+              $ref: "#/components/schemas/AuthUnlockBody"
         required: true
       responses:
         "204":
@@ -201,13 +203,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
         "401":
           description: Token null or invalid.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
         "403":
           description: Operation forbidden.
           content: {}
@@ -216,8 +218,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProblemJson'
-      x-codegen-request-body-name: body
+                $ref: "#/components/schemas/ProblemJson"
   /sessions/{fiscalcode}/state:
     get:
       summary: Get User Session State on IO App
@@ -231,7 +232,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SessionState'
+                $ref: "#/components/schemas/SessionState"
               example:
                 access_enabled: true
                 session_info:
@@ -249,7 +250,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
 components:
   schemas:
     FiscalCode:
@@ -260,16 +261,16 @@ components:
       $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/UnlockCode"
     AuthLockBody:
       required:
-      - unlock_code
+        - unlock_code
       type: object
       properties:
         unlock_code:
-          $ref: '#/components/schemas/UnlockCode'
+          $ref: "#/components/schemas/UnlockCode"
     AuthUnlockBody:
       type: object
       properties:
         unlock_code:
-          $ref: '#/components/schemas/UnlockCode'
+          $ref: "#/components/schemas/UnlockCode"
     SuccessResponse:
       type: object
       properties:
@@ -277,7 +278,7 @@ components:
           type: string
     UserSessionInfo:
       required:
-      - active
+        - active
       type: object
       properties:
         active:
@@ -285,45 +286,45 @@ components:
     SessionInfo:
       description: Info about an user session
       allOf:
-      - required:
-        - active
-        type: object
-        properties:
-          active:
-            type: boolean
-            enum:
-              - false
-        description: Inactive session
-      - required:
-        - active
-        - expiration_date
-        - type
-        type: object
-        properties:
-          active:
-            type: boolean
-            enum:
-              - true
-          expiration_date:
-            type: string
-            format: date
-          type:
-            type: string
-            enum:
-            - LV
-            - LEGACY
-        description: Active session
+        - required:
+            - active
+          type: object
+          properties:
+            active:
+              type: boolean
+              enum:
+                - false
+          description: Inactive session
+        - required:
+            - active
+            - expiration_date
+            - type
+          type: object
+          properties:
+            active:
+              type: boolean
+              enum:
+                - true
+            expiration_date:
+              type: string
+              format: date
+            type:
+              type: string
+              enum:
+                - LV
+                - LEGACY
+          description: Active session
       x-one-of: true
     SessionState:
       required:
-      - access_enabled
-      - session_info
+        - access_enabled
+        - session_info
       type: object
       properties:
         access_enabled:
           type: boolean
         session_info:
-          $ref: '#/components/schemas/SessionInfo'
+          $ref: "#/components/schemas/SessionInfo"
       description: The state of the user' session
   parameters:
     FiscalCode:

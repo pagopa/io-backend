@@ -390,7 +390,6 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-      x-codegen-request-body-name: body
   /operator-search/online-merchants:
     post:
       summary: List of online merchants
@@ -419,7 +418,6 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-      x-codegen-request-body-name: body
   /operator-search/offline-merchants:
     post:
       summary: List of merchants with a physical address
@@ -449,7 +447,6 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-      x-codegen-request-body-name: body
   /operator-search/merchants/{merchantId}:
     get:
       summary: Retrieve merchant details

@@ -3,9 +3,9 @@ info:
   title: Carta Giovani Nazionale API
   version: 16.12.1
 servers:
-- url: https://localhost/api/v1/cgn
+  - url: https://localhost/api/v1/cgn
 security:
-- Bearer: []
+  - Bearer: []
 paths:
   /status:
     get:
@@ -16,9 +16,9 @@ paths:
         "200":
           description: CGN status details.
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/Card'
+                $ref: "#/components/schemas/Card"
         "401":
           description: Bearer token null or expired.
           content: {}
@@ -31,9 +31,9 @@ paths:
         "500":
           description: Service unavailable.
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
   /activation:
     get:
       summary: |
@@ -45,9 +45,9 @@ paths:
         "200":
           description: Cgn activation details.
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/CgnActivationDetail'
+                $ref: "#/components/schemas/CgnActivationDetail"
         "401":
           description: Bearer token null or expired.
           content: {}
@@ -60,9 +60,9 @@ paths:
         "500":
           description: Service unavailable.
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
     post:
       summary: Start a CGN activation procedure
       description: |
@@ -81,15 +81,15 @@ paths:
               schema:
                 type: string
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/InstanceId'
+                $ref: "#/components/schemas/InstanceId"
         "202":
           description: Processing request.
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/InstanceId'
+                $ref: "#/components/schemas/InstanceId"
         "401":
           description: Bearer token null or expired.
           content: {}
@@ -105,9 +105,9 @@ paths:
         "500":
           description: Service unavailable.
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
   /eyca/activation:
     get:
       summary: |
@@ -119,9 +119,9 @@ paths:
         "200":
           description: Eyca Card activation details.
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/EycaActivationDetail'
+                $ref: "#/components/schemas/EycaActivationDetail"
         "401":
           description: Wrong or missing function key.
           content: {}
@@ -134,9 +134,9 @@ paths:
         "500":
           description: Service unavailable.
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
     post:
       summary: Start an EYCA activation procedure
       description: |
@@ -155,15 +155,15 @@ paths:
               schema:
                 type: string
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/InstanceId'
+                $ref: "#/components/schemas/InstanceId"
         "202":
           description: Processing request.
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/InstanceId'
+                $ref: "#/components/schemas/InstanceId"
         "401":
           description: Bearer token null or expired.
           content: {}
@@ -179,9 +179,9 @@ paths:
         "500":
           description: Service unavailable.
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
   /eyca/status:
     get:
       summary: Get the Eyca Card status details
@@ -192,9 +192,9 @@ paths:
         "200":
           description: Eyca Card status details.
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/EycaCard'
+                $ref: "#/components/schemas/EycaCard"
         "401":
           description: Bearer token null or expired.
           content: {}
@@ -210,9 +210,9 @@ paths:
         "500":
           description: Service unavailable.
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
   /delete:
     post:
       summary: Start a CGN unsubscription procedure
@@ -232,15 +232,15 @@ paths:
               schema:
                 type: string
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/InstanceId'
+                $ref: "#/components/schemas/InstanceId"
         "202":
           description: Processing request.
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/InstanceId'
+                $ref: "#/components/schemas/InstanceId"
         "401":
           description: Bearer token null or expired.
           content: {}
@@ -256,9 +256,9 @@ paths:
         "500":
           description: Service unavailable.
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
   /otp:
     post:
       summary: |
@@ -271,9 +271,9 @@ paths:
         "200":
           description: Otp generated.
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/Otp'
+                $ref: "#/components/schemas/Otp"
         "401":
           description: Bearer token null or expired.
           content: {}
@@ -283,9 +283,9 @@ paths:
         "500":
           description: Service unavailable.
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
   /operator-search/published-product-categories:
     get:
       summary: List of published product categories
@@ -293,28 +293,29 @@ paths:
         List of categories that have at least a published discount
       operationId: getPublishedProductCategories
       parameters:
-      - name: count_new_discounts
-        in: query
-        description: Indicates whether categories should be enriched with new discounts
-          count.
-        schema:
-          type: boolean
+        - name: count_new_discounts
+          in: query
+          description:
+            Indicates whether categories should be enriched with new discounts
+            count.
+          schema:
+            type: boolean
       responses:
         "200":
           description: List of categories that have at least a published discount
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/PublishedProductCategoriesResult'
+                $ref: "#/components/schemas/PublishedProductCategoriesResult"
         "401":
           description: Login expired.
           content: {}
         "500":
           description: Service unavailable.
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
   /operator-search/count:
     get:
       summary: Count merchants and discounts to search within
@@ -325,9 +326,9 @@ paths:
         "200":
           description: Count of merchants/discounts
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/CountResult'
+                $ref: "#/components/schemas/CountResult"
         "400":
           description: Bad request.
           content: {}
@@ -337,9 +338,9 @@ paths:
         "500":
           description: Service unavailable.
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
   /operator-search/search:
     post:
       summary: Search merchants or discounts
@@ -348,17 +349,17 @@ paths:
       operationId: search
       requestBody:
         content:
-          '*/*':
+          "*/*":
             schema:
-              $ref: '#/components/schemas/SearchRequest'
+              $ref: "#/components/schemas/SearchRequest"
         required: false
       responses:
         "200":
           description: List of merchants/discounts for the given query parameters
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/SearchResult'
+                $ref: "#/components/schemas/SearchResult"
         "400":
           description: Bad request.
           content: {}
@@ -368,10 +369,9 @@ paths:
         "500":
           description: Service unavailable.
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/ProblemJson'
-      x-codegen-request-body-name: body
+                $ref: "#/components/schemas/ProblemJson"
   /operator-search/online-merchants:
     post:
       summary: List of online merchants
@@ -380,27 +380,26 @@ paths:
       operationId: getOnlineMerchants
       requestBody:
         content:
-          '*/*':
+          "*/*":
             schema:
-              $ref: '#/components/schemas/OnlineMerchantSearchRequest'
+              $ref: "#/components/schemas/OnlineMerchantSearchRequest"
         required: false
       responses:
         "200":
           description: List of online merchants for the given query parameters
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/OnlineMerchants'
+                $ref: "#/components/schemas/OnlineMerchants"
         "401":
           description: Login expired.
           content: {}
         "500":
           description: Service unavailable.
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/ProblemJson'
-      x-codegen-request-body-name: body
+                $ref: "#/components/schemas/ProblemJson"
   /operator-search/offline-merchants:
     post:
       summary: List of merchants with a physical address
@@ -409,27 +408,26 @@ paths:
       operationId: getOfflineMerchants
       requestBody:
         content:
-          '*/*':
+          "*/*":
             schema:
-              $ref: '#/components/schemas/OfflineMerchantSearchRequest'
+              $ref: "#/components/schemas/OfflineMerchantSearchRequest"
         required: false
       responses:
         "200":
           description: List of physical merchants for the given query parameters
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/OfflineMerchants'
+                $ref: "#/components/schemas/OfflineMerchants"
         "401":
           description: Login expired.
           content: {}
         "500":
           description: Service unavailable.
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/ProblemJson'
-      x-codegen-request-body-name: body
+                $ref: "#/components/schemas/ProblemJson"
   /operator-search/merchants/{merchantId}:
     get:
       summary: Retrieve merchant details
@@ -437,20 +435,20 @@ paths:
         Retrieve merchant details together with published discounts
       operationId: getMerchant
       parameters:
-      - name: merchantId
-        in: path
-        description: Merchant Identifier
-        required: true
-        schema:
-          minLength: 1
-          type: string
+        - name: merchantId
+          in: path
+          description: Merchant Identifier
+          required: true
+          schema:
+            minLength: 1
+            type: string
       responses:
         "200":
           description: Found
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/Merchant'
+                $ref: "#/components/schemas/Merchant"
         "401":
           description: Login expired.
           content: {}
@@ -460,9 +458,9 @@ paths:
         "500":
           description: Service unavailable.
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
   /operator-search/discount-bucket-code/{discountId}:
     get:
       summary: Retrieve a discount bucket code
@@ -470,20 +468,20 @@ paths:
         Retrieve a discount bucket code and burns it
       operationId: getDiscountBucketCode
       parameters:
-      - name: discountId
-        in: path
-        description: Discount Identifier
-        required: true
-        schema:
-          minLength: 1
-          type: string
+        - name: discountId
+          in: path
+          description: Discount Identifier
+          required: true
+          schema:
+            minLength: 1
+            type: string
       responses:
         "200":
           description: Found
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/DiscountBucketCode'
+                $ref: "#/components/schemas/DiscountBucketCode"
         "401":
           description: Login expired.
           content: {}
@@ -499,9 +497,9 @@ paths:
         "500":
           description: Service unavailable.
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
 components:
   schemas:
     Merchant:
@@ -596,7 +594,8 @@ components:
     CountNewDiscounts:
       name: count_new_discounts
       in: query
-      description: Indicates whether categories should be enriched with new discounts
+      description:
+        Indicates whether categories should be enriched with new discounts
         count.
       schema:
         type: boolean

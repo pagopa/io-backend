@@ -383,7 +383,6 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-      x-codegen-request-body-name: body
 components:
   securitySchemes:
     Bearer:
