@@ -1,13 +1,13 @@
-name: Opex Dashboard api_backend
+name: Opex Dashboard io-backend api_auth
 
 on:
   push:
     branches:
       - master
     paths:
-      - 'openapi/generated/api_auth.yaml'
-      - '.github/workflows/opex_api_backend.yml'
-      - '.opex/api_backend/**'
+      - "openapi/generated/api_auth.yaml"
+      - ".github/workflows/opex_api_backend.yml"
+      - ".opex/api_auth/**"
 
   workflow_dispatch:
 
@@ -20,4 +20,4 @@ jobs:
     name: Apply changes to Production
     secrets: inherit
     with:
-      api_name: api_backend
+      api_name: api_auth
