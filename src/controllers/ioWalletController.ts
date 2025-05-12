@@ -25,17 +25,17 @@ import { pipe } from "fp-ts/lib/function";
 import { Errors } from "io-ts";
 
 import { CreateWalletAttestationBody } from "../../generated/io-wallet/CreateWalletAttestationBody";
+import { CreateWalletAttestationV2Body } from "../../generated/io-wallet/CreateWalletAttestationV2Body";
 import { CreateWalletInstanceBody } from "../../generated/io-wallet/CreateWalletInstanceBody";
 import { NonceDetailView } from "../../generated/io-wallet/NonceDetailView";
 import { SetWalletInstanceStatusBody } from "../../generated/io-wallet/SetWalletInstanceStatusBody";
 import { WalletAttestationView } from "../../generated/io-wallet/WalletAttestationView";
+import { WalletAttestationsView } from "../../generated/io-wallet/WalletAttestationsView";
 import { WalletInstanceData } from "../../generated/io-wallet/WalletInstanceData";
 import { WhitelistedFiscalCodeData } from "../../generated/io-wallet/WhitelistedFiscalCodeData";
 import { FF_IO_WALLET_TRIAL_ENABLED } from "../config";
 import IoWalletService from "../services/ioWalletService";
 import { withUserFromRequest } from "../types/user";
-import { CreateWalletAttestationV2Body } from "../../generated/io-wallet/CreateWalletAttestationV2Body";
-import { WalletAttestationsView } from "../../generated/io-wallet/WalletAttestationsView";
 
 const toValidationError = (errors: Errors) =>
   ResponseErrorValidation(

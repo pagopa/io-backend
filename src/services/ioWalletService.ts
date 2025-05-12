@@ -23,6 +23,7 @@ import * as O from "fp-ts/Option";
 import { pipe } from "fp-ts/lib/function";
 import { Grant_typeEnum } from "generated/io-wallet-api/CreateWalletAttestationBody";
 import { NonceDetailView } from "generated/io-wallet-api/NonceDetailView";
+import { WalletAttestationsView } from "generated/io-wallet-api/WalletAttestationsView";
 import { WhitelistedFiscalCodeData } from "generated/io-wallet-api/WhitelistedFiscalCodeData";
 
 import { SetWalletInstanceStatusWithFiscalCodeData } from "../../generated/io-wallet-api/SetWalletInstanceStatusWithFiscalCodeData";
@@ -37,7 +38,6 @@ import {
   withCatchAsInternalError,
   withValidatedOrInternalError
 } from "../utils/responses";
-import { WalletAttestationsView } from "generated/io-wallet-api/WalletAttestationsView";
 
 const unprocessableContentError = "Unprocessable Content";
 const invalidRequest = "Your request didn't validate";
