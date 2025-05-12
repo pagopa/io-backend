@@ -1,5 +1,5 @@
 oa3_spec: openapi/generated/api_auth.yaml
-name: opex_iobackend_api_backend
+name: opex_iobackend_api_auth
 location: West Europe
 timespan: 5m
 evaluation_frequency: 10
