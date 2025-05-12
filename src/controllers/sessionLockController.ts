@@ -39,7 +39,6 @@ import AuthenticationLockService, {
 import LollipopService from "../services/lollipopService";
 import { NotificationServiceFactory } from "../services/notificationServiceFactory";
 import RedisSessionStorage from "../services/redisSessionStorage";
-import RedisUserMetadataStorage from "../services/redisUserMetadataStorage";
 import { SuccessResponse } from "../types/commons";
 import { withFiscalCodeFromRequestParams } from "../types/fiscalCode";
 import {
@@ -71,7 +70,6 @@ export const withAuthUnlockBodyParams = async <T>(
 export default class SessionLockController {
   constructor(
     private readonly sessionStorage: RedisSessionStorage,
-    private readonly metadataStorage: RedisUserMetadataStorage,
     private readonly lollipopService: LollipopService,
     private readonly authenticationLockService: AuthenticationLockService,
     private readonly notificationServiceFactory: NotificationServiceFactory
@@ -138,12 +136,7 @@ export default class SessionLockController {
             ),
             TE.chain(TE.fromEither)
           ),
-          ...this.buildInvalidateUserSessionTask(fiscalCode),
-          // removes all metadata
-          pipe(
-            TE.tryCatch(() => this.metadataStorage.del(fiscalCode), E.toError),
-            TE.chain(TE.fromEither)
-          )
+          ...this.buildInvalidateUserSessionTask(fiscalCode)
         ),
         TE.mapLeft((err) => ResponseErrorInternal(err.message)),
         TE.map(() => ResponseSuccessJson({ message: "ok" })),

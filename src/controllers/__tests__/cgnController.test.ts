@@ -3,7 +3,7 @@ import {
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { FiscalCode } from "../../../generated/backend/FiscalCode";
+import { FiscalCode } from "../../../generated/auth/FiscalCode";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import { mockedUser } from "../../__mocks__/user_mock";

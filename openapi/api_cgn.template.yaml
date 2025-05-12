@@ -1,233 +1,606 @@
-swagger: "2.0"
+openapi: 3.0.2
 info:
-  version: 16.7.0
   title: Carta Giovani Nazionale API
-host: localhost
-basePath: /api/v1
-schemes:
-  - https
+  version: 16.12.1
+servers:
+  - url: https://localhost/api/v1/cgn
 security:
   - Bearer: []
 paths:
-  "/cgn/status":
+  /status:
     get:
-      operationId: getCgnStatus
       summary: Get the CGN status details
       description: "Get the CGN status details \nby the provided fiscal code\n"
+      operationId: getCgnStatus
       responses:
         "200":
           description: CGN status details.
-          schema:
-            $ref: "#/definitions/Card"
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/Card"
         "401":
           description: Bearer token null or expired.
+          content: {}
         "403":
           description: Forbidden.
+          content: {}
         "404":
           description: No CGN found.
+          content: {}
         "500":
           description: Service unavailable.
-          schema:
-            $ref: "#/definitions/ProblemJson"
-  "/cgn/activation":
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+  /activation:
+    get:
+      summary: |
+        Get CGN activation process status
+      description: |
+        Get informations about a CGN activation process
+      operationId: getCgnActivation
+      responses:
+        "200":
+          description: Cgn activation details.
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/CgnActivationDetail"
+        "401":
+          description: Bearer token null or expired.
+          content: {}
+        "403":
+          description: Forbidden.
+          content: {}
+        "404":
+          description: No CGN activation process found.
+          content: {}
+        "500":
+          description: Service unavailable.
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
     post:
-      operationId: startCgnActivation
       summary: Start a CGN activation procedure
       description: |
         Start a new CGN activation procedure
         for the logged user calculating if the user is
         eligible to get a CGN.
+      operationId: startCgnActivation
       responses:
         "201":
           description: Request created.
-          schema:
-            $ref: "#/definitions/InstanceId"
           headers:
             Location:
-              type: string
               description: |-
                 Location (URL) of created request resource.
                 A GET request to this URL returns the request status and details.
+              schema:
+                type: string
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/InstanceId"
         "202":
           description: Processing request.
-          schema:
-            $ref: "#/definitions/InstanceId"
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/InstanceId"
         "401":
           description: Bearer token null or expired.
+          content: {}
         "403":
           description: |
             Cannot activate a new CGN because the user is ineligible to get the CGN.
+          content: {}
         "409":
           description: |
             Cannot activate the user's cgn because another updateCgn request was found
             for this user or it is already active.
+          content: {}
         "500":
           description: Service unavailable.
-          schema:
-            $ref: "#/definitions/ProblemJson"
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+  /eyca/activation:
     get:
-      operationId: getCgnActivation
       summary: |
-        Get CGN activation process status
+        Get EYCA activation process' status
       description: |
-        Get informations about a CGN activation process
+        Get informations about an EYCA activation process
+      operationId: getEycaActivation
       responses:
         "200":
-          description: Cgn activation details.
-          schema:
-            $ref: "#/definitions/CgnActivationDetail"
+          description: Eyca Card activation details.
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/EycaActivationDetail"
         "401":
-          description: Bearer token null or expired.
+          description: Wrong or missing function key.
+          content: {}
         "403":
           description: Forbidden.
+          content: {}
         "404":
-          description: No CGN activation process found.
+          description: No EYCA Card activation process found.
+          content: {}
         "500":
           description: Service unavailable.
-          schema:
-            $ref: "#/definitions/ProblemJson"
-  "/cgn/eyca/activation":
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
     post:
-      operationId: startEycaActivation
       summary: Start an EYCA activation procedure
       description: |
         Start a new EYCA activation procedure
         for the logged user calculating if the user is
         eligible to enable EYCA on his CGN card.
+      operationId: startEycaActivation
       responses:
         "201":
           description: Request created.
-          schema:
-            $ref: "#/definitions/InstanceId"
           headers:
             Location:
-              type: string
               description: |-
                 Location (URL) of created request resource.
                 A GET request to this URL returns the request status and details.
+              schema:
+                type: string
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/InstanceId"
         "202":
           description: Processing request.
-          schema:
-            $ref: "#/definitions/InstanceId"
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/InstanceId"
         "401":
           description: Bearer token null or expired.
+          content: {}
         "403":
           description: |
             Cannot activate EYCA Card because the user is ineligible to enable EYCA.
+          content: {}
         "409":
           description: |
             Cannot activate EYCA Card because another EYCA Card activation request was found
             for this user or it is already active.
+          content: {}
         "500":
           description: Service unavailable.
-          schema:
-            $ref: "#/definitions/ProblemJson"
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+  /eyca/status:
     get:
-      operationId: getEycaActivation
-      summary: |
-        Get EYCA activation process' status
-      description: |
-        Get informations about an EYCA activation process
-      responses:
-        "200":
-          description: Eyca Card activation details.
-          schema:
-            $ref: "#/definitions/EycaActivationDetail"
-        "401":
-          description: Wrong or missing function key.
-        "403":
-          description: Forbidden.
-        "404":
-          description: No EYCA Card activation process found.
-        "500":
-          description: Service unavailable.
-          schema:
-            $ref: "#/definitions/ProblemJson"
-  "/cgn/eyca/status":
-    get:
-      operationId: getEycaStatus
       summary: Get the Eyca Card status details
       description: |
         Get the Eyca Card status details
+      operationId: getEycaStatus
       responses:
         "200":
           description: Eyca Card status details.
-          schema:
-            $ref: "#/definitions/EycaCard"
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/EycaCard"
         "401":
           description: Bearer token null or expired.
+          content: {}
         "403":
           description: Forbidden.
+          content: {}
         "404":
           description: No Eyca Card found.
+          content: {}
         "409":
           description: Conflict.
+          content: {}
         "500":
           description: Service unavailable.
-          schema:
-            $ref: "#/definitions/ProblemJson"
-  "/cgn/otp":
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+  /delete:
     post:
-      operationId: generateOtp
+      summary: Start a CGN unsubscription procedure
+      description: |
+        Start a new CGN unsubscription procedure
+        for the logged user
+      operationId: startCgnUnsubscription
+      responses:
+        "201":
+          description: Request created.
+          headers:
+            Location:
+              description: |
+                Location (URL) of created request resource
+                This location actually points to a not existing api, but semantically 201
+                means that the request has been taken in charge
+              schema:
+                type: string
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/InstanceId"
+        "202":
+          description: Processing request.
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/InstanceId"
+        "401":
+          description: Bearer token null or expired.
+          content: {}
+        "403":
+          description: |
+            Cannot unsubscribe because the user is ineligible to get the CGN
+          content: {}
+        "409":
+          description: |
+            Cannot unsubscribe the user's cgn because another updateCgn request was found
+            for this user
+          content: {}
+        "500":
+          description: Service unavailable.
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+  /otp:
+    post:
       summary: |
         Generate a new Otp related to a CGN
       description: |
         Generate a new Otp used to discount an online purchase
         through a valid CGN
+      operationId: generateOtp
       responses:
         "200":
           description: Otp generated.
-          schema:
-            $ref: "#/definitions/Otp"
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/Otp"
         "401":
           description: Bearer token null or expired.
+          content: {}
         "403":
           description: Forbidden.
+          content: {}
         "500":
           description: Service unavailable.
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+  /operator-search/published-product-categories:
+    get:
+      summary: List of published product categories
+      description: |
+        List of categories that have at least a published discount
+      operationId: getPublishedProductCategories
+      parameters:
+        - name: count_new_discounts
+          in: query
+          description:
+            Indicates whether categories should be enriched with new discounts
+            count.
           schema:
-            $ref: "#/definitions/ProblemJson"
-definitions:
-  Timestamp:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/Timestamp"
-  FiscalCode:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/FiscalCode"
-  ProblemJson:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ProblemJson"
-  InstanceId:
-    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/InstanceId"
-  CommonCard:
-    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/CommonCard"
-  CardPending:
-    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/CardPending"
-  CardActivated:
-    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/CardActivated"
-  CardRevoked:
-    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/CardRevoked"
-  CardExpired:
-    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/CardExpired"
-  Card:
-    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/Card"
-  CgnActivationDetail:
-    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/CgnActivationDetail"
-  EycaActivationDetail:
-    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/EycaActivationDetail"
-  EycaCard:
-    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/EycaCard"
-  EycaCardActivated:
-    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/EycaCardActivated"
-  EycaCardExpired:
-    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/EycaCardExpired"
-  EycaCardRevoked:
-    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/EycaCardRevoked"
-  CcdbNumber:
-    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/CcdbNumber"
-  Otp:
-    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/Otp"
-  OtpCode:
-    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/OtpCode"
-securityDefinitions:
-  Bearer:
-    type: apiKey
-    name: Authorization
-    in: header
+            type: boolean
+      responses:
+        "200":
+          description: List of categories that have at least a published discount
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/PublishedProductCategoriesResult"
+        "401":
+          description: Login expired.
+          content: {}
+        "500":
+          description: Service unavailable.
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+  /operator-search/count:
+    get:
+      summary: Count merchants and discounts to search within
+      description: |
+        Count merchants and discountsto search within
+      operationId: count
+      responses:
+        "200":
+          description: Count of merchants/discounts
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/CountResult"
+        "400":
+          description: Bad request.
+          content: {}
+        "401":
+          description: Login expired.
+          content: {}
+        "500":
+          description: Service unavailable.
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+  /operator-search/search:
+    post:
+      summary: Search merchants or discounts
+      description: |
+        List of merchants and discounts with the token in name and/or description
+      operationId: search
+      requestBody:
+        content:
+          "*/*":
+            schema:
+              $ref: "#/components/schemas/SearchRequest"
+        required: false
+      responses:
+        "200":
+          description: List of merchants/discounts for the given query parameters
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/SearchResult"
+        "400":
+          description: Bad request.
+          content: {}
+        "401":
+          description: Login expired.
+          content: {}
+        "500":
+          description: Service unavailable.
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+  /operator-search/online-merchants:
+    post:
+      summary: List of online merchants
+      description: |
+        List of online merchants alphabetically ordered
+      operationId: getOnlineMerchants
+      requestBody:
+        content:
+          "*/*":
+            schema:
+              $ref: "#/components/schemas/OnlineMerchantSearchRequest"
+        required: false
+      responses:
+        "200":
+          description: List of online merchants for the given query parameters
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/OnlineMerchants"
+        "401":
+          description: Login expired.
+          content: {}
+        "500":
+          description: Service unavailable.
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+  /operator-search/offline-merchants:
+    post:
+      summary: List of merchants with a physical address
+      description: |
+        List of merchants with physical address, ordered by distance from the user by default
+      operationId: getOfflineMerchants
+      requestBody:
+        content:
+          "*/*":
+            schema:
+              $ref: "#/components/schemas/OfflineMerchantSearchRequest"
+        required: false
+      responses:
+        "200":
+          description: List of physical merchants for the given query parameters
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/OfflineMerchants"
+        "401":
+          description: Login expired.
+          content: {}
+        "500":
+          description: Service unavailable.
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+  /operator-search/merchants/{merchantId}:
+    get:
+      summary: Retrieve merchant details
+      description: |
+        Retrieve merchant details together with published discounts
+      operationId: getMerchant
+      parameters:
+        - name: merchantId
+          in: path
+          description: Merchant Identifier
+          required: true
+          schema:
+            minLength: 1
+            type: string
+      responses:
+        "200":
+          description: Found
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/Merchant"
+        "401":
+          description: Login expired.
+          content: {}
+        "404":
+          description: Operator Not Found
+          content: {}
+        "500":
+          description: Service unavailable.
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+  /operator-search/discount-bucket-code/{discountId}:
+    get:
+      summary: Retrieve a discount bucket code
+      description: |
+        Retrieve a discount bucket code and burns it
+      operationId: getDiscountBucketCode
+      parameters:
+        - name: discountId
+          in: path
+          description: Discount Identifier
+          required: true
+          schema:
+            minLength: 1
+            type: string
+      responses:
+        "200":
+          description: Found
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/DiscountBucketCode"
+        "401":
+          description: Login expired.
+          content: {}
+        "403":
+          description: Access data provided are invalid or CGN not valid
+          content: {}
+        "404":
+          description: Bucket code Not Found
+          content: {}
+        "410":
+          description: Endpoint no longer available
+          content: {}
+        "500":
+          description: Service unavailable.
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+components:
+  schemas:
+    Merchant:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/Merchant"
+    SupportType:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/SupportType"
+    DiscountCodeType:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/DiscountCodeType"
+    OfflineMerchants:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/OfflineMerchants"
+    OfflineMerchant:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/OfflineMerchant"
+    OfflineMerchantSearchRequest:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/OfflineMerchantSearchRequest"
+    CountResult:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/CountResult"
+    SearchResult:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/SearchResult"
+    SearchItem:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/SearchItem"
+    OnlineMerchants:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/OnlineMerchants"
+    OnlineMerchant:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/OnlineMerchant"
+    SearchRequest:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/SearchRequest"
+    OnlineMerchantSearchRequest:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/OnlineMerchantSearchRequest"
+    Discount:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/Discount"
+    ProductCategory:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/ProductCategory"
+    Address:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/Address"
+    Coordinates:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/Coordinates"
+    BoundingBox:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/BoundingBox"
+    DiscountBucketCode:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/DiscountBucketCode"
+    PublishedProductCategories:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/PublishedProductCategories"
+    PublishedProductCategoriesWithNewDiscountsCount:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/PublishedProductCategoriesWithNewDiscountsCount"
+    PublishedProductCategoriesResult:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/PublishedProductCategoriesResult"
+    ProductCategoryWithNewDiscountsCount:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/ProductCategoryWithNewDiscountsCount"
+    InstanceId:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/InstanceId"
+    CommonCard:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/CommonCard"
+    CardPending:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/CardPending"
+    CardPendingDelete:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/CardPendingDelete"
+    CardActivated:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/CardActivated"
+    CardRevoked:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/CardRevoked"
+    CardExpired:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/CardExpired"
+    Card:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/Card"
+    CgnActivationDetail:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/CgnActivationDetail"
+    EycaActivationDetail:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/EycaActivationDetail"
+    EycaCard:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/EycaCard"
+    EycaCardActivated:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/EycaCardActivated"
+    EycaCardExpired:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/EycaCardExpired"
+    EycaCardRevoked:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/EycaCardRevoked"
+    EycaCardPendingDelete:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/EycaCardPendingDelete"
+    CcdbNumber:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/CcdbNumber"
+    Otp:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/Otp"
+    OtpCode:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/OtpCode"
+    ProblemJson:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/ProblemJson"
+    Timestamp:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/Timestamp"
+    FiscalCode:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml#/definitions/FiscalCode"
+  parameters:
+    CountNewDiscounts:
+      name: count_new_discounts
+      in: query
+      description:
+        Indicates whether categories should be enriched with new discounts
+        count.
+      schema:
+        type: boolean
+  securitySchemes:
+    Bearer:
+      type: apiKey
+      name: Authorization
+      in: header

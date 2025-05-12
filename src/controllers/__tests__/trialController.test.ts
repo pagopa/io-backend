@@ -10,7 +10,7 @@ import mockReq from "../../__mocks__/request";
 import { mockedUser } from "../../__mocks__/user_mock";
 import TrialController from "../trialController";
 import TrialService from "../../services/trialService";
-import { SubscriptionStateEnum } from "../../../generated/trial-system/SubscriptionState";
+import { SubscriptionStateEnum } from "../../../generated/platform/SubscriptionState";
 
 const aTrialId: string = "IO_WALLET_TRIAL_ID";
 const nowDate = new Date();

@@ -1,7 +1,7 @@
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { EmailAddress } from "../../generated/backend/EmailAddress";
-import { InitializedProfile } from "../../generated/backend/InitializedProfile";
-import { SpidLevelEnum } from "../../generated/backend/SpidLevel";
+import { EmailAddress } from "../../generated/auth/EmailAddress";
+import { InitializedProfile } from "../../generated/auth/InitializedProfile";
+import { SpidLevelEnum } from "../../generated/auth/SpidLevel";
 import { IsInboxEnabled } from "@pagopa/io-functions-app-sdk/IsInboxEnabled";
 import { IsWebhookEnabled } from "@pagopa/io-functions-app-sdk/IsWebhookEnabled";
 import {

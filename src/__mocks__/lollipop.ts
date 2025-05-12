@@ -19,7 +19,7 @@ import { LoginTypeEnum } from "../utils/fastLogin";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { getASAMLResponse } from "../utils/__mocks__/spid";
-import { SpidLevelEnum } from "../../generated/backend/SpidLevel";
+import { SpidLevelEnum } from "../../generated/auth/SpidLevel";
 
 export const anAssertionRef =
   "sha256-6LvipIvFuhyorHpUqK3HjySC5Y6gshXHFBhU9EJ4DoM=" as AssertionRefSha256;

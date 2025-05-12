@@ -3,8 +3,9 @@ import { addYears, format, isAfter } from "date-fns";
 import * as E from "fp-ts/Either";
 import { Option, tryCatch } from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
-import { FiscalCode } from "generated/backend/FiscalCode";
 import * as t from "io-ts";
+
+import { FiscalCode } from "../../generated/auth/FiscalCode";
 
 /**
  * Returns a comparator of two dates that returns true if
