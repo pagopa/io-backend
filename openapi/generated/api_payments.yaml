@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: 3.0.2
 info:
   title: Proxy API for payment domain
   description: Mobile and web backend API for payments domain.
