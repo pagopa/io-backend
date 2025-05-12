@@ -37,6 +37,7 @@ import {
   withCatchAsInternalError,
   withValidatedOrInternalError
 } from "../utils/responses";
+import { WalletAttestationsView } from "generated/io-wallet-api/WalletAttestationsView";
 
 const unprocessableContentError = "Unprocessable Content";
 const invalidRequest = "Your request didn't validate";
@@ -159,6 +160,65 @@ export default class IoWalletService {
           assertion,
           fiscal_code,
           grant_type
+        }
+      });
+      return withValidatedOrInternalError(validated, (response) => {
+        switch (response.status) {
+          case 200:
+            return ResponseSuccessJson(response.value);
+          case 403:
+            return getResponseErrorForbiddenNotAuthorized(
+              "Wallet instance has been revoked"
+            );
+          case 404:
+            return ResponseErrorNotFound(
+              "Not Found",
+              "Wallet instance not found"
+            );
+          case 409:
+            return ResponseErrorGeneric(
+              response.status,
+              conflictErrorTitle,
+              conflictErrorDetail
+            );
+          case 422:
+            return ResponseErrorGeneric(
+              response.status,
+              unprocessableContentError,
+              invalidRequest
+            );
+          case 500:
+            return ResponseErrorInternal(
+              `Internal server error | ${response.value}`
+            );
+          case 503:
+            return ResponseErrorServiceTemporarilyUnavailable(
+              serviceUnavailableDetail,
+              "10"
+            );
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
+  /**
+   * Create a list of Wallet Attestations.
+   */
+  public readonly createWalletAttestationV2 = (
+    assertion: NonEmptyString
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorGeneric
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<WalletAttestationsView>
+    | IResponseErrorServiceUnavailable
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.ioWalletApiClient.createWalletAttestationV2({
+        body: {
+          assertion
         }
       });
       return withValidatedOrInternalError(validated, (response) => {

@@ -34,6 +34,8 @@ import { WhitelistedFiscalCodeData } from "../../generated/io-wallet/Whitelisted
 import { FF_IO_WALLET_TRIAL_ENABLED } from "../config";
 import IoWalletService from "../services/ioWalletService";
 import { withUserFromRequest } from "../types/user";
+import { CreateWalletAttestationV2Body } from "../../generated/io-wallet/CreateWalletAttestationV2Body";
+import { WalletAttestationsView } from "../../generated/io-wallet/WalletAttestationsView";
 
 const toValidationError = (errors: Errors) =>
   ResponseErrorValidation(
@@ -120,6 +122,33 @@ export default class IoWalletController {
             grant_type,
             user.fiscal_code
           )
+        ),
+        TE.toUnion
+      )()
+    );
+
+  /**
+   * Create a list of Wallet Attestations
+   */
+  public readonly createWalletAttestationV2 = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorGeneric
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseSuccessJson<WalletAttestationsView>
+    | IResponseErrorNotFound
+    | IResponseErrorServiceUnavailable
+  > =>
+    withUserFromRequest(req, async () =>
+      pipe(
+        req.body,
+        CreateWalletAttestationV2Body.decode,
+        E.mapLeft(toValidationError),
+        TE.fromEither,
+        TE.map(({ assertion }) =>
+          this.ioWalletService.createWalletAttestationV2(assertion)
         ),
         TE.toUnion
       )()
