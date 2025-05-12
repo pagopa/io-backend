@@ -1,4 +1,4 @@
-openapi: 3.0.1
+openapi: 3.0.3
 info:
   version: 1.0.1
   title: IO Sign - Backend API
@@ -309,13 +309,13 @@ components:
         - filled_document_url
 
     QtspClause:
-        type: object
-        properties:
-          text:
-            type: string
-            minLength: 1
-        required:
-          - text
+      type: object
+      properties:
+        text:
+          type: string
+          minLength: 1
+      required:
+        - text
 
     QtspClausesMetadataDetailView:
       type: object
@@ -369,13 +369,13 @@ components:
         - type
 
     ExistingSignatureFieldAttrs:
-        type: object
-        properties:
-          unique_name:
-            type: string
-            minLength: 1
-        required:
-          - unique_name
+      type: object
+      properties:
+        unique_name:
+          type: string
+          minLength: 1
+      required:
+        - unique_name
 
     Metadata:
       type: object
@@ -508,38 +508,38 @@ components:
         - status
 
     DocumentMetadata:
-        type: object
-        properties:
-          title:
-            type: string
-          signature_fields:
-            type: array
-            items:
-              $ref: "#/components/schemas/SignatureField"
-        required:
-          - title
-          - signature_fields
+      type: object
+      properties:
+        title:
+          type: string
+        signature_fields:
+          type: array
+          items:
+            $ref: "#/components/schemas/SignatureField"
+      required:
+        - title
+        - signature_fields
 
     DocumentDetailView:
-        type: object
-        properties:
-          id:
-            $ref: "#/components/schemas/Id"
-          metadata:
-            $ref: "#/components/schemas/DocumentMetadata"
-          url:
-            type: string
-            format: uri
-          created_at:
-            $ref: "#/components/schemas/Timestamp"
-          updated_at:
-            $ref: "#/components/schemas/Timestamp"
-        required:
-          - id
-          - metadata
-          - url
-          - created_at
-          - updated_at
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/Id"
+        metadata:
+          $ref: "#/components/schemas/DocumentMetadata"
+        url:
+          type: string
+          format: uri
+        created_at:
+          $ref: "#/components/schemas/Timestamp"
+        updated_at:
+          $ref: "#/components/schemas/Timestamp"
+      required:
+        - id
+        - metadata
+        - url
+        - created_at
+        - updated_at
 
     DossierTitle:
       type: string
@@ -564,9 +564,9 @@ components:
             environment:
               $ref: "#/components/schemas/IssuerEnvironment"
           required:
-              - email
-              - description
-              - environment
+            - email
+            - description
+            - environment
         dossier_id:
           $ref: "#/components/schemas/Id"
         dossier_title:

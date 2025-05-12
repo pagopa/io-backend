@@ -1,4 +1,4 @@
-openapi: 3.0.1
+openapi: 3.0.3
 info:
   title: API for Communication domain.
   description: Mobile and web backend API for communication domain.

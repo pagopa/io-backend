@@ -1,12 +1,12 @@
-openapi: 3.0.1
+openapi: 3.0.3
 info:
   title: Internal API for Communication domain
   description: Internal API for Communication domain to handle push notifications.
   version: 16.12.0
 servers:
-- url: https://localhost/api/v1
+  - url: https://localhost/api/v1
 security:
-- Token: []
+  - Token: []
 paths:
   /notify:
     post:
@@ -17,7 +17,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Notification'
+              $ref: "#/components/schemas/Notification"
         required: true
       responses:
         "200":
@@ -25,7 +25,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
+                $ref: "#/components/schemas/SuccessResponse"
               example:
                 message: ok
         "400":
@@ -33,36 +33,37 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
         "401":
           description: Token null or invalid.
           content: {}
         "500":
-          description: There was an error in forwarding the notification to the Notification
+          description:
+            There was an error in forwarding the notification to the Notification
             Hub.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
     x-swagger-router-controller: NotificationController
 components:
   schemas:
     NotificationMessage:
       allOf:
-      - $ref: '#/components/schemas/CreatedMessageWithContent'
-      - $ref: '#/components/schemas/CreatedMessageWithoutContent'
+        - $ref: "#/components/schemas/CreatedMessageWithContent"
+        - $ref: "#/components/schemas/CreatedMessageWithoutContent"
       x-one-of: true
     Notification:
       title: Notification
       required:
-      - message
-      - sender_metadata
+        - message
+        - sender_metadata
       type: object
       properties:
         message:
-          $ref: '#/components/schemas/NotificationMessage'
+          $ref: "#/components/schemas/NotificationMessage"
         sender_metadata:
-          $ref: '#/components/schemas/SenderMetadata'
+          $ref: "#/components/schemas/SenderMetadata"
       description: A received Notification.
     SuccessResponse:
       type: object

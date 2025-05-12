@@ -1,10 +1,10 @@
-openapi: 3.0.1
+openapi: 3.0.3
 info:
   title: Public API & Trial System API
   description: Mobile and web backend API by platform.
   version: 16.12.0
 servers:
-- url: https://localhost/
+  - url: https://localhost/
 paths:
   /:
     get:
@@ -34,7 +34,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ServerInfo'
+                $ref: "#/components/schemas/ServerInfo"
               example:
                 version: 0.0.1
                 min_app_version: 0.0.0
@@ -62,34 +62,35 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ServicesStatus'
+                $ref: "#/components/schemas/ServicesStatus"
         "500":
           description: Internal Server Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
     x-swagger-router-controller: StatusServicesController
   /api/v1/trials/{trialId}/subscriptions:
     get:
       summary: Get subscription detail
-      description: Returns the details about the subscription of the authenticated
+      description:
+        Returns the details about the subscription of the authenticated
         user for the specified trial.
       operationId: getSubscription
       parameters:
-      - name: trialId
-        in: path
-        required: true
-        schema:
-          minLength: 1
-          type: string
+        - name: trialId
+          in: path
+          required: true
+          schema:
+            minLength: 1
+            type: string
       responses:
         "200":
           description: Success.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Subscription'
+                $ref: "#/components/schemas/Subscription"
         "401":
           description: Authorization error.
           content: {}
@@ -105,18 +106,18 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
     post:
       summary: Create a subscription
       description: Subscribe the authenticated user to the given trial.
       operationId: createSubscription
       parameters:
-      - name: trialId
-        in: path
-        required: true
-        schema:
-          minLength: 1
-          type: string
+        - name: trialId
+          in: path
+          required: true
+          schema:
+            minLength: 1
+            type: string
       responses:
         "201":
           description: |
@@ -124,7 +125,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Subscription'
+                $ref: "#/components/schemas/Subscription"
         "202":
           description: |
             Accepted: the request has been received, but the user may not yet be subscribed to the trial.
@@ -136,7 +137,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
         "401":
           description: Authorization error.
           content: {}
@@ -151,7 +152,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
 components:
   schemas:
     ProblemJson:
@@ -161,22 +162,22 @@ components:
     ServerInfo:
       title: Server information
       required:
-      - min_app_version
-      - min_app_version_pagopa
-      - version
+        - min_app_version
+        - min_app_version_pagopa
+        - version
       type: object
       properties:
         version:
           type: string
         min_app_version:
-          $ref: '#/components/schemas/VersionPerPlatform'
+          $ref: "#/components/schemas/VersionPerPlatform"
         min_app_version_pagopa:
-          $ref: '#/components/schemas/VersionPerPlatform'
+          $ref: "#/components/schemas/VersionPerPlatform"
     VersionPerPlatform:
       title: Specify a version for ios and another for android
       required:
-      - android
-      - ios
+        - android
+        - ios
       type: object
       properties:
         ios:
@@ -185,35 +186,35 @@ components:
           type: string
     ServicesStatus:
       required:
-      - services
+        - services
       type: object
       properties:
         services:
           type: array
           items:
-            $ref: '#/components/schemas/ServiceStatus'
+            $ref: "#/components/schemas/ServiceStatus"
     ServiceStatus:
       required:
-      - details
-      - id
-      - status
+        - details
+        - id
+        - status
       type: object
       properties:
         id:
           type: string
         status:
-          $ref: '#/components/schemas/StatusEnum'
+          $ref: "#/components/schemas/StatusEnum"
         details:
           type: string
     StatusEnum:
       type: string
       description: Status of a service
       enum:
-      - OK
-      - WARNING
-      - CRITICAL
-      - PARTIAL_AVAILABILITY
-      - MANTAINANCE
+        - OK
+        - WARNING
+        - CRITICAL
+        - PARTIAL_AVAILABILITY
+        - MANTAINANCE
     SubscriptionState:
       type: string
       description: |-
@@ -232,27 +233,27 @@ components:
         The Trial Manager can change the state of any user, within its own subscription,
         to any state (e.g. can disable a subscription setting the state to `DISABLED`).
       enum:
-      - UNSUBSCRIBED
-      - SUBSCRIBED
-      - ACTIVE
-      - DISABLED
+        - UNSUBSCRIBED
+        - SUBSCRIBED
+        - ACTIVE
+        - DISABLED
     TrialId:
       minLength: 1
       type: string
       description: Unique identifier of the trial.
     Subscription:
       required:
-      - createdAt
-      - state
-      - trialId
+        - createdAt
+        - state
+        - trialId
       type: object
       properties:
         trialId:
-          $ref: '#/components/schemas/TrialId'
+          $ref: "#/components/schemas/TrialId"
         state:
-          $ref: '#/components/schemas/SubscriptionState'
+          $ref: "#/components/schemas/SubscriptionState"
         createdAt:
-          $ref: '#/components/schemas/CreatedAt'
+          $ref: "#/components/schemas/CreatedAt"
   parameters:
     pathTrialId:
       name: trialId
