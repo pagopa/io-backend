@@ -2,6 +2,7 @@
  * This service interacts with the IO Wallet API
  */
 
+import { IResponseType } from "@pagopa/ts-commons/lib/requests";
 import {
   IResponseErrorForbiddenNotAuthorized,
   IResponseErrorGeneric,
@@ -23,7 +24,9 @@ import * as O from "fp-ts/Option";
 import { pipe } from "fp-ts/lib/function";
 import { Grant_typeEnum } from "generated/io-wallet-api/CreateWalletAttestationBody";
 import { NonceDetailView } from "generated/io-wallet-api/NonceDetailView";
+import { WalletAttestationsView } from "generated/io-wallet-api/WalletAttestationsView";
 import { WhitelistedFiscalCodeData } from "generated/io-wallet-api/WhitelistedFiscalCodeData";
+import * as t from "io-ts";
 
 import { SetWalletInstanceStatusWithFiscalCodeData } from "../../generated/io-wallet-api/SetWalletInstanceStatusWithFiscalCodeData";
 import { WalletAttestationView } from "../../generated/io-wallet-api/WalletAttestationView";
@@ -46,6 +49,16 @@ const conflictErrorTitle = "Conflict";
 const conflictErrorDetail = "There has been a conflict";
 
 const serviceUnavailableDetail = "Service Unavailable. Please try again later";
+
+type ValidatedResponse<T> = t.Validation<
+  | IResponseType<409, undefined, never>
+  | IResponseType<422, undefined, never>
+  | IResponseType<500, undefined, never>
+  | IResponseType<403, undefined, never>
+  | IResponseType<404, undefined, never>
+  | IResponseType<503, undefined, never>
+  | IResponseType<200, T, never>
+>;
 
 export default class IoWalletService {
   constructor(
@@ -138,6 +151,54 @@ export default class IoWalletService {
       });
     });
 
+  mapWalletAttestationApiResponse = <T>(
+    validatedResponse: ValidatedResponse<T>
+  ):
+    | IResponseErrorInternal
+    | IResponseErrorGeneric
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<T>
+    | IResponseErrorServiceUnavailable =>
+    withValidatedOrInternalError(validatedResponse, (response) => {
+      switch (response.status) {
+        case 200:
+          return ResponseSuccessJson(response.value);
+        case 403:
+          return getResponseErrorForbiddenNotAuthorized(
+            "Wallet instance has been revoked"
+          );
+        case 404:
+          return ResponseErrorNotFound(
+            "Not Found",
+            "Wallet instance not found"
+          );
+        case 409:
+          return ResponseErrorGeneric(
+            response.status,
+            conflictErrorTitle,
+            conflictErrorDetail
+          );
+        case 422:
+          return ResponseErrorGeneric(
+            response.status,
+            unprocessableContentError,
+            invalidRequest
+          );
+        case 500:
+          return ResponseErrorInternal(
+            `Internal server error | ${response.value}`
+          );
+        case 503:
+          return ResponseErrorServiceTemporarilyUnavailable(
+            serviceUnavailableDetail,
+            "10"
+          );
+        default:
+          return ResponseErrorStatusNotDefinedInSpec(response);
+      }
+    });
+
   /**
    * Create a Wallet Attestation.
    */
@@ -161,44 +222,33 @@ export default class IoWalletService {
           grant_type
         }
       });
-      return withValidatedOrInternalError(validated, (response) => {
-        switch (response.status) {
-          case 200:
-            return ResponseSuccessJson(response.value);
-          case 403:
-            return getResponseErrorForbiddenNotAuthorized(
-              "Wallet instance has been revoked"
-            );
-          case 404:
-            return ResponseErrorNotFound(
-              "Not Found",
-              "Wallet instance not found"
-            );
-          case 409:
-            return ResponseErrorGeneric(
-              response.status,
-              conflictErrorTitle,
-              conflictErrorDetail
-            );
-          case 422:
-            return ResponseErrorGeneric(
-              response.status,
-              unprocessableContentError,
-              invalidRequest
-            );
-          case 500:
-            return ResponseErrorInternal(
-              `Internal server error | ${response.value}`
-            );
-          case 503:
-            return ResponseErrorServiceTemporarilyUnavailable(
-              serviceUnavailableDetail,
-              "10"
-            );
-          default:
-            return ResponseErrorStatusNotDefinedInSpec(response);
+      return this.mapWalletAttestationApiResponse<WalletAttestationView>(
+        validated
+      );
+    });
+
+  /**
+   * Create a list of Wallet Attestations.
+   */
+  public readonly createWalletAttestationV2 = (
+    assertion: NonEmptyString
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorGeneric
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<WalletAttestationsView>
+    | IResponseErrorServiceUnavailable
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.ioWalletApiClient.createWalletAttestationV2({
+        body: {
+          assertion
         }
       });
+      return this.mapWalletAttestationApiResponse<WalletAttestationsView>(
+        validated
+      );
     });
 
   /**

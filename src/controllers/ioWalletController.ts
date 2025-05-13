@@ -25,10 +25,12 @@ import { pipe } from "fp-ts/lib/function";
 import { Errors } from "io-ts";
 
 import { CreateWalletAttestationBody } from "../../generated/io-wallet/CreateWalletAttestationBody";
+import { CreateWalletAttestationV2Body } from "../../generated/io-wallet/CreateWalletAttestationV2Body";
 import { CreateWalletInstanceBody } from "../../generated/io-wallet/CreateWalletInstanceBody";
 import { NonceDetailView } from "../../generated/io-wallet/NonceDetailView";
 import { SetWalletInstanceStatusBody } from "../../generated/io-wallet/SetWalletInstanceStatusBody";
 import { WalletAttestationView } from "../../generated/io-wallet/WalletAttestationView";
+import { WalletAttestationsView } from "../../generated/io-wallet/WalletAttestationsView";
 import { WalletInstanceData } from "../../generated/io-wallet/WalletInstanceData";
 import { WhitelistedFiscalCodeData } from "../../generated/io-wallet/WhitelistedFiscalCodeData";
 import { FF_IO_WALLET_TRIAL_ENABLED } from "../config";
@@ -120,6 +122,33 @@ export default class IoWalletController {
             grant_type,
             user.fiscal_code
           )
+        ),
+        TE.toUnion
+      )()
+    );
+
+  /**
+   * Create a list of Wallet Attestations
+   */
+  public readonly createWalletAttestationV2 = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorGeneric
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseSuccessJson<WalletAttestationsView>
+    | IResponseErrorNotFound
+    | IResponseErrorServiceUnavailable
+  > =>
+    withUserFromRequest(req, async () =>
+      pipe(
+        req.body,
+        CreateWalletAttestationV2Body.decode,
+        E.mapLeft(toValidationError),
+        TE.fromEither,
+        TE.map(({ assertion }) =>
+          this.ioWalletService.createWalletAttestationV2(assertion)
         ),
         TE.toUnion
       )()

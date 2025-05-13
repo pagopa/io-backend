@@ -23,22 +23,22 @@ mockGetNonce.mockImplementation(() =>
   t.success({
     status: 200,
     value: {
-      nonce: "nonce",
-    },
+      nonce: "nonce"
+    }
   })
 );
 
 mockCreateWalletInstance.mockImplementation(() =>
   t.success({
     status: 204,
-    value: undefined,
+    value: undefined
   })
 );
 
 mockCreateWalletAttestation.mockImplementation(() =>
   t.success({
     status: 200,
-    value: "value",
+    value: "value"
   })
 );
 
@@ -47,8 +47,8 @@ mockGetWalletInstanceStatus.mockImplementation(() =>
     status: 200,
     value: {
       id: "foo",
-      is_revoked: "false",
-    },
+      is_revoked: "false"
+    }
   })
 );
 
@@ -59,25 +59,37 @@ mockGetCurrentWalletInstanceStatus.mockImplementation(() =>
       id: "bar",
       is_revoked: "false",
       revocation_reason: "NEW_WALLET_INSTANCE_CREATED"
-    },
+    }
   })
 );
 
 mockSetWalletInstanceStatus.mockImplementation(() =>
   t.success({
-    status: 204,
+    status: 204
   })
 );
 
 mockIsFiscalCodeWhitelisted.mockImplementation(() =>
   t.success({
-    status: 200,
+    status: 200
   })
 );
 
 mockCreateWalletAttestationV2.mockImplementation(() =>
   t.success({
-    status: 201,
+    status: 200,
+    value: {
+      wallet_attestations: [
+        {
+          format: "jwt",
+          wallet_attestation: "wallet_attestation_jwt"
+        },
+        {
+          format: "dc+sd-jwt",
+          wallet_attestation: "wallet_attestation_sd_jwt"
+        }
+      ]
+    }
   })
 );
 
@@ -92,7 +104,7 @@ const api = {
   setWalletInstanceStatus: mockSetWalletInstanceStatus,
   deleteWalletInstances: mockDeleteWalletInstances,
   getCurrentWalletInstanceStatus: mockGetCurrentWalletInstanceStatus,
-  isFiscalCodeWhitelisted: mockIsFiscalCodeWhitelisted,
+  isFiscalCodeWhitelisted: mockIsFiscalCodeWhitelisted
 };
 
 const mockCreateSubscription = jest.fn();
@@ -104,14 +116,14 @@ mockGetSubscription.mockImplementation(() => {
     value: {
       trialId: "trialId",
       state: SubscriptionStateEnum.SUBSCRIBED,
-      createdAt: new Date(),
-    },
+      createdAt: new Date()
+    }
   });
 });
 
 const trialSystemApi = {
   createSubscription: mockCreateSubscription,
-  getSubscription: mockGetSubscription,
+  getSubscription: mockGetSubscription
 } as unknown as ReturnType<TrialSystemAPIClient>;
 
 const aFiscalCode = "GRBGPP87L04L741X" as FiscalCode;
@@ -137,7 +149,7 @@ describe("IoWalletService#getNonce", () => {
     const res = await service.getNonce();
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessJson",
+      kind: "IResponseSuccessJson"
     });
   });
 
@@ -152,7 +164,7 @@ describe("IoWalletService#getNonce", () => {
     const res = await service.getNonce();
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 
@@ -167,7 +179,7 @@ describe("IoWalletService#getNonce", () => {
     const res = await service.getNonce();
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 
@@ -180,7 +192,7 @@ describe("IoWalletService#getNonce", () => {
     const res = await service.getNonce();
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 });
@@ -205,8 +217,8 @@ describe("IoWalletService#createWalletInstance", () => {
         challenge: "challenge",
         key_attestation: "key_attestation",
         hardware_key_tag: "hardware_key_tag",
-        fiscal_code: aFiscalCode,
-      },
+        fiscal_code: aFiscalCode
+      }
     });
   });
 
@@ -221,7 +233,7 @@ describe("IoWalletService#createWalletInstance", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessNoContent",
+      kind: "IResponseSuccessNoContent"
     });
   });
 
@@ -240,7 +252,7 @@ describe("IoWalletService#createWalletInstance", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorGeneric",
+      kind: "IResponseErrorGeneric"
     });
   });
 
@@ -260,7 +272,7 @@ describe("IoWalletService#createWalletInstance", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 
@@ -280,7 +292,7 @@ describe("IoWalletService#createWalletInstance", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 
@@ -298,7 +310,7 @@ describe("IoWalletService#createWalletInstance", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 });
@@ -324,8 +336,8 @@ describe("IoWalletService#createWalletAttestation", () => {
       body: {
         grant_type,
         assertion: "assertion",
-        fiscal_code: aFiscalCode,
-      },
+        fiscal_code: aFiscalCode
+      }
     });
   });
 
@@ -339,7 +351,7 @@ describe("IoWalletService#createWalletAttestation", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessJson",
+      kind: "IResponseSuccessJson"
     });
   });
 
@@ -357,7 +369,7 @@ describe("IoWalletService#createWalletAttestation", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorGeneric",
+      kind: "IResponseErrorGeneric"
     });
   });
 
@@ -376,7 +388,7 @@ describe("IoWalletService#createWalletAttestation", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 
@@ -395,7 +407,7 @@ describe("IoWalletService#createWalletAttestation", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 
@@ -412,7 +424,102 @@ describe("IoWalletService#createWalletAttestation", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
+    });
+  });
+});
+
+describe("IoWalletService#createWalletAttestationV2", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct api call", async () => {
+    const service = new IoWalletService(api, trialSystemApi);
+
+    await service.createWalletAttestationV2("assertion" as NonEmptyString);
+
+    expect(mockCreateWalletAttestationV2).toHaveBeenCalledWith({
+      body: {
+        assertion: "assertion"
+      }
+    });
+  });
+
+  it("should handle a success response", async () => {
+    const service = new IoWalletService(api, trialSystemApi);
+
+    const res = await service.createWalletAttestationV2(
+      "assertion" as NonEmptyString
+    );
+
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson"
+    });
+  });
+
+  it("should handle an internal error when the API client returns 422", async () => {
+    mockCreateWalletAttestationV2.mockImplementationOnce(() =>
+      t.success({ status: 422 })
+    );
+
+    const service = new IoWalletService(api, trialSystemApi);
+
+    const res = await service.createWalletAttestationV2(
+      "assertion" as NonEmptyString
+    );
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorGeneric"
+    });
+  });
+
+  it("should handle an internal error when the API client returns 500", async () => {
+    const aGenericProblem = {};
+    mockCreateWalletAttestationV2.mockImplementationOnce(() =>
+      t.success({ status: 500, value: aGenericProblem })
+    );
+
+    const service = new IoWalletService(api, trialSystemApi);
+
+    const res = await service.createWalletAttestationV2(
+      "assertion" as NonEmptyString
+    );
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should handle an internal error when the API client returns a code not specified in spec", async () => {
+    const aGenericProblem = {};
+    mockCreateWalletAttestationV2.mockImplementationOnce(() =>
+      t.success({ status: 599, value: aGenericProblem })
+    );
+
+    const service = new IoWalletService(api, trialSystemApi);
+
+    const res = await service.createWalletAttestationV2(
+      "assertion" as NonEmptyString
+    );
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should return an error if the api call throws an error", async () => {
+    mockCreateWalletAttestationV2.mockImplementationOnce(() => {
+      throw new Error();
+    });
+    const service = new IoWalletService(api, trialSystemApi);
+
+    const res = await service.createWalletAttestationV2(
+      "assertion" as NonEmptyString
+    );
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
     });
   });
 });
@@ -433,8 +540,8 @@ describe("IoWalletService#setWalletInstanceStatus", () => {
       id: aId,
       body: {
         status,
-        fiscal_code: aFiscalCode,
-      },
+        fiscal_code: aFiscalCode
+      }
     });
   });
 
@@ -444,7 +551,7 @@ describe("IoWalletService#setWalletInstanceStatus", () => {
     const res = await service.setWalletInstanceStatus(aId, status, aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessNoContent",
+      kind: "IResponseSuccessNoContent"
     });
   });
 
@@ -458,7 +565,7 @@ describe("IoWalletService#setWalletInstanceStatus", () => {
     const res = await service.setWalletInstanceStatus(aId, status, aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 
@@ -472,7 +579,7 @@ describe("IoWalletService#setWalletInstanceStatus", () => {
     const res = await service.setWalletInstanceStatus(aId, status, aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 
@@ -487,7 +594,7 @@ describe("IoWalletService#setWalletInstanceStatus", () => {
     const res = await service.setWalletInstanceStatus(aId, status, aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 
@@ -502,7 +609,7 @@ describe("IoWalletService#setWalletInstanceStatus", () => {
     const res = await service.setWalletInstanceStatus(aId, status, aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorServiceUnavailable",
+      kind: "IResponseErrorServiceUnavailable"
     });
   });
 
@@ -517,7 +624,7 @@ describe("IoWalletService#setWalletInstanceStatus", () => {
     const res = await service.setWalletInstanceStatus(aId, status, aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 
@@ -530,7 +637,7 @@ describe("IoWalletService#setWalletInstanceStatus", () => {
     const res = await service.setWalletInstanceStatus(aId, status, aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 });
@@ -547,7 +654,7 @@ describe("IoWalletService#getWalletInstanceStatus", () => {
 
     expect(mockGetWalletInstanceStatus).toHaveBeenCalledWith({
       id: aId,
-      "fiscal-code": aFiscalCode,
+      "fiscal-code": aFiscalCode
     });
   });
 
@@ -557,7 +664,7 @@ describe("IoWalletService#getWalletInstanceStatus", () => {
     const res = await service.getWalletInstanceStatus(aId, aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessJson",
+      kind: "IResponseSuccessJson"
     });
   });
 
@@ -571,7 +678,7 @@ describe("IoWalletService#getWalletInstanceStatus", () => {
     const res = await service.getWalletInstanceStatus(aId, aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 
@@ -585,7 +692,7 @@ describe("IoWalletService#getWalletInstanceStatus", () => {
     const res = await service.getWalletInstanceStatus(aId, aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorNotFound",
+      kind: "IResponseErrorNotFound"
     });
   });
 
@@ -599,7 +706,7 @@ describe("IoWalletService#getWalletInstanceStatus", () => {
     const res = await service.getWalletInstanceStatus(aId, aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 
@@ -614,7 +721,7 @@ describe("IoWalletService#getWalletInstanceStatus", () => {
     const res = await service.getWalletInstanceStatus(aId, aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 
@@ -629,7 +736,7 @@ describe("IoWalletService#getWalletInstanceStatus", () => {
     const res = await service.getWalletInstanceStatus(aId, aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorServiceUnavailable",
+      kind: "IResponseErrorServiceUnavailable"
     });
   });
 
@@ -644,7 +751,7 @@ describe("IoWalletService#getWalletInstanceStatus", () => {
     const res = await service.getWalletInstanceStatus(aId, aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 
@@ -657,7 +764,7 @@ describe("IoWalletService#getWalletInstanceStatus", () => {
     const res = await service.getWalletInstanceStatus(aId, aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 });
@@ -673,7 +780,7 @@ describe("IoWalletService#getCurrentWalletInstanceStatus", () => {
     await service.getCurrentWalletInstanceStatus(aFiscalCode);
 
     expect(mockGetCurrentWalletInstanceStatus).toHaveBeenCalledWith({
-      "fiscal-code": aFiscalCode,
+      "fiscal-code": aFiscalCode
     });
   });
 
@@ -683,7 +790,7 @@ describe("IoWalletService#getCurrentWalletInstanceStatus", () => {
     const res = await service.getCurrentWalletInstanceStatus(aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessJson",
+      kind: "IResponseSuccessJson"
     });
   });
 
@@ -697,7 +804,7 @@ describe("IoWalletService#getCurrentWalletInstanceStatus", () => {
     const res = await service.getCurrentWalletInstanceStatus(aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 
@@ -711,7 +818,7 @@ describe("IoWalletService#getCurrentWalletInstanceStatus", () => {
     const res = await service.getCurrentWalletInstanceStatus(aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorNotFound",
+      kind: "IResponseErrorNotFound"
     });
   });
 
@@ -725,7 +832,7 @@ describe("IoWalletService#getCurrentWalletInstanceStatus", () => {
     const res = await service.getCurrentWalletInstanceStatus(aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 
@@ -740,7 +847,7 @@ describe("IoWalletService#getCurrentWalletInstanceStatus", () => {
     const res = await service.getCurrentWalletInstanceStatus(aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 
@@ -755,7 +862,7 @@ describe("IoWalletService#getCurrentWalletInstanceStatus", () => {
     const res = await service.getCurrentWalletInstanceStatus(aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorServiceUnavailable",
+      kind: "IResponseErrorServiceUnavailable"
     });
   });
 
@@ -770,7 +877,7 @@ describe("IoWalletService#getCurrentWalletInstanceStatus", () => {
     const res = await service.getCurrentWalletInstanceStatus(aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 
@@ -783,7 +890,7 @@ describe("IoWalletService#getCurrentWalletInstanceStatus", () => {
     const res = await service.getCurrentWalletInstanceStatus(aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 });
@@ -799,7 +906,7 @@ describe("IoWalletService#isFiscalCodeWhitelisted", () => {
     await service.isFiscalCodeWhitelisted(aFiscalCode);
 
     expect(mockIsFiscalCodeWhitelisted).toHaveBeenCalledWith({
-      fiscalCode: aFiscalCode,
+      fiscalCode: aFiscalCode
     });
   });
 
@@ -809,7 +916,7 @@ describe("IoWalletService#isFiscalCodeWhitelisted", () => {
     const res = await service.isFiscalCodeWhitelisted(aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessJson",
+      kind: "IResponseSuccessJson"
     });
   });
 
@@ -824,7 +931,7 @@ describe("IoWalletService#isFiscalCodeWhitelisted", () => {
     const res = await service.isFiscalCodeWhitelisted(aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 
@@ -839,7 +946,7 @@ describe("IoWalletService#isFiscalCodeWhitelisted", () => {
     const res = await service.isFiscalCodeWhitelisted(aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 
@@ -853,7 +960,7 @@ describe("IoWalletService#isFiscalCodeWhitelisted", () => {
     const res = await service.isFiscalCodeWhitelisted(aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 
@@ -867,7 +974,7 @@ describe("IoWalletService#isFiscalCodeWhitelisted", () => {
     const res = await service.isFiscalCodeWhitelisted(aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorServiceUnavailable",
+      kind: "IResponseErrorServiceUnavailable"
     });
   });
 
@@ -882,7 +989,7 @@ describe("IoWalletService#isFiscalCodeWhitelisted", () => {
     const res = await service.isFiscalCodeWhitelisted(aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 
@@ -895,7 +1002,7 @@ describe("IoWalletService#isFiscalCodeWhitelisted", () => {
     const res = await service.isFiscalCodeWhitelisted(aFiscalCode);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 });
@@ -914,7 +1021,7 @@ describe("IoWalletService#getSubscription", () => {
 
     expect(mockGetSubscription).toHaveBeenCalledWith({
       userId,
-      trialId: IO_WALLET_TRIAL_ID,
+      trialId: IO_WALLET_TRIAL_ID
     });
   });
 
@@ -924,7 +1031,7 @@ describe("IoWalletService#getSubscription", () => {
     const res = await service.getSubscription(userId);
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessJson",
+      kind: "IResponseSuccessJson"
     });
   });
 
@@ -938,7 +1045,7 @@ describe("IoWalletService#getSubscription", () => {
     const res = await service.getSubscription(userId);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 
@@ -952,7 +1059,7 @@ describe("IoWalletService#getSubscription", () => {
     const res = await service.getSubscription(userId);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorNotFound",
+      kind: "IResponseErrorNotFound"
     });
   });
 
@@ -967,7 +1074,7 @@ describe("IoWalletService#getSubscription", () => {
     const res = await service.getSubscription(userId);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 
@@ -982,7 +1089,7 @@ describe("IoWalletService#getSubscription", () => {
     const res = await service.getSubscription(userId);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 
@@ -995,7 +1102,7 @@ describe("IoWalletService#getSubscription", () => {
     const res = await service.getSubscription(userId);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 });
