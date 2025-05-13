@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 16.15.0
+
+### Minor Changes
+
+- 072fff2: Added /wallet-attestation wallet endpoint
+
 ## 16.14.0
 
 ### Minor Changes
