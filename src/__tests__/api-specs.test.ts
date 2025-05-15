@@ -37,7 +37,7 @@ describe("API public proxy specs", () => {
     expect(api).toBeDefined();
   });
   it("should be valid API platform domain specs", async () => {
-    const specFilePath = `${__dirname}/../../openapi/generated/api_platform.yaml`;
+    const specFilePath = `${__dirname}/../../openapi/generated/api_platform_legacy.yaml`;
     const api = await SwaggerParser.bundle(specFilePath);
     expect(api).toBeDefined();
   });
