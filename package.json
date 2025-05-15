@@ -35,7 +35,7 @@
     "generate:proxy:payments": "rimraf generated/payments && gen-api-models --api-spec ./openapi/generated/api_payments.yaml --out-dir generated/payments",
     "generate:messages:notifications": "rimraf generated/messages && gen-api-models --api-spec ./definitions/notification_queue_messages.yaml --out-dir generated/messages",
     "generate:api:trial-system": "rimraf generated/trial-system-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/trial-system/081d98c37a116c9d842f31c54a2fe641680c5424/infra/resources/modules/commons/api/ts_management/v1/_openapi.yaml --no-strict --out-dir generated/trial-system-api --request-types --response-decoders --client",
-    "generate:proxy:platform-models": "rimraf generated/platform && gen-api-models --api-spec ./openapi/generated/api_platform.yaml --out-dir generated/platform",
+    "generate:proxy:platform-models": "rimraf generated/platform && gen-api-models --api-spec ./openapi/generated/api_platform_legacy.yaml --out-dir generated/platform",
     "generate:api:io-messages": "rimraf generated/io-messages-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-functions-app-messages/v5.3.0/openapi/index.yaml --no-strict --out-dir generated/io-messages-api --request-types --response-decoders --client",
     "generate:proxy:io-auth": "rimraf generated/auth && gen-api-models --api-spec ./openapi/generated/api_auth.yaml --out-dir generated/auth",
     "generate:proxy:cgn-models": "rimraf generated/cgn && gen-api-models --api-spec ./openapi/generated/api_cgn.yaml --out-dir generated/cgn",

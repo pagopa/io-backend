@@ -1,8 +1,8 @@
 openapi: 3.0.2
 info:
   title: Internal Session API for Auth & Identity domain
-  version: 16.15.0
   description: Collection of enpoints to interact with user session.
+  version: 16.15.0
 servers:
   - url: https://localhost/api/v1
 paths:

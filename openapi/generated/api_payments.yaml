@@ -2,7 +2,7 @@ openapi: 3.0.2
 info:
   title: Proxy API for payment domain
   description: Mobile and web backend API for payments domain.
-  version: 16.14.0
+  version: 16.15.0
 servers:
   - url: https://api-app.io.pagopa.it/api/v1
 security:

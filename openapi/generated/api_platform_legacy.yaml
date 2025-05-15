@@ -1,10 +1,20 @@
 openapi: 3.0.2
 info:
   title: Public API & Trial System API
-  description: Mobile and web backend API by platform.
-  version: 16.14.0
+  description: >
+    Mobile and web backend API by platform.
+
+    WARNING! This is a legacy API that will be exposed by the API Management
+    under the `/api/platform-legacy` path.
+
+    But the base path exposed to the client is `/api` and an url-rewrite is
+    performed by the Application Gateway.
+
+    Redirect and getServerInfo are the only endpoints that will be exposed
+    without any base path.
+  version: 16.15.0
 servers:
-  - url: https://localhost/
+  - url: https://localhost/api/platform-legacy
 paths:
   /:
     get:
@@ -40,7 +50,7 @@ paths:
                 min_app_version: 0.0.0
                 min_app_version_pagopa: 0.0.0
     x-swagger-router-controller: ServerInfoController
-  /api/v1/ping:
+  /v1/ping:
     get:
       summary: Check online status
       description: |
@@ -51,7 +61,7 @@ paths:
           description: Service is alive.
           content: {}
     x-swagger-router-controller: StatusServicesController
-  /api/v1/status:
+  /v1/status:
     get:
       summary: Get service statuses
       description: Returns the current status of all microservices.
@@ -70,7 +80,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
     x-swagger-router-controller: StatusServicesController
-  /api/v1/trials/{trialId}/subscriptions:
+  /v1/trials/{trialId}/subscriptions:
     get:
       summary: Get subscription detail
       description: >-

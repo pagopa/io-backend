@@ -1,7 +1,7 @@
 openapi: 3.0.2
 info:
-  version: 16.15.0
   title: Carta Giovani Nazionale API
+  version: 16.15.0
 servers:
   - url: https://localhost/api/v1/cgn
 security:
@@ -11,7 +11,7 @@ paths:
     get:
       summary: Get the CGN status details
       description: |
-        Get the CGN status details
+        Get the CGN status details 
         by the provided fiscal code
       operationId: getCgnStatus
       responses:
