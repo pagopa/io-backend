@@ -4,30 +4,30 @@
 
 import * as E from "fp-ts/lib/Either";
 import mockReq from "../../__mocks__/request";
-import { EmailAddress } from "../../../generated/backend/EmailAddress";
-import { ExtendedProfile as ExtendedProfileBackend } from "../../../generated/backend/ExtendedProfile";
-import { IsInboxEnabled } from "../../../generated/backend/IsInboxEnabled";
-import { IsWebhookEnabled } from "../../../generated/backend/IsWebhookEnabled";
+import { EmailAddress } from "../../../generated/auth/EmailAddress";
+import { ExtendedProfile as ExtendedProfileBackend } from "../../../generated/auth/ExtendedProfile";
+import { IsInboxEnabled } from "../../../generated/auth/IsInboxEnabled";
+import { IsWebhookEnabled } from "../../../generated/auth/IsWebhookEnabled";
 import {
   PreferredLanguage,
   PreferredLanguageEnum,
-} from "../../../generated/backend/PreferredLanguage";
-import { Version } from "../../../generated/backend/Version";
+} from "../../../generated/auth/PreferredLanguage";
+import { Version } from "../../../generated/auth/Version";
 import { ExtendedProfile as ExtendedProfileApi } from "@pagopa/io-functions-app-sdk/ExtendedProfile";
 import { ResponseErrorNotFound } from "@pagopa/ts-commons/lib/responses";
-import { AcceptedTosVersion } from "../../../generated/backend/AcceptedTosVersion";
-import { IsEmailEnabled } from "../../../generated/backend/IsEmailEnabled";
-import { IsEmailValidated } from "../../../generated/backend/IsEmailValidated";
+import { AcceptedTosVersion } from "../../../generated/auth/AcceptedTosVersion";
+import { IsEmailEnabled } from "../../../generated/auth/IsEmailEnabled";
+import { IsEmailValidated } from "../../../generated/auth/IsEmailValidated";
 import {
   notFoundProfileToInternalServerError,
   profileMissingErrorResponse,
   toInitializedProfile,
 } from "../profile";
 import { mockedUser } from "../../__mocks__/user_mock";
-import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
-import { ServicesPreferencesModeEnum } from "../../../generated/backend/ServicesPreferencesMode";
-import { ReminderStatus } from "../../../generated/backend/ReminderStatus";
-import { AppVersion } from "../../../generated/backend/AppVersion";
+import { ServicePreferencesSettings } from "../../../generated/auth/ServicePreferencesSettings";
+import { ServicesPreferencesModeEnum } from "../../../generated/auth/ServicesPreferencesMode";
+import { ReminderStatus } from "../../../generated/auth/ReminderStatus";
+import { AppVersion } from "../../../generated/auth/AppVersion";
 
 const aTosVersion = 1 as AcceptedTosVersion;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;

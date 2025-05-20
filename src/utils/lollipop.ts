@@ -17,7 +17,7 @@ import { flow, identity, pipe } from "fp-ts/lib/function";
 import { Errors } from "io-ts";
 import { ulid } from "ulid";
 
-import { AssertionRef } from "../../generated/backend/AssertionRef";
+import { AssertionRef } from "../../generated/auth/AssertionRef";
 import { RCConfigurationPublic } from "../../generated/io-messages-api/RCConfigurationPublic";
 import { LollipopSignatureInput } from "../../generated/lollipop/LollipopSignatureInput";
 import { LcParams } from "../../generated/lollipop-api/LcParams";

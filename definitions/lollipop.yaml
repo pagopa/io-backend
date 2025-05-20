@@ -1,0 +1,113 @@
+openapi: 3.0.1
+info:
+  title: LolliPoP Definitions
+  description: The definitions of the headers needed by the LolliPoP protocol.
+  version: 1.0.0
+
+# Dummy unused endpoint
+paths:
+  /dummy:
+    get:
+      responses:
+        "200":
+          description: "ok"
+
+components:
+  parameters:
+
+    # --------------------------------------------
+    # Custom LolliPoP headers
+    # --------------------------------------------
+    LollipopMethodHeader:
+      name: x-pagopa-lollipop-original-method
+      in: header
+      description: The method of the endpoint called by IO app
+      required: true
+      schema:
+        $ref: "#/components/schemas/LollipopMethod"
+    LollipopOriginalURLHeader:
+      name: x-pagopa-lollipop-original-url
+      in: header
+      description: The url of the endpoint called by IO app
+      required: true
+      schema:
+        $ref: "#/components/schemas/LollipopOriginalURL"
+
+    # --------------------------------------------
+    # Standard HTTP Message Signatures headers
+    # --------------------------------------------
+    LollipopContentTypeHeader:
+      name: content-type
+      in: header
+      description: The content type, if any.
+      required: false
+      schema:
+        $ref: "#/components/schemas/LollipopContentType"
+    LollipopContentDigestHeader:
+      name: content-digest
+      in: header
+      description: The body digest, if any, as defined in https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-digest-headers-10
+      required: false
+      schema:
+        $ref: "#/components/schemas/LollipopContentDigest"
+
+
+    LollipopSignatureInputHeader:
+      name: signature-input
+      in: header
+      description: The signature input, needed to verify the `signature` header
+      required: true
+      schema:
+        $ref: "#/components/schemas/LollipopSignatureInput"
+    LollipopSignatureHeader:
+      name: signature
+      in: header
+      description: The signature of the HTTP request, signed by the client with its private key.
+      required: true
+      schema:
+        $ref: "#/components/schemas/LollipopSignature"
+
+    JwkPubKeyToken:
+      in: header
+      name: x-pagopa-lollipop-pub-key
+      type: string
+      description: represents a Base64url encode of a JWK Public Key
+      format: JwkPublicKeyFromToken
+      x-import: '@pagopa/ts-commons/lib/jwk'
+      x-example: "eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6IjRmMzB6dUdNcm9kRXl3cEoxelZKbWFRLVYtZlM4OVZBTW8yZnN6dWxOTmsiLCJ5IjoibG5NdmExengxaFJncVY5enVEU3dkV0dyUlhTREl4UXQ1YVJVeG1EVW44NCJ9"
+    JwkPubKeyHashAlgorithm:
+      in: header
+      name: x-pagopa-lollipop-pub-key-hash-algo
+      type: string
+      enum: [sha256, sha384, sha512]
+      description: Represents the selected hashing algorithm for jwk thumbprint
+      x-example: "sha256"
+  
+  schemas:
+    LollipopMethod:
+      type: string
+      enum:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+    LollipopOriginalURL:
+      type: string
+      pattern: "^https:\/\/"
+
+    LollipopContentType:
+      type: string
+      enum:
+        - application/json
+        - application/octet-stream
+    LollipopContentDigest:
+      type: string
+      pattern: "^(sha-256=:[A-Za-z0-9+/=]{44}:|sha-384=:[A-Za-z0-9+/=]{66}:|sha-512=:[A-Za-z0-9+/=]{88}:)$"
+
+    LollipopSignatureInput:
+      type: string
+      pattern: ^(?:sig\d+=[^,]*)(?:,\s*(?:sig\d+=[^,]*))*$
+    LollipopSignature:
+      type: string
+      pattern: "^((sig[0-9]+)=:[A-Za-z0-9+/=]*:(, ?)?)+$"

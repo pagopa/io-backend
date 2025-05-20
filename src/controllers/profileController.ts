@@ -17,8 +17,8 @@ import {
 import * as express from "express";
 import { ISessionStorage } from "src/services/ISessionStorage";
 
-import { InitializedProfile } from "../../generated/backend/InitializedProfile";
-import { Profile } from "../../generated/backend/Profile";
+import { InitializedProfile } from "../../generated/auth/InitializedProfile";
+import { Profile } from "../../generated/auth/Profile";
 import ProfileService from "../services/profileService";
 import { profileMissingErrorResponse } from "../types/profile";
 import { withUserFromRequest } from "../types/user";

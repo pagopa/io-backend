@@ -1,5 +1,5 @@
-import { SessionInfo } from "../../../generated/backend/SessionInfo";
-import { SessionsList } from "../../../generated/backend/SessionsList";
+import { SessionInfo } from "../../../generated/auth/SessionInfo";
+import { SessionsList } from "../../../generated/auth/SessionsList";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import RedisSessionStorage from "../../services/redisSessionStorage";

@@ -1,14 +1,14 @@
 import * as t from "io-ts";
-import { IsInboxEnabled } from "../../../generated/backend/IsInboxEnabled";
-import { IsWebhookEnabled } from "../../../generated/backend/IsWebhookEnabled";
+import { IsInboxEnabled } from "../../../generated/auth/IsInboxEnabled";
+import { IsWebhookEnabled } from "../../../generated/auth/IsWebhookEnabled";
 import {
   PreferredLanguage,
   PreferredLanguageEnum,
-} from "../../../generated/backend/PreferredLanguage";
-import { PushNotificationsContentTypeEnum } from "../../../generated/backend/PushNotificationsContentType";
-import { ReminderStatusEnum } from "../../../generated/backend/ReminderStatus";
-import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
-import { ServicesPreferencesModeEnum } from "../../../generated/backend/ServicesPreferencesMode";
+} from "../../../generated/auth/PreferredLanguage";
+import { PushNotificationsContentTypeEnum } from "../../../generated/auth/PushNotificationsContentType";
+import { ReminderStatusEnum } from "../../../generated/auth/ReminderStatus";
+import { ServicePreferencesSettings } from "../../../generated/auth/ServicePreferencesSettings";
+import { ServicesPreferencesModeEnum } from "../../../generated/auth/ServicesPreferencesMode";
 import { AppVersion } from "@pagopa/io-functions-app-sdk/AppVersion";
 import { ExtendedProfile as ExtendedProfileApi } from "@pagopa/io-functions-app-sdk/ExtendedProfile";
 import { NewProfile } from "@pagopa/io-functions-app-sdk/NewProfile";
@@ -24,7 +24,7 @@ import {
 } from "../../__mocks__/user_mock";
 import ApiClientFactory from "../apiClientFactory";
 import ProfileService from "../profileService";
-import { Profile } from "../../../generated/backend/Profile";
+import { Profile } from "../../../generated/auth/Profile";
 import { UpdateProfileParams } from "@pagopa/io-functions-app-sdk/UpdateProfileParams";
 
 const aValidAPIEmail = anEmailAddress;

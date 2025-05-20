@@ -19,8 +19,6 @@ import {
   ALLOW_NOTIFY_IP_SOURCE_RANGE,
   ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE,
   API_BASE_PATH,
-  AUTHENTICATION_BASE_PATH,
-  BONUS_API_BASE_PATH,
   CGN_API_BASE_PATH,
   CGN_OPERATOR_SEARCH_API_BASE_PATH,
   ENV,
@@ -42,9 +40,7 @@ import { initHttpGracefulShutdown } from "./utils/gracefulShutdown";
 import { log } from "./utils/logger";
 import { TimeTracer } from "./utils/timer";
 
-const authenticationBasePath = AUTHENTICATION_BASE_PATH;
 const APIBasePath = API_BASE_PATH;
-const BonusAPIBasePath = BONUS_API_BASE_PATH;
 const CGNAPIBasePath = CGN_API_BASE_PATH;
 const IoSignAPIBasePath = IO_SIGN_API_BASE_PATH;
 const IoFimsAPIBasePath = IO_FIMS_API_BASE_PATH;
@@ -93,7 +89,6 @@ const maybeAppInsightsClient = pipe(
 
 newApp({
   APIBasePath,
-  BonusAPIBasePath,
   CGNAPIBasePath,
   CGNOperatorSearchAPIBasePath,
   EUCovidCertBasePath,
@@ -105,7 +100,6 @@ newApp({
   allowNotifyIPSourceRange: ALLOW_NOTIFY_IP_SOURCE_RANGE,
   allowSessionHandleIPSourceRange: ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE,
   appInsightsClient: O.toUndefined(maybeAppInsightsClient),
-  authenticationBasePath,
   env: ENV
 })
   .then((app) => {

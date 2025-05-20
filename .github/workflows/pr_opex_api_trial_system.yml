@@ -11,7 +11,7 @@ on:
       - master
     paths:
 
-      - 'openapi/generated/api_trial_system.yaml'
+      - 'openapi/generated/api_platform_legacy.yaml'
       - '.github/workflows/pr_opex_api_trial_system.yml'
       - '.github/workflows/opex_api_trial_system.yml'
       - '.opex/api_trial_system/**'

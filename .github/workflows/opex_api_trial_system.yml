@@ -1,11 +1,11 @@
-name: Opex Dashboard api_trial_system
+name: Opex Dashboard platform with Trial System API
 
 on:
   push:
     branches:
       - master
     paths:
-      - 'openapi/generated/api_trial_system.yaml'
+      - 'openapi/generated/api_platform_legacy.yaml'
       - '.github/workflows/opex_api_trial_system.yml'
       - '.opex/api_trial_system/**'
 
