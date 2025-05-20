@@ -5,7 +5,7 @@ on:
     branches:
       - master
     paths:
-      - 'openapi/generated/api_platform.yaml'
+      - 'openapi/generated/api_platform_legacy.yaml'
       - '.github/workflows/opex_api_trial_system.yml'
       - '.opex/api_trial_system/**'
 
