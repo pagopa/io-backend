@@ -54,6 +54,14 @@ paths:
         "204":
           description: Service is alive.
           content: {}
+    head:
+      summary: Check online status
+      operationId: getPingHead
+      description: Preflight check for the ping API.
+      responses:
+        "200":
+          description: Preflight success response.
+          content: {}
     x-swagger-router-controller: StatusServicesController
   /v1/status:
     get:
@@ -73,6 +81,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ProblemJson"
+    head:
+      summary: Get service statuses
+      operationId: getServicesStatusHead
+      description: Preflight check for the service statuses API.
+      responses:
+        "200":
+          description: Preflight success response.
+          content: {}
     x-swagger-router-controller: StatusServicesController
   /v1/trials/{trialId}/subscriptions:
     get:
