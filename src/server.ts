@@ -24,7 +24,6 @@ import {
   CGN_API_BASE_PATH,
   CGN_OPERATOR_SEARCH_API_BASE_PATH,
   ENV,
-  EUCOVIDCERT_API_BASE_PATH,
   IO_FIMS_API_BASE_PATH,
   IO_SIGN_API_BASE_PATH,
   IO_WALLET_API_BASE_PATH,
@@ -49,7 +48,6 @@ const CGNAPIBasePath = CGN_API_BASE_PATH;
 const IoSignAPIBasePath = IO_SIGN_API_BASE_PATH;
 const IoFimsAPIBasePath = IO_FIMS_API_BASE_PATH;
 const CGNOperatorSearchAPIBasePath = CGN_OPERATOR_SEARCH_API_BASE_PATH;
-const EUCovidCertBasePath = EUCOVIDCERT_API_BASE_PATH;
 const ServicesAppBackendBasePath = SERVICES_APP_BACKEND_BASE_PATH;
 const TrialSystemBasePath = TRIAL_SYSTEM_API_BASE_PATH;
 const IoWalletAPIBasePath = IO_WALLET_API_BASE_PATH;
@@ -96,7 +94,6 @@ newApp({
   BonusAPIBasePath,
   CGNAPIBasePath,
   CGNOperatorSearchAPIBasePath,
-  EUCovidCertBasePath,
   IoFimsAPIBasePath,
   IoSignAPIBasePath,
   IoWalletAPIBasePath,

@@ -7,6 +7,7 @@ import {
   HttpStatusCodeEnum,
   IResponse,
   IResponseErrorInternal,
+  IResponseErrorNotFound,
   IResponseErrorValidation,
   ResponseErrorGeneric,
   ResponseErrorInternal,
@@ -49,6 +50,24 @@ export const ResponseErrorDismissed = ResponseErrorNotFound(
   "Expired resource",
   "The resource you asked for is no longer available"
 );
+
+/**
+ * Returns a `403` as `Not Found` error
+ *
+ * @param detail The error message
+ */
+export function ResponseErrorNotFound403(
+  detail: string
+): IResponseErrorNotFound {
+  return {
+    ...ResponseErrorGeneric(
+      HttpStatusCodeEnum.HTTP_STATUS_403,
+      "Not Found",
+      detail
+    ),
+    kind: "IResponseErrorNotFound"
+  };
+}
 
 /**
  * Transforms async failures into internal errors

@@ -63,7 +63,6 @@ const aAPIBasePath = "/api/v1";
 const aBonusAPIBasePath = "/bonus/api/v1";
 const aCgnAPIBasePath = "/api/v1/cgn";
 const aCgnOperatorSearchAPIBasePath = "/api/v1/cgn-operator-search";
-const aEuCovidCertAPIBasePath = "/api/v1/eucovidcert";
 const aIoFimsAPIBasePath = "/api/v1/fims";
 const aIoSignAPIBasePath = "/api/v1/sign";
 const aServicesAppBackendBasePath = "/api/v2";
@@ -79,7 +78,6 @@ describe("Success app start", () => {
       BonusAPIBasePath: aBonusAPIBasePath,
       CGNAPIBasePath: aCgnAPIBasePath,
       CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
-      EUCovidCertBasePath: aEuCovidCertAPIBasePath,
       IoFimsAPIBasePath: aIoFimsAPIBasePath,
       IoSignAPIBasePath: aIoSignAPIBasePath,
       IoWalletAPIBasePath: aIoWalletAPIBasePath,
@@ -186,7 +184,6 @@ describe("Failure app start", () => {
         BonusAPIBasePath: aBonusAPIBasePath,
         CGNAPIBasePath: aCgnAPIBasePath,
         CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
-        EUCovidCertBasePath: aEuCovidCertAPIBasePath,
         IoFimsAPIBasePath: aIoFimsAPIBasePath,
         IoSignAPIBasePath: aIoSignAPIBasePath,
         IoWalletAPIBasePath: aIoWalletAPIBasePath,

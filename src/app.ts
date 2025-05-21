@@ -27,10 +27,8 @@ import {
   CGN_API_CLIENT,
   CGN_OPERATOR_SEARCH_API_CLIENT,
   ENV,
-  EUCOVIDCERT_API_CLIENT,
   FF_BONUS_ENABLED,
   FF_CGN_ENABLED,
-  FF_EUCOVIDCERT_ENABLED,
   FF_IO_FIMS_ENABLED,
   FF_IO_SIGN_ENABLED,
   FF_IO_WALLET_ENABLED,
@@ -68,7 +66,6 @@ import {
   registerCgnAPIRoutes,
   registerCgnOperatorSearchAPIRoutes
 } from "./routes/cgnRoutes";
-import { registerEUCovidCertAPIRoutes } from "./routes/euCovidCertRoutes";
 import { registerFirstLollipopConsumer } from "./routes/firstLollipopConsumerRoutes";
 import { registerIoFimsAPIRoutes } from "./routes/ioFimsRoutes";
 import { registerIoSignAPIRoutes } from "./routes/ioSignRoutes";
@@ -82,7 +79,6 @@ import AuthenticationLockService from "./services/authenticationLockService";
 import BonusService from "./services/bonusService";
 import CgnOperatorSearchService from "./services/cgnOperatorSearchService";
 import CgnService from "./services/cgnService";
-import EUCovidCertService from "./services/eucovidcertService";
 import IoFimsService from "./services/fimsService";
 import FunctionsAppService from "./services/functionAppService";
 import IoSignService from "./services/ioSignService";
@@ -127,7 +123,6 @@ export interface IAppFactoryParameters {
   readonly IoSignAPIBasePath: string;
   readonly IoFimsAPIBasePath: string;
   readonly IoWalletAPIBasePath: string;
-  readonly EUCovidCertBasePath: string;
   readonly ServicesAppBackendBasePath: string;
   readonly TrialSystemBasePath: string;
 }
@@ -145,7 +140,6 @@ export async function newApp({
   IoFimsAPIBasePath,
   IoWalletAPIBasePath,
   CGNOperatorSearchAPIBasePath,
-  EUCovidCertBasePath,
   ServicesAppBackendBasePath,
   TrialSystemBasePath
 }: IAppFactoryParameters): Promise<Express> {
@@ -299,11 +293,6 @@ export async function newApp({
         // Create the cgn operator search service
         const CGN_OPERATOR_SEARCH_SERVICE = new CgnOperatorSearchService(
           CGN_OPERATOR_SEARCH_API_CLIENT
-        );
-
-        // Create the EUCovidCert service
-        const EUCOVIDCERT_SERVICE = new EUCovidCertService(
-          EUCOVIDCERT_API_CLIENT
         );
 
         // Create the user data processing service
@@ -479,15 +468,6 @@ export async function newApp({
             IoFimsAPIBasePath,
             IO_FIMS_SERVICE,
             PROFILE_SERVICE,
-            authMiddlewares.bearerSession
-          );
-        }
-
-        if (FF_EUCOVIDCERT_ENABLED) {
-          registerEUCovidCertAPIRoutes(
-            app,
-            EUCovidCertBasePath,
-            EUCOVIDCERT_SERVICE,
             authMiddlewares.bearerSession
           );
         }
