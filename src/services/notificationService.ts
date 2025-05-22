@@ -90,11 +90,7 @@ export default class NotificationService {
       }
     };
 
-    const queueClient = redirectOnNewPushNotifyQueue()
-      ? this.newNotificationQueueClient
-      : this.notificationQueueClient;
-
-    return queueClient
+    return this.notificationQueueClient
       .sendMessage(base64EncodeObject(notifyMessage))
       .then(() => ResponseSuccessJson({ message: "ok" }))
       .catch((error) =>
