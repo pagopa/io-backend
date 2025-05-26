@@ -118,7 +118,6 @@ export default class NotificationService {
       pushChannel: installation.pushChannel,
       tags: [toFiscalCodeHash(fiscalCode)]
     };
-    //generazione del numero casuale oppure test dell'espressione regolare sul fiscalCode
 
     const queueClient = redirectOnNewPushNotifyQueue()
       ? this.newNotificationQueueClient
