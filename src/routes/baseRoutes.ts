@@ -2,6 +2,8 @@ import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { CIDR } from "@pagopa/ts-commons/lib/strings";
 import { Express } from "express";
 import * as passport from "passport";
+import PagoPAEcommerceController from "src/controllers/pagoPAEcommerceController";
+import PagoPAEcommerceService from "src/services/pagoPAEcommerceService";
 
 import { LollipopApiClient } from "../clients/lollipop";
 import {
@@ -57,6 +59,7 @@ export const registerAPIRoutes = (
   notificationServiceFactory: NotificationServiceFactory,
   sessionStorage: RedisSessionStorage,
   pagoPaProxyService: PagoPAProxyService,
+  PagoPaEcommerceService: PagoPAEcommerceService,
   userMetadataStorage: RedisUserMetadataStorage,
   userDataProcessingService: UserDataProcessingService,
   bearerSessionTokenAuth: ReturnType<passport.Authenticator["authenticate"]>,
@@ -89,6 +92,9 @@ export const registerAPIRoutes = (
 
   const pagoPAProxyController: PagoPAProxyController =
     new PagoPAProxyController(pagoPaProxyService);
+
+  const pagoPAEcommerceController: PagoPAEcommerceController =
+    new PagoPAEcommerceController(PagoPaEcommerceService);
 
   const userMetadataController: UserMetadataController =
     new UserMetadataController(userMetadataStorage);
@@ -272,6 +278,15 @@ export const registerAPIRoutes = (
     toExpressHandler(
       pagoPAProxyController.getPaymentInfo,
       pagoPAProxyController
+    )
+  );
+
+  app.get(
+    `${basePath}/payment-info/:rptId`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      pagoPAEcommerceController.getPaymentInfo,
+      pagoPAEcommerceController
     )
   );
 
