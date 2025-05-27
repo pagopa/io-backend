@@ -59,7 +59,7 @@ paths:
       operationId: getPingHead
       description: Preflight check for the ping API.
       responses:
-        "200":
+        "204":
           description: Preflight success response.
           content: {}
     x-swagger-router-controller: StatusServicesController
@@ -86,7 +86,7 @@ paths:
       operationId: getServicesStatusHead
       description: Preflight check for the service statuses API.
       responses:
-        "200":
+        "204":
           description: Preflight success response.
           content: {}
     x-swagger-router-controller: StatusServicesController
