@@ -1230,15 +1230,26 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-for-io.yaml#/definitions/SpezzoniCausaleVersamentoItem"
   # Definitions from pagopa ecommerce api
   PaymentInfoResponse:
-    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/PaymentRequestsGetResponse"
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/PaymentRequestsGetResponse"
   PaymentInfoNotFoundResponse:
-    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/PaymentInfoNotFoundResponse"
+    x-one-of: true
+    allOf:
+      - $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/ValidationFaultPaymentDataErrorProblemJson"
+      - $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/ValidationFaultPaymentUnknownProblemJson"
   PaymentInfoConflictResponse:
-    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/PaymentInfoConflictResponse"
+    x-one-of: true
+    allOf:
+      - $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/PaymentOngoingStatusFaultPaymentProblemJson"
+      - $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/PaymentExpiredStatusFaultPaymentProblemJson"
+      - $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/PaymentCanceledStatusFaultPaymentProblemJson"
+      - $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/PaymentDuplicatedStatusFaultPaymentProblemJson"
   PaymentInfoBadGatewayResponse:
-    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/PaymentInfoBadGatewayResponse"
+    x-one-of: true
+    allOf:
+      - $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/GatewayFaultPaymentProblemJson"
+      - $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/ValidationFaultPaymentUnavailableProblemJson"
   PaymentInfoUnavailableResponse:
-    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/PartyConfigurationFaultPaymentProblemJson"
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/PartyConfigurationFaultPaymentProblemJson"
   # AssertionRef possible inputs
   AssertionRefSha256:
     type: string
