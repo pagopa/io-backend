@@ -169,8 +169,8 @@ components:
       - $ref: "#/components/schemas/ValidationFaultPaymentUnknownProblemJson"
     PaymentInfoBadGatewayResponse:
       oneOf:
-      - "$ref": "#/components/schemas/GatewayFaultPaymentProblemJson"
-      - "$ref": "#/components/schemas/ValidationFaultPaymentUnavailableProblemJson"
+      - $ref: "#/components/schemas/GatewayFaultPaymentProblemJson"
+      - $ref: "#/components/schemas/ValidationFaultPaymentUnavailableProblemJson"
     ValidationFaultPaymentUnavailableProblemJson:
       description: |-
         A PaymentProblemJson-like type specific for the GetPayment operations.

@@ -812,7 +812,7 @@ paths:
         "200":
           description: Payment information
           schema:
-            "$ref": "#/definitions/PaymentInfoResponse"
+            $ref: "#/definitions/PaymentInfoResponse"
           examples:
             application/json:
               amount: 11400
@@ -820,37 +820,27 @@ paths:
               dueDate: "2025-05-31"
         "401":
           description: Bearer token null or expired.
-        '404':
+        "404":
           description: This error occurs when submitting a non-existing RPT id.
-          content:
-            application/json:
-              schema:
-                "$ref": "#/definitions/PaymentInfoNotFoundResponse"
-        '409':
+          schema:
+            $ref: "#/definitions/PaymentInfoNotFoundResponse"
+        "409":
           description: Conflict on payment status
-          content:
-            application/json:
-              schema:
-                "$ref": "#/definitions/PaymentInfoConflictResponse"
-        '500':
+          schema:
+            $ref: "#/definitions/PaymentInfoConflictResponse"
+        "500":
           description: Unauthorized, access token missing or invalid
-          content:
-            application/json:
-              schema:
-                "$ref": "#/definitions/ProblemJson"
-        '502':
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "502":
           description: PagoPA services are not available or request is rejected by
             PagoPa
-          content:
-            application/json:
-              schema:
-                "$ref": "#/definitions/PaymentInfoBadGatewayResponse"
-        '503':
+          schema:
+            $ref: "#/definitions/PaymentInfoBadGatewayResponse"
+        "503":
           description: EC services are not available
-          content:
-            application/json:
-              schema:
-                "$ref": "#/definitions/PaymentInfoUnavailableResponse"
+          schema:
+            $ref: "#/definitions/PaymentInfoUnavailableResponse"
   "/user-data-processing":
     x-swagger-router-controller: UserDataProcessingController
     post:
@@ -1167,8 +1157,6 @@ definitions:
     # Definitions from pagopa ecommerce api
   PaymentInfoResponse:
     $ref: "consumed/pagopa_ecommerce.yaml#/components/schemas/PaymentRequestsGetResponse"
-  PaymnetInfoProblemJson:
-    $ref: "consumed/pagopa_ecommerce.yaml#/components/schemas/ProblemJson"
   PaymentInfoNotFoundResponse:
     $ref: "consumed/pagopa_ecommerce.yaml#/components/schemas/PaymentInfoNotFoundResponse"
   PaymentInfoConflictResponse:
