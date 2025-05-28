@@ -1154,7 +1154,41 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-for-io.yaml#/definitions/SpezzoniCausaleVersamento"
   SpezzoniCausaleVersamentoItem:
     $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-for-io.yaml#/definitions/SpezzoniCausaleVersamentoItem"
-    # Definitions from pagopa ecommerce api
+  # Definitions from pagopa ecommerce api
+  ValidationFaultPaymentUnknown:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/ValidationFaultPaymentUnknown"
+  ValidationFaultPaymentUnknownProblemJson:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/ValidationFaultPaymentUnknownProblemJson"
+  ValidationFaultPaymentUnavailable:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/ValidationFaultPaymentUnavailable"
+  ValidationFaultPaymentUnavailableProblemJson:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/ValidationFaultPaymentUnavailableProblemJson"
+  ValidationFaultPaymentDataErrorProblemJson:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/ValidationFaultPaymentDataErrorProblemJson"
+  ValidationFaultPaymentDataError:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/ValidationFaultPaymentDataError"
+  GatewayFaultPaymentProblemJson:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/GatewayFaultPaymentProblemJson"
+  GatewayFault:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/GatewayFault"
+  PartyConfigurationFault:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PartyConfigurationFault"
+  PaymentOngoingStatusFault:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentOngoingStatusFault"
+  PaymentOngoingStatusFaultPaymentProblemJson:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentOngoingStatusFaultPaymentProblemJson"
+  PaymentExpiredStatusFaultPaymentProblemJson:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentExpiredStatusFaultPaymentProblemJson"
+  PaymentExpiredStatusFault:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentExpiredStatusFault"
+  PaymentCanceledStatusFaultPaymentProblemJson:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentCanceledStatusFaultPaymentProblemJson"
+  PaymentCanceledStatusFault:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentCanceledStatusFault"
+  PaymentDuplicatedStatusFaultPaymentProblemJson:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentDuplicatedStatusFaultPaymentProblemJson"
+  PaymentDuplicatedStatusFault:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentDuplicatedStatusFault"
   PaymentInfoResponse:
     $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentRequestsGetResponse"
   PaymentInfoNotFoundResponse:
@@ -1162,7 +1196,7 @@ definitions:
   PaymentInfoConflictResponse:
     $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentInfoConflictResponse"
   PaymentInfoBadGatewayResponse:
-    $ref: "onsumed/pagopa_ecommerce.yaml#/definitions/PaymentInfoBadGatewayResponse"
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentInfoBadGatewayResponse"
   PaymentInfoUnavailableResponse:
     $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PartyConfigurationFaultPaymentProblemJson"
   # AssertionRef possible inputs
