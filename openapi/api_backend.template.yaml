@@ -805,7 +805,7 @@ paths:
         type: boolean
         required: false
     get:
-      operationId: getPaymentInfo
+      operationId: getPaymentInfoV2
       summary: Get Payment Info
       description: Retrieve information about a payment
       responses:
