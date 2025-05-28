@@ -1229,8 +1229,6 @@ definitions:
   SpezzoniCausaleVersamentoItem:
     $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-for-io.yaml#/definitions/SpezzoniCausaleVersamentoItem"
   # Definitions from pagopa ecommerce api
-  ValidationFaultPaymentDataError:
-    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/ValidationFaultPaymentDataError"
   ValidationFaultPaymentUnknown:
     $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/ValidationFaultPaymentUnknown"
   ValidationFaultPaymentUnknownProblemJson:
@@ -1239,6 +1237,10 @@ definitions:
     $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/ValidationFaultPaymentUnavailable"
   ValidationFaultPaymentUnavailableProblemJson:
     $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/ValidationFaultPaymentUnavailableProblemJson"
+  ValidationFaultPaymentDataErrorProblemJson:
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/ValidationFaultPaymentDataErrorProblemJson"
+  ValidationFaultPaymentDataError:
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/ValidationFaultPaymentDataError"
   GatewayFaultPaymentProblemJson:
     $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/GatewayFaultPaymentProblemJson"
   GatewayFault:
