@@ -2,8 +2,6 @@ import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { CIDR } from "@pagopa/ts-commons/lib/strings";
 import { Express } from "express";
 import * as passport from "passport";
-import PagoPAEcommerceController from "src/controllers/pagoPAEcommerceController";
-import PagoPAEcommerceService from "src/services/pagoPAEcommerceService";
 
 import { LollipopApiClient } from "../clients/lollipop";
 import {
@@ -13,6 +11,7 @@ import {
 } from "../config";
 import MessagesController from "../controllers/messagesController";
 import NotificationController from "../controllers/notificationController";
+import PagoPAEcommerceController from "../controllers/pagoPAEcommerceController";
 import PagoPAProxyController from "../controllers/pagoPAProxyController";
 import ProfileController from "../controllers/profileController";
 import ServicesController from "../controllers/servicesController";
@@ -22,6 +21,7 @@ import UserMetadataController from "../controllers/userMetadataController";
 import FunctionsAppService from "../services/functionAppService";
 import NewMessagesService from "../services/newMessagesService";
 import { NotificationServiceFactory } from "../services/notificationServiceFactory";
+import PagoPAEcommerceService from "../services/pagoPAEcommerceService";
 import PagoPAProxyService from "../services/pagoPAProxyService";
 import ProfileService from "../services/profileService";
 import RedisSessionStorage from "../services/redisSessionStorage";
