@@ -1230,15 +1230,15 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-for-io.yaml#/definitions/SpezzoniCausaleVersamentoItem"
   # Definitions from pagopa ecommerce api
   PaymentInfoResponse:
-    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/PaymentRequestsGetResponse"
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/PaymentRequestsGetResponse"
   PaymentInfoNotFoundResponse:
-    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/PaymentInfoNotFoundResponse"
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/PaymentInfoNotFoundResponse"
   PaymentInfoConflictResponse:
-    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/PaymentInfoConflictResponse"
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/PaymentInfoConflictResponse"
   PaymentInfoBadGatewayResponse:
-    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/PaymentInfoBadGatewayResponse"
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/PaymentInfoBadGatewayResponse"
   PaymentInfoUnavailableResponse:
-    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/PartyConfigurationFaultPaymentProblemJson"
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/PartyConfigurationFaultPaymentProblemJson"
   # AssertionRef possible inputs
   AssertionRefSha256:
     type: string
