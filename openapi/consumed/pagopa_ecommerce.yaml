@@ -156,19 +156,21 @@ components:
           example: '2025-07-31'
       required:
       - amount
-      - paymentContextCode
     PaymentInfoConflictResponse:
-      oneOf:
+      x-one-of: true
+      allOf:
       - $ref: "#/components/schemas/PaymentOngoingStatusFaultPaymentProblemJson"
       - $ref: "#/components/schemas/PaymentExpiredStatusFaultPaymentProblemJson"
       - $ref: "#/components/schemas/PaymentCanceledStatusFaultPaymentProblemJson"
       - $ref: "#/components/schemas/PaymentDuplicatedStatusFaultPaymentProblemJson"
     PaymentInfoNotFoundResponse:
-      oneOf:
+      x-one-of: true
+      allOf:
       - $ref: "#/components/schemas/ValidationFaultPaymentDataErrorProblemJson"
       - $ref: "#/components/schemas/ValidationFaultPaymentUnknownProblemJson"
     PaymentInfoBadGatewayResponse:
-      oneOf:
+      x-one-of: true
+      allOf:
       - $ref: "#/components/schemas/GatewayFaultPaymentProblemJson"
       - $ref: "#/components/schemas/ValidationFaultPaymentUnavailableProblemJson"
     ValidationFaultPaymentUnavailableProblemJson:
