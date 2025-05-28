@@ -1247,6 +1247,22 @@ definitions:
     $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/GatewayFault"
   PartyConfigurationFault:
     $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/PartyConfigurationFault"
+  PaymentOngoingStatusFault:
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/PaymentOngoingStatusFault"
+  PaymentOngoingStatusFaultPaymentProblemJson:
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/PaymentOngoingStatusFaultPaymentProblemJson"
+  PaymentExpiredStatusFaultPaymentProblemJson:
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/PaymentExpiredStatusFaultPaymentProblemJson"
+  PaymentExpiredStatusFault:
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/PaymentExpiredStatusFault"
+  PaymentCanceledStatusFaultPaymentProblemJson:
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/PaymentCanceledStatusFaultPaymentProblemJson"
+  PaymentCanceledStatusFault:
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/PaymentCanceledStatusFault"
+  PaymentDuplicatedStatusFaultPaymentProblemJson:
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/PaymentDuplicatedStatusFaultPaymentProblemJson"
+  PaymentDuplicatedStatusFault:
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/PaymentDuplicatedStatusFault"
   PaymentInfoResponse:
     $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/PaymentRequestsGetResponse"
   PaymentInfoNotFoundResponse:
