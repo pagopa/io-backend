@@ -1,5 +1,6 @@
-import { Client, createClient } from "generated/pagopa-ecommerce/client";
 import nodeFetch from "node-fetch";
+
+import { Client, createClient } from "../../generated/pagopa-ecommerce/client";
 
 export type PagoPaEcommerceClient = Client<"ApiKeyAuth">;
 
