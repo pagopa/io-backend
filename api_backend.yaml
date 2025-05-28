@@ -1230,33 +1230,33 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-for-io.yaml#/definitions/SpezzoniCausaleVersamentoItem"
   # Definitions from pagopa ecommerce api
   ValidationFaultPaymentUnknown:
-    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/ValidationFaultPaymentUnknown"
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/ValidationFaultPaymentUnknown"
   ValidationFaultPaymentUnknownProblemJson:
-    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/ValidationFaultPaymentUnknownProblemJson"
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/ValidationFaultPaymentUnknownProblemJson"
   ValidationFaultPaymentUnavailable:
-    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/ValidationFaultPaymentUnavailable"
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/ValidationFaultPaymentUnavailable"
   ValidationFaultPaymentUnavailableProblemJson:
-    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/ValidationFaultPaymentUnavailableProblemJson"
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/ValidationFaultPaymentUnavailableProblemJson"
   ValidationFaultPaymentDataErrorProblemJson:
-    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/ValidationFaultPaymentDataErrorProblemJson"
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/ValidationFaultPaymentDataErrorProblemJson"
   ValidationFaultPaymentDataError:
-    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/ValidationFaultPaymentDataError"
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/ValidationFaultPaymentDataError"
   GatewayFaultPaymentProblemJson:
-    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/GatewayFaultPaymentProblemJson"
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/GatewayFaultPaymentProblemJson"
   GatewayFault:
-    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/GatewayFault"
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/GatewayFault"
   PartyConfigurationFault:
-    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/PartyConfigurationFault"
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/PartyConfigurationFault"
   PaymentInfoResponse:
-    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/PaymentRequestsGetResponse"
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/PaymentRequestsGetResponse"
   PaymentInfoNotFoundResponse:
-    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/PaymentInfoNotFoundResponse"
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/PaymentInfoNotFoundResponse"
   PaymentInfoConflictResponse:
-    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/PaymentInfoConflictResponse"
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/PaymentInfoConflictResponse"
   PaymentInfoBadGatewayResponse:
-    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/PaymentInfoBadGatewayResponse"
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/PaymentInfoBadGatewayResponse"
   PaymentInfoUnavailableResponse:
-    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/components/schemas/PartyConfigurationFaultPaymentProblemJson"
+    $ref: "openapi/consumed/pagopa_ecommerce.yaml#/definitions/PartyConfigurationFaultPaymentProblemJson"
   # AssertionRef possible inputs
   AssertionRefSha256:
     type: string
