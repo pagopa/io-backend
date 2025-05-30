@@ -7,6 +7,7 @@ import {
   HttpStatusCodeEnum,
   IResponse,
   IResponseErrorBadGateway,
+  IResponseErrorConflict,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorServiceUnavailable,
@@ -30,6 +31,7 @@ import { PaymentProblemJson } from "generated/pagopa-proxy/PaymentProblemJson";
 import * as t from "io-ts";
 
 import { errorsToError } from "./errorsFormatter";
+import { PaymentInfoConflictResponse } from "generated/pagopa-ecommerce/PaymentInfoConflictResponse";
 
 /**
  * Interface for a no content response returning a empty object.
@@ -207,6 +209,21 @@ export const ResponsePaymentInfoNotFound = (
       .set("Content-Type", "application/problem+json")
       .json(body),
   kind: "IResponseErrorNotFound"
+});
+
+/**
+ * Returns a 409 error response payment api
+ */
+export const ResponsePaymentInfoConflict = (
+  status: HttpStatusCodeEnum,
+  body: PaymentInfoConflictResponse
+): IResponseErrorConflict => ({
+  apply: (res) =>
+    res
+      .status(status)
+      .set("Content-Type", "application/problem+json")
+      .json(body),
+  kind: "IResponseErrorConflict"
 });
 
 /**

@@ -1,5 +1,6 @@
 import {
   IResponseErrorBadGateway,
+  IResponseErrorConflict,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorServiceUnavailable,
@@ -12,6 +13,7 @@ import { PagoPaEcommerceClient } from "src/clients/pagopa-ecommerce";
 import { PaymentInfoResponse } from "../../generated/backend/PaymentInfoResponse";
 import {
   ResponsePaymentInfoBadGateway,
+  ResponsePaymentInfoConflict,
   ResponsePaymentInfoInternal,
   ResponsePaymentInfoNotFound,
   ResponsePaymentInfoUnavailable,
@@ -37,6 +39,7 @@ export default class PagoPAEcommerceService {
     | IResponseErrorServiceUnavailable
     | IResponseErrorBadGateway
     | IResponseErrorNotFound
+    | IResponseErrorConflict
     | IResponseSuccessJson<PaymentInfoResponse>
   > =>
     withCatchAsInternalError(async () => {
@@ -66,6 +69,8 @@ export default class PagoPAEcommerceService {
             );
           case 404:
             return ResponsePaymentInfoNotFound(response.status, response.value);
+          case 409:
+            return ResponsePaymentInfoConflict(response.status, response.value);
           case 502:
             return ResponsePaymentInfoBadGateway(
               response.status,
@@ -75,11 +80,6 @@ export default class PagoPAEcommerceService {
             return ResponsePaymentInfoUnavailable(
               response.status,
               response.value
-            );
-          default:
-            return ResponsePaymentInfoInternal(
-              response.status,
-              "Unexpected response status from PagoPA Ecommerce API"
             );
         }
       });

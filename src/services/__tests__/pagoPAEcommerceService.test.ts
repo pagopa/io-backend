@@ -18,12 +18,10 @@ const mockGetPaymentRequestInfoUat = jest.fn();
 
 const pagoPAEcommerceClientMock: PagoPaEcommerceClient = {
   getPaymentRequestInfo: mockGetPaymentRequestInfo,
-  getCarts: jest.fn()
 };
 
 const pagopaEcommerceUatClientMock: PagoPaEcommerceClient = {
   getPaymentRequestInfo: mockGetPaymentRequestInfoUat,
-  getCarts: jest.fn()
 };
 
 const rptId = "12345678912301230900000812348";

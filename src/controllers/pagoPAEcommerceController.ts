@@ -1,5 +1,6 @@
 import {
   IResponseErrorBadGateway,
+  IResponseErrorConflict,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorServiceUnavailable,
@@ -33,6 +34,7 @@ export default class PagoPAEcommerceController {
     | IResponseErrorServiceUnavailable
     | IResponseErrorBadGateway
     | IResponseErrorNotFound
+    | IResponseErrorConflict
     | IResponseSuccessJson<PaymentInfoResponse>
   > =>
     withValidatedOrInternalError(t.string.decode(req.params.rptId), (rptId) =>
