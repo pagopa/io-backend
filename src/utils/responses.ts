@@ -6,7 +6,11 @@ import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import {
   HttpStatusCodeEnum,
   IResponse,
+  IResponseErrorBadGateway,
+  IResponseErrorConflict,
   IResponseErrorInternal,
+  IResponseErrorNotFound,
+  IResponseErrorServiceUnavailable,
   IResponseErrorValidation,
   ResponseErrorGeneric,
   ResponseErrorInternal,
@@ -17,6 +21,11 @@ import * as express from "express";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
+import { PaymentInfoBadGatewayResponse } from "generated/backend/PaymentInfoBadGatewayResponse";
+import { ProblemJson } from "generated/io-messages-api/ProblemJson";
+import { PartyConfigurationFaultPaymentProblemJson } from "generated/pagopa-ecommerce/PartyConfigurationFaultPaymentProblemJson";
+import { PaymentInfoConflictResponse } from "generated/pagopa-ecommerce/PaymentInfoConflictResponse";
+import { PaymentInfoNotFoundResponse } from "generated/pagopa-ecommerce/PaymentInfoNotFoundResponse";
 import { PaymentFaultEnum } from "generated/pagopa-proxy/PaymentFault";
 import { PaymentFaultV2Enum } from "generated/pagopa-proxy/PaymentFaultV2";
 import { PaymentProblemJson } from "generated/pagopa-proxy/PaymentProblemJson";
@@ -176,6 +185,93 @@ export const ResponsePaymentError = (
     detail_v2: detailV2,
     status: HttpStatusCodeEnum.HTTP_STATUS_500 as HttpStatusCode,
     title: "Internal server error"
+  };
+  return {
+    apply: (res) =>
+      res
+        .status(HttpStatusCodeEnum.HTTP_STATUS_500)
+        .set("Content-Type", "application/problem+json")
+        .json(problem),
+    kind: "IResponseErrorInternal"
+  };
+};
+
+/**
+ * Returns a 404 error response payment api
+ */
+export const ResponsePaymentInfoNotFound = (
+  status: HttpStatusCodeEnum,
+  body: PaymentInfoNotFoundResponse
+): IResponseErrorNotFound => ({
+  apply: (res) =>
+    res
+      .status(status)
+      .set("Content-Type", "application/problem+json")
+      .json(body),
+  kind: "IResponseErrorNotFound"
+});
+
+/**
+ * Returns a 409 error response payment api
+ */
+export const ResponsePaymentInfoConflict = (
+  status: HttpStatusCodeEnum,
+  body: PaymentInfoConflictResponse
+): IResponseErrorConflict => ({
+  apply: (res) =>
+    res
+      .status(status)
+      .set("Content-Type", "application/problem+json")
+      .json(body),
+  kind: "IResponseErrorConflict"
+});
+
+/**
+ * Returns a 502 error response payment api
+ */
+export const ResponsePaymentInfoBadGateway = (
+  status: HttpStatusCodeEnum,
+  body: PaymentInfoBadGatewayResponse
+): IResponseErrorBadGateway => ({
+  apply: (res) =>
+    res
+      .status(status)
+      .set("Content-Type", "application/problem+json")
+      .json(body),
+  kind: "IResponseErrorBadGateway"
+});
+
+/**
+ * Returns a 503 error response payment api
+ */
+export const ResponsePaymentInfoUnavailable = (
+  status: HttpStatusCodeEnum,
+  body: PartyConfigurationFaultPaymentProblemJson
+): IResponseErrorServiceUnavailable => ({
+  apply: (res) =>
+    res
+      .status(status)
+      .set("Content-Type", "application/problem+json")
+      .json(body),
+  kind: "IResponseErrorServiceUnavailable"
+});
+
+/**
+ * Returns a 500 with json response.
+ */
+export const ResponsePaymentInfoInternal = (
+  status: HttpStatusCodeEnum,
+  detail?: string,
+  title?: string,
+  type?: string,
+  instance?: string
+): IResponsePaymentInternalError => {
+  const problem: ProblemJson = {
+    status: status as HttpStatusCode,
+    title: title || "Internal server error",
+    detail: detail || "Unexpected error from PagoPA Ecommerce API",
+    type: type,
+    instance
   };
   return {
     apply: (res) =>
