@@ -12,7 +12,6 @@ export function getPagoPaEcommerceClient(
   return createClient<"ApiKeyAuth">({
     baseUrl,
     fetchApi,
-    withDefaults: (op) => (params) =>
-      op({ ApiKeyAuth: apiKey, ...params, id_cart: "" })
+    withDefaults: (op) => (params) => op({ ApiKeyAuth: apiKey, ...params })
   });
 }

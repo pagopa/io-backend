@@ -67,37 +67,6 @@ paths:
           description: EC services are not available
           schema:
             $ref: "#/definitions/PartyConfigurationFaultPaymentProblemJson"
-  /carts/{id_cart}:
-    get:
-      tags:
-        - payment-requests
-      operationId: getCarts
-      summary: Get a cart data
-      description: Retrieve cart information
-      parameters:
-        - in: path
-          name: id_cart
-          description: Unique identifier for cart
-          type: string
-          format: uuid
-          required: true
-      responses:
-        '200':
-          description: Cart data
-          schema:
-            $ref: "#/definitions/CartRequest"
-        '400':
-          description: Formally invalid input
-          schema:
-            $ref: "#/definitions/ProblemJson"
-        '404':
-          description: Cart not found
-          schema:
-            $ref: "#/definitions/ProblemJson"
-        '500':
-          description: Internal server error
-          schema:
-            $ref: "#/definitions/ProblemJson"
 definitions:
   PaymentRequestsGetResponse:
     type: object
