@@ -24,6 +24,7 @@ import { pipe } from "fp-ts/lib/function";
 import { PaymentInfoBadGatewayResponse } from "generated/backend/PaymentInfoBadGatewayResponse";
 import { ProblemJson } from "generated/io-messages-api/ProblemJson";
 import { PartyConfigurationFaultPaymentProblemJson } from "generated/pagopa-ecommerce/PartyConfigurationFaultPaymentProblemJson";
+import { PaymentInfoConflictResponse } from "generated/pagopa-ecommerce/PaymentInfoConflictResponse";
 import { PaymentInfoNotFoundResponse } from "generated/pagopa-ecommerce/PaymentInfoNotFoundResponse";
 import { PaymentFaultEnum } from "generated/pagopa-proxy/PaymentFault";
 import { PaymentFaultV2Enum } from "generated/pagopa-proxy/PaymentFaultV2";
@@ -31,7 +32,6 @@ import { PaymentProblemJson } from "generated/pagopa-proxy/PaymentProblemJson";
 import * as t from "io-ts";
 
 import { errorsToError } from "./errorsFormatter";
-import { PaymentInfoConflictResponse } from "generated/pagopa-ecommerce/PaymentInfoConflictResponse";
 
 /**
  * Interface for a no content response returning a empty object.
