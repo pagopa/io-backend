@@ -791,6 +791,56 @@ paths:
           description: Unavailable service
           schema:
             $ref: "#/definitions/ProblemJson"
+  "/payment-info/{rptId}":
+    x-swagger-router-controller: PagoPAEcommerceController
+    parameters:
+      - name: rptId
+        in: path
+        required: true
+        description: Unique identifier for payments.
+        type: string
+      - name: test
+        in: query
+        description: Use test environment of PagoPAEcommerceClient
+        type: boolean
+        required: false
+    get:
+      operationId: getPaymentInfoV2
+      summary: Get Payment Info
+      description: Retrieve information about a payment
+      responses:
+        "200":
+          description: Payment information
+          schema:
+            $ref: "#/definitions/PaymentInfoResponse"
+          examples:
+            application/json:
+              amount: 11400
+              description: "PAGAMENTO TARI PRIMA RATA"
+              dueDate: "2025-05-31"
+        "401":
+          description: Bearer token null or expired.
+        "404":
+          description: This error occurs when submitting a non-existing RPT id.
+          schema:
+            $ref: "#/definitions/PaymentInfoNotFoundResponse"
+        "409":
+          description: Conflict on payment status
+          schema:
+            $ref: "#/definitions/PaymentInfoConflictResponse"
+        "500":
+          description: Unauthorized, access token missing or invalid
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "502":
+          description: PagoPA services are not available or request is rejected by
+            PagoPa
+          schema:
+            $ref: "#/definitions/PaymentInfoBadGatewayResponse"
+        "503":
+          description: EC services are not available
+          schema:
+            $ref: "#/definitions/PaymentInfoUnavailableResponse"
   "/user-data-processing":
     x-swagger-router-controller: UserDataProcessingController
     post:
@@ -1104,6 +1154,51 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-for-io.yaml#/definitions/SpezzoniCausaleVersamento"
   SpezzoniCausaleVersamentoItem:
     $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-for-io.yaml#/definitions/SpezzoniCausaleVersamentoItem"
+  # Definitions from pagopa ecommerce api
+  ValidationFaultPaymentUnknown:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/ValidationFaultPaymentUnknown"
+  ValidationFaultPaymentUnknownProblemJson:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/ValidationFaultPaymentUnknownProblemJson"
+  ValidationFaultPaymentUnavailable:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/ValidationFaultPaymentUnavailable"
+  ValidationFaultPaymentUnavailableProblemJson:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/ValidationFaultPaymentUnavailableProblemJson"
+  ValidationFaultPaymentDataErrorProblemJson:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/ValidationFaultPaymentDataErrorProblemJson"
+  ValidationFaultPaymentDataError:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/ValidationFaultPaymentDataError"
+  GatewayFaultPaymentProblemJson:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/GatewayFaultPaymentProblemJson"
+  GatewayFault:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/GatewayFault"
+  PartyConfigurationFault:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PartyConfigurationFault"
+  PaymentOngoingStatusFault:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentOngoingStatusFault"
+  PaymentOngoingStatusFaultPaymentProblemJson:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentOngoingStatusFaultPaymentProblemJson"
+  PaymentExpiredStatusFaultPaymentProblemJson:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentExpiredStatusFaultPaymentProblemJson"
+  PaymentExpiredStatusFault:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentExpiredStatusFault"
+  PaymentCanceledStatusFaultPaymentProblemJson:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentCanceledStatusFaultPaymentProblemJson"
+  PaymentCanceledStatusFault:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentCanceledStatusFault"
+  PaymentDuplicatedStatusFaultPaymentProblemJson:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentDuplicatedStatusFaultPaymentProblemJson"
+  PaymentDuplicatedStatusFault:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentDuplicatedStatusFault"
+  PaymentInfoResponse:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentRequestsGetResponse"
+  PaymentInfoNotFoundResponse:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentInfoNotFoundResponse"
+  PaymentInfoConflictResponse:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentInfoConflictResponse"
+  PaymentInfoBadGatewayResponse:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentInfoBadGatewayResponse"
+  PaymentInfoUnavailableResponse:
+    $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PartyConfigurationFaultPaymentProblemJson"
   # AssertionRef possible inputs
   AssertionRefSha256:
     type: string

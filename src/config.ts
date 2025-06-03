@@ -30,6 +30,7 @@ import { IoFimsAPIClient } from "./clients/io-fims";
 import { IoSignAPIClient } from "./clients/io-sign";
 import { IoWalletAPIClient } from "./clients/io-wallet";
 import { LollipopApiClient } from "./clients/lollipop";
+import { getPagoPaEcommerceClient } from "./clients/pagopa-ecommerce";
 import { PNClientFactory } from "./clients/pn-clients";
 import { ServicesAppBackendAPIClient } from "./clients/services-app-backend";
 import { TrialSystemAPIClient } from "./clients/trial-system.client";
@@ -320,6 +321,26 @@ export const PAGOPA_CLIENT = new PagoPAClientFactory(
   pagoPAApiKeyProd,
   pagoPAApiUrlTest,
   pagoPAApiKeyTest,
+  simpleHttpsApiFetch
+);
+
+const pagoPAEcommerceApiUrl = getRequiredENVVar("PAGOPA_ECOMMERCE_BASE_URL");
+const pagoPAEcommerceApiKey = getRequiredENVVar("PAGOPA_ECOMMERCE_API_KEY");
+const pagoPAEcommerceUatApiUrl = getRequiredENVVar(
+  "PAGOPA_ECOMMERCE_UAT_BASE_URL"
+);
+const pagoPAEcommerceUatApiKey = getRequiredENVVar(
+  "PAGOPA_ECOMMERCE_UAT_API_KEY"
+);
+export const PAGOPA_ECOMMERCE_CLIENT = getPagoPaEcommerceClient(
+  pagoPAEcommerceApiUrl,
+  pagoPAEcommerceApiKey,
+  simpleHttpsApiFetch
+);
+
+export const PAGOPA_ECOMMERCE_UAT_CLIENT = getPagoPaEcommerceClient(
+  pagoPAEcommerceUatApiUrl,
+  pagoPAEcommerceUatApiKey,
   simpleHttpsApiFetch
 );
 

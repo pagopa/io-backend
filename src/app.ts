@@ -51,6 +51,8 @@ import {
   NOTIFICATIONS_QUEUE_NAME,
   NOTIFICATIONS_STORAGE_CONNECTION_STRING,
   PAGOPA_CLIENT,
+  PAGOPA_ECOMMERCE_CLIENT,
+  PAGOPA_ECOMMERCE_UAT_CLIENT,
   PN_ADDRESS_BOOK_CLIENT_SELECTOR,
   PNAddressBookConfig,
   PUSH_NOTIFICATIONS_QUEUE_NAME,
@@ -87,6 +89,7 @@ import LollipopService from "./services/lollipopService";
 import NewMessagesService from "./services/newMessagesService";
 import NotificationService from "./services/notificationService";
 import { getNotificationServiceFactory } from "./services/notificationServiceFactory";
+import PagoPAEcommerceService from "./services/pagoPAEcommerceService";
 import PagoPAProxyService from "./services/pagoPAProxyService";
 import { PNService } from "./services/pnService";
 import ProfileService from "./services/profileService";
@@ -394,6 +397,12 @@ export async function newApp({
         );
 
         const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT);
+
+        const PAGOPA_ECOMMERCE_SERVICE = new PagoPAEcommerceService(
+          PAGOPA_ECOMMERCE_CLIENT,
+          PAGOPA_ECOMMERCE_UAT_CLIENT
+        );
+
         // Register the user metadata storage service.
         const USER_METADATA_STORAGE = new RedisUserMetadataStorage(
           REDIS_CLIENT_SELECTOR.selectOne(RedisClientMode.FAST)
@@ -409,6 +418,7 @@ export async function newApp({
           notificationServiceFactory,
           SESSION_STORAGE,
           PAGOPA_PROXY_SERVICE,
+          PAGOPA_ECOMMERCE_SERVICE,
           USER_METADATA_STORAGE,
           USER_DATA_PROCESSING_SERVICE,
           authMiddlewares.bearerSession,
