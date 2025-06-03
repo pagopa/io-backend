@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 16.15.1
+
+### Patch Changes
+
+- 9d6cd33: Switch to new push-notifications queue.
+
 ## 16.15.0
 
 ### Minor Changes
