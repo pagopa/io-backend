@@ -1497,6 +1497,7 @@ definitions:
       - SUBJECT_VALIDATION_ERROR
     description: A representation of all the error type for an invalid ThirdPartyMessage
     x-example: ATTACHMENTS_NOT_PRESENT
+responses: {}
 parameters:
   MessageId:
     name: id
