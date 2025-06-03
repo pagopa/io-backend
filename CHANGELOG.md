@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 16.16.0
+
+### Minor Changes
+
+- d75e740: new payment info api
+
 ## 16.15.1
 
 ### Patch Changes
