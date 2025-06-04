@@ -25,7 +25,6 @@ import { AppMessagesAPIClient } from "./clients/app-messages.client";
 import { BonusAPIClient } from "./clients/bonus";
 import { CgnAPIClient } from "./clients/cgn";
 import { CgnOperatorSearchAPIClient } from "./clients/cgn-operator-search";
-import { EUCovidCertAPIClient } from "./clients/eucovidcert.client";
 import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
 import { IoFimsAPIClient } from "./clients/io-fims";
 import { IoSignAPIClient } from "./clients/io-sign";
@@ -233,17 +232,6 @@ export const CGN_OPERATOR_SEARCH_API_CLIENT = CgnOperatorSearchAPIClient(
   CGN_OPERATOR_SEARCH_API_KEY,
   CGN_OPERATOR_SEARCH_API_URL,
   CGN_OPERATOR_SEARCH_API_BASE_PATH,
-  httpOrHttpsApiFetch
-);
-
-export const EUCOVIDCERT_API_KEY = getRequiredENVVar("EUCOVIDCERT_API_KEY");
-export const EUCOVIDCERT_API_URL = getRequiredENVVar("EUCOVIDCERT_API_URL");
-export const EUCOVIDCERT_API_BASE_PATH = getRequiredENVVar(
-  "EUCOVIDCERT_API_BASE_PATH"
-);
-export const EUCOVIDCERT_API_CLIENT = EUCovidCertAPIClient(
-  EUCOVIDCERT_API_KEY,
-  EUCOVIDCERT_API_URL,
   httpOrHttpsApiFetch
 );
 
@@ -465,8 +453,6 @@ export const FF_BONUS_ENABLED = process.env.FF_BONUS_ENABLED === "1";
 export const FF_CGN_ENABLED = process.env.FF_CGN_ENABLED === "1";
 export const FF_IO_SIGN_ENABLED = process.env.FF_IO_SIGN_ENABLED === "1";
 export const FF_IO_FIMS_ENABLED = process.env.FF_IO_FIMS_ENABLED === "1";
-export const FF_EUCOVIDCERT_ENABLED =
-  process.env.FF_EUCOVIDCERT_ENABLED === "1";
 
 export const TEST_CGN_FISCAL_CODES = pipe(
   process.env.TEST_CGN_FISCAL_CODES || "",
