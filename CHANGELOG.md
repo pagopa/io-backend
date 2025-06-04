@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 16.17.0
+
+### Minor Changes
+
+- 298a510: Removed EUCovidCert
+
 ## 16.16.0
 
 ### Minor Changes
