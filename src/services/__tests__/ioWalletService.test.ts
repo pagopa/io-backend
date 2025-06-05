@@ -444,7 +444,8 @@ describe("IoWalletService#createWalletAttestationV2", () => {
 
     expect(mockCreateWalletAttestationV2).toHaveBeenCalledWith({
       body: {
-        assertion: "assertion"
+        assertion: "assertion",
+        fiscal_code: aFiscalCode
       }
     });
   });
