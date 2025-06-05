@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 16.18.0
+
+### Minor Changes
+
+- dd957f6: Added /wallet-attestations endpoint
+
 ## 16.17.0
 
 ### Minor Changes
