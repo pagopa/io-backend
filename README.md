@@ -110,11 +110,9 @@ Those are all Environment variables needed by the application:
 | CGN_API_BASE_PATH                         | The root path for the backend cgn api endpoints                                                      | string |
 | PORT                                      | The HTTP port the Express server is listening to                                                     | int    |
 | REDIS_URL                                 | The URL of a Redis instance                                                                          | string |
-| PRE_SHARED_KEY                            | The key shared with the API backend to authenticate the webhook notifications                        | string |
 | ALLOW_NOTIFY_IP_SOURCE_RANGE              | The range in CIDR form of allowed IPs for the webhook notifications                                  | string |
 | NOTIFICATIONS_STORAGE_CONNECTION_STRING   | Connection string to Azure queue storage for notification hub messages                               | string |
 | NOTIFICATIONS_QUEUE_NAME                  | Queue name of Azure queue storage for notification hub messages                                      | string |
-| ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE     | The range in CIDR form of IPs of service allowed to handle user sessions                             | string |
 | AUTHENTICATION_BASE_PATH                  | The root path for the authentication endpoints                                                       | string |
 | PAGOPA_API_URL_PROD                       | The url for the PagoPA api endpoints in prod mode                                                    | string |
 | PAGOPA_API_KEY_PROD                       | The api-key needed to call the pagopa proxy API                                                      | string |
@@ -135,7 +133,6 @@ Those are all Environment variables needed by the application:
 | APP_MESSAGES_API_KEY                      | The key used to authenticate to the io-functions-app-messages API                                    | string |
 | APP_MESSAGES_API_URL                      | The io-functions-app-messages URL                                                                    | string |
 | THIRD_PARTY_CONFIG_LIST                   | (Optional, default empty) A list of ThirdParty Configuration                                         | stringified JSON |
-| IS_APPBACKENDLI                           | (Optional, default false) Enables notify and session lock endpoints working only on appbackendli     | boolean |
 | FF_PN_ACTIVATION_ENABLED                  | (Optional) Enable the integration with PN for Service Activation (1 enabled)                         | int     |
 | PN_ACTIVATION_BASE_PATH                   | (Required if FF_PN_ACTIVATION_ENABLED = 1) base path for activation endpoint                         | string  |
 | PN_API_KEY                                | (Required if FF_PN_ACTIVATION_ENABLED = 1) PN API key for production environment                     | string  |
@@ -149,10 +146,6 @@ Those are all Environment variables needed by the application:
 | LOLLIPOP_API_KEY                          | The key used to authenticate to the io-function-lollipop API                                         | string  |
 | LOLLIPOP_API_URL                          | The io-function-lollipop URL                                                                         | string  |
 | LOLLIPOP_API_BASE_PATH                    | The io-function-lollipop api base path                                                               | string  |
-| LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING | Connection string to Azure queue storage for revoke Users lollipop PubKeys                           | string  |
-| LOLLIPOP_REVOKE_QUEUE_NAME                | Queue name of Azure queue storage for revoke Users lollipop PubKeys                                  | string  |
-| LOCKED_PROFILES_STORAGE_CONNECTION_STRING | Connection string to Azure queue storage for locked profiles table                                   | string |
-| LOCKED_PROFILES_TABLE_NAME                | The locked profiles table name                                                                       | string |
 | FF_UNIQUE_EMAIL_ENFORCEMENT               | (Optional) Enable the unique email enforcement policy. Default: NONE                                 | string (enum: NONE, BETA, ALL) |
 | UNIQUE_EMAIL_ENFORCEMENT_USERS            | (Optional) Comma separated list of UNIQUE_EMAIL_ENFORCEMENT beta testers. Default: empty array       | string |
 | SERVICES_APP_BACKEND_BASE_PATH            | New Service APIs(include search engine) basepath                                                     | string |
