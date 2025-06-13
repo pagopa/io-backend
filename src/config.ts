@@ -93,20 +93,6 @@ export const ALLOW_NOTIFY_IP_SOURCE_RANGE = pipe(
   })
 );
 
-// IP(s) or CIDR(s) allowed for handling sessions
-export const ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE = pipe(
-  process.env.ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE,
-  decodeCIDRs,
-  E.getOrElseW((errs) => {
-    log.error(
-      `Missing or invalid ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE environment variable: ${readableReport(
-        errs
-      )}`
-    );
-    return process.exit(1);
-  })
-);
-
 const DEFAULT_REQUEST_TIMEOUT_MS = 10000 as Millisecond;
 
 // Generic HTTP/HTTPS fetch with optional keepalive agent
