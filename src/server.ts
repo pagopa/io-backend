@@ -17,7 +17,6 @@ import * as path from "path";
 import { newApp } from "./app";
 import {
   ALLOW_NOTIFY_IP_SOURCE_RANGE,
-  ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE,
   API_BASE_PATH,
   AUTHENTICATION_BASE_PATH,
   BONUS_API_BASE_PATH,
@@ -100,7 +99,6 @@ newApp({
   ServicesAppBackendBasePath,
   TrialSystemBasePath,
   allowNotifyIPSourceRange: ALLOW_NOTIFY_IP_SOURCE_RANGE,
-  allowSessionHandleIPSourceRange: ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE,
   appInsightsClient: O.toUndefined(maybeAppInsightsClient),
   authenticationBasePath,
   env: ENV
