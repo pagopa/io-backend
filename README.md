@@ -167,7 +167,6 @@ Notes:
 If you are trying to run the docker images on your local environment (through the docker-compose) you must set the following variables:
   * NOTIFICATIONS_STORAGE_CONNECTION_STRING
   * PUSH_NOTIFICATIONS_STORAGE_CONNECTION_STRING
-  * LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING
 With this **connection string** as value:
   * DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:20003/devstoreaccount1;QueueEndpoint=http://127.0.0.1:20004/devstoreaccount1;TableEndpoint=http://127.0.0.1:20005/devstoreaccount1;
 
