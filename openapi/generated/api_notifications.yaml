@@ -274,7 +274,7 @@ definitions:
       Remember: this has to be a long text.
   PaymentNoticeNumber:
     description: >-
-      The field "Numero Avviso" of pagoPa, needed to identify the payment.
+      The field "Numero Avviso" of pagoPa, needed to identify the payment. 
       Format is `<aux digit(1n)>[<application code> (2n)]<codice IUV (15|17n)>`.
       See [pagoPa
       specs](https://docs.pagopa.it/saci/specifiche-attuative-dei-codici-identificativi-di-versamento-riversamento-e-rendicontazione/premessa)
