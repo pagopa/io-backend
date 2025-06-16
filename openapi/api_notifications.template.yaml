@@ -9,7 +9,7 @@ schemes:
   - https
 security:
   - Token: []
-paths:
+paths: null
 definitions:
   CreatedMessageWithContent:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/CreatedMessageWithContent"
