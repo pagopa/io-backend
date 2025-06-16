@@ -9,7 +9,12 @@ schemes:
   - https
 security:
   - Token: []
-paths: null
+paths:
+  "/dummy":
+    get:
+      responses:
+        "200":
+          description: "ok"
 definitions:
   CreatedMessageWithContent:
     type: object
