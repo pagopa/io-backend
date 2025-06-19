@@ -46,7 +46,7 @@ export const registerIoWalletAPIRoutes = (
   );
 
   app.post(
-    `${basePath}/wallet-attestation`,
+    `${basePath}/wallet-attestations`,
     bearerSessionTokenAuth,
     toExpressHandler(
       ioWalletController.createWalletAttestationV2,

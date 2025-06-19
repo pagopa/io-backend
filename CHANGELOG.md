@@ -1,5 +1,29 @@
 # @pagopa/io-backend
 
+## 16.18.0
+
+### Minor Changes
+
+- dd957f6: Added /wallet-attestations endpoint
+
+## 16.17.0
+
+### Minor Changes
+
+- 298a510: Removed EUCovidCert
+
+## 16.16.0
+
+### Minor Changes
+
+- d75e740: new payment info api
+
+## 16.15.1
+
+### Patch Changes
+
+- 9d6cd33: Switch to new push-notifications queue.
+
 ## 16.15.0
 
 ### Minor Changes

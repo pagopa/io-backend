@@ -82,7 +82,7 @@ paths:
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
 
-  /wallet-attestation:
+  /wallet-attestations:
     post:
       operationId: createWalletAttestationV2
       summary: Create and return a Wallet Attestation

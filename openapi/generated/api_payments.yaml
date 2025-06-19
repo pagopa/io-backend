@@ -2,7 +2,7 @@ openapi: 3.0.2
 info:
   title: Proxy API for payment domain
   description: Mobile and web backend API for payments domain.
-  version: 16.15.0
+  version: 16.18.0
 servers:
   - url: https://api-app.io.pagopa.it/api/v1
 security:
@@ -150,6 +150,68 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
+  /payment-info/{rptId}:
+    get:
+      summary: Get Payment Info
+      description: Retrieve information about a payment
+      operationId: getPaymentInfoV2
+      parameters:
+        - name: rptId
+          in: path
+          description: Unique identifier for payments.
+          required: true
+          schema:
+            type: string
+        - name: test
+          in: query
+          description: Use test environment of PagoPAEcommerceClient
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Payment information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentInfoResponse'
+              example:
+                amount: 11400
+                description: PAGAMENTO TARI PRIMA RATA
+                dueDate: '2025-05-31'
+        '401':
+          description: Bearer token null or expired.
+          content: {}
+        '404':
+          description: This error occurs when submitting a non-existing RPT id.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentInfoNotFoundResponse'
+        '409':
+          description: Conflict on payment status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentInfoConflictResponse'
+        '500':
+          description: Unauthorized, access token missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '502':
+          description: PagoPA services are not available or request is rejected by PagoPa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentInfoBadGatewayResponse'
+        '503':
+          description: EC services are not available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentInfoUnavailableResponse'
+    x-swagger-router-controller: PagoPAEcommerceController
 components:
   schemas:
     ProblemJson:
@@ -666,6 +728,533 @@ components:
           maxLength: 35
         spezzoneStrutturatoCausaleVersamento:
           $ref: '#/components/schemas/SpezzoneStrutturatoCausaleVersamento'
+    ValidationFaultPaymentUnknown:
+      description: >
+        Fault codes for errors related to well-formed requests to ECs not
+        present inside Nodo, should be mapped to 404 HTTP status code.
+
+        Most of the time these are generated when users input a wrong fiscal
+        code or notice number.
+
+        For further information visit
+        https://docs.pagopa.it/gestionedeglierrori/struttura-degli-errori/fault-code.
+
+        Possible fault codes are:
+
+        - `PAA_PAGAMENTO_SCONOSCIUTO`
+      type: string
+      enum:
+        - PAA_PAGAMENTO_SCONOSCIUTO
+    ValidationFaultPaymentUnknownProblemJson:
+      description: >
+        A PaymentProblemJson-like type specific for the GetPayment operations.
+
+        Possible values of `detail_v2` are limited to faults pertaining to
+        validation errors.
+      type: object
+      properties:
+        title:
+          type: string
+          description: >
+            A short, summary of the problem type. Written in english and
+            readable
+
+            for engineers (usually not suited for non technical stakeholders and
+
+            not localized); example: Service Unavailable
+        faultCodeCategory:
+          type: string
+          enum:
+            - PAYMENT_UNKNOWN
+        faultCodeDetail:
+          $ref: '#/components/schemas/ValidationFaultPaymentUnknown'
+      required:
+        - faultCodeCategory
+        - faultCodeDetail
+    ValidationFaultPaymentUnavailable:
+      description: >
+        Fault codes for errors related to well-formed requests to ECs not
+        present inside Nodo, should be mapped to 404 HTTP status code.
+
+        Most of the time these are generated when users input a wrong fiscal
+        code or notice number.
+
+        For further information visit
+        https://docs.pagopa.it/gestionedeglierrori/struttura-degli-errori/fault-code.
+
+        Possible fault codes are:
+
+        - `PPT_PSP_SCONOSCIUTO`
+
+        - `PPT_PSP_DISABILITATO`
+
+        - `PPT_INTERMEDIARIO_PSP_SCONOSCIUTO`
+
+        - `PPT_INTERMEDIARIO_PSP_DISABILITATO`
+
+        - `PPT_CANALE_SCONOSCIUTO`
+
+        - `PPT_CANALE_DISABILITATO`
+
+        - `PPT_AUTENTICAZIONE`
+
+        - `PPT_AUTORIZZAZIONE`
+
+        - `PPT_DOMINIO_DISABILITATO`
+
+        - `PPT_INTERMEDIARIO_PA_DISABILITATO`
+
+        - `PPT_STAZIONE_INT_PA_DISABILITATA`
+
+        - `PPT_CODIFICA_PSP_SCONOSCIUTA`
+
+        - `PPT_SEMANTICA`
+
+        - `PPT_SYSTEM_ERROR`
+
+        - `PAA_SEMANTICA`
+      type: string
+      enum:
+        - PPT_PSP_SCONOSCIUTO
+        - PPT_PSP_DISABILITATO
+        - PPT_INTERMEDIARIO_PSP_SCONOSCIUTO
+        - PPT_INTERMEDIARIO_PSP_DISABILITATO
+        - PPT_CANALE_SCONOSCIUTO
+        - PPT_CANALE_DISABILITATO
+        - PPT_AUTENTICAZIONE
+        - PPT_AUTORIZZAZIONE
+        - PPT_DOMINIO_DISABILITATO
+        - PPT_INTERMEDIARIO_PA_DISABILITATO
+        - PPT_STAZIONE_INT_PA_DISABILITATA
+        - PPT_CODIFICA_PSP_SCONOSCIUTA
+        - PPT_SEMANTICA
+        - PPT_SYSTEM_ERROR
+        - PAA_SEMANTICA
+    ValidationFaultPaymentUnavailableProblemJson:
+      description: >
+        A PaymentProblemJson-like type specific for the GetPayment operations.
+
+        Possible values of `detail_v2` are limited to faults pertaining to
+        validation errors.
+      type: object
+      properties:
+        title:
+          type: string
+          description: >
+            A short, summary of the problem type. Written in english and
+            readable
+
+            for engineers (usually not suited for non technical stakeholders and
+
+            not localized); example: Service Unavailable
+        faultCodeCategory:
+          type: string
+          enum:
+            - PAYMENT_UNAVAILABLE
+        faultCodeDetail:
+          $ref: '#/components/schemas/ValidationFaultPaymentUnavailable'
+      required:
+        - faultCodeCategory
+        - faultCodeDetail
+    ValidationFaultPaymentDataErrorProblemJson:
+      description: >
+        A PaymentProblemJson-like type specific for the GetPayment operations.
+
+        Possible values of `detail_v2` are limited to faults pertaining to
+        validation errors.
+      type: object
+      properties:
+        title:
+          type: string
+          description: >
+            A short, summary of the problem type. Written in english and
+            readable
+
+            for engineers (usually not suited for non technical stakeholders and
+
+            not localized); example: Service Unavailable
+        faultCodeCategory:
+          type: string
+          enum:
+            - PAYMENT_DATA_ERROR
+        faultCodeDetail:
+          $ref: '#/components/schemas/ValidationFaultPaymentDataError'
+      required:
+        - faultCodeCategory
+        - faultCodeDetail
+    ValidationFaultPaymentDataError:
+      description: >
+        Fault codes for errors related to well-formed requests to ECs not
+        present inside Nodo, should be mapped to 404 HTTP status code.
+
+        Most of the time these are generated when users input a wrong fiscal
+        code or notice number.
+
+        For further information visit
+        https://docs.pagopa.it/gestionedeglierrori/struttura-degli-errori/fault-code.
+
+        Possible fault codes are:
+
+        - `PPT_SINTASSI_EXTRAXSD`
+
+        - `PPT_SINTASSI_XSD`
+
+        - `PPT_DOMINIO_SCONOSCIUTO`
+
+        - `PPT_STAZIONE_INT_PA_SCONOSCIUTA`
+      type: string
+      enum:
+        - PPT_SINTASSI_EXTRAXSD
+        - PPT_SINTASSI_XSD
+        - PPT_DOMINIO_SCONOSCIUTO
+        - PPT_STAZIONE_INT_PA_SCONOSCIUTA
+    GatewayFaultPaymentProblemJson:
+      description: >
+        A PaymentProblemJson-like type specific for the GetPayment and
+        ActivatePayment operations.
+
+        Possible values of `detail_v2` are limited to faults pertaining to Nodo
+        errors.
+      type: object
+      properties:
+        title:
+          type: string
+          description: >
+            A short, summary of the problem type. Written in english and
+            readable
+
+            for engineers (usually not suited for non technical stakeholders and
+
+            not localized); example: Service Unavailable
+        faultCodeCategory:
+          type: string
+          enum:
+            - GENERIC_ERROR
+        faultCodeDetail:
+          $ref: '#/components/schemas/GatewayFault'
+      required:
+        - faultCodeCategory
+        - faultCodeDetail
+    GatewayFault:
+      description: >
+        Fault codes for generic downstream services errors, should be mapped to
+        502 HTTP status code.
+
+        For further information visit
+        https://docs.pagopa.it/gestionedeglierrori/struttura-degli-errori/fault-code.
+      type: string
+    PartyConfigurationFault:
+      description: >
+        Fault codes for fatal errors from ECs, should be mapped to 503 HTTP
+        status code.
+
+        For further information visit
+        https://docs.pagopa.it/gestionedeglierrori/struttura-degli-errori/fault-code.
+
+        Possible fault codes are:
+
+        - `PPT_STAZIONE_INT_PA_IRRAGGIUNGIBILE`
+
+        - `PPT_STAZIONE_INT_PA_TIMEOUT`
+
+        - `PPT_STAZIONE_INT_PA_ERRORE_RESPONSE`
+
+        - `PPT_IBAN_NON_CENSITO`
+
+        - `PAA_SINTASSI_EXTRAXSD`
+
+        - `PAA_SINTASSI_XSD`
+
+        - `PAA_ID_DOMINIO_ERRATO`
+
+        - `PAA_ID_INTERMEDIARIO_ERRATO`
+
+        - `PAA_STAZIONE_INT_ERRATA`
+
+        - `PAA_ATTIVA_RPT_IMPORTO_NON_VALIDO`
+
+        - `PPT_ERRORE_EMESSO_DA_PAA`
+
+        - `PAA_SYSTEM_ERROR`
+      type: string
+      enum:
+        - PPT_STAZIONE_INT_PA_IRRAGGIUNGIBILE
+        - PPT_STAZIONE_INT_PA_TIMEOUT
+        - PPT_STAZIONE_INT_PA_ERRORE_RESPONSE
+        - PPT_IBAN_NON_CENSITO
+        - PAA_SINTASSI_EXTRAXSD
+        - PAA_SINTASSI_XSD
+        - PAA_ID_DOMINIO_ERRATO
+        - PAA_ID_INTERMEDIARIO_ERRATO
+        - PAA_STAZIONE_INT_ERRATA
+        - PAA_ATTIVA_RPT_IMPORTO_NON_VALIDO
+        - PPT_ERRORE_EMESSO_DA_PAA
+        - PAA_SYSTEM_ERROR
+    PaymentOngoingStatusFault:
+      description: >
+        Fault codes for errors related to payment attempts that cause conflict
+        with the current payment status,
+
+        such as a duplicated payment attempt or a payment attempt made while
+        another attempt is still being processed.
+
+        Should be mapped to 409 HTTP status code.
+
+        For further information visit
+        https://docs.pagopa.it/gestionedeglierrori/struttura-degli-errori/fault-code.
+
+        Possible fault codes are:
+
+        - `PPT_PAGAMENTO_IN_CORSO`
+
+        - `PAA_PAGAMENTO_IN_CORSO`
+      type: string
+      enum:
+        - PPT_PAGAMENTO_IN_CORSO
+        - PAA_PAGAMENTO_IN_CORSO
+    PaymentOngoingStatusFaultPaymentProblemJson:
+      description: >
+        A PaymentProblemJson-like type specific for the GetPayment and
+        ActivatePayment operations.
+
+        Possible values of `detail_v2` are limited to faults pertaining to Nodo
+        errors related to payment status conflicts.
+      type: object
+      properties:
+        title:
+          type: string
+          description: >
+            A short, summary of the problem type. Written in english and
+            readable
+
+            for engineers (usually not suited for non technical stakeholders and
+
+            not localized); example: Service Unavailable
+        faultCodeCategory:
+          type: string
+          enum:
+            - PAYMENT_ONGOING
+        faultCodeDetail:
+          $ref: '#/components/schemas/PaymentOngoingStatusFault'
+      required:
+        - faultCodeCategory
+        - faultCodeDetail
+    PaymentExpiredStatusFaultPaymentProblemJson:
+      description: >
+        A PaymentProblemJson-like type specific for the GetPayment and
+        ActivatePayment operations.
+
+        Possible values of `detail_v2` are limited to faults pertaining to Nodo
+        errors related to payment status conflicts.
+      type: object
+      properties:
+        title:
+          type: string
+          description: >
+            A short, summary of the problem type. Written in english and
+            readable
+
+            for engineers (usually not suited for non technical stakeholders and
+
+            not localized); example: Service Unavailable
+        faultCodeCategory:
+          type: string
+          enum:
+            - PAYMENT_EXPIRED
+        faultCodeDetail:
+          $ref: '#/components/schemas/PaymentExpiredStatusFault'
+      required:
+        - faultCodeCategory
+        - faultCodeDetail
+    PaymentExpiredStatusFault:
+      description: >
+        Fault codes for errors related to payment attempts that cause conflict
+        with the current payment status,
+
+        such as a duplicated payment attempt or a payment attempt made while
+        another attempt is still being processed.
+
+        Should be mapped to 409 HTTP status code.
+
+        For further information visit
+        https://docs.pagopa.it/gestionedeglierrori/struttura-degli-errori/fault-code.
+
+        Possible fault codes are:
+
+        - `PAA_PAGAMENTO_SCADUTO`
+      type: string
+      enum:
+        - PAA_PAGAMENTO_SCADUTO
+    PaymentCanceledStatusFaultPaymentProblemJson:
+      description: >
+        A PaymentProblemJson-like type specific for the GetPayment and
+        ActivatePayment operations.
+
+        Possible values of `detail_v2` are limited to faults pertaining to Nodo
+        errors related to payment status conflicts.
+      type: object
+      properties:
+        title:
+          type: string
+          description: >
+            A short, summary of the problem type. Written in english and
+            readable
+
+            for engineers (usually not suited for non technical stakeholders and
+
+            not localized); example: Service Unavailable
+        faultCodeCategory:
+          type: string
+          enum:
+            - PAYMENT_CANCELED
+        faultCodeDetail:
+          $ref: '#/components/schemas/PaymentCanceledStatusFault'
+      required:
+        - faultCodeCategory
+        - faultCodeDetail
+    PaymentCanceledStatusFault:
+      description: >
+        Fault codes for errors related to payment attempts that cause conflict
+        with the current payment status,
+
+        such as a duplicated payment attempt or a payment attempt made while
+        another attempt is still being processed.
+
+        Should be mapped to 409 HTTP status code.
+
+        For further information visit
+        https://docs.pagopa.it/gestionedeglierrori/struttura-degli-errori/fault-code.
+
+        Possible fault codes are:
+
+        - `PAA_PAGAMENTO_ANNULLATO`
+      type: string
+      enum:
+        - PAA_PAGAMENTO_ANNULLATO
+    PaymentDuplicatedStatusFaultPaymentProblemJson:
+      description: >
+        A PaymentProblemJson-like type specific for the GetPayment and
+        ActivatePayment operations.
+
+        Possible values of `detail_v2` are limited to faults pertaining to Nodo
+        errors related to payment status conflicts.
+      type: object
+      properties:
+        title:
+          type: string
+          description: >
+            A short, summary of the problem type. Written in english and
+            readable
+
+            for engineers (usually not suited for non technical stakeholders and
+
+            not localized); example: Service Unavailable
+        faultCodeCategory:
+          type: string
+          enum:
+            - PAYMENT_DUPLICATED
+        faultCodeDetail:
+          $ref: '#/components/schemas/PaymentDuplicatedStatusFault'
+      required:
+        - faultCodeCategory
+        - faultCodeDetail
+    PaymentDuplicatedStatusFault:
+      description: >
+        Fault codes for errors related to payment attempts that cause conflict
+        with the current payment status,
+
+        such as a duplicated payment attempt or a payment attempt made while
+        another attempt is still being processed.
+
+        Should be mapped to 409 HTTP status code.
+
+        For further information visit
+        https://docs.pagopa.it/gestionedeglierrori/struttura-degli-errori/fault-code.
+
+        Possible fault codes are:
+
+        - `PAA_PAGAMENTO_DUPLICATO`
+
+        - `PPT_PAGAMENTO_DUPLICATO`
+      type: string
+      enum:
+        - PAA_PAGAMENTO_DUPLICATO
+        - PPT_PAGAMENTO_DUPLICATO
+    PaymentInfoResponse:
+      type: object
+      title: PaymentRequestsGetResponse
+      description: Response with payment request information
+      properties:
+        rptId:
+          description: Digital payment request id
+          type: string
+          pattern: ([a-zA-Z\\d]{1,35})|(RF\\d{2}[a-zA-Z\\d]{1,21})
+        paFiscalCode:
+          description: Fiscal code associated to the payment notice
+          type: string
+          minLength: 11
+          maxLength: 11
+        paName:
+          description: Name of the payment notice issuer
+          type: string
+          minLength: 1
+          maxLength: 140
+        description:
+          description: Payment notice description
+          type: string
+          minLength: 1
+          maxLength: 140
+        amount:
+          description: Payment notice amount
+          type: integer
+          minimum: 0
+          maximum: 99999999
+        dueDate:
+          description: Payment notice due date
+          type: string
+          pattern: ([0-9]{4})-(1[0-2]|0[1-9])-(0[1-9]|1[0-9]|2[0-9]|3[0-1])
+          example: '2025-07-31'
+      required:
+        - amount
+    PaymentInfoNotFoundResponse:
+      x-one-of: true
+      allOf:
+        - $ref: '#/components/schemas/ValidationFaultPaymentDataErrorProblemJson'
+        - $ref: '#/components/schemas/ValidationFaultPaymentUnknownProblemJson'
+    PaymentInfoConflictResponse:
+      x-one-of: true
+      allOf:
+        - $ref: '#/components/schemas/PaymentOngoingStatusFaultPaymentProblemJson'
+        - $ref: '#/components/schemas/PaymentExpiredStatusFaultPaymentProblemJson'
+        - $ref: '#/components/schemas/PaymentCanceledStatusFaultPaymentProblemJson'
+        - $ref: '#/components/schemas/PaymentDuplicatedStatusFaultPaymentProblemJson'
+    PaymentInfoBadGatewayResponse:
+      x-one-of: true
+      allOf:
+        - $ref: '#/components/schemas/GatewayFaultPaymentProblemJson'
+        - $ref: '#/components/schemas/ValidationFaultPaymentUnavailableProblemJson'
+    PaymentInfoUnavailableResponse:
+      description: A PaymentProblemJson-like type specific for the GetPayment
+      type: object
+      properties:
+        title:
+          type: string
+          description: >
+            A short, summary of the problem type. Written in english and
+            readable
+
+            for engineers (usually not suited for non technical stakeholders and
+
+            not localized); example: Service Unavailable
+        faultCodeCategory:
+          type: string
+          enum:
+            - DOMAIN_UNKNOWN
+        faultCodeDetail:
+          $ref: '#/components/schemas/PartyConfigurationFault'
+      required:
+        - faultCodeCategory
+        - faultCodeDetail
   securitySchemes:
     Bearer:
       type: http
