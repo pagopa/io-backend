@@ -3,7 +3,7 @@ servers:
   - url: https://api-app.io.pagopa.it/api
 info:
   title: Services App Backend API
-  version: 16.15.0
+  version: 16.18.0
 tags:
   - name: search
     description: Search APIs

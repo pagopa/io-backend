@@ -1,6 +1,6 @@
 {
   "name": "@pagopa/io-backend",
-  "version": "16.15.0",
+  "version": "16.18.0",
   "min_app_version": {
     "ios": "2.3.0",
     "android": "2.3.0"
@@ -46,10 +46,10 @@
     "generate:api:io-cgn": "rimraf generated/io-cgn-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-cgn/6fe0b844c1f0e119502b9cbf8edd4b79a62912aa/apps/card-func/openapi/index.yaml --no-strict --out-dir generated/io-cgn-api --request-types --response-decoders --client",
     "generate:api:io-cgn-operator-search": "rimraf generated/io-cgn-operator-search-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml --no-strict --out-dir generated/io-cgn-operator-search-api --request-types --response-decoders --client",
     "generate:api:pagopaproxy": "rimraf generated/pagopa-proxy && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-for-io.yaml --no-strict --out-dir generated/pagopa-proxy --request-types --response-decoders --client",
+    "generate:api:pagopa-ecommerce": "rimraf generated/pagopa-ecommerce && gen-api-models --api-spec openapi/consumed/pagopa_ecommerce.yaml --no-strict --out-dir generated/pagopa-ecommerce --request-types --response-decoders --client",
     "generate:api:lollipop": "rimraf generated/lollipop-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-functions-lollipop/724c3ba79d272d4e2555dbc2a8e1657bec9f84ce/openapi/internal.yaml --no-strict --out-dir generated/lollipop-api --request-types --response-decoders --client",
     "generate:api:services-app-backend": "rimraf generated/services-app-backend && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-services-cms/30efc51d50e72685d2cf7739967ca4a6b36037f5/apps/app-backend/api/internal.yaml --no-strict --out-dir generated/services-app-backend --request-types --response-decoders --client",
     "generate:proxy:services": "rimraf generated/services && gen-api-models --api-spec ./openapi/generated/api_services.yaml --no-strict --out-dir generated/services --request-types --response-decoders --client",
-    "generate:proxy:eucovidcert-models": "rimraf generated/eucovidcert && gen-api-models --api-spec ./openapi/generated/api_eucovidcert.yaml --out-dir generated/eucovidcert",
     "generate:proxy:third-party-service": "rimraf generated/third-party-service && gen-api-models --api-spec openapi/consumed/api-third-party.yaml --out-dir generated/third-party-service --request-types --response-decoders --client",
     "generate:proxy:remote-content-service": "rimraf generated/remote-content-service && gen-api-models --api-spec openapi/consumed/api_remote_content.yaml --out-dir generated/remote-content-service --request-types --response-decoders --client",
     "generate:proxy:piattaforma-notifiche": "rimraf generated/piattaforma-notifiche && gen-api-models --api-spec openapi/consumed/api-piattaforma-notifiche.yaml --out-dir generated/piattaforma-notifiche --request-types --response-decoders --client",
@@ -58,7 +58,7 @@
     "generate:proxy:api-session": "rimraf generated/session && gen-api-models --api-spec ./openapi/generated/api_session.yaml --out-dir generated/session",
     "generate:lollipop-definitions": "rimraf generated/lollipop && gen-api-models --api-spec definitions/lollipop.yaml --out-dir generated/lollipop",
     "generate:lollipop-first-sign": "rimraf generated/lollipop-first-consumer && gen-api-models --api-spec openapi/consumed/lollipop_first_consumer.yaml --out-dir generated/lollipop-first-consumer --request-types --response-decoders --client",
-    "generate:api:io-wallet": "rimraf generated/io-wallet-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-wallet/io-wallet-user-func@3.3.0/apps/io-wallet-user-func/openapi.yaml --no-strict --out-dir generated/io-wallet-api --request-types --response-decoders --client",
+    "generate:api:io-wallet": "rimraf generated/io-wallet-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-wallet/io-wallet-user-func@3.4.0/apps/io-wallet-user-func/openapi.yaml --no-strict --out-dir generated/io-wallet-api --request-types --response-decoders --client",
     "generate:proxy:io-wallet-models": "rimraf generated/io-wallet && gen-api-models --api-spec ./openapi/generated/api_io_wallet.yaml --out-dir generated/io-wallet",
     "dist:modules": "modclean -r -n default:safe && yarn install --production",
     "predeploy": "npm-run-all generate build dist:modules",
@@ -83,7 +83,6 @@
     "@pagopa/io-functions-app-sdk": "x",
     "@pagopa/io-functions-cgn-sdk": "x",
     "@pagopa/io-functions-commons": "^29.3.0",
-    "@pagopa/io-functions-eucovidcerts-sdk": "x",
     "@pagopa/ts-commons": "^13.1.2",
     "@pagopa/winston-ts": "^2.2.0",
     "applicationinsights": "^2.9.5",
