@@ -2,7 +2,7 @@ openapi: 3.0.2
 info:
   title: API for Communication domain.
   description: Mobile and web backend API for communication domain.
-  version: 16.15.0
+  version: 16.18.0
 servers:
   - url: https://api-app.io.pagopa.it/api/v1
 security:

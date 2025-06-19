@@ -46,11 +46,6 @@ describe("API public proxy specs", () => {
     const api = await SwaggerParser.bundle(specFilePath);
     expect(api).toBeDefined();
   });
-  it("should be valid API EUCovidCert specs", async () => {
-    const specFilePath = `${__dirname}/../../openapi/generated/api_eucovidcert.yaml`;
-    const api = await SwaggerParser.bundle(specFilePath);
-    expect(api).toBeDefined();
-  });
 });
 
 describe("API internal ", () => {
