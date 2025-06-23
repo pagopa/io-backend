@@ -729,6 +729,7 @@ components:
         spezzoneStrutturatoCausaleVersamento:
           $ref: '#/components/schemas/SpezzoneStrutturatoCausaleVersamento'
     ValidationFaultPaymentUnknown:
+      type: string
       description: >
         Fault codes for errors related to well-formed requests to ECs not
         present inside Nodo, should be mapped to 404 HTTP status code.
@@ -742,15 +743,12 @@ components:
         Possible fault codes are:
 
         - `PAA_PAGAMENTO_SCONOSCIUTO`
-      type: string
       enum:
         - PAA_PAGAMENTO_SCONOSCIUTO
     ValidationFaultPaymentUnknownProblemJson:
-      description: >
-        A PaymentProblemJson-like type specific for the GetPayment operations.
-
-        Possible values of `detail_v2` are limited to faults pertaining to
-        validation errors.
+      required:
+        - faultCodeCategory
+        - faultCodeDetail
       type: object
       properties:
         title:
@@ -768,10 +766,13 @@ components:
             - PAYMENT_UNKNOWN
         faultCodeDetail:
           $ref: '#/components/schemas/ValidationFaultPaymentUnknown'
-      required:
-        - faultCodeCategory
-        - faultCodeDetail
+      description: >
+        A PaymentProblemJson-like type specific for the GetPayment operations.
+
+        Possible values of `detail_v2` are limited to faults pertaining to
+        validation errors.
     ValidationFaultPaymentUnavailable:
+      type: string
       description: >
         Fault codes for errors related to well-formed requests to ECs not
         present inside Nodo, should be mapped to 404 HTTP status code.
@@ -813,7 +814,6 @@ components:
         - `PPT_SYSTEM_ERROR`
 
         - `PAA_SEMANTICA`
-      type: string
       enum:
         - PPT_PSP_SCONOSCIUTO
         - PPT_PSP_DISABILITATO
@@ -831,11 +831,9 @@ components:
         - PPT_SYSTEM_ERROR
         - PAA_SEMANTICA
     ValidationFaultPaymentUnavailableProblemJson:
-      description: >
-        A PaymentProblemJson-like type specific for the GetPayment operations.
-
-        Possible values of `detail_v2` are limited to faults pertaining to
-        validation errors.
+      required:
+        - faultCodeCategory
+        - faultCodeDetail
       type: object
       properties:
         title:
@@ -853,15 +851,15 @@ components:
             - PAYMENT_UNAVAILABLE
         faultCodeDetail:
           $ref: '#/components/schemas/ValidationFaultPaymentUnavailable'
-      required:
-        - faultCodeCategory
-        - faultCodeDetail
-    ValidationFaultPaymentDataErrorProblemJson:
       description: >
         A PaymentProblemJson-like type specific for the GetPayment operations.
 
         Possible values of `detail_v2` are limited to faults pertaining to
         validation errors.
+    ValidationFaultPaymentDataErrorProblemJson:
+      required:
+        - faultCodeCategory
+        - faultCodeDetail
       type: object
       properties:
         title:
@@ -879,10 +877,13 @@ components:
             - PAYMENT_DATA_ERROR
         faultCodeDetail:
           $ref: '#/components/schemas/ValidationFaultPaymentDataError'
-      required:
-        - faultCodeCategory
-        - faultCodeDetail
+      description: >
+        A PaymentProblemJson-like type specific for the GetPayment operations.
+
+        Possible values of `detail_v2` are limited to faults pertaining to
+        validation errors.
     ValidationFaultPaymentDataError:
+      type: string
       description: >
         Fault codes for errors related to well-formed requests to ECs not
         present inside Nodo, should be mapped to 404 HTTP status code.
@@ -902,19 +903,15 @@ components:
         - `PPT_DOMINIO_SCONOSCIUTO`
 
         - `PPT_STAZIONE_INT_PA_SCONOSCIUTA`
-      type: string
       enum:
         - PPT_SINTASSI_EXTRAXSD
         - PPT_SINTASSI_XSD
         - PPT_DOMINIO_SCONOSCIUTO
         - PPT_STAZIONE_INT_PA_SCONOSCIUTA
     GatewayFaultPaymentProblemJson:
-      description: >
-        A PaymentProblemJson-like type specific for the GetPayment and
-        ActivatePayment operations.
-
-        Possible values of `detail_v2` are limited to faults pertaining to Nodo
-        errors.
+      required:
+        - faultCodeCategory
+        - faultCodeDetail
       type: object
       properties:
         title:
@@ -932,18 +929,22 @@ components:
             - GENERIC_ERROR
         faultCodeDetail:
           $ref: '#/components/schemas/GatewayFault'
-      required:
-        - faultCodeCategory
-        - faultCodeDetail
+      description: >
+        A PaymentProblemJson-like type specific for the GetPayment and
+        ActivatePayment operations.
+
+        Possible values of `detail_v2` are limited to faults pertaining to Nodo
+        errors.
     GatewayFault:
+      type: string
       description: >
         Fault codes for generic downstream services errors, should be mapped to
         502 HTTP status code.
 
         For further information visit
         https://docs.pagopa.it/gestionedeglierrori/struttura-degli-errori/fault-code.
-      type: string
     PartyConfigurationFault:
+      type: string
       description: >
         Fault codes for fatal errors from ECs, should be mapped to 503 HTTP
         status code.
@@ -976,7 +977,6 @@ components:
         - `PPT_ERRORE_EMESSO_DA_PAA`
 
         - `PAA_SYSTEM_ERROR`
-      type: string
       enum:
         - PPT_STAZIONE_INT_PA_IRRAGGIUNGIBILE
         - PPT_STAZIONE_INT_PA_TIMEOUT
@@ -991,6 +991,7 @@ components:
         - PPT_ERRORE_EMESSO_DA_PAA
         - PAA_SYSTEM_ERROR
     PaymentOngoingStatusFault:
+      type: string
       description: >
         Fault codes for errors related to payment attempts that cause conflict
         with the current payment status,
@@ -1008,17 +1009,13 @@ components:
         - `PPT_PAGAMENTO_IN_CORSO`
 
         - `PAA_PAGAMENTO_IN_CORSO`
-      type: string
       enum:
         - PPT_PAGAMENTO_IN_CORSO
         - PAA_PAGAMENTO_IN_CORSO
     PaymentOngoingStatusFaultPaymentProblemJson:
-      description: >
-        A PaymentProblemJson-like type specific for the GetPayment and
-        ActivatePayment operations.
-
-        Possible values of `detail_v2` are limited to faults pertaining to Nodo
-        errors related to payment status conflicts.
+      required:
+        - faultCodeCategory
+        - faultCodeDetail
       type: object
       properties:
         title:
@@ -1036,16 +1033,16 @@ components:
             - PAYMENT_ONGOING
         faultCodeDetail:
           $ref: '#/components/schemas/PaymentOngoingStatusFault'
-      required:
-        - faultCodeCategory
-        - faultCodeDetail
-    PaymentExpiredStatusFaultPaymentProblemJson:
       description: >
         A PaymentProblemJson-like type specific for the GetPayment and
         ActivatePayment operations.
 
         Possible values of `detail_v2` are limited to faults pertaining to Nodo
         errors related to payment status conflicts.
+    PaymentExpiredStatusFaultPaymentProblemJson:
+      required:
+        - faultCodeCategory
+        - faultCodeDetail
       type: object
       properties:
         title:
@@ -1063,10 +1060,14 @@ components:
             - PAYMENT_EXPIRED
         faultCodeDetail:
           $ref: '#/components/schemas/PaymentExpiredStatusFault'
-      required:
-        - faultCodeCategory
-        - faultCodeDetail
+      description: >
+        A PaymentProblemJson-like type specific for the GetPayment and
+        ActivatePayment operations.
+
+        Possible values of `detail_v2` are limited to faults pertaining to Nodo
+        errors related to payment status conflicts.
     PaymentExpiredStatusFault:
+      type: string
       description: >
         Fault codes for errors related to payment attempts that cause conflict
         with the current payment status,
@@ -1082,16 +1083,12 @@ components:
         Possible fault codes are:
 
         - `PAA_PAGAMENTO_SCADUTO`
-      type: string
       enum:
         - PAA_PAGAMENTO_SCADUTO
     PaymentCanceledStatusFaultPaymentProblemJson:
-      description: >
-        A PaymentProblemJson-like type specific for the GetPayment and
-        ActivatePayment operations.
-
-        Possible values of `detail_v2` are limited to faults pertaining to Nodo
-        errors related to payment status conflicts.
+      required:
+        - faultCodeCategory
+        - faultCodeDetail
       type: object
       properties:
         title:
@@ -1109,10 +1106,14 @@ components:
             - PAYMENT_CANCELED
         faultCodeDetail:
           $ref: '#/components/schemas/PaymentCanceledStatusFault'
-      required:
-        - faultCodeCategory
-        - faultCodeDetail
+      description: >
+        A PaymentProblemJson-like type specific for the GetPayment and
+        ActivatePayment operations.
+
+        Possible values of `detail_v2` are limited to faults pertaining to Nodo
+        errors related to payment status conflicts.
     PaymentCanceledStatusFault:
+      type: string
       description: >
         Fault codes for errors related to payment attempts that cause conflict
         with the current payment status,
@@ -1128,16 +1129,12 @@ components:
         Possible fault codes are:
 
         - `PAA_PAGAMENTO_ANNULLATO`
-      type: string
       enum:
         - PAA_PAGAMENTO_ANNULLATO
     PaymentDuplicatedStatusFaultPaymentProblemJson:
-      description: >
-        A PaymentProblemJson-like type specific for the GetPayment and
-        ActivatePayment operations.
-
-        Possible values of `detail_v2` are limited to faults pertaining to Nodo
-        errors related to payment status conflicts.
+      required:
+        - faultCodeCategory
+        - faultCodeDetail
       type: object
       properties:
         title:
@@ -1155,10 +1152,14 @@ components:
             - PAYMENT_DUPLICATED
         faultCodeDetail:
           $ref: '#/components/schemas/PaymentDuplicatedStatusFault'
-      required:
-        - faultCodeCategory
-        - faultCodeDetail
+      description: >
+        A PaymentProblemJson-like type specific for the GetPayment and
+        ActivatePayment operations.
+
+        Possible values of `detail_v2` are limited to faults pertaining to Nodo
+        errors related to payment status conflicts.
     PaymentDuplicatedStatusFault:
+      type: string
       description: >
         Fault codes for errors related to payment attempts that cause conflict
         with the current payment status,
@@ -1176,65 +1177,66 @@ components:
         - `PAA_PAGAMENTO_DUPLICATO`
 
         - `PPT_PAGAMENTO_DUPLICATO`
-      type: string
       enum:
         - PAA_PAGAMENTO_DUPLICATO
         - PPT_PAGAMENTO_DUPLICATO
     PaymentInfoResponse:
-      type: object
       title: PaymentRequestsGetResponse
-      description: Response with payment request information
-      properties:
-        rptId:
-          description: Digital payment request id
-          type: string
-          pattern: ([a-zA-Z\\d]{1,35})|(RF\\d{2}[a-zA-Z\\d]{1,21})
-        paFiscalCode:
-          description: Fiscal code associated to the payment notice
-          type: string
-          minLength: 11
-          maxLength: 11
-        paName:
-          description: Name of the payment notice issuer
-          type: string
-          minLength: 1
-          maxLength: 140
-        description:
-          description: Payment notice description
-          type: string
-          minLength: 1
-          maxLength: 140
-        amount:
-          description: Payment notice amount
-          type: integer
-          minimum: 0
-          maximum: 99999999
-        dueDate:
-          description: Payment notice due date
-          type: string
-          pattern: ([0-9]{4})-(1[0-2]|0[1-9])-(0[1-9]|1[0-9]|2[0-9]|3[0-1])
-          example: '2025-07-31'
       required:
         - amount
+      type: object
+      properties:
+        rptId:
+          pattern: ([a-zA-Z\d]{1,35})|(RF\d{2}[a-zA-Z\d]{1,21})
+          type: string
+          description: Digital payment request id
+        paFiscalCode:
+          maxLength: 11
+          minLength: 11
+          type: string
+          description: Fiscal code associated to the payment notice
+        paName:
+          maxLength: 140
+          minLength: 1
+          type: string
+          description: Name of the payment notice issuer
+        description:
+          maxLength: 140
+          minLength: 1
+          type: string
+          description: Payment notice description
+        amount:
+          maximum: 99999999
+          minimum: 0
+          type: integer
+          description: Payment notice amount
+        dueDate:
+          pattern: ([0-9]{4})-(1[0-2]|0[1-9])-(0[1-9]|1[0-9]|2[0-9]|3[0-1])
+          type: string
+          description: Payment notice due date
+          example: '2025-07-31'
+      description: Response with payment request information
     PaymentInfoNotFoundResponse:
-      x-one-of: true
       allOf:
         - $ref: '#/components/schemas/ValidationFaultPaymentDataErrorProblemJson'
         - $ref: '#/components/schemas/ValidationFaultPaymentUnknownProblemJson'
-    PaymentInfoConflictResponse:
       x-one-of: true
+    PaymentInfoConflictResponse:
       allOf:
         - $ref: '#/components/schemas/PaymentOngoingStatusFaultPaymentProblemJson'
         - $ref: '#/components/schemas/PaymentExpiredStatusFaultPaymentProblemJson'
         - $ref: '#/components/schemas/PaymentCanceledStatusFaultPaymentProblemJson'
         - $ref: '#/components/schemas/PaymentDuplicatedStatusFaultPaymentProblemJson'
-    PaymentInfoBadGatewayResponse:
       x-one-of: true
+    PaymentInfoBadGatewayResponse:
       allOf:
         - $ref: '#/components/schemas/GatewayFaultPaymentProblemJson'
         - $ref: '#/components/schemas/ValidationFaultPaymentUnavailableProblemJson'
+      x-one-of: true
     PaymentInfoUnavailableResponse:
-      description: A PaymentProblemJson-like type specific for the GetPayment
+      required:
+        - faultCodeCategory
+        - faultCodeDetail
       type: object
       properties:
         title:
@@ -1252,9 +1254,7 @@ components:
             - DOMAIN_UNKNOWN
         faultCodeDetail:
           $ref: '#/components/schemas/PartyConfigurationFault'
-      required:
-        - faultCodeCategory
-        - faultCodeDetail
+      description: A PaymentProblemJson-like type specific for the GetPayment
   securitySchemes:
     Bearer:
       type: http
