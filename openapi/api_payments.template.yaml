@@ -246,49 +246,49 @@ components:
       $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-for-io.yaml#/definitions/SpezzoniCausaleVersamentoItem"
     # Definitions from pagopa ecommerce api
     ValidationFaultPaymentUnknown:
-      $ref: "consumed/pagopa_ecommerce.yaml#/definitions/ValidationFaultPaymentUnknown"
+      $ref: "consumed/pagopa_ecommerce.yaml#/components/schemas/ValidationFaultPaymentUnknown"
     ValidationFaultPaymentUnknownProblemJson:
-      $ref: "consumed/pagopa_ecommerce.yaml#/definitions/ValidationFaultPaymentUnknownProblemJson"
+      $ref: "consumed/pagopa_ecommerce.yaml#/components/schemas/ValidationFaultPaymentUnknownProblemJson"
     ValidationFaultPaymentUnavailable:
-      $ref: "consumed/pagopa_ecommerce.yaml#/definitions/ValidationFaultPaymentUnavailable"
+      $ref: "consumed/pagopa_ecommerce.yaml#/components/schemas/ValidationFaultPaymentUnavailable"
     ValidationFaultPaymentUnavailableProblemJson:
-      $ref: "consumed/pagopa_ecommerce.yaml#/definitions/ValidationFaultPaymentUnavailableProblemJson"
+      $ref: "consumed/pagopa_ecommerce.yaml#/components/schemas/ValidationFaultPaymentUnavailableProblemJson"
     ValidationFaultPaymentDataErrorProblemJson:
-      $ref: "consumed/pagopa_ecommerce.yaml#/definitions/ValidationFaultPaymentDataErrorProblemJson"
+      $ref: "consumed/pagopa_ecommerce.yaml#/components/schemas/ValidationFaultPaymentDataErrorProblemJson"
     ValidationFaultPaymentDataError:
-      $ref: "consumed/pagopa_ecommerce.yaml#/definitions/ValidationFaultPaymentDataError"
+      $ref: "consumed/pagopa_ecommerce.yaml#/components/schemas/ValidationFaultPaymentDataError"
     GatewayFaultPaymentProblemJson:
-      $ref: "consumed/pagopa_ecommerce.yaml#/definitions/GatewayFaultPaymentProblemJson"
+      $ref: "consumed/pagopa_ecommerce.yaml#/components/schemas/GatewayFaultPaymentProblemJson"
     GatewayFault:
-      $ref: "consumed/pagopa_ecommerce.yaml#/definitions/GatewayFault"
+      $ref: "consumed/pagopa_ecommerce.yaml#/components/schemas/GatewayFault"
     PartyConfigurationFault:
-      $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PartyConfigurationFault"
+      $ref: "consumed/pagopa_ecommerce.yaml#/components/schemas/PartyConfigurationFault"
     PaymentOngoingStatusFault:
-      $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentOngoingStatusFault"
+      $ref: "consumed/pagopa_ecommerce.yaml#/components/schemas/PaymentOngoingStatusFault"
     PaymentOngoingStatusFaultPaymentProblemJson:
-      $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentOngoingStatusFaultPaymentProblemJson"
+      $ref: "consumed/pagopa_ecommerce.yaml#/components/schemas/PaymentOngoingStatusFaultPaymentProblemJson"
     PaymentExpiredStatusFaultPaymentProblemJson:
-      $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentExpiredStatusFaultPaymentProblemJson"
+      $ref: "consumed/pagopa_ecommerce.yaml#/components/schemas/PaymentExpiredStatusFaultPaymentProblemJson"
     PaymentExpiredStatusFault:
-      $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentExpiredStatusFault"
+      $ref: "consumed/pagopa_ecommerce.yaml#/components/schemas/PaymentExpiredStatusFault"
     PaymentCanceledStatusFaultPaymentProblemJson:
-      $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentCanceledStatusFaultPaymentProblemJson"
+      $ref: "consumed/pagopa_ecommerce.yaml#/components/schemas/PaymentCanceledStatusFaultPaymentProblemJson"
     PaymentCanceledStatusFault:
-      $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentCanceledStatusFault"
+      $ref: "consumed/pagopa_ecommerce.yaml#/components/schemas/PaymentCanceledStatusFault"
     PaymentDuplicatedStatusFaultPaymentProblemJson:
-      $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentDuplicatedStatusFaultPaymentProblemJson"
+      $ref: "consumed/pagopa_ecommerce.yaml#/components/schemas/PaymentDuplicatedStatusFaultPaymentProblemJson"
     PaymentDuplicatedStatusFault:
-      $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentDuplicatedStatusFault"
+      $ref: "consumed/pagopa_ecommerce.yaml#/components/schemas/PaymentDuplicatedStatusFault"
     PaymentInfoResponse:
-      $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentRequestsGetResponse"
+      $ref: "consumed/pagopa_ecommerce.yaml#/components/schemas/PaymentRequestsGetResponse"
     PaymentInfoNotFoundResponse:
-      $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentInfoNotFoundResponse"
+      $ref: "consumed/pagopa_ecommerce.yaml#/components/schemas/PaymentInfoNotFoundResponse"
     PaymentInfoConflictResponse:
-      $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentInfoConflictResponse"
+      $ref: "consumed/pagopa_ecommerce.yaml#/components/schemas/PaymentInfoConflictResponse"
     PaymentInfoBadGatewayResponse:
-      $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PaymentInfoBadGatewayResponse"
+      $ref: "consumed/pagopa_ecommerce.yaml#/components/schemas/PaymentInfoBadGatewayResponse"
     PaymentInfoUnavailableResponse:
-      $ref: "consumed/pagopa_ecommerce.yaml#/definitions/PartyConfigurationFaultPaymentProblemJson"
+      $ref: "consumed/pagopa_ecommerce.yaml#/components/schemas/PartyConfigurationFaultPaymentProblemJson"
   securitySchemes:
     Bearer:
       type: http
