@@ -1,5 +1,5 @@
 ---
-"@pagopa/io-backend": minor
+"@pagopa/io-backend": major
 ---
 
 Removed backend internal related config and endpoints
