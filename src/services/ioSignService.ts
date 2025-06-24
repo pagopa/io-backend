@@ -39,11 +39,11 @@ import { IoSignAPIClient } from "../clients/io-sign";
 import { IoSignLollipopLocalsType } from "../controllers/ioSignController";
 import { readableProblem } from "../utils/errorsFormatter";
 import {
-  ResponseErrorNotFound403,
   ResponseErrorStatusNotDefinedInSpec,
   withCatchAsInternalError,
   withValidatedOrInternalError
 } from "../utils/responses";
+import { ResponseErrorNotFound403 } from "./eucovidcertService";
 
 const internalServerError = "Internal server error";
 const invalidRequest = "Invalid request";

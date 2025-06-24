@@ -2,7 +2,7 @@ openapi: 3.0.2
 info:
   title: Internal API for Communication domain
   description: Internal API for Communication domain to handle push notifications.
-  version: 16.18.0
+  version: 16.15.0
 servers:
   - url: https://localhost/api/v1
 security:

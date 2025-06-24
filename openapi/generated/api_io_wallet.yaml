@@ -1,7 +1,7 @@
 openapi: 3.0.2
 info:
   title: IO Wallet
-  version: 16.18.0
+  version: 16.15.0
 servers:
   - url: https://api-app.io.pagopa.it/api/v1/wallet
 security:
@@ -79,7 +79,7 @@ paths:
           $ref: '#/components/responses/Unexpected'
         '503':
           $ref: '#/components/responses/ServiceUnavailable'
-  /wallet-attestations:
+  /wallet-attestation:
     post:
       operationId: createWalletAttestationV2
       summary: Create and return a Wallet Attestation

@@ -12,7 +12,7 @@ info:
 
     Redirect and getServerInfo are the only endpoints that will be exposed
     without any base path.
-  version: 16.18.0
+  version: 16.15.0
 servers:
   - url: https://localhost/api/platform-legacy
 paths:

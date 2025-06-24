@@ -231,8 +231,7 @@ export default class IoWalletService {
    * Create a list of Wallet Attestations.
    */
   public readonly createWalletAttestationV2 = (
-    assertion: NonEmptyString,
-    fiscal_code: FiscalCode
+    assertion: NonEmptyString
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorGeneric
@@ -244,8 +243,7 @@ export default class IoWalletService {
     withCatchAsInternalError(async () => {
       const validated = await this.ioWalletApiClient.createWalletAttestationV2({
         body: {
-          assertion,
-          fiscal_code
+          assertion
         }
       });
       return this.mapWalletAttestationApiResponse<WalletAttestationsView>(

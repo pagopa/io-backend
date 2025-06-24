@@ -1,6 +1,6 @@
 openapi: 3.0.2
 info:
-  version: 16.18.0
+  version: 16.15.0
   title: IO Sign - Backend API
 servers:
   - url: https://api-app.io.pagopa.it/api/v1/sign

@@ -141,17 +141,14 @@ export default class IoWalletController {
     | IResponseErrorNotFound
     | IResponseErrorServiceUnavailable
   > =>
-    withUserFromRequest(req, async (user) =>
+    withUserFromRequest(req, async () =>
       pipe(
         req.body,
         CreateWalletAttestationV2Body.decode,
         E.mapLeft(toValidationError),
         TE.fromEither,
         TE.map(({ assertion }) =>
-          this.ioWalletService.createWalletAttestationV2(
-            assertion,
-            user.fiscal_code
-          )
+          this.ioWalletService.createWalletAttestationV2(assertion)
         ),
         TE.toUnion
       )()

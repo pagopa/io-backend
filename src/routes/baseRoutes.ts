@@ -11,7 +11,6 @@ import {
 } from "../config";
 import MessagesController from "../controllers/messagesController";
 import NotificationController from "../controllers/notificationController";
-import PagoPAEcommerceController from "../controllers/pagoPAEcommerceController";
 import PagoPAProxyController from "../controllers/pagoPAProxyController";
 import ProfileController from "../controllers/profileController";
 import ServicesController from "../controllers/servicesController";
@@ -20,7 +19,6 @@ import UserDataProcessingController from "../controllers/userDataProcessingContr
 import FunctionsAppService from "../services/functionAppService";
 import NewMessagesService from "../services/newMessagesService";
 import { NotificationServiceFactory } from "../services/notificationServiceFactory";
-import PagoPAEcommerceService from "../services/pagoPAEcommerceService";
 import PagoPAProxyService from "../services/pagoPAProxyService";
 import ProfileService from "../services/profileService";
 import RedisSessionStorage from "../services/redisSessionStorage";
@@ -56,7 +54,6 @@ export const registerAPIRoutes = (
   notificationServiceFactory: NotificationServiceFactory,
   sessionStorage: RedisSessionStorage,
   pagoPaProxyService: PagoPAProxyService,
-  PagoPaEcommerceService: PagoPAEcommerceService,
   userDataProcessingService: UserDataProcessingService,
   bearerSessionTokenAuth: ReturnType<passport.Authenticator["authenticate"]>,
   lollipopClient: ReturnType<typeof LollipopApiClient>
@@ -88,9 +85,6 @@ export const registerAPIRoutes = (
 
   const pagoPAProxyController: PagoPAProxyController =
     new PagoPAProxyController(pagoPaProxyService);
-
-  const pagoPAEcommerceController: PagoPAEcommerceController =
-    new PagoPAEcommerceController(PagoPaEcommerceService);
 
   const userDataProcessingController: UserDataProcessingController =
     new UserDataProcessingController(userDataProcessingService);
@@ -256,15 +250,6 @@ export const registerAPIRoutes = (
     toExpressHandler(
       pagoPAProxyController.getPaymentInfo,
       pagoPAProxyController
-    )
-  );
-
-  app.get(
-    `${basePath}/payment-info/:rptId`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      pagoPAEcommerceController.getPaymentInfo,
-      pagoPAEcommerceController
     )
   );
 

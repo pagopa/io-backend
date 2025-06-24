@@ -437,15 +437,11 @@ describe("IoWalletService#createWalletAttestationV2", () => {
   it("should make the correct api call", async () => {
     const service = new IoWalletService(api, trialSystemApi);
 
-    await service.createWalletAttestationV2(
-      "assertion" as NonEmptyString,
-      aFiscalCode
-    );
+    await service.createWalletAttestationV2("assertion" as NonEmptyString);
 
     expect(mockCreateWalletAttestationV2).toHaveBeenCalledWith({
       body: {
-        assertion: "assertion",
-        fiscal_code: aFiscalCode
+        assertion: "assertion"
       }
     });
   });
@@ -454,8 +450,7 @@ describe("IoWalletService#createWalletAttestationV2", () => {
     const service = new IoWalletService(api, trialSystemApi);
 
     const res = await service.createWalletAttestationV2(
-      "assertion" as NonEmptyString,
-      aFiscalCode
+      "assertion" as NonEmptyString
     );
 
     expect(res).toMatchObject({
@@ -471,8 +466,7 @@ describe("IoWalletService#createWalletAttestationV2", () => {
     const service = new IoWalletService(api, trialSystemApi);
 
     const res = await service.createWalletAttestationV2(
-      "assertion" as NonEmptyString,
-      aFiscalCode
+      "assertion" as NonEmptyString
     );
 
     expect(res).toMatchObject({
@@ -489,8 +483,7 @@ describe("IoWalletService#createWalletAttestationV2", () => {
     const service = new IoWalletService(api, trialSystemApi);
 
     const res = await service.createWalletAttestationV2(
-      "assertion" as NonEmptyString,
-      aFiscalCode
+      "assertion" as NonEmptyString
     );
 
     expect(res).toMatchObject({
@@ -507,8 +500,7 @@ describe("IoWalletService#createWalletAttestationV2", () => {
     const service = new IoWalletService(api, trialSystemApi);
 
     const res = await service.createWalletAttestationV2(
-      "assertion" as NonEmptyString,
-      aFiscalCode
+      "assertion" as NonEmptyString
     );
 
     expect(res).toMatchObject({
@@ -523,8 +515,7 @@ describe("IoWalletService#createWalletAttestationV2", () => {
     const service = new IoWalletService(api, trialSystemApi);
 
     const res = await service.createWalletAttestationV2(
-      "assertion" as NonEmptyString,
-      aFiscalCode
+      "assertion" as NonEmptyString
     );
 
     expect(res).toMatchObject({
