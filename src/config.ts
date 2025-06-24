@@ -36,7 +36,6 @@ import { ServicesAppBackendAPIClient } from "./clients/services-app-backend";
 import { TrialSystemAPIClient } from "./clients/trial-system.client";
 import ApiClientFactory from "./services/apiClientFactory";
 import PagoPAClientFactory from "./services/pagoPAClientFactory";
-import urlTokenStrategy from "./strategies/urlTokenStrategy";
 import { getRequiredENVVar } from "./utils/container";
 import {
   FeatureFlag,
@@ -87,20 +86,6 @@ export const ALLOW_NOTIFY_IP_SOURCE_RANGE = pipe(
   E.getOrElseW((errs) => {
     log.error(
       `Missing or invalid ALLOW_NOTIFY_IP_SOURCE_RANGE environment variable: ${readableReport(
-        errs
-      )}`
-    );
-    return process.exit(1);
-  })
-);
-
-// IP(s) or CIDR(s) allowed for handling sessions
-export const ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE = pipe(
-  process.env.ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE,
-  decodeCIDRs,
-  E.getOrElseW((errs) => {
-    log.error(
-      `Missing or invalid ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE environment variable: ${readableReport(
         errs
       )}`
     );
@@ -194,12 +179,6 @@ export const CGN_API_CLIENT = CgnAPIClient(
   httpOrHttpsApiFetch
 );
 
-export const LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING = getRequiredENVVar(
-  "LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING"
-);
-export const LOLLIPOP_REVOKE_QUEUE_NAME = getRequiredENVVar(
-  "LOLLIPOP_REVOKE_QUEUE_NAME"
-);
 export const LOLLIPOP_API_KEY = getRequiredENVVar("LOLLIPOP_API_KEY");
 export const LOLLIPOP_API_URL = getRequiredENVVar("LOLLIPOP_API_URL");
 export const LOLLIPOP_API_BASE_PATH = getRequiredENVVar(
@@ -353,12 +332,6 @@ export const SERVICES_APP_BACKEND_BASE_PATH = getRequiredENVVar(
   "SERVICES_APP_BACKEND_BASE_PATH"
 );
 
-// Token needed to receive API calls (notifications, metadata update) from io-functions-services
-export const PRE_SHARED_KEY = getRequiredENVVar("PRE_SHARED_KEY");
-
-// Register the urlTokenStrategy.
-export const URL_TOKEN_STRATEGY = urlTokenStrategy(PRE_SHARED_KEY);
-
 // Needed to forward push notifications actions events
 export const NOTIFICATIONS_STORAGE_CONNECTION_STRING = getRequiredENVVar(
   "NOTIFICATIONS_STORAGE_CONNECTION_STRING"
@@ -411,14 +384,6 @@ export const ROOT_REDIRECT_URL = pipe(
     );
     return DEFAULT_ROOT_REDIRECT_URL;
   })
-);
-
-// Needed to verify if a profile has been locked
-export const LOCKED_PROFILES_STORAGE_CONNECTION_STRING = getRequiredENVVar(
-  "LOCKED_PROFILES_STORAGE_CONNECTION_STRING"
-);
-export const LOCKED_PROFILES_TABLE_NAME = getRequiredENVVar(
-  "LOCKED_PROFILES_TABLE_NAME"
 );
 
 // Push notifications
@@ -492,22 +457,6 @@ export const PECSERVERS = pipe(
   })
 );
 //
-
-// -------------------------------
-// FF Appbackendli
-// -------------------------------
-
-// Enable /notify and session/:fiscal_code/lock endpoint
-// only if code is deployed on appbackendli
-
-const IS_APPBACKENDLI = pipe(
-  O.fromNullable(process.env.IS_APPBACKENDLI),
-  O.map((val) => val.toLowerCase() === "true"),
-  O.getOrElse(() => false)
-);
-
-export const FF_ENABLE_NOTIFY_ENDPOINT = IS_APPBACKENDLI;
-export const FF_ENABLE_SESSION_ENDPOINTS = IS_APPBACKENDLI;
 
 // PN Service Id
 export const PN_SERVICE_ID = pipe(
