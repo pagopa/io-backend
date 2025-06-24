@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 17.0.0
+
+### Major Changes
+
+- 0735084: Removed backend internal related config and endpoints
+
 ## 16.18.0
 
 ### Minor Changes
