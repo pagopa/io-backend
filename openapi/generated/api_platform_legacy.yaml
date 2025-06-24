@@ -1,0 +1,359 @@
+openapi: 3.0.2
+info:
+  title: Public API & Trial System API
+  description: >
+    Mobile and web backend API by platform.
+
+    WARNING! This is a legacy API that will be exposed by the API Management
+    under the `/api/platform-legacy` path.
+
+    But the base path exposed to the client is `/api` and an url-rewrite is
+    performed by the Application Gateway.
+
+    Redirect and getServerInfo are the only endpoints that will be exposed
+    without any base path.
+  version: 16.18.0
+servers:
+  - url: https://localhost/api/platform-legacy
+paths:
+  /:
+    get:
+      summary: Redirect
+      description: |
+        Redirects to a specific URL.
+      operationId: Redirect
+      responses:
+        '302':
+          description: HTTP Redirect.
+          headers:
+            Location:
+              description: URL where the client is being redirected.
+              schema:
+                type: string
+          content: {}
+    x-swagger-router-controller: ServerInfoController
+  /info:
+    get:
+      summary: Runtime server info
+      description: |
+        Returns runtime information about the server.
+      operationId: getServerInfo
+      responses:
+        '200':
+          description: Runtime server info.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerInfo'
+              example:
+                version: 0.0.1
+                min_app_version: 0.0.0
+                min_app_version_pagopa: 0.0.0
+    x-swagger-router-controller: ServerInfoController
+  /v1/ping:
+    get:
+      summary: Check online status
+      description: |
+        Returns no content.
+      operationId: getPing
+      responses:
+        '204':
+          description: Service is alive.
+          content: {}
+    head:
+      summary: Check online status
+      operationId: getPingHead
+      description: Preflight check for the ping API.
+      responses:
+        '204':
+          description: Preflight success response.
+          content: {}
+    x-swagger-router-controller: StatusServicesController
+  /v1/status:
+    get:
+      summary: Get service statuses
+      description: Returns the current status of all microservices.
+      operationId: getServicesStatus
+      responses:
+        '200':
+          description: App backend microservices statuses.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServicesStatus'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+    head:
+      summary: Get service statuses
+      operationId: getServicesStatusHead
+      description: Preflight check for the service statuses API.
+      responses:
+        '204':
+          description: Preflight success response.
+          content: {}
+    x-swagger-router-controller: StatusServicesController
+  /v1/trials/{trialId}/subscriptions:
+    get:
+      summary: Get subscription detail
+      description: >-
+        Returns the details about the subscription of the authenticated user for
+        the specified trial.
+      operationId: getSubscription
+      parameters:
+        - name: trialId
+          in: path
+          required: true
+          schema:
+            minLength: 1
+            type: string
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '401':
+          description: Authorization error.
+          content: {}
+        '404':
+          description: >
+            Not Found. This occurs when the specified user is not listed under
+            the trial.
+          content: {}
+        '429':
+          description: Too may requests.
+          content: {}
+        '500':
+          description: There was an error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+    post:
+      summary: Create a subscription
+      description: Subscribe the authenticated user to the given trial.
+      operationId: createSubscription
+      parameters:
+        - name: trialId
+          in: path
+          required: true
+          schema:
+            minLength: 1
+            type: string
+      responses:
+        '201':
+          description: >
+            Created: the request has been processed and the user has been
+            registered for the trial.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '202':
+          description: >
+            Accepted: the request has been received, but the user may not yet be
+            subscribed to the trial.
+
+            The server will process the request asynchronously.
+
+            Resubmitting the same request may result in a `409 Conflict` error.
+          content: {}
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '401':
+          description: Authorization error.
+          content: {}
+        '409':
+          description: The resource already exists.
+          content: {}
+        '429':
+          description: Too may requests.
+          content: {}
+        '500':
+          description: There was an error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+components:
+  schemas:
+    ProblemJson:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+          description: |-
+            An absolute URI that identifies the problem type. When dereferenced,
+            it SHOULD provide human-readable documentation for the problem type
+            (e.g., using HTML).
+          default: about:blank
+          example: https://example.com/problem/constraint-violation
+        title:
+          type: string
+          description: >-
+            A short, summary of the problem type. Written in english and
+            readable
+
+            for engineers (usually not suited for non technical stakeholders and
+
+            not localized); example: Service Unavailable
+        status:
+          type: integer
+          format: int32
+          description: >-
+            The HTTP status code generated by the origin server for this
+            occurrence of the problem.
+          minimum: 100
+          maximum: 600
+          exclusiveMaximum: true
+          example: 200
+        detail:
+          type: string
+          description: |-
+            A human readable explanation specific to this occurrence of the
+            problem.
+          example: There was an error processing the request
+        instance:
+          type: string
+          format: uri
+          description: >-
+            An absolute URI that identifies the specific occurrence of the
+            problem.
+
+            It may or may not yield further information if dereferenced.
+    CreatedAt:
+      type: string
+      format: UTCISODateFromString
+      description: A date-time field in ISO-8601 format and UTC timezone.
+      x-import: '@pagopa/ts-commons/lib/dates'
+      example: '2018-10-13T00:00:00.000Z'
+    ServerInfo:
+      title: Server information
+      required:
+        - min_app_version
+        - min_app_version_pagopa
+        - version
+      type: object
+      properties:
+        version:
+          type: string
+        min_app_version:
+          $ref: '#/components/schemas/VersionPerPlatform'
+        min_app_version_pagopa:
+          $ref: '#/components/schemas/VersionPerPlatform'
+    VersionPerPlatform:
+      title: Specify a version for ios and another for android
+      required:
+        - android
+        - ios
+      type: object
+      properties:
+        ios:
+          type: string
+        android:
+          type: string
+    ServicesStatus:
+      required:
+        - services
+      type: object
+      properties:
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceStatus'
+    ServiceStatus:
+      required:
+        - details
+        - id
+        - status
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        details:
+          type: string
+    StatusEnum:
+      type: string
+      description: Status of a service
+      enum:
+        - OK
+        - WARNING
+        - CRITICAL
+        - PARTIAL_AVAILABILITY
+        - MANTAINANCE
+    SubscriptionState:
+      type: string
+      description: >-
+        - UNSUBSCRIBED: The user is not subscribed to the specified trial and
+        does
+            not have any access to the specified trial.
+        - SUBSCRIBED: The user is subscribed to the specified trial and does
+            not have any access to the specified trial. The system is going to
+            activate the user if any slot for the trial is available.
+        - ACTIVE: The user has the access to the specified trial.
+
+        - DISABLED: The user does not have the access to the specified trial.
+
+
+        When a user subscribes a trial, the subscription is in the `SUBSCRIBED`
+        state
+
+        If the user wants to unsubscribe, the state changes to `UNSUBSCRIBED`.
+
+        When the trial is going to be activated (by the Trial Manager, the owner
+        of the trial), then the state of the
+
+        selected `SUBSCRIBED` users becomes `ACTIVE`.
+
+        The Trial Manager can change the state of any user, within its own
+        subscription,
+
+        to any state (e.g. can disable a subscription setting the state to
+        `DISABLED`).
+      enum:
+        - UNSUBSCRIBED
+        - SUBSCRIBED
+        - ACTIVE
+        - DISABLED
+    TrialId:
+      minLength: 1
+      type: string
+      description: Unique identifier of the trial.
+    Subscription:
+      required:
+        - createdAt
+        - state
+        - trialId
+      type: object
+      properties:
+        trialId:
+          $ref: '#/components/schemas/TrialId'
+        state:
+          $ref: '#/components/schemas/SubscriptionState'
+        createdAt:
+          $ref: '#/components/schemas/CreatedAt'
+  parameters:
+    pathTrialId:
+      name: trialId
+      in: path
+      required: true
+      schema:
+        minLength: 1
+        type: string
+  securitySchemes:
+    Bearer:
+      type: apiKey
+      name: Authorization
+      in: header

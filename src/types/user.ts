@@ -10,12 +10,9 @@ import * as O from "fp-ts/Option";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
-import { CieUserIdentity } from "../../generated/auth/CieUserIdentity";
-import { SpidUserIdentity } from "../../generated/auth/SpidUserIdentity";
-import { UserIdentity } from "../../generated/auth/UserIdentity";
-import { EmailAddress } from "../../generated/backend/EmailAddress";
-import { FiscalCode } from "../../generated/backend/FiscalCode";
-import { SpidLevel } from "../../generated/backend/SpidLevel";
+import { EmailAddress } from "../../generated/auth/EmailAddress";
+import { FiscalCode } from "../../generated/auth/FiscalCode";
+import { SpidLevel } from "../../generated/auth/SpidLevel";
 import { withValidatedOrValidationError } from "../utils/responses";
 import {
   BPDToken,
@@ -94,26 +91,6 @@ export type UserV5 = t.TypeOf<typeof UserV5>;
 
 export const User = t.union([UserV1, UserV2, UserV3, UserV4, UserV5], "User");
 export type User = t.TypeOf<typeof User>;
-
-/**
- * Discriminate from a CieUserIdentity and a SpidUserIdentity
- * checking the spid_email property.
- *
- * @param user
- */
-export function isSpidUserIdentity(
-  user: CieUserIdentity | SpidUserIdentity
-): user is SpidUserIdentity {
-  return (user as SpidUserIdentity).spid_email !== undefined;
-}
-
-export function exactUserIdentityDecode(
-  user: UserIdentity
-): E.Either<t.Errors, UserIdentity> {
-  return isSpidUserIdentity(user)
-    ? t.exact(SpidUserIdentity.type).decode(user)
-    : t.exact(CieUserIdentity.type).decode(user);
-}
 
 export const withUserFromRequest = async <T>(
   req: express.Request,

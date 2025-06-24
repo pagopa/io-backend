@@ -5,7 +5,6 @@ import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import RedisSessionStorage from "../../services/redisSessionStorage";
-import RedisUserMetadataStorage from "../../services/redisUserMetadataStorage";
 import SessionLockController from "../sessionLockController";
 import { pipe } from "fp-ts/lib/function";
 import { PubKeyStatusEnum } from "../../../generated/lollipop-api/PubKeyStatus";
@@ -25,12 +24,12 @@ import {
   getUserAuthenticationLockDataMock,
   isUserAuthenticationLockedMock,
   lockUserAuthenticationMockLazy,
-  unlockUserAuthenticationMock,
+  unlockUserAuthenticationMock
 } from "../../__mocks__/services.mock";
 import { anothernUnlockCode } from "../../__mocks__/lockedProfileTableClient";
 import {
   ResponseErrorInternal,
-  ResponseSuccessJson,
+  ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import NotificationService from "../../services/notificationService";
 
@@ -72,13 +71,8 @@ const mockRedisSessionStorage = {
   userHasActiveSessionsOrLV: mockUserHasActiveSessionsOrLV,
   getLollipopAssertionRefForUser: mockGetLollipop,
   delLollipopDataForUser: mockDelLollipop,
-  getSessionRemainingTTL: mockGetSessionRemainingTTL,
+  getSessionRemainingTTL: mockGetSessionRemainingTTL
 } as unknown as RedisSessionStorage;
-
-const mockDel = jest.fn().mockImplementation(async () => E.right(true));
-const mockRedisUserMetadataStorage = {
-  del: mockDel,
-} as unknown as RedisUserMetadataStorage;
 
 const anActivatedPubKey = {
   status: PubKeyStatusEnum.VALID,
@@ -89,7 +83,7 @@ const anActivatedPubKey = {
   pub_key: {} as JwkPubKey,
   ttl: 600,
   version: 1,
-  expires_at: 1000,
+  expires_at: 1000
 } as unknown as ActivatedPubKey;
 
 const mockRevokePreviousAssertionRef = jest
@@ -104,8 +98,8 @@ jest.mock("../../services/lollipopService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
       revokePreviousAssertionRef: mockRevokePreviousAssertionRef,
-      activateLolliPoPKey: mockActivateLolliPoPKey,
-    })),
+      activateLolliPoPKey: mockActivateLolliPoPKey
+    }))
   };
 });
 
@@ -115,7 +109,7 @@ const mockDeleteInstallation = jest
   .fn()
   .mockResolvedValue(ResponseSuccessJson({ message: "ok" }));
 const mockNotificationService = {
-  deleteInstallation: mockDeleteInstallation,
+  deleteInstallation: mockDeleteInstallation
 };
 
 const notificationServiceFactory = (_fiscalCode: FiscalCode) =>
@@ -123,7 +117,6 @@ const notificationServiceFactory = (_fiscalCode: FiscalCode) =>
 
 const controller = new SessionLockController(
   mockRedisSessionStorage,
-  mockRedisUserMetadataStorage,
   mockLollipopService,
   AuthenticationLockServiceMock,
   notificationServiceFactory
@@ -163,7 +156,7 @@ describe("SessionLockController#getUserSession", () => {
 
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
-      active: true,
+      active: true
     });
   });
 });
@@ -202,7 +195,7 @@ describe("SessionLockController#lockUserSession", () => {
 
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
-      message: "ok",
+      message: "ok"
     });
   });
 
@@ -291,18 +284,6 @@ describe("SessionLockController#lockUserSession", () => {
 
     expect(res.status).toHaveBeenCalledWith(500);
   });
-
-  it("should fail on delete metadata error", async () => {
-    const req = mockReq({ params: { fiscal_code: aFiscalCode } });
-    const res = mockRes();
-
-    mockDel.mockImplementationOnce(async () => E.left("any error"));
-
-    const response = await controller.lockUserSession(req);
-    response.apply(res);
-
-    expect(res.status).toHaveBeenCalledWith(500);
-  });
 });
 
 describe("SessionLockController#unlockUserSession", () => {
@@ -335,7 +316,7 @@ describe("SessionLockController#unlockUserSession", () => {
 
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
-      message: "ok",
+      message: "ok"
     });
   });
 
@@ -392,7 +373,7 @@ describe("SessionLockController#deleteUserSession", () => {
     expect(mockDelLollipop).toHaveBeenCalled();
     expect(mockDelUserAllSessions).toHaveBeenCalled();
     expect(res.json).toHaveBeenCalledWith({
-      message: "ok",
+      message: "ok"
     });
   });
 
@@ -478,7 +459,7 @@ describe("SessionLockController#lockUserAuthentication", () => {
 
   const aValidRequest = {
     params: { fiscal_code: aFiscalCode },
-    body: { unlock_code: anUnlockCode },
+    body: { unlock_code: anUnlockCode }
   };
 
   it("should succeed storing CF-unlockcode when request is valid and the association has not been previously stored", async () => {
@@ -599,7 +580,7 @@ describe("SessionLockController#lockUserAuthentication", () => {
   `("should return 400 when $title", async ({ unlockCode, fiscalCode }) => {
     const req = mockReq({
       params: { fiscal_code: fiscalCode },
-      body: { unlock_code: unlockCode },
+      body: { unlock_code: unlockCode }
     });
     const res = mockRes();
 
@@ -618,11 +599,11 @@ describe("SessionLockController#unlockUserAuthentication", () => {
 
   const aValidRequest = {
     params: { fiscal_code: aFiscalCode },
-    body: { unlock_code: anUnlockCode },
+    body: { unlock_code: anUnlockCode }
   };
   const aValidRequestWithoutUnlockCode = {
     params: { fiscal_code: aFiscalCode },
-    body: {},
+    body: {}
   };
 
   it.each`
@@ -638,7 +619,7 @@ describe("SessionLockController#unlockUserAuthentication", () => {
       getUserAuthenticationLockDataMock.mockReturnValueOnce(
         TE.of([
           aNotReleasedData,
-          { ...aNotReleasedData, rowKey: anothernUnlockCode },
+          { ...aNotReleasedData, rowKey: anothernUnlockCode }
         ])
       );
 
@@ -743,7 +724,7 @@ describe("SessionLockController#unlockUserAuthentication", () => {
   `("should return 400 when $title", async ({ unlockCode, fiscalCode }) => {
     const req = mockReq({
       params: { fiscal_code: fiscalCode },
-      body: { unlock_code: unlockCode },
+      body: { unlock_code: unlockCode }
     });
     const res = mockRes();
 
@@ -782,8 +763,8 @@ describe("SessionLockController#getUserSessionState", () => {
             froxenNowDate,
             expectedSessionTTL
           ).toISOString(),
-          type: LoginTypeEnum.LV,
-        }),
+          type: LoginTypeEnum.LV
+        })
       });
   });
 
@@ -805,8 +786,8 @@ describe("SessionLockController#getUserSessionState", () => {
             froxenNowDate,
             expectedSessionTTL
           ).toISOString(),
-          type: LoginTypeEnum.LV,
-        }),
+          type: LoginTypeEnum.LV
+        })
       });
   });
 
@@ -823,8 +804,8 @@ describe("SessionLockController#getUserSessionState", () => {
       expect(response.value).toEqual({
         access_enabled: true,
         session_info: {
-          active: false,
-        },
+          active: false
+        }
       });
   });
 

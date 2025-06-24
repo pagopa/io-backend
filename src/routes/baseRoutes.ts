@@ -17,7 +17,6 @@ import ProfileController from "../controllers/profileController";
 import ServicesController from "../controllers/servicesController";
 import SessionController from "../controllers/sessionController";
 import UserDataProcessingController from "../controllers/userDataProcessingController";
-import UserMetadataController from "../controllers/userMetadataController";
 import FunctionsAppService from "../services/functionAppService";
 import NewMessagesService from "../services/newMessagesService";
 import { NotificationServiceFactory } from "../services/notificationServiceFactory";
@@ -25,7 +24,6 @@ import PagoPAEcommerceService from "../services/pagoPAEcommerceService";
 import PagoPAProxyService from "../services/pagoPAProxyService";
 import ProfileService from "../services/profileService";
 import RedisSessionStorage from "../services/redisSessionStorage";
-import RedisUserMetadataStorage from "../services/redisUserMetadataStorage";
 import UserDataProcessingService from "../services/userDataProcessingService";
 import { toExpressHandler } from "../utils/express";
 
@@ -42,7 +40,6 @@ import { toExpressHandler } from "../utils/express";
  * @param notificationServiceFactory The factory that build the Service service to handle services
  * @param sessionStorage The session storage service that handles the user sessions
  * @param pagoPaProxyService The service that handles the PagoPA Proxy
- * @param userMetadataStorage The user metadata storage service that handles the user metadata
  * @param userDataProcessingService The service that handles the user request for data processing
  * @param bearerSessionTokenAuth The autentication middleware for user session token
  * @param lollipopClient The API Client that handles the Lollipop protocol requests
@@ -60,7 +57,6 @@ export const registerAPIRoutes = (
   sessionStorage: RedisSessionStorage,
   pagoPaProxyService: PagoPAProxyService,
   PagoPaEcommerceService: PagoPAEcommerceService,
-  userMetadataStorage: RedisUserMetadataStorage,
   userDataProcessingService: UserDataProcessingService,
   bearerSessionTokenAuth: ReturnType<passport.Authenticator["authenticate"]>,
   lollipopClient: ReturnType<typeof LollipopApiClient>
@@ -96,9 +92,6 @@ export const registerAPIRoutes = (
   const pagoPAEcommerceController: PagoPAEcommerceController =
     new PagoPAEcommerceController(PagoPaEcommerceService);
 
-  const userMetadataController: UserMetadataController =
-    new UserMetadataController(userMetadataStorage);
-
   const userDataProcessingController: UserDataProcessingController =
     new UserDataProcessingController(userDataProcessingService);
 
@@ -126,21 +119,6 @@ export const registerAPIRoutes = (
     toExpressHandler(
       profileController.startEmailValidationProcess,
       profileController
-    )
-  );
-
-  app.get(
-    `${basePath}/user-metadata`,
-    bearerSessionTokenAuth,
-    toExpressHandler(userMetadataController.getMetadata, userMetadataController)
-  );
-
-  app.post(
-    `${basePath}/user-metadata`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      userMetadataController.upsertMetadata,
-      userMetadataController
     )
   );
 

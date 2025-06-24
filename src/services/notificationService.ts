@@ -9,11 +9,11 @@ import {
   ResponseErrorInternal,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
 
-import { FiscalCode } from "../../generated/backend/FiscalCode";
-import { Installation } from "../../generated/backend/Installation";
+import { Installation } from "../../generated/communication/Installation";
 import {
   CreateOrUpdateInstallationMessage,
   KindEnum as CreateOrUpdateKind

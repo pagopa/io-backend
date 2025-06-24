@@ -18,9 +18,9 @@ import * as B from "fp-ts/lib/boolean";
 import { flow, identity, pipe } from "fp-ts/lib/function";
 import { isArray } from "util";
 
-import { AssertionRef as BackendAssertionRef } from "../../generated/backend/AssertionRef";
-import { SessionInfo } from "../../generated/backend/SessionInfo";
-import { SessionsList } from "../../generated/backend/SessionsList";
+import { AssertionRef as BackendAssertionRef } from "../../generated/auth/AssertionRef";
+import { SessionInfo } from "../../generated/auth/SessionInfo";
+import { SessionsList } from "../../generated/auth/SessionsList";
 import {
   LollipopData,
   NullableBackendAssertionRefFromString

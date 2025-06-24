@@ -102,9 +102,6 @@ Those are all Environment variables needed by the application:
 | API_KEY                                   | The key used to authenticate to the io-functions-app API                                             | string |
 | API_URL                                   | The io-functions-app URL                                                                             | string |
 | API_BASE_PATH                             | The root path for the backend api endpoints                                                          | string |
-| BONUS_API_KEY                             | The key used to authenticate to the io-functions-bonus API                                           | string |
-| BONUS_API_URL                             | The io-functions-bonus  URL                                                                          | string |
-| BONUS_API_BASE_PATH                       | The root path for the backend bonus api endpoints                                                    | string |
 | CGN_API_KEY                               | The key used to authenticate to the io-functions-cgn API                                             | string |
 | CGN_API_URL                               | The io-functions-cgn  URL                                                                            | string |
 | CGN_API_BASE_PATH                         | The root path for the backend cgn api endpoints                                                      | string |
@@ -115,7 +112,6 @@ Those are all Environment variables needed by the application:
 | NOTIFICATIONS_STORAGE_CONNECTION_STRING   | Connection string to Azure queue storage for notification hub messages                               | string |
 | NOTIFICATIONS_QUEUE_NAME                  | Queue name of Azure queue storage for notification hub messages                                      | string |
 | ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE     | The range in CIDR form of IPs of service allowed to handle user sessions                             | string |
-| AUTHENTICATION_BASE_PATH                  | The root path for the authentication endpoints                                                       | string |
 | PAGOPA_API_URL_PROD                       | The url for the PagoPA api endpoints in prod mode                                                    | string |
 | PAGOPA_API_KEY_PROD                       | The api-key needed to call the pagopa proxy API                                                      | string |
 | PAGOPA_API_URL_TEST                       | The url for the PagoPA api endpoints in test mode                                                    | string |

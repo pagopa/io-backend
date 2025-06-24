@@ -15,8 +15,8 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { NotificationServiceFactory } from "src/services/notificationServiceFactory";
 
-import { Installation } from "../../generated/backend/Installation";
-import { InstallationID } from "../../generated/backend/InstallationID";
+import { Installation } from "../../generated/communication/Installation";
+import { InstallationID } from "../../generated/communication/InstallationID";
 import { Notification } from "../../generated/notifications/Notification";
 import { SuccessResponse } from "../../generated/notifications/SuccessResponse";
 import RedisSessionStorage from "../services/redisSessionStorage";

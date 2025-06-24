@@ -21,7 +21,6 @@ import * as express from "express";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
-import { PaymentInfoBadGatewayResponse } from "generated/backend/PaymentInfoBadGatewayResponse";
 import { ProblemJson } from "generated/io-messages-api/ProblemJson";
 import { PartyConfigurationFaultPaymentProblemJson } from "generated/pagopa-ecommerce/PartyConfigurationFaultPaymentProblemJson";
 import { PaymentInfoConflictResponse } from "generated/pagopa-ecommerce/PaymentInfoConflictResponse";
@@ -29,6 +28,7 @@ import { PaymentInfoNotFoundResponse } from "generated/pagopa-ecommerce/PaymentI
 import { PaymentFaultEnum } from "generated/pagopa-proxy/PaymentFault";
 import { PaymentFaultV2Enum } from "generated/pagopa-proxy/PaymentFaultV2";
 import { PaymentProblemJson } from "generated/pagopa-proxy/PaymentProblemJson";
+import { PaymentInfoBadGatewayResponse } from "generated/payments/PaymentInfoBadGatewayResponse";
 import * as t from "io-ts";
 
 import { errorsToError } from "./errorsFormatter";

@@ -10,7 +10,7 @@ on:
     branches:
       - master
     paths:
-      - 'openapi/generated/api_services_app_backend.yaml'
+      - 'openapi/generated/api_services.yaml'
       - '.github/workflows/pr_opex_api_services_app_backend.yml'
       - '.github/workflows/opex_api_services_app_backend.yml'
       - '.opex/api_services_app_backend/**'

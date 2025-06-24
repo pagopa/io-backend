@@ -13,7 +13,7 @@ import {
 import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
 
-import { InitializedProfile } from "../../generated/backend/InitializedProfile";
+import { InitializedProfile } from "../../generated/auth/InitializedProfile";
 import { formatDate } from "../utils/date";
 import { User } from "./user";
 
