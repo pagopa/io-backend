@@ -24,12 +24,12 @@ import * as t from "io-ts";
 import { AppMessagesAPIClient } from "./clients/app-messages.client";
 import { CgnAPIClient } from "./clients/cgn";
 import { CgnOperatorSearchAPIClient } from "./clients/cgn-operator-search";
-import { EUCovidCertAPIClient } from "./clients/eucovidcert.client";
 import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
 import { IoFimsAPIClient } from "./clients/io-fims";
 import { IoSignAPIClient } from "./clients/io-sign";
 import { IoWalletAPIClient } from "./clients/io-wallet";
 import { LollipopApiClient } from "./clients/lollipop";
+import { getPagoPaEcommerceClient } from "./clients/pagopa-ecommerce";
 import { PNClientFactory } from "./clients/pn-clients";
 import { ServicesAppBackendAPIClient } from "./clients/services-app-backend";
 import { TrialSystemAPIClient } from "./clients/trial-system.client";
@@ -225,17 +225,6 @@ export const CGN_OPERATOR_SEARCH_API_CLIENT = CgnOperatorSearchAPIClient(
   httpOrHttpsApiFetch
 );
 
-export const EUCOVIDCERT_API_KEY = getRequiredENVVar("EUCOVIDCERT_API_KEY");
-export const EUCOVIDCERT_API_URL = getRequiredENVVar("EUCOVIDCERT_API_URL");
-export const EUCOVIDCERT_API_BASE_PATH = getRequiredENVVar(
-  "EUCOVIDCERT_API_BASE_PATH"
-);
-export const EUCOVIDCERT_API_CLIENT = EUCovidCertAPIClient(
-  EUCOVIDCERT_API_KEY,
-  EUCOVIDCERT_API_URL,
-  httpOrHttpsApiFetch
-);
-
 export const SERVICES_APP_BACKEND_API_BASE_PATH = getRequiredENVVar(
   "SERVICES_APP_BACKEND_API_BASE_PATH"
 );
@@ -325,6 +314,26 @@ export const PAGOPA_CLIENT = new PagoPAClientFactory(
   simpleHttpsApiFetch
 );
 
+const pagoPAEcommerceApiUrl = getRequiredENVVar("PAGOPA_ECOMMERCE_BASE_URL");
+const pagoPAEcommerceApiKey = getRequiredENVVar("PAGOPA_ECOMMERCE_API_KEY");
+const pagoPAEcommerceUatApiUrl = getRequiredENVVar(
+  "PAGOPA_ECOMMERCE_UAT_BASE_URL"
+);
+const pagoPAEcommerceUatApiKey = getRequiredENVVar(
+  "PAGOPA_ECOMMERCE_UAT_API_KEY"
+);
+export const PAGOPA_ECOMMERCE_CLIENT = getPagoPaEcommerceClient(
+  pagoPAEcommerceApiUrl,
+  pagoPAEcommerceApiKey,
+  simpleHttpsApiFetch
+);
+
+export const PAGOPA_ECOMMERCE_UAT_CLIENT = getPagoPaEcommerceClient(
+  pagoPAEcommerceUatApiUrl,
+  pagoPAEcommerceUatApiKey,
+  simpleHttpsApiFetch
+);
+
 // API endpoint mount.
 export const SERVICES_APP_BACKEND_BASE_PATH = getRequiredENVVar(
   "SERVICES_APP_BACKEND_BASE_PATH"
@@ -350,6 +359,19 @@ export const PUSH_NOTIFICATIONS_STORAGE_CONNECTION_STRING = getRequiredENVVar(
 );
 export const PUSH_NOTIFICATIONS_QUEUE_NAME = getRequiredENVVar(
   "PUSH_NOTIFICATIONS_QUEUE_NAME"
+);
+
+// The following 3 varibales are needed to redirect the create/update installations and notifications traffic
+//to the new io-com push-notificaiton queue.
+export const IO_COM_QUEUE_STORAGE_CONNECTION_STRING = getRequiredENVVar(
+  "IO_COM_QUEUE_STORAGE_CONNECTION_STRING"
+);
+export const IO_COM_PUSH_NOTIFICATIONS_QUEUE_NAME = getRequiredENVVar(
+  "IO_COM_PUSH_NOTIFICATIONS_QUEUE_NAME"
+);
+
+export const IO_COM_PUSH_NOTIFICATIONS_REDIRECT_PERCENTAGE = getRequiredENVVar(
+  "IO_COM_PUSH_NOTIFICATIONS_REDIRECT_PERCENTAGE"
 );
 
 // Root redirect
@@ -416,8 +438,6 @@ export const errorOrAppInsightConfig: t.Validation<AppInsightsConfig> =
 export const FF_CGN_ENABLED = process.env.FF_CGN_ENABLED === "1";
 export const FF_IO_SIGN_ENABLED = process.env.FF_IO_SIGN_ENABLED === "1";
 export const FF_IO_FIMS_ENABLED = process.env.FF_IO_FIMS_ENABLED === "1";
-export const FF_EUCOVIDCERT_ENABLED =
-  process.env.FF_EUCOVIDCERT_ENABLED === "1";
 
 export const TEST_CGN_FISCAL_CODES = pipe(
   process.env.TEST_CGN_FISCAL_CODES || "",
