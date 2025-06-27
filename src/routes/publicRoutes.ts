@@ -1,4 +1,4 @@
-import { Express } from "express";
+import { Express, Request, Response } from "express";
 import * as O from "fp-ts/Option";
 import { pipe } from "fp-ts/function";
 
@@ -37,7 +37,7 @@ export const registerPublicRoutes = (app: Express): void => {
     res.redirect(ROOT_REDIRECT_URL.href);
   });
 
-  app.get("/info", (_, res) => {
+  const info = (_: Request, res: Response) => {
     const serverInfo: ServerInfo = {
       min_app_version: pipe(
         minAppVersion,
@@ -56,7 +56,9 @@ export const registerPublicRoutes = (app: Express): void => {
       version
     };
     res.status(200).json(serverInfo);
-  });
+  };
+  app.get("/info", info);
+  app.get("/api/platform/info", info);
 
   // Liveness probe for Kubernetes.
   // @see
@@ -64,8 +66,13 @@ export const registerPublicRoutes = (app: Express): void => {
   app.get("/ping", (_, res) => {
     res.status(200).send("ok");
   });
+  app.get("/api/platform/ping", (_, res) => {
+    res.status(200).send("ok");
+  });
 
   app.get("/api/v1/ping", toExpressHandler(getPing));
+  app.get("/api/platform/v1/ping", toExpressHandler(getPing));
 
   app.get("/api/v1/status", toExpressHandler(getStatusServices));
+  app.get("/api/platform/v1/status", toExpressHandler(getStatusServices));
 };

@@ -13,12 +13,16 @@ import { toExpressHandler } from "../utils/express";
  *
  * @param app The Express application
  * @param basePath The base path for the Piattaforma Notifiche APIs
+ * TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+ * @param basePathProxy The proxy base path for the Piattaforma Notifiche APIs (RFC IOPLT-1156)
  * @param pnService The service that handles the Piattaforma Notifiche APIs
  * @param bearerSessionTokenAuth The autentication middleware for user session token
  */
 export const registerPNRoutes = (
   app: Express,
   pnBasePath: string,
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  pnBasePathProxy: string,
   pnService: ReturnType<typeof PNService>,
   bearerSessionTokenAuth: ReturnType<passport.Authenticator["authenticate"]>
 ): void => {
@@ -27,9 +31,21 @@ export const registerPNRoutes = (
     bearerSessionTokenAuth,
     toExpressHandler(getPNActivationController(pnService.getPnActivation))
   );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.get(
+    `${pnBasePathProxy}/activation`,
+    bearerSessionTokenAuth,
+    toExpressHandler(getPNActivationController(pnService.getPnActivation))
+  );
 
   app.post(
     `${pnBasePath}/activation`,
+    bearerSessionTokenAuth,
+    toExpressHandler(upsertPNActivationController(pnService.upsertPnActivation))
+  );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.post(
+    `${pnBasePathProxy}/activation`,
     bearerSessionTokenAuth,
     toExpressHandler(upsertPNActivationController(pnService.upsertPnActivation))
   );

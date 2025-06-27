@@ -66,6 +66,7 @@ const aServicesAppBackendBasePath = "/api/v2";
 const aTrialSystemBasePath = "/trials/api/v1";
 const aIoWalletAPIBasePath = "/api/v1/wallet";
 const aIoWalletUatAPIBasePath = "/api/v1/wallet/uat";
+const aAPIPathProxyMock = "/api/v1";
 
 describe("Success app start", () => {
   // tslint:disable:no-let
@@ -82,7 +83,18 @@ describe("Success app start", () => {
       ServicesAppBackendBasePath: aServicesAppBackendBasePath,
       TrialSystemBasePath: aTrialSystemBasePath,
       allowNotifyIPSourceRange: [aValidCIDR],
-      env: NodeEnvironmentEnum.PRODUCTION
+      env: NodeEnvironmentEnum.PRODUCTION,
+      // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+      APIBasePathProxy: aAPIPathProxyMock,
+      CGNAPIBasePathProxy: aAPIPathProxyMock,
+      CGNOperatorSearchAPIBasePathProxy: aAPIPathProxyMock,
+      IoFimsAPIBasePathProxy: aAPIPathProxyMock,
+      IoSignAPIBasePathProxy: aAPIPathProxyMock,
+      IoWalletAPIBasePathProxy: aAPIPathProxyMock,
+      IoWalletUatAPIBasePathProxy: aAPIPathProxyMock,
+      ServicesAppBackendBasePathProxy: aAPIPathProxyMock,
+      TrialSystemBasePathProxy: aAPIPathProxyMock,
+      LollipopAPIBasePathProxy: aAPIPathProxyMock
     });
   });
 
@@ -188,7 +200,18 @@ describe("Failure app start", () => {
         ServicesAppBackendBasePath: aServicesAppBackendBasePath,
         TrialSystemBasePath: aTrialSystemBasePath,
         allowNotifyIPSourceRange: [aValidCIDR],
-        env: NodeEnvironmentEnum.PRODUCTION
+        env: NodeEnvironmentEnum.PRODUCTION,
+        // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+        APIBasePathProxy: aAPIPathProxyMock,
+        CGNAPIBasePathProxy: aAPIPathProxyMock,
+        CGNOperatorSearchAPIBasePathProxy: aAPIPathProxyMock,
+        IoFimsAPIBasePathProxy: aAPIPathProxyMock,
+        IoSignAPIBasePathProxy: aAPIPathProxyMock,
+        IoWalletAPIBasePathProxy: aAPIPathProxyMock,
+        IoWalletUatAPIBasePathProxy: aAPIPathProxyMock,
+        ServicesAppBackendBasePathProxy: aAPIPathProxyMock,
+        TrialSystemBasePathProxy: aAPIPathProxyMock,
+        LollipopAPIBasePathProxy: aAPIPathProxyMock
       });
     } catch (err) {
       expect(mockNotificationService).toBeCalledTimes(1);

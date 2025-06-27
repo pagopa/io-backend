@@ -123,6 +123,8 @@ export const getHttpsApiFetchWithBearer = (bearer: string) =>
 export const API_KEY = getRequiredENVVar("API_KEY");
 export const API_URL = getRequiredENVVar("API_URL");
 export const API_BASE_PATH = getRequiredENVVar("API_BASE_PATH");
+// TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+export const API_BASE_PATH_PROXY = getRequiredENVVar("API_BASE_PATH_PROXY");
 export const API_CLIENT = new ApiClientFactory(
   API_KEY,
   API_URL,
@@ -142,6 +144,10 @@ export const IO_SIGN_API_KEY = getRequiredENVVar("IO_SIGN_API_KEY");
 export const IO_SIGN_API_URL = getRequiredENVVar("IO_SIGN_API_URL");
 export const IO_SIGN_SERVICE_ID = getRequiredENVVar("IO_SIGN_SERVICE_ID");
 export const IO_SIGN_API_BASE_PATH = getRequiredENVVar("IO_SIGN_API_BASE_PATH");
+// TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+export const IO_SIGN_API_BASE_PATH_PROXY = getRequiredENVVar(
+  "IO_SIGN_API_BASE_PATH_PROXY"
+);
 export const IO_SIGN_API_CLIENT = IoSignAPIClient(
   IO_SIGN_API_KEY,
   IO_SIGN_API_URL,
@@ -152,6 +158,10 @@ export const IO_SIGN_API_CLIENT = IoSignAPIClient(
 export const IO_FIMS_API_KEY = getRequiredENVVar("IO_FIMS_API_KEY");
 export const IO_FIMS_API_URL = getRequiredENVVar("IO_FIMS_API_URL");
 export const IO_FIMS_API_BASE_PATH = getRequiredENVVar("IO_FIMS_API_BASE_PATH");
+// TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+export const IO_FIMS_API_BASE_PATH_PROXY = getRequiredENVVar(
+  "IO_FIMS_API_BASE_PATH_PROXY"
+);
 export const IO_FIMS_API_CLIENT = IoFimsAPIClient(
   IO_FIMS_API_KEY,
   IO_FIMS_API_URL,
@@ -162,6 +172,10 @@ export const IO_FIMS_API_CLIENT = IoFimsAPIClient(
 export const CGN_API_KEY = getRequiredENVVar("CGN_API_KEY");
 export const CGN_API_URL = getRequiredENVVar("CGN_API_URL");
 export const CGN_API_BASE_PATH = getRequiredENVVar("CGN_API_BASE_PATH");
+// TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+export const CGN_API_BASE_PATH_PROXY = getRequiredENVVar(
+  "CGN_API_BASE_PATH_PROXY"
+);
 export const CGN_API_CLIENT = CgnAPIClient(
   CGN_API_KEY,
   CGN_API_URL,
@@ -173,6 +187,10 @@ export const LOLLIPOP_API_KEY = getRequiredENVVar("LOLLIPOP_API_KEY");
 export const LOLLIPOP_API_URL = getRequiredENVVar("LOLLIPOP_API_URL");
 export const LOLLIPOP_API_BASE_PATH = getRequiredENVVar(
   "LOLLIPOP_API_BASE_PATH"
+);
+// TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+export const LOLLIPOP_API_BASE_PATH_PROXY = getRequiredENVVar(
+  "LOLLIPOP_API_BASE_PATH_PROXY"
 );
 export const LOLLIPOP_API_CLIENT = LollipopApiClient(
   LOLLIPOP_API_KEY,
@@ -196,6 +214,10 @@ export const CGN_OPERATOR_SEARCH_API_URL = getRequiredENVVar(
 );
 export const CGN_OPERATOR_SEARCH_API_BASE_PATH = getRequiredENVVar(
   "CGN_OPERATOR_SEARCH_API_BASE_PATH"
+);
+// TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+export const CGN_OPERATOR_SEARCH_API_BASE_PATH_PROXY = getRequiredENVVar(
+  "CGN_OPERATOR_SEARCH_API_BASE_PATH_PROXY"
 );
 export const CGN_OPERATOR_SEARCH_API_CLIENT = CgnOperatorSearchAPIClient(
   CGN_OPERATOR_SEARCH_API_KEY,
@@ -229,6 +251,8 @@ export const SERVICES_APP_BACKEND_CLIENT = ServicesAppBackendAPIClient(
 const IEnabledPnAddressBookConfig = t.interface({
   FF_PN_ACTIVATION_ENABLED: t.literal("1"),
   PN_ACTIVATION_BASE_PATH: t.string,
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  PN_ACTIVATION_BASE_PATH_PROXY: t.string,
   PN_API_KEY: NonEmptyString,
   PN_API_KEY_UAT: NonEmptyString,
   PN_API_URL: UrlFromString,
@@ -316,6 +340,10 @@ export const PAGOPA_ECOMMERCE_UAT_CLIENT = getPagoPaEcommerceClient(
 // API endpoint mount.
 export const SERVICES_APP_BACKEND_BASE_PATH = getRequiredENVVar(
   "SERVICES_APP_BACKEND_BASE_PATH"
+);
+// TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+export const SERVICES_APP_BACKEND_BASE_PATH_PROXY = getRequiredENVVar(
+  "SERVICES_APP_BACKEND_BASE_PATH_PROXY"
 );
 
 // Needed to forward push notifications actions events
@@ -514,6 +542,10 @@ export const FF_TRIAL_SYSTEM_ENABLED =
 export const TRIAL_SYSTEM_API_BASE_PATH = getRequiredENVVar(
   "TRIAL_SYSTEM_API_BASE_PATH"
 );
+// TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+export const TRIAL_SYSTEM_API_BASE_PATH_PROXY = getRequiredENVVar(
+  "TRIAL_SYSTEM_API_BASE_PATH_PROXY"
+);
 export const TRIAL_SYSTEM_API_KEY = getRequiredENVVar("TRIAL_SYSTEM_APIM_KEY");
 export const TRIAL_SYSTEM_API_URL = getRequiredENVVar("TRIAL_SYSTEM_APIM_URL");
 export const TRIAL_SYSTEM_APIM_BASE_PATH = getRequiredENVVar(
@@ -530,6 +562,10 @@ export const IO_WALLET_API_URL = getRequiredENVVar("IO_WALLET_API_URL");
 export const IO_WALLET_API_BASE_PATH = getRequiredENVVar(
   "IO_WALLET_API_BASE_PATH"
 );
+// TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+export const IO_WALLET_API_BASE_PATH_PROXY = getRequiredENVVar(
+  "IO_WALLET_API_BASE_PATH_PROXY"
+);
 export const IO_WALLET_TRIAL_ID = getRequiredENVVar("IO_WALLET_TRIAL_ID");
 export const IO_WALLET_API_CLIENT = IoWalletAPIClient(
   IO_WALLET_API_KEY,
@@ -544,6 +580,10 @@ export const FF_IO_WALLET_TRIAL_ENABLED =
 const IO_WALLET_UAT_API_KEY = getRequiredENVVar("IO_WALLET_UAT_API_KEY");
 export const IO_WALLET_UAT_API_BASE_PATH = getRequiredENVVar(
   "IO_WALLET_UAT_API_BASE_PATH"
+);
+// TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+export const IO_WALLET_UAT_API_BASE_PATH_PROXY = getRequiredENVVar(
+  "IO_WALLET_UAT_API_BASE_PATH_PROXY"
 );
 const IO_WALLET_UAT_API_URL = getRequiredENVVar("IO_WALLET_UAT_API_URL");
 export const IO_WALLET_UAT_API_CLIENT = IoWalletAPIClient(

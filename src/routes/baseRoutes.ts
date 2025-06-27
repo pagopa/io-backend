@@ -30,7 +30,9 @@ import { toExpressHandler } from "../utils/express";
  * Mount the base routes into the Express application
  *
  * @param app The Express application
- * @param authBasePath The base path for the base API APIs
+ * @param basePath The base path for the base API APIs
+ * TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+ * @param basePathProxy The proxy base path for the base API APIs (RFC IOPLT-1156)
  * @param _allowNotifyIPSourceRange The IP source range that is allowed to send notifications
  * @param profileService The service that handles the user profiles
  * @param fnAppService The API Client for the Function App
@@ -46,6 +48,8 @@ import { toExpressHandler } from "../utils/express";
 export const registerAPIRoutes = (
   app: Express,
   basePath: string,
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  basePathProxy: string,
   _allowNotifyIPSourceRange: ReadonlyArray<CIDR>,
   profileService: ProfileService,
   fnAppService: FunctionsAppService,
@@ -97,9 +101,21 @@ export const registerAPIRoutes = (
     bearerSessionTokenAuth,
     toExpressHandler(profileController.getProfile, profileController)
   );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.get(
+    `${basePathProxy}/profile`,
+    bearerSessionTokenAuth,
+    toExpressHandler(profileController.getProfile, profileController)
+  );
 
   app.get(
     `${basePath}/api-profile`,
+    bearerSessionTokenAuth,
+    toExpressHandler(profileController.getApiProfile, profileController)
+  );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.get(
+    `${basePathProxy}/api-profile`,
     bearerSessionTokenAuth,
     toExpressHandler(profileController.getApiProfile, profileController)
   );
@@ -109,9 +125,24 @@ export const registerAPIRoutes = (
     bearerSessionTokenAuth,
     toExpressHandler(profileController.updateProfile, profileController)
   );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.post(
+    `${basePathProxy}/profile`,
+    bearerSessionTokenAuth,
+    toExpressHandler(profileController.updateProfile, profileController)
+  );
 
   app.post(
     `${basePath}/email-validation-process`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      profileController.startEmailValidationProcess,
+      profileController
+    )
+  );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.post(
+    `${basePathProxy}/email-validation-process`,
     bearerSessionTokenAuth,
     toExpressHandler(
       profileController.startEmailValidationProcess,
@@ -127,9 +158,27 @@ export const registerAPIRoutes = (
       userDataProcessingController
     )
   );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.post(
+    `${basePathProxy}/user-data-processing`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      userDataProcessingController.upsertUserDataProcessing,
+      userDataProcessingController
+    )
+  );
 
   app.get(
     `${basePath}/user-data-processing/:choice`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      userDataProcessingController.getUserDataProcessing,
+      userDataProcessingController
+    )
+  );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.get(
+    `${basePathProxy}/user-data-processing/:choice`,
     bearerSessionTokenAuth,
     toExpressHandler(
       userDataProcessingController.getUserDataProcessing,
@@ -145,9 +194,24 @@ export const registerAPIRoutes = (
       userDataProcessingController
     )
   );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.delete(
+    `${basePathProxy}/user-data-processing/:choice`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      userDataProcessingController.abortUserDataProcessing,
+      userDataProcessingController
+    )
+  );
 
   app.get(
     `${basePath}/messages`,
+    bearerSessionTokenAuth,
+    toExpressHandler(messagesController.getMessagesByUser, messagesController)
+  );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.get(
+    `${basePathProxy}/messages`,
     bearerSessionTokenAuth,
     toExpressHandler(messagesController.getMessagesByUser, messagesController)
   );
@@ -157,15 +221,36 @@ export const registerAPIRoutes = (
     bearerSessionTokenAuth,
     toExpressHandler(messagesController.getMessage, messagesController)
   );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.get(
+    `${basePathProxy}/messages/:id`,
+    bearerSessionTokenAuth,
+    toExpressHandler(messagesController.getMessage, messagesController)
+  );
 
   app.put(
     `${basePath}/messages/:id/message-status`,
     bearerSessionTokenAuth,
     toExpressHandler(messagesController.upsertMessageStatus, messagesController)
   );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.put(
+    `${basePathProxy}/messages/:id/message-status`,
+    bearerSessionTokenAuth,
+    toExpressHandler(messagesController.upsertMessageStatus, messagesController)
+  );
 
   app.get(
     `${basePath}/third-party-messages/:id/precondition`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      messagesController.getThirdPartyMessagePrecondition,
+      messagesController
+    )
+  );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.get(
+    `${basePathProxy}/third-party-messages/:id/precondition`,
     bearerSessionTokenAuth,
     toExpressHandler(
       messagesController.getThirdPartyMessagePrecondition,
@@ -181,9 +266,27 @@ export const registerAPIRoutes = (
       messagesController
     )
   );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.get(
+    `${basePathProxy}/third-party-messages/:id`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      messagesController.getThirdPartyMessage,
+      messagesController
+    )
+  );
 
   app.get(
     `${basePath}/third-party-messages/:id/attachments/:attachment_url(*)`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      messagesController.getThirdPartyMessageAttachment,
+      messagesController
+    )
+  );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.get(
+    `${basePathProxy}/third-party-messages/:id/attachments/:attachment_url(*)`,
     bearerSessionTokenAuth,
     toExpressHandler(
       messagesController.getThirdPartyMessageAttachment,
@@ -196,9 +299,24 @@ export const registerAPIRoutes = (
     bearerSessionTokenAuth,
     toExpressHandler(servicesController.getService, servicesController)
   );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.get(
+    `${basePathProxy}/services/:id`,
+    bearerSessionTokenAuth,
+    toExpressHandler(servicesController.getService, servicesController)
+  );
 
   app.get(
     `${basePath}/services/:id/preferences`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      servicesController.getServicePreferences,
+      servicesController
+    )
+  );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.get(
+    `${basePathProxy}/services/:id/preferences`,
     bearerSessionTokenAuth,
     toExpressHandler(
       servicesController.getServicePreferences,
@@ -214,9 +332,27 @@ export const registerAPIRoutes = (
       servicesController
     )
   );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.post(
+    `${basePathProxy}/services/:id/preferences`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      servicesController.upsertServicePreferences,
+      servicesController
+    )
+  );
 
   app.get(
     `${basePath}/services`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      () => Promise.resolve(ResponseSuccessJson({ items: [] })),
+      servicesController
+    )
+  );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.get(
+    `${basePathProxy}/services`,
     bearerSessionTokenAuth,
     toExpressHandler(
       () => Promise.resolve(ResponseSuccessJson({ items: [] })),
@@ -232,15 +368,39 @@ export const registerAPIRoutes = (
       notificationController
     )
   );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.put(
+    `${basePathProxy}/installations/:id`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      notificationController.createOrUpdateInstallation,
+      notificationController
+    )
+  );
 
   app.get(
     `${basePath}/sessions`,
     bearerSessionTokenAuth,
     toExpressHandler(sessionController.listSessions, sessionController)
   );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.get(
+    `${basePathProxy}/sessions`,
+    bearerSessionTokenAuth,
+    toExpressHandler(sessionController.listSessions, sessionController)
+  );
 
   app.get(
     `${basePath}/payment-requests/:rptId`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      pagoPAProxyController.getPaymentInfo,
+      pagoPAProxyController
+    )
+  );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.get(
+    `${basePathProxy}/payment-requests/:rptId`,
     bearerSessionTokenAuth,
     toExpressHandler(
       pagoPAProxyController.getPaymentInfo,
@@ -256,6 +416,15 @@ export const registerAPIRoutes = (
       pagoPAEcommerceController
     )
   );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.get(
+    `${basePathProxy}/payment-info/:rptId`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      pagoPAEcommerceController.getPaymentInfo,
+      pagoPAEcommerceController
+    )
+  );
 
   app.post(
     `${basePath}/payment-activations`,
@@ -265,9 +434,27 @@ export const registerAPIRoutes = (
       pagoPAProxyController
     )
   );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.post(
+    `${basePathProxy}/payment-activations`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      pagoPAProxyController.activatePayment,
+      pagoPAProxyController
+    )
+  );
 
   app.get(
     `${basePath}/payment-activations/:codiceContestoPagamento`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      pagoPAProxyController.getActivationStatus,
+      pagoPAProxyController
+    )
+  );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.get(
+    `${basePathProxy}/payment-activations/:codiceContestoPagamento`,
     bearerSessionTokenAuth,
     toExpressHandler(
       pagoPAProxyController.getActivationStatus,
