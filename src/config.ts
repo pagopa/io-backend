@@ -348,19 +348,6 @@ export const PUSH_NOTIFICATIONS_QUEUE_NAME = getRequiredENVVar(
   "PUSH_NOTIFICATIONS_QUEUE_NAME"
 );
 
-// The following 3 varibales are needed to redirect the create/update installations and notifications traffic
-//to the new io-com push-notificaiton queue.
-export const IO_COM_QUEUE_STORAGE_CONNECTION_STRING = getRequiredENVVar(
-  "IO_COM_QUEUE_STORAGE_CONNECTION_STRING"
-);
-export const IO_COM_PUSH_NOTIFICATIONS_QUEUE_NAME = getRequiredENVVar(
-  "IO_COM_PUSH_NOTIFICATIONS_QUEUE_NAME"
-);
-
-export const IO_COM_PUSH_NOTIFICATIONS_REDIRECT_PERCENTAGE = getRequiredENVVar(
-  "IO_COM_PUSH_NOTIFICATIONS_REDIRECT_PERCENTAGE"
-);
-
 // Root redirect
 const DEFAULT_ROOT_REDIRECT_URL = pipe(
   "https://io.italia.it",
