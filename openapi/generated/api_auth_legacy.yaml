@@ -1,24 +1,14 @@
 openapi: 3.0.2
 info:
   title: API for Auth & Identity domain
-  description: >
-    Mobile and web backend API for the Auth and Identity domain.
-
-    WARNING! This is a legacy API that will be exposed by the API Management
-    under the `/api/auth-legacy` path.
-
-    But the base path exposed to the client is `/api` and an url-rewrite is
-    performed by the Application Gateway.
-
-    Redirect and `signMessage` are the only endpoints that will be exposed without
-    any base path.
+  description: Mobile and web backend API for the Auth and Identity domain.
   version: 16.18.0
 servers:
-  - url: https://api-app.io.pagopa.it/api/auth-legacy
+  - url: https://api-app.io.pagopa.it
 security:
   - Bearer: []
 paths:
-  /v1/services/{service_id}/preferences:
+  /api/v1/services/{service_id}/preferences:
     get:
       summary: GetServicePreferences
       operationId: getServicePreferences
@@ -117,7 +107,7 @@ paths:
         '500':
           description: Internal Server Error
           content: {}
-  /v1/profile:
+  /api/v1/profile:
     get:
       summary: Get user's profile
       description: Returns the profile for the user identified by the provided fiscal code.
@@ -234,7 +224,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-  /v1/api-profile:
+  /api/v1/api-profile:
     get:
       summary: Get user's profile stored into the API
       description: Returns the profile for the user identified by the provided fiscal code.
@@ -285,7 +275,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-  /v1/email-validation-process:
+  /api/v1/email-validation-process:
     post:
       summary: Start the Email Validation Process
       description: |-
@@ -323,7 +313,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-  /v1/sessions:
+  /api/v1/sessions:
     get:
       summary: List sessions of a User
       description: Return all the active sessions for an authenticated User.
@@ -350,7 +340,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-  /v1/user-data-processing:
+  /api/v1/user-data-processing:
     post:
       summary: Set User's data processing choices
       description: >-
@@ -394,7 +384,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-  /v1/user-data-processing/{choice}:
+  /api/v1/user-data-processing/{choice}:
     get:
       summary: Get User's data processing
       description: >-
