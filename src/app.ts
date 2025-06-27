@@ -118,7 +118,6 @@ export interface IAppFactoryParameters {
   readonly IoWalletAPIBasePath: string;
   readonly ServicesAppBackendBasePath: string;
   readonly TrialSystemBasePath: string;
-  readonly LollipopAPIBasePath: string;
   // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
   readonly authenticationBasePathProxy: string;
   readonly APIBasePathProxy: string;
@@ -147,7 +146,6 @@ export async function newApp({
   CGNOperatorSearchAPIBasePath,
   ServicesAppBackendBasePath,
   TrialSystemBasePath,
-  LollipopAPIBasePath,
   // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
   authenticationBasePathProxy,
   APIBasePathProxy,
@@ -364,7 +362,7 @@ export async function newApp({
 
         registerFirstLollipopConsumer(
           app,
-          LollipopAPIBasePath,
+          "/first-lollipop",
           // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
           LollipopAPIBasePathProxy,
           LOLLIPOP_API_CLIENT,

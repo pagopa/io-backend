@@ -34,7 +34,6 @@ import {
   IO_SIGN_API_BASE_PATH_PROXY,
   IO_WALLET_API_BASE_PATH,
   IO_WALLET_API_BASE_PATH_PROXY,
-  LOLLIPOP_API_BASE_PATH,
   LOLLIPOP_API_BASE_PATH_PROXY,
   SERVER_PORT,
   SERVICES_APP_BACKEND_BASE_PATH,
@@ -62,7 +61,6 @@ const CGNOperatorSearchAPIBasePath = CGN_OPERATOR_SEARCH_API_BASE_PATH;
 const ServicesAppBackendBasePath = SERVICES_APP_BACKEND_BASE_PATH;
 const TrialSystemBasePath = TRIAL_SYSTEM_API_BASE_PATH;
 const IoWalletAPIBasePath = IO_WALLET_API_BASE_PATH;
-const LollipopAPIBasePath = LOLLIPOP_API_BASE_PATH;
 // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
 const authenticationBasePathProxy = AUTHENTICATION_BASE_PATH_PROXY;
 const APIBasePathProxy = API_BASE_PATH_PROXY;
@@ -127,7 +125,6 @@ newApp({
   allowNotifyIPSourceRange: ALLOW_NOTIFY_IP_SOURCE_RANGE,
   appInsightsClient: O.toUndefined(maybeAppInsightsClient),
   authenticationBasePath,
-  LollipopAPIBasePath,
   env: ENV,
   // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
   authenticationBasePathProxy,
