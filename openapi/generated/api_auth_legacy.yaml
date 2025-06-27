@@ -1,0 +1,1235 @@
+openapi: 3.0.2
+info:
+  title: API for Auth & Identity domain
+  description: >
+    Mobile and web backend API for the Auth and Identity domain.
+
+    WARNING! This is a legacy API that will be exposed by the API Management
+    under the `/api/auth-legacy` path.
+
+    But the base path exposed to the client is `/api` and an url-rewrite is
+    performed by the Application Gateway.
+
+    Redirect and `signMessage` are the only endpoints that will be exposed without
+    any base path.
+  version: 16.18.0
+servers:
+  - url: https://api-app.io.pagopa.it/api/auth-legacy
+security:
+  - Bearer: []
+paths:
+  /v1/services/{service_id}/preferences:
+    get:
+      summary: GetServicePreferences
+      operationId: getServicePreferences
+      parameters:
+        - name: service_id
+          in: path
+          description: The ID of an existing Service.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Service Preference found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServicePreference'
+              example:
+                can_access_message_read_status: true
+                is_inbox_enabled: true
+                is_email_enabled: false
+                is_webhook_enabled: true
+                settings_version: 1
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: No service found for the provided ID.
+          content: {}
+        '409':
+          description: Conflict. The Profile is not in the correct preference mode.
+          content: {}
+        '429':
+          description: Too many requests
+          content: {}
+        '500':
+          description: Internal Server Error
+          content: {}
+    post:
+      summary: UpsertServicePreferences
+      operationId: upsertServicePreferences
+      parameters:
+        - name: service_id
+          in: path
+          description: The ID of an existing Service.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertServicePreference'
+        required: false
+      responses:
+        '200':
+          description: Service Preference found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServicePreference'
+              example:
+                can_access_message_read_status: true
+                is_inbox_enabled: true
+                is_email_enabled: false
+                is_webhook_enabled: true
+                settings_version: 1
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: No service found for the provided ID.
+          content: {}
+        '409':
+          description: >-
+            Conflict. Either the provided preference setting version is not
+            consistent with the current version stored in the Profile
+
+            or the Profile is not in the correct preference mode.
+          content: {}
+        '429':
+          description: Too many requests
+          content: {}
+        '500':
+          description: Internal Server Error
+          content: {}
+  /v1/profile:
+    get:
+      summary: Get user's profile
+      description: Returns the profile for the user identified by the provided fiscal code.
+      operationId: getUserProfile
+      responses:
+        '200':
+          description: Found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InitializedProfile'
+              example:
+                email: email@example.com
+                family_name: Rossi
+                fiscal_code: TMMEXQ60A10Y526X
+                has_profile: true
+                is_email_set: true
+                is_inbox_enabled: true
+                is_webhook_enabled: true
+                is_email_validated: true
+                is_email_already_taken: false
+                name: Mario
+                spid_email: preferred@example.com
+                service_preferences_settings:
+                  - mode: LEGACY
+                version: 1
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+          content: {}
+        '429':
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '500':
+          description: There was an error in retrieving the user profile.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+    post:
+      summary: Update the User's profile
+      description: Update the profile for the user identified by the provided fiscal code.
+      operationId: updateProfile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Profile'
+        required: true
+      responses:
+        '200':
+          description: Profile updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InitializedProfile'
+              example:
+                email: email@example.com
+                family_name: Rossi
+                fiscal_code: TMMEXQ60A10Y526X
+                has_profile: true
+                is_email_set: true
+                is_inbox_enabled: true
+                is_webhook_enabled: true
+                is_email_validated: true
+                is_email_already_taken: false
+                name: Mario
+                spid_email: preferred@example.com
+                version: 0
+        '400':
+          description: Invalid payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+          content: {}
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '409':
+          description: Conflict.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '412':
+          description: Precondition Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '429':
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '500':
+          description: Profile cannot be updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+  /v1/api-profile:
+    get:
+      summary: Get user's profile stored into the API
+      description: Returns the profile for the user identified by the provided fiscal code.
+      operationId: getApiUserProfile
+      responses:
+        '200':
+          description: Found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExtendedProfile'
+              example:
+                email: email@example.com
+                preferred_languages:
+                  - it_IT
+                is_inbox_enabled: true
+                accepted_tos_version: 1
+                is_webhook_enabled: true
+                is_email_enabled: true
+                is_email_validated: true
+                is_email_already_taken: false
+                version: 1
+                sender_allowed: true
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+          content: {}
+        '404':
+          description: Profile not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '429':
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '500':
+          description: There was an error in retrieving the user profile.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+  /v1/email-validation-process:
+    post:
+      summary: Start the Email Validation Process
+      description: |-
+        Start the email validation process that create the validation token
+        and send the validation email
+      operationId: startEmailValidationProcess
+      responses:
+        '202':
+          description: Accepted
+          content: {}
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+          content: {}
+        '404':
+          description: Profile not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '429':
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '500':
+          description: There was an error starting email validation process
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+  /v1/sessions:
+    get:
+      summary: List sessions of a User
+      description: Return all the active sessions for an authenticated User.
+      operationId: listUserSessions
+      responses:
+        '200':
+          description: Found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionsList'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+          content: {}
+        '500':
+          description: Unavailable service
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+  /v1/user-data-processing:
+    post:
+      summary: Set User's data processing choices
+      description: >-
+        Let the authenticated user express his will to retrieve or delete his
+        stored data.
+      operationId: upsertUserDataProcessing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDataProcessingChoiceRequest'
+        required: true
+      responses:
+        '200':
+          description: User Data processing created / updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDataProcessing'
+        '400':
+          description: Invalid payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+          content: {}
+        '409':
+          description: Conflict.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '429':
+          description: Too may requests
+          content: {}
+        '500':
+          description: User Data processing choice cannot be taken in charge.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+  /v1/user-data-processing/{choice}:
+    get:
+      summary: Get User's data processing
+      description: >-
+        Get the user's request to delete or download his stored data by
+        providing a kind of choice.
+      operationId: getUserDataProcessing
+      parameters:
+        - name: choice
+          in: path
+          description: A representation of a user data processing choice
+          required: true
+          schema:
+            type: string
+            enum:
+              - DOWNLOAD
+              - DELETE
+      responses:
+        '200':
+          description: User data processing retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDataProcessing'
+        '401':
+          description: Bearer token null or expired.
+          content: {}
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '429':
+          description: Too many requests
+          content: {}
+    delete:
+      tags:
+        - restricted
+      summary: Abort User's revious data processing request
+      description: Ask for a request to abort, if present
+      operationId: abortUserDataProcessing
+      parameters:
+        - name: choice
+          in: path
+          description: A representation of a user data processing choice
+          required: true
+          schema:
+            type: string
+            enum:
+              - DOWNLOAD
+              - DELETE
+      responses:
+        '202':
+          description: The abort request has been recorded
+          content: {}
+        '400':
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not Found
+          content: {}
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '429':
+          description: Too many requests
+          content: {}
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+  /first-lollipop/sign:
+    post:
+      operationId: signMessage
+      summary: POST a signed request with Lollipop
+      parameters:
+        - name: x-pagopa-lollipop-original-method
+          in: header
+          description: The method of the endpoint called by IO app
+          required: true
+          schema:
+            $ref: '#/components/schemas/LollipopMethod'
+        - name: x-pagopa-lollipop-original-url
+          in: header
+          description: The url of the endpoint called by IO app
+          required: true
+          schema:
+            $ref: '#/components/schemas/LollipopOriginalURL'
+        - name: content-digest
+          in: header
+          description: >-
+            The body digest, if any, as defined in
+            https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-digest-headers-10
+          required: true
+          schema:
+            $ref: '#/components/schemas/LollipopContentDigest'
+        - name: signature-input
+          in: header
+          description: The signature input, needed to verify the `signature` header
+          required: true
+          schema:
+            $ref: '#/components/schemas/LollipopSignatureInput'
+        - name: signature
+          in: header
+          description: >-
+            The signature of the HTTP request, signed by the client with its
+            private key.
+          required: true
+          schema:
+            $ref: '#/components/schemas/LollipopSignature'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignMessagePayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignMessageResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '401':
+          description: Token null or invalid.
+        '500':
+          description: There was an error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+components:
+  schemas:
+    AcceptedTosVersion:
+      type: number
+      minimum: 1
+      description: Version of latest terms of service accepted by the user.
+    AppVersion:
+      type: string
+      pattern: ^((0|[1-9]\d*)\.){2}(0|[1-9]\d*)(\.(0|[1-9]\d*)){0,1}$
+      description: A string field in Semantic Versioning format
+      example: 1.10.11
+    BlockedInboxOrChannels:
+      type: object
+      additionalProperties:
+        type: array
+        items:
+          type: string
+          description: |-
+            All notification channels plus the message inbox.
+            These represent all the possible channels a user could block.
+          x-extensible-enum:
+            - EMAIL
+            - INBOX
+            - WEBHOOK
+          example: INBOX
+      description: |-
+        All the notification channels blocked by the user.
+        Each channel is related to a specific service (sender).
+    DepartmentName:
+      type: string
+      description: |-
+        The department inside the organization that runs the service. Will
+        be added to the content of sent messages.
+      minLength: 1
+    EmailAddress:
+      type: string
+      format: email
+      example: foobar@example.com
+    PreferredLanguage:
+      type: string
+      x-extensible-enum:
+        - it_IT
+        - en_GB
+        - es_ES
+        - de_DE
+        - fr_FR
+      example: it_IT
+    PreferredLanguages:
+      type: array
+      items:
+        $ref: '#/components/schemas/PreferredLanguage'
+      description: >-
+        Indicates the User's preferred written or spoken languages in order
+
+        of preference. Generally used for selecting a localized User interface.
+        Valid
+
+        values are concatenation of the ISO 639-1 two letter language code, an
+        underscore,
+
+        and the ISO 3166-1 2 letter country code; e.g., 'en_US' specifies the
+        language
+
+        English and country US.
+    Profile:
+      type: object
+      description: |-
+        Describes the citizen's profile.
+        Used for profile update.
+      properties:
+        email:
+          $ref: '#/components/schemas/EmailAddress'
+        service_preferences_settings:
+          $ref: '#/components/schemas/ServicePreferencesSettings'
+        blocked_inbox_or_channels:
+          $ref: '#/components/schemas/BlockedInboxOrChannels'
+        preferred_languages:
+          $ref: '#/components/schemas/PreferredLanguages'
+        is_inbox_enabled:
+          $ref: '#/components/schemas/IsInboxEnabled'
+        accepted_tos_version:
+          $ref: '#/components/schemas/AcceptedTosVersion'
+        is_webhook_enabled:
+          $ref: '#/components/schemas/IsWebhookEnabled'
+        is_email_enabled:
+          $ref: '#/components/schemas/IsEmailEnabled'
+        reminder_status:
+          $ref: '#/components/schemas/ReminderStatus'
+        last_app_version:
+          $ref: '#/components/schemas/AppVersion'
+        push_notifications_content_type:
+          $ref: '#/components/schemas/PushNotificationsContentType'
+        version:
+          type: integer
+      required:
+        - version
+    ExtendedProfile:
+      description: |-
+        Describes the citizen's profile, mostly interesting for preferences
+        attributes.
+      type: object
+      properties:
+        email:
+          $ref: '#/components/schemas/EmailAddress'
+        service_preferences_settings:
+          $ref: '#/components/schemas/ServicePreferencesSettings'
+        blocked_inbox_or_channels:
+          $ref: '#/components/schemas/BlockedInboxOrChannels'
+        preferred_languages:
+          $ref: '#/components/schemas/PreferredLanguages'
+        is_inbox_enabled:
+          $ref: '#/components/schemas/IsInboxEnabled'
+        accepted_tos_version:
+          $ref: '#/components/schemas/AcceptedTosVersion'
+        is_webhook_enabled:
+          $ref: '#/components/schemas/IsWebhookEnabled'
+        is_email_enabled:
+          $ref: '#/components/schemas/IsEmailEnabled'
+        is_email_validated:
+          $ref: '#/components/schemas/IsEmailValidated'
+        is_email_already_taken:
+          $ref: '#/components/schemas/IsEmailAlreadyTaken'
+        reminder_status:
+          $ref: '#/components/schemas/ReminderStatus'
+        is_test_profile:
+          $ref: '#/components/schemas/IsTestProfile'
+        last_app_version:
+          $ref: '#/components/schemas/AppVersion'
+        push_notifications_content_type:
+          $ref: '#/components/schemas/PushNotificationsContentType'
+        version:
+          type: integer
+      required:
+        - is_email_enabled
+        - is_email_validated
+        - is_email_already_taken
+        - is_inbox_enabled
+        - is_webhook_enabled
+        - service_preferences_settings
+        - version
+    FiscalCode:
+      type: string
+      description: User's fiscal code.
+      format: FiscalCode
+      x-import: '@pagopa/ts-commons/lib/strings'
+      example: SPNDNL80R13C555X
+    IsEmailEnabled:
+      type: boolean
+      description: >-
+        True if the recipient of a message wants to forward the notifications to
+        his email address.
+    IsInboxEnabled:
+      type: boolean
+      description: |-
+        True if the recipient of a message wants to store its content for
+        later retrieval.
+    IsEmailValidated:
+      type: boolean
+      description: True if the user email has been validated.
+    IsEmailAlreadyTaken:
+      type: boolean
+      default: false
+      description: |-
+        True if the user email has been validated by another user.
+        If so, the user must provide a new email.
+    UpdateProfile412ErrorTypes:
+      type: string
+      description: >-
+        List of error types returned by the updateProfile endpoint when the HTTP
+        status code is 412
+      x-extensible-enum:
+        - https://ioapp.it/problems/email-already-taken
+      example: https://ioapp.it/problems/email-already-taken
+    ReminderStatus:
+      type: string
+      x-extensible-enum:
+        - ENABLED
+        - DISABLED
+      example: ENABLED
+      description: Api definition of reminder opt-in status
+    PushNotificationsContentType:
+      type: string
+      x-extensible-enum:
+        - FULL
+        - ANONYMOUS
+      example: FULL
+      description: >-
+        This parameter specifies how a specific user wants to visualize push
+        notifications.
+
+        FULL leads to descriptive push notifications while ANONYMOUS leads to
+        silent ones.
+    IsTestProfile:
+      type: boolean
+      description: True if the user's profile is only for test purpose.
+      default: false
+    IsWebhookEnabled:
+      type: boolean
+      description: >-
+        True if the recipient of a message wants to forward the notifications to
+        the default webhook.
+    LimitedProfile:
+      description: |-
+        Describes the citizen's profile, mostly interesting for preferences
+        attributes.
+      type: object
+      properties:
+        sender_allowed:
+          type: boolean
+          description: |-
+            True in case the service that made the request can send
+            messages to the user identified by this profile (false otherwise).
+        preferred_languages:
+          $ref: '#/components/schemas/PreferredLanguages'
+      required:
+        - sender_allowed
+    MessageResponseNotificationStatus:
+      type: object
+      properties:
+        email:
+          $ref: '#/components/schemas/NotificationChannelStatusValue'
+        webhook:
+          $ref: '#/components/schemas/NotificationChannelStatusValue'
+    NotificationChannelStatusValue:
+      type: string
+      description: >-
+        The status of a notification (one for each channel).
+
+        "SENT": the notification was succesfully sent to the channel (ie. email
+        or push notification)
+
+        "THROTTLED": a temporary failure caused a retry during the notification
+        processing;
+          the notification associated with this channel will be delayed for a maximum of 7 days or until the message expires
+        "EXPIRED": the message expired before the notification could be sent;
+          this means that the maximum message time to live was reached; no notification will be sent to this channel
+        "FAILED": a permanent failure caused the process to exit with an error,
+        no notification will be sent to this channel
+      x-extensible-enum:
+        - SENT
+        - THROTTLED
+        - EXPIRED
+        - FAILED
+      example: SENT
+    NotificationChannel:
+      type: string
+      description: All notification channels.
+      x-extensible-enum:
+        - EMAIL
+        - WEBHOOK
+      example: EMAIL
+    OrganizationFiscalCode:
+      type: string
+      description: Organization fiscal code.
+      format: OrganizationFiscalCode
+      x-import: '@pagopa/ts-commons/lib/strings'
+      example: '12345678901'
+    OrganizationName:
+      type: string
+      description: |-
+        The organization that runs the service. Will be added to the content
+        of sent messages to identify the sender.
+      minLength: 1
+    ProblemJson:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+          description: |-
+            An absolute URI that identifies the problem type. When dereferenced,
+            it SHOULD provide human-readable documentation for the problem type
+            (e.g., using HTML).
+          default: about:blank
+          example: https://example.com/problem/constraint-violation
+        title:
+          type: string
+          description: >-
+            A short, summary of the problem type. Written in english and
+            readable
+
+            for engineers (usually not suited for non technical stakeholders and
+
+            not localized); example: Service Unavailable
+        status:
+          type: integer
+          format: int32
+          description: >-
+            The HTTP status code generated by the origin server for this
+            occurrence of the problem.
+          minimum: 100
+          maximum: 600
+          exclusiveMaximum: true
+          example: 200
+        detail:
+          type: string
+          description: |-
+            A human readable explanation specific to this occurrence of the
+            problem.
+          example: There was an error processing the request
+        instance:
+          type: string
+          format: uri
+          description: >-
+            An absolute URI that identifies the specific occurrence of the
+            problem.
+
+            It may or may not yield further information if dereferenced.
+    ServiceId:
+      type: string
+      description: |-
+        The ID of the Service. Equals the subscriptionId of a registered
+        API user.
+      minLength: 1
+    ServiceCategory:
+      x-one-of: true
+      allOf:
+        - $ref: '#/components/schemas/SpecialServiceCategory'
+        - $ref: '#/components/schemas/StandardServiceCategory'
+    SpecialServiceCategory:
+      type: string
+      x-extensible-enum:
+        - SPECIAL
+    StandardServiceCategory:
+      type: string
+      x-extensible-enum:
+        - STANDARD
+    Timestamp:
+      type: string
+      format: UTCISODateFromString
+      description: A date-time field in ISO-8601 format and UTC timezone.
+      x-import: '@pagopa/ts-commons/lib/dates'
+      example: '2018-10-13T00:00:00.000Z'
+    PaymentNoticeNumber:
+      description: >-
+        The field "Numero Avviso" of pagoPa, needed to identify the payment.
+        Format is `<aux digit(1n)>[<application code> (2n)]<codice IUV
+        (15|17n)>`. See [pagoPa
+        specs](https://docs.pagopa.it/saci/specifiche-attuative-dei-codici-identificativi-di-versamento-riversamento-e-rendicontazione/premessa)
+        for more info on this field and the IUV.
+      type: string
+      pattern: ^[0123][0-9]{17}$
+    PaymentAmount:
+      description: >-
+        Amount of payment in euro cent. PagoPA accepts up to 9999999999 euro
+        cents.
+      type: integer
+      minimum: 1
+      maximum: 9999999999
+    PaymentData:
+      allOf:
+        - type: object
+          description: Metadata needed to process pagoPA payments.
+          properties:
+            amount:
+              $ref: '#/components/schemas/PaymentAmount'
+            notice_number:
+              $ref: '#/components/schemas/PaymentNoticeNumber'
+            invalid_after_due_date:
+              type: boolean
+              default: false
+          required:
+            - amount
+            - notice_number
+        - type: object
+          properties:
+            payee:
+              type: object
+              description: Metadata needed to explicit payment's payee.
+              properties:
+                fiscal_code:
+                  $ref: '#/components/schemas/OrganizationFiscalCode'
+              required:
+                - fiscal_code
+    TimeToLiveSeconds:
+      type: integer
+      default: 3600
+      minimum: 3600
+      maximum: 604800
+      description: |-
+        This parameter specifies for how long (in seconds) the system will
+        try to deliver the message to the channels configured by the user.
+      example: 3600
+    UserDataProcessingStatus:
+      type: string
+      description: The status of a user data processing request
+      enum:
+        - PENDING
+        - WIP
+        - CLOSED
+        - FAILED
+        - ABORTED
+      example: PENDING
+    UserDataProcessingChoice:
+      type: string
+      description: User's choice to delete or download his own data.
+      enum:
+        - DOWNLOAD
+        - DELETE
+      example: DOWNLOAD
+    UserDataProcessingChoiceRequest:
+      type: object
+      description: A request wrapper for User data processing choice
+      properties:
+        choice:
+          $ref: '#/components/schemas/UserDataProcessingChoice'
+      required:
+        - choice
+    UserDataProcessing:
+      type: object
+      description: A representation of a single user data processing request
+      properties:
+        choice:
+          $ref: '#/components/schemas/UserDataProcessingChoice'
+        status:
+          $ref: '#/components/schemas/UserDataProcessingStatus'
+        created_at:
+          $ref: '#/components/schemas/Timestamp'
+        updated_at:
+          $ref: '#/components/schemas/Timestamp'
+        version:
+          type: integer
+      required:
+        - choice
+        - status
+        - version
+    ServicePreferencesSettings:
+      description: |-
+        Describes the citizen's profile, mostly interesting for preferences
+        attributes.
+      type: object
+      properties:
+        mode:
+          $ref: '#/components/schemas/ServicesPreferencesMode'
+      required:
+        - mode
+    ServicesPreferencesMode:
+      type: string
+      enum:
+        - LEGACY
+        - AUTO
+        - MANUAL
+    BasicServicePreference:
+      description: >-
+        Define a set of required preferences of a Citizen for a given Service.
+
+        It's needed by Citizens to express how they want Services to get in
+        touch with them.
+      type: object
+      properties:
+        is_email_enabled:
+          type: boolean
+        is_inbox_enabled:
+          type: boolean
+        is_webhook_enabled:
+          type: boolean
+        settings_version:
+          type: integer
+          minimum: 0
+      required:
+        - is_email_enabled
+        - is_inbox_enabled
+        - is_webhook_enabled
+        - settings_version
+    ServicePreference:
+      description: |-
+        Return the set of preferences of a Citizen for a given Service.
+        It's needed by Citizens to read previoulsy expressed preferences.
+      allOf:
+        - $ref: '#/components/schemas/BasicServicePreference'
+        - type: object
+          properties:
+            can_access_message_read_status:
+              type: boolean
+          required:
+            - can_access_message_read_status
+    UpsertServicePreference:
+      description: >-
+        Define a set of preferences of a Citizen for a given Service.
+
+        Extends the BasicServicePreference with new optional preferences for
+        backward compatibility.
+      allOf:
+        - $ref: '#/components/schemas/BasicServicePreference'
+        - type: object
+          properties:
+            can_access_message_read_status:
+              type: boolean
+    PaginationResponse:
+      type: object
+      description: Pagination response parameters.
+      properties:
+        prev:
+          type: string
+          description: Contains a value useful to get the previous page
+          example: first_id_of_the_page
+        next:
+          type: string
+          description: Contains a value useful to get the next page
+          example: last_id_of_the_page
+    Ulid:
+      type: string
+      description: Ulid string.
+      format: Ulid
+      x-import: '@pagopa/ts-commons/lib/strings'
+      example: 01ARZ3NDEKTSV4RRFFQ69G5FAV
+    PathTraversalSafePathParam:
+      description: >-
+        A non empty string that is safe to be used in an url parameter to avoid
+        path traversal attacks
+      type: string
+      pattern: ^[0-9a-zA-Z\-\._\/+]+$
+    AssertionRefSha256:
+      type: string
+      pattern: ^(sha256-[A-Za-z0-9-_=]{1,44})$
+    AssertionRefSha384:
+      type: string
+      pattern: ^(sha384-[A-Za-z0-9-_=]{1,66})$
+    AssertionRefSha512:
+      type: string
+      pattern: ^(sha512-[A-Za-z0-9-_=]{1,88})$
+    AssertionRef:
+      x-one-of: true
+      allOf:
+        - $ref: '#/components/schemas/AssertionRefSha512'
+        - $ref: '#/components/schemas/AssertionRefSha384'
+        - $ref: '#/components/schemas/AssertionRefSha256'
+    InitializedProfile:
+      type: object
+      title: Initialized profile
+      description: >-
+        Describes the user's profile after it has been stored in the Profile
+        API.
+      properties:
+        accepted_tos_version:
+          $ref: '#/components/schemas/AcceptedTosVersion'
+        email:
+          $ref: '#/components/schemas/EmailAddress'
+        blocked_inbox_or_channels:
+          $ref: '#/components/schemas/BlockedInboxOrChannels'
+        preferred_languages:
+          $ref: '#/components/schemas/PreferredLanguages'
+        is_inbox_enabled:
+          $ref: '#/components/schemas/IsInboxEnabled'
+        is_email_validated:
+          $ref: '#/components/schemas/IsEmailValidated'
+        is_email_already_taken:
+          $ref: '#/components/schemas/IsEmailAlreadyTaken'
+        is_email_enabled:
+          $ref: '#/components/schemas/IsEmailEnabled'
+        reminder_status:
+          $ref: '#/components/schemas/ReminderStatus'
+        push_notifications_content_type:
+          $ref: '#/components/schemas/PushNotificationsContentType'
+        is_webhook_enabled:
+          $ref: '#/components/schemas/IsWebhookEnabled'
+        family_name:
+          type: string
+        fiscal_code:
+          $ref: '#/components/schemas/FiscalCode'
+        has_profile:
+          $ref: '#/components/schemas/HasProfile'
+        last_app_version:
+          $ref: '#/components/schemas/AppVersion'
+        name:
+          type: string
+        spid_email:
+          $ref: '#/components/schemas/EmailAddress'
+        date_of_birth:
+          type: string
+          format: date
+        service_preferences_settings:
+          $ref: '#/components/schemas/ServicePreferencesSettings'
+        version:
+          $ref: '#/components/schemas/Version'
+      required:
+        - family_name
+        - fiscal_code
+        - has_profile
+        - is_inbox_enabled
+        - is_email_enabled
+        - is_webhook_enabled
+        - name
+        - service_preferences_settings
+        - version
+    SessionInfo:
+      type: object
+      title: Session info of a user
+      description: Decribe a session of an authenticated user.
+      properties:
+        createdAt:
+          $ref: '#/components/schemas/Timestamp'
+        sessionToken:
+          type: string
+      required:
+        - createdAt
+        - sessionToken
+    SessionsList:
+      description: Contains all active sessions for an authenticated user.
+      type: object
+      properties:
+        sessions:
+          type: array
+          items:
+            $ref: '#/components/schemas/SessionInfo'
+      required:
+        - sessions
+    HasProfile:
+      type: boolean
+      default: false
+      description: True if the user has a remote profile.
+    IsEmailSet:
+      type: boolean
+      default: false
+      description: True if the user has presonalized the email.
+    Version:
+      type: integer
+      description: The entity version.
+    SpidLevel:
+      type: string
+      description: A SPID level.
+      x-extensible-enum:
+        - https://www.spid.gov.it/SpidL1
+        - https://www.spid.gov.it/SpidL2
+        - https://www.spid.gov.it/SpidL3
+    LimitedFederatedUser:
+      title: Federated user
+      description: User data needed by federated applications.
+      type: object
+      properties:
+        fiscal_code:
+          $ref: '#/components/schemas/FiscalCode'
+      required:
+        - fiscal_code
+    FederatedUser:
+      title: Federated user
+      description: User data needed by federated applications.
+      allOf:
+        - type: object
+          properties:
+            name:
+              type: string
+            family_name:
+              type: string
+          required:
+            - name
+            - family_name
+        - $ref: '#/components/schemas/LimitedFederatedUser'
+    LollipopMethod:
+      type: string
+      enum:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+    LollipopOriginalURL:
+      type: string
+      pattern: ^https://
+    LollipopContentType:
+      type: string
+      enum:
+        - application/json
+        - application/octet-stream
+    LollipopContentDigest:
+      type: string
+      pattern: >-
+        ^(sha-256=:[A-Za-z0-9+/=]{44}:|sha-384=:[A-Za-z0-9+/=]{66}:|sha-512=:[A-Za-z0-9+/=]{88}:)$
+    LollipopSignatureInput:
+      type: string
+      pattern: ^(?:sig\d+=[^,]*)(?:,\s*(?:sig\d+=[^,]*))*$
+    LollipopSignature:
+      type: string
+      pattern: ^((sig[0-9]+)=:[A-Za-z0-9+/=]*:(, ?)?)+$
+    SignMessagePayload:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+    SignMessageResponse:
+      type: object
+      properties:
+        response:
+          type: string
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
