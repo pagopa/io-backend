@@ -120,6 +120,19 @@ export interface IAppFactoryParameters {
   readonly IoWalletUatAPIBasePath: string;
   readonly ServicesAppBackendBasePath: string;
   readonly TrialSystemBasePath: string;
+  readonly LollipopAPIBasePath: string;
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  readonly authenticationBasePathProxy: string;
+  readonly APIBasePathProxy: string;
+  readonly BonusAPIBasePathProxy: string;
+  readonly CGNAPIBasePathProxy: string;
+  readonly CGNOperatorSearchAPIBasePathProxy: string;
+  readonly IoSignAPIBasePathProxy: string;
+  readonly IoFimsAPIBasePathProxy: string;
+  readonly IoWalletAPIBasePathProxy: string;
+  readonly ServicesAppBackendBasePathProxy: string;
+  readonly TrialSystemBasePathProxy: string;
+  readonly LollipopAPIBasePathProxy: string;
 }
 
 export async function newApp({
@@ -136,7 +149,20 @@ export async function newApp({
   IoWalletUatAPIBasePath,
   CGNOperatorSearchAPIBasePath,
   ServicesAppBackendBasePath,
-  TrialSystemBasePath
+  TrialSystemBasePath,
+  LollipopAPIBasePath,
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  authenticationBasePathProxy,
+  APIBasePathProxy,
+  BonusAPIBasePathProxy,
+  CGNAPIBasePathProxy,
+  CGNOperatorSearchAPIBasePathProxy,
+  IoSignAPIBasePathProxy,
+  IoFimsAPIBasePathProxy,
+  IoWalletAPIBasePathProxy,
+  ServicesAppBackendBasePathProxy,
+  TrialSystemBasePathProxy,
+  LollipopAPIBasePathProxy
 }: IAppFactoryParameters): Promise<Express> {
   const isDevEnvironment = ENV === NodeEnvironmentEnum.DEVELOPMENT;
   const REDIS_CLIENT_SELECTOR = await RedisClientSelector(
@@ -347,7 +373,9 @@ export async function newApp({
 
         registerFirstLollipopConsumer(
           app,
-          "/first-lollipop",
+          LollipopAPIBasePath,
+          // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+          LollipopAPIBasePathProxy,
           LOLLIPOP_API_CLIENT,
           SESSION_STORAGE,
           FIRST_LOLLIPOP_CONSUMER_CLIENT,
@@ -357,6 +385,8 @@ export async function newApp({
         registerAuthenticationRoutes(
           app,
           authenticationBasePath,
+          // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+          authenticationBasePathProxy,
           authMiddlewares.bearerSession
         );
 
@@ -381,6 +411,8 @@ export async function newApp({
         registerAPIRoutes(
           app,
           APIBasePath,
+          // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+          APIBasePathProxy,
           allowNotifyIPSourceRange,
           PROFILE_SERVICE,
           FN_APP_SERVICE,
@@ -398,6 +430,8 @@ export async function newApp({
           registerBonusAPIRoutes(
             app,
             BonusAPIBasePath,
+            // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+            BonusAPIBasePathProxy,
             BONUS_SERVICE,
             authMiddlewares.bearerSession
           );
@@ -406,6 +440,8 @@ export async function newApp({
           registerCgnAPIRoutes(
             app,
             CGNAPIBasePath,
+            // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+            CGNAPIBasePathProxy,
             CGN_SERVICE,
             authMiddlewares.bearerSession
           );
@@ -413,6 +449,8 @@ export async function newApp({
           registerCgnOperatorSearchAPIRoutes(
             app,
             CGNOperatorSearchAPIBasePath,
+            // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+            CGNOperatorSearchAPIBasePathProxy,
             CGN_SERVICE,
             CGN_OPERATOR_SEARCH_SERVICE,
             authMiddlewares.bearerSession
@@ -423,6 +461,8 @@ export async function newApp({
           registerIoSignAPIRoutes(
             app,
             IoSignAPIBasePath,
+            // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+            IoSignAPIBasePathProxy,
             IO_SIGN_SERVICE,
             PROFILE_SERVICE,
             authMiddlewares.bearerSession,
@@ -435,6 +475,8 @@ export async function newApp({
           registerIoFimsAPIRoutes(
             app,
             IoFimsAPIBasePath,
+            // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+            IoFimsAPIBasePathProxy,
             IO_FIMS_SERVICE,
             PROFILE_SERVICE,
             authMiddlewares.bearerSession
@@ -444,6 +486,8 @@ export async function newApp({
         registerServicesAppBackendRoutes(
           app,
           ServicesAppBackendBasePath,
+          // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+          ServicesAppBackendBasePathProxy,
           SERVICES_APP_BACKEND_SERVICE,
           authMiddlewares.bearerSession
         );
@@ -456,6 +500,8 @@ export async function newApp({
           registerPNRoutes(
             app,
             PNAddressBookConfig.PN_ACTIVATION_BASE_PATH,
+            // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+            PNAddressBookConfig.PN_ACTIVATION_BASE_PATH_PROXY,
             pnService,
             authMiddlewares.bearerSession
           );
@@ -465,6 +511,8 @@ export async function newApp({
           registerTrialSystemAPIRoutes(
             app,
             TrialSystemBasePath,
+            // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+            TrialSystemBasePathProxy,
             TRIAL_SERVICE,
             authMiddlewares.bearerSession
           );
@@ -474,6 +522,8 @@ export async function newApp({
           registerIoWalletAPIRoutes(
             app,
             IoWalletAPIBasePath,
+            // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+            IoWalletAPIBasePathProxy,
             IO_WALLET_SERVICE,
             authMiddlewares.bearerSession
           );
@@ -481,6 +531,8 @@ export async function newApp({
           registerIoWalletAPIRoutes(
             app,
             IoWalletUatAPIBasePath,
+            // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+            IoWalletAPIBasePathProxy,
             IO_WALLET_UAT_SERVICE,
             authMiddlewares.bearerSession
           );

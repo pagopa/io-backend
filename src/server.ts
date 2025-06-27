@@ -18,18 +18,30 @@ import { newApp } from "./app";
 import {
   ALLOW_NOTIFY_IP_SOURCE_RANGE,
   API_BASE_PATH,
+  API_BASE_PATH_PROXY,
   AUTHENTICATION_BASE_PATH,
+  AUTHENTICATION_BASE_PATH_PROXY,
   BONUS_API_BASE_PATH,
+  BONUS_API_BASE_PATH_PROXY,
   CGN_API_BASE_PATH,
+  CGN_API_BASE_PATH_PROXY,
   CGN_OPERATOR_SEARCH_API_BASE_PATH,
+  CGN_OPERATOR_SEARCH_API_BASE_PATH_PROXY,
   ENV,
   IO_FIMS_API_BASE_PATH,
+  IO_FIMS_API_BASE_PATH_PROXY,
   IO_SIGN_API_BASE_PATH,
+  IO_SIGN_API_BASE_PATH_PROXY,
   IO_WALLET_API_BASE_PATH,
+  IO_WALLET_API_BASE_PATH_PROXY,
   IO_WALLET_UAT_API_BASE_PATH,
+  LOLLIPOP_API_BASE_PATH,
+  LOLLIPOP_API_BASE_PATH_PROXY,
   SERVER_PORT,
   SERVICES_APP_BACKEND_BASE_PATH,
+  SERVICES_APP_BACKEND_BASE_PATH_PROXY,
   TRIAL_SYSTEM_API_BASE_PATH,
+  TRIAL_SYSTEM_API_BASE_PATH_PROXY,
   errorOrAppInsightConfig
 } from "./config";
 import {
@@ -52,6 +64,20 @@ const ServicesAppBackendBasePath = SERVICES_APP_BACKEND_BASE_PATH;
 const TrialSystemBasePath = TRIAL_SYSTEM_API_BASE_PATH;
 const IoWalletAPIBasePath = IO_WALLET_API_BASE_PATH;
 const IoWalletUatAPIBasePath = IO_WALLET_UAT_API_BASE_PATH;
+const LollipopAPIBasePath = LOLLIPOP_API_BASE_PATH;
+// TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+const authenticationBasePathProxy = AUTHENTICATION_BASE_PATH_PROXY;
+const APIBasePathProxy = API_BASE_PATH_PROXY;
+const BonusAPIBasePathProxy = BONUS_API_BASE_PATH_PROXY;
+const CGNAPIBasePathProxy = CGN_API_BASE_PATH_PROXY;
+const CGNOperatorSearchAPIBasePathProxy =
+  CGN_OPERATOR_SEARCH_API_BASE_PATH_PROXY;
+const IoSignAPIBasePathProxy = IO_SIGN_API_BASE_PATH_PROXY;
+const IoFimsAPIBasePathProxy = IO_FIMS_API_BASE_PATH_PROXY;
+const IoWalletAPIBasePathProxy = IO_WALLET_API_BASE_PATH_PROXY;
+const ServicesAppBackendBasePathProxy = SERVICES_APP_BACKEND_BASE_PATH_PROXY;
+const TrialSystemBasePathProxy = TRIAL_SYSTEM_API_BASE_PATH_PROXY;
+const LollipopAPIBasePathProxy = LOLLIPOP_API_BASE_PATH_PROXY;
 
 // Set default for graceful-shutdown
 const DEFAULT_SHUTDOWN_SIGNALS = "SIGINT SIGTERM";
@@ -104,7 +130,20 @@ newApp({
   allowNotifyIPSourceRange: ALLOW_NOTIFY_IP_SOURCE_RANGE,
   appInsightsClient: O.toUndefined(maybeAppInsightsClient),
   authenticationBasePath,
-  env: ENV
+  LollipopAPIBasePath,
+  env: ENV,
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  authenticationBasePathProxy,
+  APIBasePathProxy,
+  BonusAPIBasePathProxy,
+  CGNAPIBasePathProxy,
+  CGNOperatorSearchAPIBasePathProxy,
+  IoSignAPIBasePathProxy,
+  IoFimsAPIBasePathProxy,
+  IoWalletAPIBasePathProxy,
+  ServicesAppBackendBasePathProxy,
+  TrialSystemBasePathProxy,
+  LollipopAPIBasePathProxy
 })
   .then((app) => {
     const startupTimeMs = timer.getElapsedMilliseconds();
