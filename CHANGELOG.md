@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 17.0.1
+
+### Patch Changes
+
+- 9fea3d2: Remove push notification rollout temporary logic
+
 ## 17.0.0
 
 ### Major Changes
