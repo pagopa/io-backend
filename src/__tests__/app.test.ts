@@ -67,6 +67,7 @@ const aIoSignAPIBasePath = "/api/v1/sign";
 const aServicesAppBackendBasePath = "/api/v2";
 const aTrialSystemBasePath = "/trials/api/v1";
 const aIoWalletAPIBasePath = "/api/v1/wallet";
+const aIoWalletUatAPIBasePath = "/api/v1/wallet/uat";
 
 describe("Success app start", () => {
   // tslint:disable:no-let
@@ -80,6 +81,7 @@ describe("Success app start", () => {
       IoFimsAPIBasePath: aIoFimsAPIBasePath,
       IoSignAPIBasePath: aIoSignAPIBasePath,
       IoWalletAPIBasePath: aIoWalletAPIBasePath,
+      IoWalletUatAPIBasePath: aIoWalletUatAPIBasePath,
       ServicesAppBackendBasePath: aServicesAppBackendBasePath,
       TrialSystemBasePath: aTrialSystemBasePath,
       allowNotifyIPSourceRange: [aValidCIDR],
@@ -187,6 +189,7 @@ describe("Failure app start", () => {
         IoFimsAPIBasePath: aIoFimsAPIBasePath,
         IoSignAPIBasePath: aIoSignAPIBasePath,
         IoWalletAPIBasePath: aIoWalletAPIBasePath,
+        IoWalletUatAPIBasePath: aIoWalletUatAPIBasePath,
         ServicesAppBackendBasePath: aServicesAppBackendBasePath,
         TrialSystemBasePath: aTrialSystemBasePath,
         allowNotifyIPSourceRange: [aValidCIDR],
