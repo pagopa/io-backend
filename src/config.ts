@@ -556,6 +556,18 @@ export const FF_IO_WALLET_ENABLED = process.env.FF_IO_WALLET_ENABLED === "1";
 export const FF_IO_WALLET_TRIAL_ENABLED =
   process.env.FF_IO_WALLET_TRIAL_ENABLED === "1";
 
+const IO_WALLET_UAT_API_KEY = getRequiredENVVar("IO_WALLET_UAT_API_KEY");
+export const IO_WALLET_UAT_API_BASE_PATH = getRequiredENVVar(
+  "IO_WALLET_API_BASE_PATH"
+);
+const IO_WALLET_UAT_API_URL = getRequiredENVVar("IO_WALLET_UAT_API_URL");
+export const IO_WALLET_UAT_API_CLIENT = IoWalletAPIClient(
+  IO_WALLET_UAT_API_KEY,
+  IO_WALLET_UAT_API_BASE_PATH,
+  IO_WALLET_UAT_API_URL,
+  httpOrHttpsApiFetch
+);
+
 export const FF_IO_X_USER_TOKEN = pipe(
   process.env.FF_IO_X_USER_TOKEN,
   FeatureFlag.decode,

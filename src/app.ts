@@ -42,6 +42,7 @@ import {
   IO_FIMS_API_CLIENT,
   IO_SIGN_API_CLIENT,
   IO_WALLET_API_CLIENT,
+  IO_WALLET_UAT_API_CLIENT,
   LOLLIPOP_API_CLIENT,
   NOTIFICATIONS_QUEUE_NAME,
   NOTIFICATIONS_STORAGE_CONNECTION_STRING,
@@ -116,6 +117,7 @@ export interface IAppFactoryParameters {
   readonly IoSignAPIBasePath: string;
   readonly IoFimsAPIBasePath: string;
   readonly IoWalletAPIBasePath: string;
+  readonly IoWalletUatAPIBasePath: string;
   readonly ServicesAppBackendBasePath: string;
   readonly TrialSystemBasePath: string;
 }
@@ -131,6 +133,7 @@ export async function newApp({
   IoSignAPIBasePath,
   IoFimsAPIBasePath,
   IoWalletAPIBasePath,
+  IoWalletUatAPIBasePath,
   CGNOperatorSearchAPIBasePath,
   ServicesAppBackendBasePath,
   TrialSystemBasePath
@@ -287,6 +290,12 @@ export async function newApp({
         // Create the io wallet
         const IO_WALLET_SERVICE = new IoWalletService(
           IO_WALLET_API_CLIENT,
+          TRIAL_SYSTEM_CLIENT
+        );
+
+        // Create the io wallet - uat routes
+        const IO_WALLET_UAT_SERVICE = new IoWalletService(
+          IO_WALLET_UAT_API_CLIENT,
           TRIAL_SYSTEM_CLIENT
         );
 
@@ -466,6 +475,13 @@ export async function newApp({
             app,
             IoWalletAPIBasePath,
             IO_WALLET_SERVICE,
+            authMiddlewares.bearerSession
+          );
+
+          registerIoWalletAPIRoutes(
+            app,
+            IoWalletUatAPIBasePath,
+            IO_WALLET_UAT_SERVICE,
             authMiddlewares.bearerSession
           );
         }
