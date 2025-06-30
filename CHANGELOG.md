@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 17.1.0
+
+### Minor Changes
+
+- d8d25b6: Added wallet uat routes
+
 ## 17.0.1
 
 ### Patch Changes
