@@ -1,5 +1,23 @@
 # @pagopa/io-backend
 
+## 17.1.0
+
+### Minor Changes
+
+- d8d25b6: Added wallet uat routes
+
+## 17.0.1
+
+### Patch Changes
+
+- 9fea3d2: Remove push notification rollout temporary logic
+
+## 17.0.0
+
+### Major Changes
+
+- 0735084: Removed backend internal related config and endpoints
+
 ## 16.18.0
 
 ### Minor Changes

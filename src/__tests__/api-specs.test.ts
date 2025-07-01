@@ -49,11 +49,6 @@ describe("API public proxy specs", () => {
 });
 
 describe("API internal ", () => {
-  it("should be valid auth domain for sessions specs", async () => {
-    const specFilePath = `${__dirname}/../../openapi/generated/api_session.yaml`;
-    const api = await SwaggerParser.bundle(specFilePath);
-    expect(api).toBeDefined();
-  });
   it("should be valid API notifications specs", async () => {
     const specFilePath = `${__dirname}/../../openapi/generated/api_notifications.yaml`;
     const api = await SwaggerParser.bundle(specFilePath);

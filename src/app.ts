@@ -2,7 +2,6 @@
 /**
  * Main entry point for the Digital Citizenship proxy.
  */
-import { TableClient } from "@azure/data-tables";
 import {
   NodeEnvironment,
   NodeEnvironmentEnum
@@ -41,11 +40,8 @@ import {
   IO_FIMS_API_CLIENT,
   IO_SIGN_API_CLIENT,
   IO_WALLET_API_CLIENT,
-  LOCKED_PROFILES_STORAGE_CONNECTION_STRING,
-  LOCKED_PROFILES_TABLE_NAME,
+  IO_WALLET_UAT_API_CLIENT,
   LOLLIPOP_API_CLIENT,
-  LOLLIPOP_REVOKE_QUEUE_NAME,
-  LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING,
   NOTIFICATIONS_QUEUE_NAME,
   NOTIFICATIONS_STORAGE_CONNECTION_STRING,
   PAGOPA_CLIENT,
@@ -56,8 +52,7 @@ import {
   PUSH_NOTIFICATIONS_QUEUE_NAME,
   PUSH_NOTIFICATIONS_STORAGE_CONNECTION_STRING,
   SERVICES_APP_BACKEND_CLIENT,
-  TRIAL_SYSTEM_CLIENT,
-  URL_TOKEN_STRATEGY
+  TRIAL_SYSTEM_CLIENT
 } from "./config";
 import { registerAPIRoutes } from "./routes/baseRoutes";
 import {
@@ -71,16 +66,13 @@ import { registerIoWalletAPIRoutes } from "./routes/ioWalletRoutes";
 import { registerPNRoutes } from "./routes/pnRoutes";
 import { registerPublicRoutes } from "./routes/publicRoutes";
 import { registerServicesAppBackendRoutes } from "./routes/servicesRoutes";
-import { registerSessionAPIRoutes } from "./routes/sessionRoutes";
 import { registerTrialSystemAPIRoutes } from "./routes/trialSystemRoutes";
-import AuthenticationLockService from "./services/authenticationLockService";
 import CgnOperatorSearchService from "./services/cgnOperatorSearchService";
 import CgnService from "./services/cgnService";
 import IoFimsService from "./services/fimsService";
 import FunctionsAppService from "./services/functionAppService";
 import IoSignService from "./services/ioSignService";
 import IoWalletService from "./services/ioWalletService";
-import LollipopService from "./services/lollipopService";
 import NewMessagesService from "./services/newMessagesService";
 import NotificationService from "./services/notificationService";
 import { getNotificationServiceFactory } from "./services/notificationServiceFactory";
@@ -111,13 +103,13 @@ export interface IAppFactoryParameters {
   readonly env: NodeEnvironment;
   readonly appInsightsClient?: appInsights.TelemetryClient;
   readonly allowNotifyIPSourceRange: ReadonlyArray<CIDR>;
-  readonly allowSessionHandleIPSourceRange: ReadonlyArray<CIDR>;
   readonly APIBasePath: string;
   readonly CGNAPIBasePath: string;
   readonly CGNOperatorSearchAPIBasePath: string;
   readonly IoSignAPIBasePath: string;
   readonly IoFimsAPIBasePath: string;
   readonly IoWalletAPIBasePath: string;
+  readonly IoWalletUatAPIBasePath: string;
   readonly ServicesAppBackendBasePath: string;
   readonly TrialSystemBasePath: string;
 }
@@ -125,13 +117,13 @@ export interface IAppFactoryParameters {
 export async function newApp({
   env,
   allowNotifyIPSourceRange,
-  allowSessionHandleIPSourceRange,
   appInsightsClient,
   APIBasePath,
   CGNAPIBasePath,
   IoSignAPIBasePath,
   IoFimsAPIBasePath,
   IoWalletAPIBasePath,
+  IoWalletUatAPIBasePath,
   CGNOperatorSearchAPIBasePath,
   ServicesAppBackendBasePath,
   TrialSystemBasePath
@@ -161,15 +153,9 @@ export async function newApp({
     )
   );
 
-  // Add the strategy to authenticate webhook calls.
-  passport.use(URL_TOKEN_STRATEGY);
-
   // Creates middlewares for each implemented strategy
   const authMiddlewares = {
     bearerSession: passport.authenticate("bearer.session", {
-      session: false
-    }),
-    urlToken: passport.authenticate("authtoken", {
       session: false
     })
   };
@@ -262,14 +248,7 @@ export async function newApp({
     TE.tryCatch(
       async () => {
         // Create the profile service
-        const tableClient = TableClient.fromConnectionString(
-          LOCKED_PROFILES_STORAGE_CONNECTION_STRING,
-          LOCKED_PROFILES_TABLE_NAME
-        );
         const PROFILE_SERVICE = new ProfileService(API_CLIENT);
-        const AUTHENTICATION_LOCK_SERVICE = new AuthenticationLockService(
-          tableClient
-        );
 
         // Create the cgn service
         const CGN_SERVICE = new CgnService(CGN_API_CLIENT);
@@ -298,6 +277,12 @@ export async function newApp({
         // Create the io wallet
         const IO_WALLET_SERVICE = new IoWalletService(
           IO_WALLET_API_CLIENT,
+          TRIAL_SYSTEM_CLIENT
+        );
+
+        // Create the io wallet - uat routes
+        const IO_WALLET_UAT_SERVICE = new IoWalletService(
+          IO_WALLET_UAT_API_CLIENT,
           TRIAL_SYSTEM_CLIENT
         );
 
@@ -343,20 +328,6 @@ export async function newApp({
           FF_ROUTING_PUSH_NOTIF
         );
 
-        const LOLLIPOP_SERVICE = pipe(
-          E.tryCatch(
-            () =>
-              new LollipopService(
-                LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING,
-                LOLLIPOP_REVOKE_QUEUE_NAME
-              ),
-            (err) => new Error(`Error initializing LollipopService: [${err}]`)
-          ),
-          E.getOrElseW((err) => {
-            throw err;
-          })
-        );
-
         const TRIAL_SERVICE = new TrialService(TRIAL_SYSTEM_CLIENT);
 
         registerPublicRoutes(app);
@@ -388,7 +359,6 @@ export async function newApp({
           app,
           APIBasePath,
           allowNotifyIPSourceRange,
-          authMiddlewares.urlToken,
           PROFILE_SERVICE,
           FN_APP_SERVICE,
           APP_MESSAGES_SERVICE,
@@ -399,16 +369,6 @@ export async function newApp({
           USER_DATA_PROCESSING_SERVICE,
           authMiddlewares.bearerSession,
           LOLLIPOP_API_CLIENT
-        );
-        registerSessionAPIRoutes(
-          app,
-          APIBasePath,
-          allowSessionHandleIPSourceRange,
-          authMiddlewares.urlToken,
-          SESSION_STORAGE,
-          LOLLIPOP_SERVICE,
-          AUTHENTICATION_LOCK_SERVICE,
-          notificationServiceFactory
         );
         if (FF_CGN_ENABLED) {
           registerCgnAPIRoutes(
@@ -483,6 +443,13 @@ export async function newApp({
             app,
             IoWalletAPIBasePath,
             IO_WALLET_SERVICE,
+            authMiddlewares.bearerSession
+          );
+
+          registerIoWalletAPIRoutes(
+            app,
+            IoWalletUatAPIBasePath,
+            IO_WALLET_UAT_SERVICE,
             authMiddlewares.bearerSession
           );
         }
