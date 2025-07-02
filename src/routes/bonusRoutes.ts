@@ -11,12 +11,16 @@ import { ResponseErrorDismissed } from "../utils/responses";
  *
  * @param app The Express application
  * @param basePath The base path for the bonus APIs
+ * TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+ * @param basePathProxy The proxy base path for the bonus APIs (RFC IOPLT-1156)
  * @param bonusService The service that handles the bonus requests
  * @param bearerSessionTokenAuth The autentication middleware for user session token
  */
 export const registerBonusAPIRoutes = (
   app: Express,
   basePath: string,
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  basePathProxy: string,
   bonusService: BonusService,
   bearerSessionTokenAuth: ReturnType<passport.Authenticator["authenticate"]>
 ): void => {
@@ -27,9 +31,21 @@ export const registerBonusAPIRoutes = (
     bearerSessionTokenAuth,
     constantExpressHandler(ResponseErrorDismissed)
   );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.post(
+    `${basePathProxy}/bonus/vacanze/eligibility`,
+    bearerSessionTokenAuth,
+    constantExpressHandler(ResponseErrorDismissed)
+  );
 
   app.get(
     `${basePath}/bonus/vacanze/eligibility`,
+    bearerSessionTokenAuth,
+    toExpressHandler(bonusController.getBonusEligibilityCheck, bonusController)
+  );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.get(
+    `${basePathProxy}/bonus/vacanze/eligibility`,
     bearerSessionTokenAuth,
     toExpressHandler(bonusController.getBonusEligibilityCheck, bonusController)
   );
@@ -42,15 +58,36 @@ export const registerBonusAPIRoutes = (
       bonusController
     )
   );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.get(
+    `${basePathProxy}/bonus/vacanze/activations/:bonus_id`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      bonusController.getLatestBonusActivationById,
+      bonusController
+    )
+  );
 
   app.get(
     `${basePath}/bonus/vacanze/activations`,
     bearerSessionTokenAuth,
     toExpressHandler(bonusController.getAllBonusActivations, bonusController)
   );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.get(
+    `${basePathProxy}/bonus/vacanze/activations`,
+    bearerSessionTokenAuth,
+    toExpressHandler(bonusController.getAllBonusActivations, bonusController)
+  );
 
   app.post(
     `${basePath}/bonus/vacanze/activations`,
+    bearerSessionTokenAuth,
+    constantExpressHandler(ResponseErrorDismissed)
+  );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.post(
+    `${basePathProxy}/bonus/vacanze/activations`,
     bearerSessionTokenAuth,
     constantExpressHandler(ResponseErrorDismissed)
   );
