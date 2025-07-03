@@ -40,7 +40,6 @@ import {
   mockSetEx,
   mockSmembers,
   mockSrem,
-  mockTtl,
 } from "../../__mocks__/redis";
 import { RedisClientMode } from "../../utils/redis";
 
@@ -84,15 +83,6 @@ mockSmembers.mockImplementation((_) => Promise.resolve([mockSessionToken]));
 const sessionStorage = new RedisSessionStorage(mockRedisClientSelector);
 
 let clock: any;
-
-const redisMethodImplFromError = (
-  mockFunction: jest.Mock<unknown, any>,
-  success?: unknown,
-  error?: Error
-) =>
-  mockFunction.mockImplementationOnce(() =>
-    error ? Promise.reject(error) : Promise.resolve(success)
-  );
 
 beforeEach(() => {
   // We need to mock time to test token expiration.
@@ -257,93 +247,6 @@ describe("RedisSessionStorage#getByMyPortalToken", () => {
       `SESSION-${aValidUser.session_token}`
     );
     expect(response).toEqual(E.right(O.some(aValidUser)));
-  });
-});
-
-// tslint:disable-next-line: no-big-function
-describe("RedisSessionStorage#del", () => {
-  const expectedRedisDelError = new Error("del error");
-
-  it.each([
-    [undefined, 1, E.right(true), "should delete all user tokens"],
-    [
-      expectedRedisDelError,
-      undefined,
-      E.left(
-        new Error(
-          `value [${expectedRedisDelError.message}] at RedisSessionStorage.del`
-        )
-      ),
-      "should fail if Redis client returns an error on deleting the user tokens",
-    ],
-    [
-      undefined,
-      //here we are making integerReplyAsync function fail, even if the DEL operations went fine
-      0,
-      E.left(
-        new Error(
-          `value [${
-            new Error(
-              "Unexpected response from redis client deleting user tokens."
-            ).message
-          }] at RedisSessionStorage.del`
-        )
-      ),
-      "should fail if Redis client returns an error deleting the session and false deleting the mapping",
-    ],
-  ])("%s, %s, %s, %s", async (tokenDelErr, tokenDelResponse, expected, _) => {
-    const aValidUserWithExternalTokens = {
-      ...aValidUser,
-      bpd_token: mockBPDToken,
-      myportal_token: mockMyPortalToken,
-    };
-    const expectedSessionInfoKey = `SESSIONINFO-${aValidUserWithExternalTokens.session_token}`;
-
-    for (let i = 0; i < (tokenDelErr == undefined ? 7 : 1); i++)
-      redisMethodImplFromError(mockDel, tokenDelResponse, tokenDelErr);
-
-    const response = await sessionStorage.del(aValidUserWithExternalTokens);
-
-    expect(mockDel).toHaveBeenCalledTimes(tokenDelErr == undefined ? 7 : 1);
-    if (tokenDelErr == undefined) {
-      expect(mockDel).toHaveBeenNthCalledWith(
-        1,
-        `BPD-${aValidUserWithExternalTokens.bpd_token}`
-      );
-      expect(mockDel).toHaveBeenNthCalledWith(
-        2,
-        `FIMS-${aValidUserWithExternalTokens.fims_token}`
-      );
-
-      expect(mockDel).toHaveBeenNthCalledWith(
-        3,
-        `MYPORTAL-${aValidUserWithExternalTokens.myportal_token}`
-      );
-      expect(mockDel).toHaveBeenNthCalledWith(4, expectedSessionInfoKey);
-      expect(mockDel).toHaveBeenNthCalledWith(
-        5,
-        `SESSION-${aValidUserWithExternalTokens.session_token}`
-      );
-      expect(mockDel).toHaveBeenNthCalledWith(
-        6,
-        `WALLET-${aValidUserWithExternalTokens.wallet_token}`
-      );
-      expect(mockDel).toHaveBeenNthCalledWith(
-        7,
-        `ZENDESK-${aValidUserWithExternalTokens.zendesk_token}`
-      );
-    }
-
-    if (E.isRight(expected)) {
-      expect(mockSrem).toHaveBeenCalledTimes(1);
-      expect(mockSrem).toHaveBeenCalledWith(
-        `USERSESSIONS-${aValidUserWithExternalTokens.fiscal_code}`,
-        `SESSIONINFO-${aValidUserWithExternalTokens.session_token}`
-      );
-    } else {
-      expect(mockSrem).not.toHaveBeenCalled();
-    }
-    expect(response).toEqual(expected);
   });
 });
 
@@ -839,61 +742,6 @@ describe("RedisSessionStorage#unsetBlockedUser", () => {
   });
 });
 
-describe("RedisSessionStorage#delUserAllSessions", () => {
-  it("should succeed if user has no session", async () => {
-    mockSmembers.mockImplementationOnce((_) => Promise.resolve([]));
-    const result = await sessionStorage.delUserAllSessions(aFiscalCode);
-
-    expect(E.isRight(result)).toBeTruthy();
-    if (E.isRight(result)) {
-      expect(result.right).toBe(true);
-    }
-  });
-
-  it("should fail if there's an error retrieving user's sessions", async () => {
-    const aError = new Error("any error");
-    mockSmembers.mockImplementationOnce((_) => Promise.reject(aError));
-    const result = await sessionStorage.delUserAllSessions(aFiscalCode);
-
-    expect(E.isLeft(result)).toBeTruthy();
-    if (E.isLeft(result)) {
-      expect(result.left).toBe(aError);
-    }
-  });
-
-  it("should fail if the stored user profile is not valid", async () => {
-    const invalidProfile = { foo: "bar" };
-    mockGet.mockImplementationOnce((_) => Promise.resolve(invalidProfile));
-
-    const result = await sessionStorage.delUserAllSessions(aFiscalCode);
-
-    expect(E.isLeft(result)).toBeTruthy();
-    if (E.isLeft(result)) {
-      expect(result.left instanceof Error).toBe(true);
-    }
-  });
-
-  it("should succeed if there's no user stored", async () => {
-    mockGet.mockImplementationOnce((_) => Promise.resolve());
-
-    const result = await sessionStorage.delUserAllSessions(aFiscalCode);
-
-    expect(E.isRight(result)).toBeTruthy();
-    if (E.isRight(result)) {
-      expect(result.right).toBe(true);
-    }
-  });
-
-  it("should succeed if everything is fine", async () => {
-    const result = await sessionStorage.delUserAllSessions(aFiscalCode);
-
-    expect(E.isRight(result)).toBeTruthy();
-    if (E.isRight(result)) {
-      expect(result.right).toBe(true);
-    }
-  });
-});
-
 describe("RedisSessionStorage#delPagoPaNoticeEmail", () => {
   it("should succeded deleting a notice email", async () => {
     mockDel.mockImplementationOnce((_) => Promise.resolve(1));
@@ -973,105 +821,6 @@ describe("RedisSessionStorage#getLollipopAssertionRefForUser", () => {
 
     expect(mockGet).toHaveBeenCalledTimes(1);
     expect(mockGet).toBeCalledWith(`KEYS-${aValidUser.fiscal_code}`);
-    expect(E.isLeft(response)).toBeTruthy();
-  });
-});
-
-describe("RedisSessionStorage#delLollipopDataForUser", () => {
-  it("should return a right either with true value on success", async () => {
-    mockDel.mockImplementationOnce((_) => Promise.resolve(1));
-    const response = await sessionStorage.delLollipopDataForUser(
-      aValidUser.fiscal_code
-    );
-
-    expect(mockDel).toHaveBeenCalledTimes(1);
-    expect(mockDel).toBeCalledWith(`KEYS-${aValidUser.fiscal_code}`);
-    expect(E.isRight(response)).toBeTruthy();
-    if (E.isRight(response)) expect(response.right).toEqual(true);
-  });
-
-  it("should fail with a left response if an error occurs on redis", async () => {
-    const expectedError = new Error("redis Error");
-    mockDel.mockImplementationOnce((_) => Promise.reject(expectedError));
-    const response = await sessionStorage.delLollipopDataForUser(
-      aValidUser.fiscal_code
-    );
-
-    expect(mockDel).toHaveBeenCalledTimes(1);
-    expect(mockDel).toBeCalledWith(`KEYS-${aValidUser.fiscal_code}`);
-    expect(E.isLeft(response)).toBeTruthy();
-    if (E.isLeft(response)) expect(response.left).toEqual(expectedError);
-  });
-
-  it("should success if no element are removed from redis", async () => {
-    mockDel.mockImplementationOnce((_) => Promise.resolve(0));
-    const response = await sessionStorage.delLollipopDataForUser(
-      aValidUser.fiscal_code
-    );
-
-    expect(mockDel).toHaveBeenCalledTimes(1);
-    expect(mockDel).toBeCalledWith(`KEYS-${aValidUser.fiscal_code}`);
-    expect(E.isRight(response)).toBeTruthy();
-    if (E.isRight(response)) expect(response.right).toEqual(true);
-  });
-});
-
-describe("RedisSessionStorage#getSessionRemaningTTL", () => {
-  it("should return the remining TTL of a session", async () => {
-    const expectedTtl = 1000;
-    mockTtl.mockImplementationOnce((_) => Promise.resolve(expectedTtl));
-    mockGet.mockImplementationOnce((_) => Promise.resolve(anAssertionRef));
-    const response = await sessionStorage.getSessionRemainingTTL(
-      aValidUser.fiscal_code
-    )();
-    expect(mockTtl).toHaveBeenCalledTimes(1);
-    expect(mockTtl).toBeCalledWith(`KEYS-${aValidUser.fiscal_code}`);
-    expect(mockGet).toHaveBeenCalledTimes(1);
-    expect(mockGet).toBeCalledWith(`KEYS-${aValidUser.fiscal_code}`);
-    expect(E.isRight(response)).toBeTruthy();
-    if (E.isRight(response))
-      expect(response.right).toEqual(
-        O.some({
-          ttl: expectedTtl,
-          type: LoginTypeEnum.LEGACY,
-        })
-      );
-  });
-
-  it("should return none if no CF-AssertionRef ref exists in redis", async () => {
-    const expectedTtl = -2;
-    mockTtl.mockImplementationOnce((_) => Promise.resolve(expectedTtl));
-    const response = await sessionStorage.getSessionRemainingTTL(
-      aValidUser.fiscal_code
-    )();
-    expect(mockTtl).toHaveBeenCalledTimes(1);
-    expect(mockTtl).toBeCalledWith(`KEYS-${aValidUser.fiscal_code}`);
-    expect(mockGet).not.toBeCalled();
-    expect(E.isRight(response)).toBeTruthy();
-    if (E.isRight(response)) expect(response.right).toEqual(O.none);
-  });
-
-  it("should return an error if exists a CF-AssertionRef without a TTL", async () => {
-    const expectedTtl = -1;
-    mockTtl.mockImplementationOnce((_) => Promise.resolve(expectedTtl));
-    const response = await sessionStorage.getSessionRemainingTTL(
-      aValidUser.fiscal_code
-    )();
-    expect(mockTtl).toHaveBeenCalledTimes(1);
-    expect(mockTtl).toBeCalledWith(`KEYS-${aValidUser.fiscal_code}`);
-    expect(mockGet).not.toBeCalled();
-    expect(E.isLeft(response)).toBeTruthy();
-  });
-
-  it("should return an error if we retrieve a TTL but we can't retrieve the value", async () => {
-    const expectedTtl = 1000;
-    mockTtl.mockImplementationOnce((_) => Promise.resolve(expectedTtl));
-    mockGet.mockImplementationOnce((_) => Promise.resolve(null));
-    const response = await sessionStorage.getSessionRemainingTTL(
-      aValidUser.fiscal_code
-    )();
-    expect(mockTtl).toHaveBeenCalledTimes(1);
-    expect(mockTtl).toBeCalledWith(`KEYS-${aValidUser.fiscal_code}`);
     expect(E.isLeft(response)).toBeTruthy();
   });
 });

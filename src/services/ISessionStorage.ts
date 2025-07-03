@@ -6,13 +6,11 @@ import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { Either } from "fp-ts/lib/Either";
 import { Option } from "fp-ts/lib/Option";
 import * as O from "fp-ts/lib/Option";
-import * as TE from "fp-ts/lib/TaskEither";
 
 import { AssertionRef as BackendAssertionRef } from "../../generated/auth/AssertionRef";
 import { LollipopData } from "../types/assertionRef";
 import { MyPortalToken, SessionToken } from "../types/token";
 import { User } from "../types/user";
-import { ActiveSessionInfo } from "../utils/fastLogin";
 
 export interface ISessionStorage {
   /**
@@ -48,36 +46,5 @@ export interface ISessionStorage {
     fiscalCode: FiscalCode
   ) => Promise<Either<Error, O.Option<LollipopData>>>;
 
-  /**
-   * Delete the Lollipop assertionRef related to an user
-   *
-   * @param fiscalCode A user fiscal code
-   */
-  readonly delLollipopDataForUser: (
-    fiscalCode: FiscalCode
-  ) => Promise<Either<Error, boolean>>;
-
-  /**
-   * Removes a value from the cache.
-   */
-  readonly del: (user: User) => Promise<Either<Error, boolean>>;
-
   readonly delPagoPaNoticeEmail: (user: User) => Promise<Either<Error, true>>;
-
-  readonly delUserAllSessions: (
-    fiscalCode: FiscalCode
-  ) => Promise<Either<Error, boolean>>;
-
-  /**
-   * Retrieve the remining TTL for the CF-AssertionRef record
-   * and the Login Type (`LEGACY` of `LV`).
-   * The TTL value is the same of the Session expire time.
-   * If the record is missing the result value is `None`.
-   * If the recors hasn't an expire time an error is returned.
-   *
-   * @param fiscalCode
-   */
-  readonly getSessionRemainingTTL: (
-    fiscalCode: FiscalCode
-  ) => TE.TaskEither<Error, O.Option<ActiveSessionInfo>>;
 }

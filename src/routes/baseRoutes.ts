@@ -5,7 +5,6 @@ import * as passport from "passport";
 
 import { LollipopApiClient } from "../clients/lollipop";
 import {
-  FF_ENABLE_NOTIFY_ENDPOINT,
   NOTIFICATION_DEFAULT_SUBJECT,
   NOTIFICATION_DEFAULT_TITLE
 } from "../config";
@@ -33,7 +32,6 @@ import { toExpressHandler } from "../utils/express";
  * @param app The Express application
  * @param authBasePath The base path for the base API APIs
  * @param _allowNotifyIPSourceRange The IP source range that is allowed to send notifications
- * @param urlTokenAuth The middleware that autenticate the requests with a URL token
  * @param profileService The service that handles the user profiles
  * @param fnAppService The API Client for the Function App
  * @param appMessagesService The service that handles the user messages
@@ -49,7 +47,6 @@ export const registerAPIRoutes = (
   app: Express,
   basePath: string,
   _allowNotifyIPSourceRange: ReadonlyArray<CIDR>,
-  urlTokenAuth: ReturnType<passport.Authenticator["authenticate"]>,
   profileService: ProfileService,
   fnAppService: FunctionsAppService,
   appMessagesService: NewMessagesService,
@@ -235,14 +232,6 @@ export const registerAPIRoutes = (
       notificationController
     )
   );
-
-  if (FF_ENABLE_NOTIFY_ENDPOINT) {
-    app.post(
-      `${basePath}/notify`,
-      urlTokenAuth,
-      toExpressHandler(notificationController.notify, notificationController)
-    );
-  }
 
   app.get(
     `${basePath}/sessions`,

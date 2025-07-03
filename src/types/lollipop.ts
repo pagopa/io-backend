@@ -28,14 +28,8 @@ import {
   JwkPubKeyHashAlgorithmEnum
 } from "../../generated/lollipop-api/JwkPubKeyHashAlgorithm";
 import { JwkPubKeyToken } from "../../generated/lollipop-api/JwkPubKeyToken";
-import LollipopService from "../services/lollipopService";
 import { ResLocals } from "../utils/express";
 import { withValidatedOrValidationError } from "../utils/responses";
-
-export interface LollipopParams {
-  readonly isLollipopEnabled: boolean;
-  readonly lollipopService: LollipopService;
-}
 
 export const LollipopRequiredHeaders = t.intersection([
   t.type({

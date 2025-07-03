@@ -12,7 +12,6 @@ import { ServerInfo } from "../../generated/platform/ServerInfo";
 import * as redisUtils from "../utils/redis";
 
 jest.mock("@azure/storage-queue");
-jest.mock("@azure/data-tables");
 
 jest.mock("../services/redisSessionStorage");
 jest.mock("../services/apiClientFactory");
@@ -66,6 +65,7 @@ const aIoSignAPIBasePath = "/api/v1/sign";
 const aServicesAppBackendBasePath = "/api/v2";
 const aTrialSystemBasePath = "/trials/api/v1";
 const aIoWalletAPIBasePath = "/api/v1/wallet";
+const aIoWalletUatAPIBasePath = "/api/v1/wallet/uat";
 
 describe("Success app start", () => {
   // tslint:disable:no-let
@@ -78,10 +78,10 @@ describe("Success app start", () => {
       IoFimsAPIBasePath: aIoFimsAPIBasePath,
       IoSignAPIBasePath: aIoSignAPIBasePath,
       IoWalletAPIBasePath: aIoWalletAPIBasePath,
+      IoWalletUatAPIBasePath: aIoWalletUatAPIBasePath,
       ServicesAppBackendBasePath: aServicesAppBackendBasePath,
       TrialSystemBasePath: aTrialSystemBasePath,
       allowNotifyIPSourceRange: [aValidCIDR],
-      allowSessionHandleIPSourceRange: [aValidCIDR],
       env: NodeEnvironmentEnum.PRODUCTION
     });
   });
@@ -184,10 +184,10 @@ describe("Failure app start", () => {
         IoFimsAPIBasePath: aIoFimsAPIBasePath,
         IoSignAPIBasePath: aIoSignAPIBasePath,
         IoWalletAPIBasePath: aIoWalletAPIBasePath,
+        IoWalletUatAPIBasePath: aIoWalletUatAPIBasePath,
         ServicesAppBackendBasePath: aServicesAppBackendBasePath,
         TrialSystemBasePath: aTrialSystemBasePath,
         allowNotifyIPSourceRange: [aValidCIDR],
-        allowSessionHandleIPSourceRange: [aValidCIDR],
         env: NodeEnvironmentEnum.PRODUCTION
       });
     } catch (err) {

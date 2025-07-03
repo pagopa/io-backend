@@ -10,8 +10,6 @@ import { Either } from "fp-ts/lib/Either";
 import { NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
 import * as O from "fp-ts/lib/Option";
 import { Option } from "fp-ts/lib/Option";
-import * as ROA from "fp-ts/lib/ReadonlyArray";
-import * as R from "fp-ts/lib/Record";
 import * as TE from "fp-ts/lib/TaskEither";
 import { TaskEither } from "fp-ts/lib/TaskEither";
 import * as B from "fp-ts/lib/boolean";
@@ -25,7 +23,6 @@ import {
   LollipopData,
   NullableBackendAssertionRefFromString
 } from "../types/assertionRef";
-import { assertUnreachable } from "../types/commons";
 import {
   BPDToken,
   FIMSToken,
@@ -34,8 +31,8 @@ import {
   WalletToken,
   ZendeskToken
 } from "../types/token";
-import { User, UserV1, UserV2, UserV3, UserV4, UserV5 } from "../types/user";
-import { ActiveSessionInfo, LoginTypeEnum } from "../utils/fastLogin";
+import { User } from "../types/user";
+import { LoginTypeEnum } from "../utils/fastLogin";
 import { log } from "../utils/logger";
 import { RedisClientMode, RedisClientSelectorType } from "../utils/redis";
 import { ISessionStorage } from "./ISessionStorage";
@@ -116,62 +113,6 @@ export default class RedisSessionStorage
     const user = errorOrSession.right;
 
     return E.right(O.some(user));
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public async del(user: User): Promise<Either<Error, boolean>> {
-    const tokens: ReadonlyArray<string> = R.collect(
-      (_, { prefix, value }) => `${prefix}${value}`
-    )(this.getUserTokens(user));
-
-    const deleteTokensPromiseV2 = await pipe(
-      tokens,
-      ROA.map((singleToken) =>
-        TE.tryCatch(
-          () =>
-            this.redisClientSelector
-              .selectOne(RedisClientMode.FAST)
-              .del(singleToken),
-          E.toError
-        )
-      ),
-      ROA.sequence(TE.ApplicativeSeq),
-      TE.map(ROA.reduce(0, (current, next) => current + next)),
-      this.integerReplyAsync(tokens.length),
-      this.falsyResponseToErrorAsync(
-        new Error("Unexpected response from redis client deleting user tokens.")
-      )
-    )();
-
-    if (E.isLeft(deleteTokensPromiseV2)) {
-      return E.left(
-        new Error(
-          `value [${deleteTokensPromiseV2.left.message}] at RedisSessionStorage.del`
-        )
-      );
-    }
-
-    // Remove SESSIONINFO reference from USERSESSIONS Set
-    // this operation is executed in background and doesn't compromise
-    // the logout process.
-    pipe(
-      TE.tryCatch(
-        () =>
-          this.redisClientSelector
-            .selectOne(RedisClientMode.FAST)
-            .sRem(
-              `${userSessionsSetKeyPrefix}${user.fiscal_code}`,
-              `${sessionInfoKeyPrefix}${user.session_token}`
-            ),
-        E.toError
-      ),
-      TE.mapLeft(() => {
-        log.warn(`Error updating USERSESSIONS Set for ${user.fiscal_code}`);
-      })
-    )().catch(() => void 0);
-    return E.right(true);
   }
 
   public async listUserSessions(
@@ -383,65 +324,6 @@ export default class RedisSessionStorage
   }
 
   /**
-   * Delete all user session data
-   *
-   * @param fiscalCode
-   */
-  public async delUserAllSessions(
-    fiscalCode: FiscalCode
-  ): Promise<Either<Error, boolean>> {
-    const errorOrSessions = await this.readSessionInfoKeys(fiscalCode);
-
-    const delEverySession = (
-      sessionTokens: ReadonlyArray<SessionToken>
-    ): TaskEither<Error, boolean> =>
-      pipe(
-        A.sequence(TE.ApplicativePar)<Error, boolean>(
-          sessionTokens.map((sessionToken) =>
-            pipe(
-              TE.fromEither(
-                pipe(
-                  sessionToken,
-                  SessionToken.decode,
-                  E.mapLeft(() => new Error("Error decoding token"))
-                )
-              ),
-              TE.chain((token: SessionToken) =>
-                pipe(
-                  TE.tryCatch(() => this.delSingleSession(token), E.toError),
-                  TE.chain(TE.fromEither)
-                )
-              )
-            )
-          )
-        ),
-        TE.map(() => true)
-      );
-
-    return pipe(
-      TE.fromEither(errorOrSessions),
-      TE.fold(
-        // as we're deleting stuff, a NotFound error can be considered as a success
-        (error) =>
-          error === sessionNotFoundError ? TE.of(true) : TE.left(error),
-        (sessionInfoKeys) =>
-          delEverySession(
-            sessionInfoKeys.map(
-              (sessionInfoKey) =>
-                sessionInfoKey.replace(sessionInfoKeyPrefix, "") as SessionToken
-            )
-          )
-      ),
-      TE.chain(() =>
-        pipe(
-          TE.tryCatch(() => this.delSessionsSet(fiscalCode), E.toError),
-          TE.chain(TE.fromEither)
-        )
-      )
-    )();
-  }
-
-  /**
    * Delete notify email cache related to an user
    */
   public async delPagoPaNoticeEmail(user: User): Promise<Either<Error, true>> {
@@ -510,69 +392,6 @@ export default class RedisSessionStorage
     )();
   }
 
-  /**
-   * {@inheritDoc}
-   */
-  public getSessionRemainingTTL(
-    fiscalCode: FiscalCode
-  ): TE.TaskEither<Error, O.Option<ActiveSessionInfo>> {
-    return pipe(
-      TE.tryCatch(
-        // The `setLollipopDataForUser` has a default value for key `expire`
-        // If the assertionRef is saved whidout providing an expire time related
-        // with the session validity it will invalidate this implementation.
-        () =>
-          this.redisClientSelector
-            .selectOne(RedisClientMode.SAFE)
-            .ttl(`${lollipopDataPrefix}${fiscalCode}`),
-        E.toError
-      ),
-      TE.chain(
-        TE.fromPredicate(
-          (_) => _ !== -1,
-          () => new Error("Unexpected missing CF-AssertionRef TTL")
-        )
-      ),
-      TE.map(flow(O.fromPredicate((ttl) => ttl > 0))),
-      TE.chain((maybeTtl) =>
-        O.isNone(maybeTtl)
-          ? TE.right(O.none)
-          : pipe(
-              TE.tryCatch(
-                () => this.getLollipopDataForUser(fiscalCode),
-                E.toError
-              ),
-              TE.chain(TE.fromEither),
-              TE.chain(
-                TE.fromPredicate(
-                  O.isSome,
-                  () => new Error("Unexpected missing value")
-                )
-              ),
-              TE.map(({ value }) =>
-                O.some({ ttl: maybeTtl.value, type: value.loginType })
-              )
-            )
-      )
-    );
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public async delLollipopDataForUser(fiscalCode: FiscalCode) {
-    return pipe(
-      TE.tryCatch(
-        () =>
-          this.redisClientSelector
-            .selectOne(RedisClientMode.FAST)
-            .del(`${lollipopDataPrefix}${fiscalCode}`),
-        E.toError
-      ),
-      this.integerReplyAsync()
-    )();
-  }
-
   // ----------------------------------------------
   // Private methods
   // ----------------------------------------------
@@ -591,44 +410,6 @@ export default class RedisSessionStorage
       ),
       A.sequence(TE.ApplicativePar)
     );
-  }
-
-  /**
-   * Given a token, it removes user session token and wallet token
-   *
-   * @param token
-   */
-  private async delSingleSession(
-    token: SessionToken
-  ): Promise<Either<Error, boolean>> {
-    try {
-      const user: User = pipe(
-        await this.loadSessionBySessionToken(token),
-        E.getOrElseW((err) => {
-          throw err;
-        })
-      );
-      return this.del(user);
-    } catch (error) {
-      // as it's a delete, if the query fails for a NotFoudn error, it might be considered a success
-      return error === sessionNotFoundError
-        ? E.right(true)
-        : E.left(E.toError(error));
-    }
-  }
-
-  private delSessionsSet(fiscalCode: FiscalCode): Promise<Either<Error, true>> {
-    return pipe(
-      TE.tryCatch(() => {
-        log.info(
-          `Deleting sessions set ${userSessionsSetKeyPrefix}${fiscalCode}`
-        );
-        return this.redisClientSelector
-          .selectOne(RedisClientMode.FAST)
-          .del(`${userSessionsSetKeyPrefix}${fiscalCode}`);
-      }, E.toError),
-      TE.map<number, true>(() => true)
-    )();
   }
 
   /**
@@ -757,90 +538,5 @@ export default class RedisSessionStorage
         ),
       { sessions: [] } as SessionsList
     );
-  }
-
-  private getUserTokens(
-    user: User
-  ): Record<string, { readonly prefix: string; readonly value: string }> {
-    const requiredTokens = {
-      session_info: {
-        prefix: sessionInfoKeyPrefix,
-        value: user.session_token
-      },
-      session_token: {
-        prefix: sessionKeyPrefix,
-        value: user.session_token
-      },
-      wallet_token: {
-        prefix: walletKeyPrefix,
-        value: user.wallet_token
-      }
-    };
-    if (UserV5.is(user)) {
-      return {
-        ...requiredTokens,
-        bpd_token: {
-          prefix: bpdTokenPrefix,
-          value: user.bpd_token
-        },
-        fims_token: {
-          prefix: fimsTokenPrefix,
-          value: user.fims_token
-        },
-        myportal_token: {
-          prefix: myPortalTokenPrefix,
-          value: user.myportal_token
-        },
-        zendesk_token: {
-          prefix: zendeskTokenPrefix,
-          value: user.zendesk_token
-        }
-      };
-    }
-    if (UserV4.is(user)) {
-      return {
-        ...requiredTokens,
-        bpd_token: {
-          prefix: bpdTokenPrefix,
-          value: user.bpd_token
-        },
-        myportal_token: {
-          prefix: myPortalTokenPrefix,
-          value: user.myportal_token
-        },
-        zendesk_token: {
-          prefix: zendeskTokenPrefix,
-          value: user.zendesk_token
-        }
-      };
-    }
-    if (UserV3.is(user)) {
-      return {
-        ...requiredTokens,
-        bpd_token: {
-          prefix: bpdTokenPrefix,
-          value: user.bpd_token
-        },
-        myportal_token: {
-          prefix: myPortalTokenPrefix,
-          value: user.myportal_token
-        }
-      };
-    }
-    if (UserV2.is(user)) {
-      return {
-        ...requiredTokens,
-        myportal_token: {
-          prefix: myPortalTokenPrefix,
-          value: user.myportal_token
-        }
-      };
-    }
-    if (UserV1.is(user)) {
-      return {
-        ...requiredTokens
-      };
-    }
-    return assertUnreachable(user);
   }
 }
