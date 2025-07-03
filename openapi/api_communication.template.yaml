@@ -5,6 +5,9 @@ info:
   version: 16.7.0
 servers:
   - url: https://api-app.io.pagopa.it/api/v1
+    description: prod env
+  - url: https://api-app.io.pagopa.it/api/communication/v1
+    description: proxy endpoint
 security:
   - Bearer: []
 paths:
@@ -99,6 +102,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ProblemJson"
+
   /messages/{id}:
     get:
       summary: Get message
@@ -166,6 +170,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ProblemJson"
+
   /messages/{id}/message-status:
     put:
       summary: UpsertMessageStatusAttributes
@@ -227,6 +232,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ProblemJson"
+
   /third-party-messages/{id}:
     get:
       summary: Retrieve Third Party message
@@ -299,6 +305,7 @@ paths:
         "504":
           description: Gateway Timeout
           content: {}
+
   /third-party-messages/{id}/attachments/{attachment_url}:
     get:
       summary: Retrieve an attachment of a Thrid Party message
@@ -357,6 +364,7 @@ paths:
         "504":
           description: Gateway Timeout
           content: {}
+
   /third-party-messages/{id}/precondition:
     get:
       summary:
@@ -429,6 +437,7 @@ paths:
         "504":
           description: Gateway Timeout
           content: {}
+
   /installations/{installationID}:
     put:
       summary: Create or update an Installation

@@ -4,6 +4,9 @@ info:
   title: IO FIMS - Backend API
 servers:
   - url: https://api-app.io.pagopa.it/api/v1/fims
+    description: prod env
+  - url: https://api-app.io.pagopa.it/api/fims/v1/fims
+    description: proxy endpoint
 security:
   - Bearer: []
 

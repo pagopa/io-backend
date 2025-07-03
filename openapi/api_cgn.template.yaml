@@ -4,6 +4,9 @@ info:
   version: 16.12.1
 servers:
   - url: https://localhost/api/v1/cgn
+    description: prod env
+  - url: https://localhost/api/cgn/v1/cgn
+    description: proxy endpoint
 security:
   - Bearer: []
 paths:
@@ -34,6 +37,7 @@ paths:
             "*/*":
               schema:
                 $ref: "#/components/schemas/ProblemJson"
+
   /activation:
     get:
       summary: |
@@ -108,6 +112,7 @@ paths:
             "*/*":
               schema:
                 $ref: "#/components/schemas/ProblemJson"
+
   /eyca/activation:
     get:
       summary: |
@@ -182,6 +187,7 @@ paths:
             "*/*":
               schema:
                 $ref: "#/components/schemas/ProblemJson"
+
   /eyca/status:
     get:
       summary: Get the Eyca Card status details
@@ -213,6 +219,7 @@ paths:
             "*/*":
               schema:
                 $ref: "#/components/schemas/ProblemJson"
+
   /delete:
     post:
       summary: Start a CGN unsubscription procedure
@@ -259,6 +266,7 @@ paths:
             "*/*":
               schema:
                 $ref: "#/components/schemas/ProblemJson"
+
   /otp:
     post:
       summary: |
@@ -286,6 +294,7 @@ paths:
             "*/*":
               schema:
                 $ref: "#/components/schemas/ProblemJson"
+
   /operator-search/published-product-categories:
     get:
       summary: List of published product categories
@@ -316,6 +325,7 @@ paths:
             "*/*":
               schema:
                 $ref: "#/components/schemas/ProblemJson"
+
   /operator-search/count:
     get:
       summary: Count merchants and discounts to search within
@@ -341,6 +351,7 @@ paths:
             "*/*":
               schema:
                 $ref: "#/components/schemas/ProblemJson"
+
   /operator-search/search:
     post:
       summary: Search merchants or discounts
@@ -372,6 +383,7 @@ paths:
             "*/*":
               schema:
                 $ref: "#/components/schemas/ProblemJson"
+
   /operator-search/online-merchants:
     post:
       summary: List of online merchants
@@ -400,6 +412,7 @@ paths:
             "*/*":
               schema:
                 $ref: "#/components/schemas/ProblemJson"
+
   /operator-search/offline-merchants:
     post:
       summary: List of merchants with a physical address
@@ -428,6 +441,7 @@ paths:
             "*/*":
               schema:
                 $ref: "#/components/schemas/ProblemJson"
+
   /operator-search/merchants/{merchantId}:
     get:
       summary: Retrieve merchant details
@@ -461,6 +475,7 @@ paths:
             "*/*":
               schema:
                 $ref: "#/components/schemas/ProblemJson"
+
   /operator-search/discount-bucket-code/{discountId}:
     get:
       summary: Retrieve a discount bucket code

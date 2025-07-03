@@ -4,11 +4,14 @@ info:
   description: Mobile and web backend API for the Auth and Identity domain.
   version: 17.1.0
 servers:
-  - url: https://api-app.io.pagopa.it
+  - url: https://api-app.io.pagopa.it/api
+    description: prod env
+  - url: https://api-app.io.pagopa.it/api/auth
+    description: proxy endpoint
 security:
   - Bearer: []
 paths:
-  /api/v1/services/{service_id}/preferences:
+  /v1/services/{service_id}/preferences:
     get:
       summary: GetServicePreferences
       operationId: getServicePreferences
@@ -107,7 +110,7 @@ paths:
         '500':
           description: Internal Server Error
           content: {}
-  /api/v1/profile:
+  /v1/profile:
     get:
       summary: Get user's profile
       description: Returns the profile for the user identified by the provided fiscal code.
@@ -224,7 +227,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-  /api/v1/api-profile:
+  /v1/api-profile:
     get:
       summary: Get user's profile stored into the API
       description: Returns the profile for the user identified by the provided fiscal code.
@@ -275,7 +278,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-  /api/v1/email-validation-process:
+  /v1/email-validation-process:
     post:
       summary: Start the Email Validation Process
       description: |-
@@ -313,7 +316,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-  /api/v1/sessions:
+  /v1/sessions:
     get:
       summary: List sessions of a User
       description: Return all the active sessions for an authenticated User.
@@ -340,7 +343,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-  /api/v1/user-data-processing:
+  /v1/user-data-processing:
     post:
       summary: Set User's data processing choices
       description: >-
@@ -384,7 +387,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-  /api/v1/user-data-processing/{choice}:
+  /v1/user-data-processing/{choice}:
     get:
       summary: Get User's data processing
       description: >-

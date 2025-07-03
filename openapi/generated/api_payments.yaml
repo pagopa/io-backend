@@ -5,6 +5,9 @@ info:
   version: 17.1.0
 servers:
   - url: https://api-app.io.pagopa.it/api/v1
+    description: prod env
+  - url: https://api-app.io.pagopa.it/api/payments/v1
+    description: proxy endpoint
 security:
   - Bearer: []
 paths:

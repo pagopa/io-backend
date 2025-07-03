@@ -1,6 +1,9 @@
 openapi: 3.0.2
 servers:
   - url: https://api-app.io.pagopa.it/api
+    description: prod env
+  - url: https://api-app.io.pagopa.it/api/services
+    description: proxy endpoint
 info:
   title: Services App Backend API
   version: 16.7.0

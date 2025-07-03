@@ -5,8 +5,12 @@ info:
 servers:
   - url: https://api-app.io.pagopa.it/api/v1/wallet
     description: prod env
+  - url: https://api-app.io.pagopa.it/api/wallet/v1/wallet
+    description: proxy endpoint
   - url: https://api-app.io.pagopa.it/api/v1/wallet/uat
     description: uat env
+  - url: https://api-app.io.pagopa.it/api/wallet/v1/wallet/uat
+    description: uat proxy endpoint
 security:
   - Bearer: []
 paths:

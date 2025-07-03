@@ -4,6 +4,9 @@ info:
   title: IO Sign - Backend API
 servers:
   - url: https://api-app.io.pagopa.it/api/v1/sign
+    description: prod env
+  - url: https://api-app.io.pagopa.it/api/sign/v1/sign
+    description: proxy endpoint
 security:
   - Bearer: []
 paths:
