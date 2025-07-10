@@ -17,7 +17,6 @@ import * as path from "path";
 import { newApp } from "./app";
 import {
   ALLOW_NOTIFY_IP_SOURCE_RANGE,
-  ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE,
   API_BASE_PATH,
   CGN_API_BASE_PATH,
   CGN_OPERATOR_SEARCH_API_BASE_PATH,
@@ -25,6 +24,7 @@ import {
   IO_FIMS_API_BASE_PATH,
   IO_SIGN_API_BASE_PATH,
   IO_WALLET_API_BASE_PATH,
+  IO_WALLET_UAT_API_BASE_PATH,
   SERVER_PORT,
   SERVICES_APP_BACKEND_BASE_PATH,
   TRIAL_SYSTEM_API_BASE_PATH,
@@ -47,6 +47,7 @@ const CGNOperatorSearchAPIBasePath = CGN_OPERATOR_SEARCH_API_BASE_PATH;
 const ServicesAppBackendBasePath = SERVICES_APP_BACKEND_BASE_PATH;
 const TrialSystemBasePath = TRIAL_SYSTEM_API_BASE_PATH;
 const IoWalletAPIBasePath = IO_WALLET_API_BASE_PATH;
+const IoWalletUatAPIBasePath = IO_WALLET_UAT_API_BASE_PATH;
 
 // Set default for graceful-shutdown
 const DEFAULT_SHUTDOWN_SIGNALS = "SIGINT SIGTERM";
@@ -92,10 +93,10 @@ newApp({
   IoFimsAPIBasePath,
   IoSignAPIBasePath,
   IoWalletAPIBasePath,
+  IoWalletUatAPIBasePath,
   ServicesAppBackendBasePath,
   TrialSystemBasePath,
   allowNotifyIPSourceRange: ALLOW_NOTIFY_IP_SOURCE_RANGE,
-  allowSessionHandleIPSourceRange: ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE,
   appInsightsClient: O.toUndefined(maybeAppInsightsClient),
   env: ENV
 })

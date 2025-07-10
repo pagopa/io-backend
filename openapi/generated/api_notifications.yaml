@@ -2,50 +2,18 @@ openapi: 3.0.2
 info:
   title: Internal API for Communication domain
   description: Internal API for Communication domain to handle push notifications.
-  version: 16.18.0
+  version: 17.1.0
 servers:
   - url: https://localhost/api/v1
 security:
   - Token: []
 paths:
-  /notify:
-    post:
-      summary: Notify a user
-      description: Post the notification to the user using a push notification.
-      operationId: notify
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Notification'
-        required: true
+  /dummy:
+    get:
       responses:
         '200':
-          description: Success.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SuccessResponse'
-              example:
-                message: ok
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemJson'
-        '401':
-          description: Token null or invalid.
+          description: ok
           content: {}
-        '500':
-          description: >-
-            There was an error in forwarding the notification to the
-            Notification Hub.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemJson'
-    x-swagger-router-controller: NotificationController
 components:
   schemas:
     NotificationMessage:

@@ -1,9 +1,12 @@
 openapi: 3.0.2
 info:
   title: IO Wallet
-  version: 16.18.0
+  version: 17.1.0
 servers:
   - url: https://api-app.io.pagopa.it/api/v1/wallet
+    description: prod env
+  - url: https://api-app.io.pagopa.it/api/v1/wallet/uat
+    description: uat env
 security:
   - Bearer: []
 paths:
