@@ -22,11 +22,9 @@ import * as passport from "passport";
 import {
   API_CLIENT,
   APP_MESSAGES_API_CLIENT,
-  BONUS_API_CLIENT,
   CGN_API_CLIENT,
   CGN_OPERATOR_SEARCH_API_CLIENT,
   ENV,
-  FF_BONUS_ENABLED,
   FF_CGN_ENABLED,
   FF_IO_FIMS_ENABLED,
   FF_IO_SIGN_ENABLED,
@@ -56,9 +54,7 @@ import {
   SERVICES_APP_BACKEND_CLIENT,
   TRIAL_SYSTEM_CLIENT
 } from "./config";
-import { registerAuthenticationRoutes } from "./routes/authenticationRoutes";
 import { registerAPIRoutes } from "./routes/baseRoutes";
-import { registerBonusAPIRoutes } from "./routes/bonusRoutes";
 import {
   registerCgnAPIRoutes,
   registerCgnOperatorSearchAPIRoutes
@@ -71,7 +67,6 @@ import { registerPNRoutes } from "./routes/pnRoutes";
 import { registerPublicRoutes } from "./routes/publicRoutes";
 import { registerServicesAppBackendRoutes } from "./routes/servicesRoutes";
 import { registerTrialSystemAPIRoutes } from "./routes/trialSystemRoutes";
-import BonusService from "./services/bonusService";
 import CgnOperatorSearchService from "./services/cgnOperatorSearchService";
 import CgnService from "./services/cgnService";
 import IoFimsService from "./services/fimsService";
@@ -86,7 +81,6 @@ import PagoPAProxyService from "./services/pagoPAProxyService";
 import { PNService } from "./services/pnService";
 import ProfileService from "./services/profileService";
 import RedisSessionStorage from "./services/redisSessionStorage";
-import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import ServicesAppBackendService from "./services/servicesAppBackendService";
 import TrialService from "./services/trialService";
 import UserDataProcessingService from "./services/userDataProcessingService";
@@ -109,9 +103,7 @@ export interface IAppFactoryParameters {
   readonly env: NodeEnvironment;
   readonly appInsightsClient?: appInsights.TelemetryClient;
   readonly allowNotifyIPSourceRange: ReadonlyArray<CIDR>;
-  readonly authenticationBasePath: string;
   readonly APIBasePath: string;
-  readonly BonusAPIBasePath: string;
   readonly CGNAPIBasePath: string;
   readonly CGNOperatorSearchAPIBasePath: string;
   readonly IoSignAPIBasePath: string;
@@ -120,15 +112,24 @@ export interface IAppFactoryParameters {
   readonly IoWalletUatAPIBasePath: string;
   readonly ServicesAppBackendBasePath: string;
   readonly TrialSystemBasePath: string;
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  readonly APIBasePathProxy: string;
+  readonly CGNAPIBasePathProxy: string;
+  readonly IoSignAPIBasePathProxy: string;
+  readonly IoFimsAPIBasePathProxy: string;
+  readonly IoWalletAPIBasePathProxy: string;
+  readonly IoWalletUatAPIBasePathProxy: string;
+  readonly CGNOperatorSearchAPIBasePathProxy: string;
+  readonly ServicesAppBackendBasePathProxy: string;
+  readonly TrialSystemBasePathProxy: string;
+  readonly LollipopAPIBasePathProxy: string;
 }
 
 export async function newApp({
   env,
   allowNotifyIPSourceRange,
   appInsightsClient,
-  authenticationBasePath,
   APIBasePath,
-  BonusAPIBasePath,
   CGNAPIBasePath,
   IoSignAPIBasePath,
   IoFimsAPIBasePath,
@@ -136,7 +137,18 @@ export async function newApp({
   IoWalletUatAPIBasePath,
   CGNOperatorSearchAPIBasePath,
   ServicesAppBackendBasePath,
-  TrialSystemBasePath
+  TrialSystemBasePath,
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  APIBasePathProxy,
+  CGNAPIBasePathProxy,
+  IoSignAPIBasePathProxy,
+  IoFimsAPIBasePathProxy,
+  IoWalletAPIBasePathProxy,
+  IoWalletUatAPIBasePathProxy,
+  CGNOperatorSearchAPIBasePathProxy,
+  ServicesAppBackendBasePathProxy,
+  TrialSystemBasePathProxy,
+  LollipopAPIBasePathProxy
 }: IAppFactoryParameters): Promise<Express> {
   const isDevEnvironment = ENV === NodeEnvironmentEnum.DEVELOPMENT;
   const REDIS_CLIENT_SELECTOR = await RedisClientSelector(
@@ -260,9 +272,6 @@ export async function newApp({
         // Create the profile service
         const PROFILE_SERVICE = new ProfileService(API_CLIENT);
 
-        // Create the bonus service
-        const BONUS_SERVICE = new BonusService(BONUS_API_CLIENT);
-
         // Create the cgn service
         const CGN_SERVICE = new CgnService(CGN_API_CLIENT);
 
@@ -348,15 +357,11 @@ export async function newApp({
         registerFirstLollipopConsumer(
           app,
           "/first-lollipop",
+          // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+          LollipopAPIBasePathProxy,
           LOLLIPOP_API_CLIENT,
           SESSION_STORAGE,
           FIRST_LOLLIPOP_CONSUMER_CLIENT,
-          authMiddlewares.bearerSession
-        );
-
-        registerAuthenticationRoutes(
-          app,
-          authenticationBasePath,
           authMiddlewares.bearerSession
         );
 
@@ -374,13 +379,11 @@ export async function newApp({
           PAGOPA_ECOMMERCE_UAT_CLIENT
         );
 
-        // Register the user metadata storage service.
-        const USER_METADATA_STORAGE = new RedisUserMetadataStorage(
-          REDIS_CLIENT_SELECTOR.selectOne(RedisClientMode.FAST)
-        );
         registerAPIRoutes(
           app,
           APIBasePath,
+          // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+          APIBasePathProxy,
           allowNotifyIPSourceRange,
           PROFILE_SERVICE,
           FN_APP_SERVICE,
@@ -389,23 +392,16 @@ export async function newApp({
           SESSION_STORAGE,
           PAGOPA_PROXY_SERVICE,
           PAGOPA_ECOMMERCE_SERVICE,
-          USER_METADATA_STORAGE,
           USER_DATA_PROCESSING_SERVICE,
           authMiddlewares.bearerSession,
           LOLLIPOP_API_CLIENT
         );
-        if (FF_BONUS_ENABLED) {
-          registerBonusAPIRoutes(
-            app,
-            BonusAPIBasePath,
-            BONUS_SERVICE,
-            authMiddlewares.bearerSession
-          );
-        }
         if (FF_CGN_ENABLED) {
           registerCgnAPIRoutes(
             app,
             CGNAPIBasePath,
+            // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+            CGNAPIBasePathProxy,
             CGN_SERVICE,
             authMiddlewares.bearerSession
           );
@@ -413,6 +409,8 @@ export async function newApp({
           registerCgnOperatorSearchAPIRoutes(
             app,
             CGNOperatorSearchAPIBasePath,
+            // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+            CGNOperatorSearchAPIBasePathProxy,
             CGN_SERVICE,
             CGN_OPERATOR_SEARCH_SERVICE,
             authMiddlewares.bearerSession
@@ -423,6 +421,8 @@ export async function newApp({
           registerIoSignAPIRoutes(
             app,
             IoSignAPIBasePath,
+            // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+            IoSignAPIBasePathProxy,
             IO_SIGN_SERVICE,
             PROFILE_SERVICE,
             authMiddlewares.bearerSession,
@@ -435,6 +435,8 @@ export async function newApp({
           registerIoFimsAPIRoutes(
             app,
             IoFimsAPIBasePath,
+            // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+            IoFimsAPIBasePathProxy,
             IO_FIMS_SERVICE,
             PROFILE_SERVICE,
             authMiddlewares.bearerSession
@@ -444,6 +446,8 @@ export async function newApp({
         registerServicesAppBackendRoutes(
           app,
           ServicesAppBackendBasePath,
+          // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+          ServicesAppBackendBasePathProxy,
           SERVICES_APP_BACKEND_SERVICE,
           authMiddlewares.bearerSession
         );
@@ -456,6 +460,8 @@ export async function newApp({
           registerPNRoutes(
             app,
             PNAddressBookConfig.PN_ACTIVATION_BASE_PATH,
+            // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+            PNAddressBookConfig.PN_ACTIVATION_BASE_PATH_PROXY,
             pnService,
             authMiddlewares.bearerSession
           );
@@ -465,6 +471,8 @@ export async function newApp({
           registerTrialSystemAPIRoutes(
             app,
             TrialSystemBasePath,
+            // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+            TrialSystemBasePathProxy,
             TRIAL_SERVICE,
             authMiddlewares.bearerSession
           );
@@ -474,6 +482,8 @@ export async function newApp({
           registerIoWalletAPIRoutes(
             app,
             IoWalletAPIBasePath,
+            // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+            IoWalletAPIBasePathProxy,
             IO_WALLET_SERVICE,
             authMiddlewares.bearerSession
           );
@@ -481,6 +491,8 @@ export async function newApp({
           registerIoWalletAPIRoutes(
             app,
             IoWalletUatAPIBasePath,
+            // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+            IoWalletUatAPIBasePathProxy,
             IO_WALLET_UAT_SERVICE,
             authMiddlewares.bearerSession
           );

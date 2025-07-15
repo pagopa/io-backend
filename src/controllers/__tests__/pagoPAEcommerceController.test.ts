@@ -5,7 +5,7 @@ import {
 import mockReq from "../../__mocks__/request";
 import PagoPAEcommerceController from "../pagoPAEcommerceController";
 import PagoPAEcommerceService from "../../services/pagoPAEcommerceService";
-import { PaymentInfoResponse } from "../../../generated/backend/PaymentInfoResponse";
+import { PaymentInfoResponse } from "../../../generated/payments/PaymentInfoResponse";
 
 const aRptId = "12345678912301230900000812348";
 const aPaymentInfo: PaymentInfoResponse = {

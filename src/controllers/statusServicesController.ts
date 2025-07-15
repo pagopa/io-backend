@@ -7,7 +7,7 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import { Request } from "express";
 
-import { ServicesStatus } from "../../generated/public/ServicesStatus";
+import { ServicesStatus } from "../../generated/platform/ServicesStatus";
 import { withValidatedOrInternalError } from "../utils/responses";
 import { mockServicesStatus } from "./__mocks__/statusServices";
 

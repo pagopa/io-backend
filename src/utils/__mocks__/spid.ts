@@ -1,5 +1,5 @@
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { SpidLevel, SpidLevelEnum } from "../../../generated/backend/SpidLevel";
+import { SpidLevel, SpidLevelEnum } from "../../../generated/auth/SpidLevel";
 
 export const aSAMLRequest = `<?xml version="1.0"?>
 <samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" ID="A-REQUEST-ID" Version="2.0" 

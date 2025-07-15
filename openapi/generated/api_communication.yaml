@@ -1,0 +1,1137 @@
+openapi: 3.0.2
+info:
+  title: API for Communication domain.
+  description: Mobile and web backend API for communication domain.
+  version: 17.1.0
+servers:
+  - url: https://api-app.io.pagopa.it/api/v1
+    description: prod env
+  - url: https://api-app.io.pagopa.it/api/communication/v1
+    description: proxy endpoint
+security:
+  - Bearer: []
+paths:
+  /messages:
+    get:
+      summary: Get user's messages
+      description: >-
+        Returns the messages for the user identified by the provided fiscal
+        code.
+
+        Messages will be returned in inverse acceptance order (from last to
+        first).
+
+        The "next" field, when present, contains an URL pointing to the next
+        page of results.
+      operationId: getUserMessages
+      parameters:
+        - name: page_size
+          in: query
+          description: How many items a page should include.
+          schema:
+            maximum: 100
+            minimum: 1
+            type: integer
+        - name: enrich_result_data
+          in: query
+          description: Indicates whether result data should be enriched or not.
+          schema:
+            type: boolean
+        - name: archived
+          in: query
+          description: >-
+            Indicates whether retrieve archived/not archived messages. Default
+            is false
+          schema:
+            type: boolean
+        - name: maximum_id
+          in: query
+          description: The maximum id to get messages until to.
+          schema:
+            maxLength: 26
+            minLength: 26
+            pattern: '[0-9a-hjkmnp-tv-zA-HJKMNP-TV-Z]{26}'
+            type: string
+        - name: minimum_id
+          in: query
+          description: The minimum id to get messages from.
+          schema:
+            maxLength: 26
+            minLength: 26
+            pattern: '[0-9a-hjkmnp-tv-zA-HJKMNP-TV-Z]{26}'
+            type: string
+      responses:
+        '200':
+          description: Found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPublicMessagesCollection'
+              example:
+                items:
+                  - created_at: '2018-05-21T07:36:41.209Z'
+                    fiscal_code: LSSLCU79B24L219P
+                    id: 01CE0T1Z18T3NT9ECK5NJ09YR3
+                    sender_service_id: 5a563817fcc896087002ea46c49a
+                    time_to_live: 3600
+                  - created_at: '2018-05-21T07:41:01.361Z'
+                    fiscal_code: LSSLCU79B24L219P
+                    id: 01CE0T9X1HT595GEF8FH9NRSW7
+                    sender_service_id: 5a563817fcc896087002ea46c49a
+                    time_to_live: 3600
+                next: 01CE0T9X1HT595GEF8FH9NRSW7
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+          content: {}
+        '404':
+          description: No message found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '429':
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '500':
+          description: There was an error in retrieving the messages.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+  /messages/{id}:
+    get:
+      summary: Get message
+      description: Returns the message with the provided message ID.
+      operationId: getUserMessage
+      parameters:
+        - name: id
+          in: path
+          description: The message id in ulid format
+          required: true
+          schema:
+            maxLength: 26
+            minLength: 26
+            pattern: '[0-9a-hjkmnp-tv-zA-HJKMNP-TV-Z]{26}'
+            type: string
+        - name: public_message
+          in: query
+          description: Discriminate when to return public message shape. Default to false.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatedMessageWithContentAndAttachments'
+              example: |
+                content: {
+                  markdown: "hey hey !! <a style=\"color: red\" href=\"http://example.com\"> some content here ..... this is a link with a style applied, some other content</a>",
+                  subject: "my subject ............",
+                  attachments: [{name:"attachment", content:"aBase64Encoding", mime_type: "image/png"}]
+                },
+                created_at: "2018-06-06T12:22:24.523Z",
+                fiscal_code: "LSSLCU79B24L219P",
+                id: "01CFAGRMGB9XCA8B2CQ4QA7K76",
+                sender_service_id: "5a25abf4fcc89605c082f042c49a",
+                time_to_live: 3600
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+          content: {}
+        '404':
+          description: No message found for the provided ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '429':
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '500':
+          description: There was an error in retrieving the message.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+  /messages/{id}/message-status:
+    put:
+      summary: UpsertMessageStatusAttributes
+      description: Updates the status of a message with attributes
+      operationId: upsertMessageStatusAttributes
+      parameters:
+        - name: id
+          in: path
+          description: The message id in ulid format
+          required: true
+          schema:
+            maxLength: 26
+            minLength: 26
+            pattern: '[0-9a-hjkmnp-tv-zA-HJKMNP-TV-Z]{26}'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageStatusChange'
+        required: true
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageStatusAttributes'
+              example:
+                is_read: true,
+                is_archived: false
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+          content: {}
+        '403':
+          description: Operation forbidden.
+          content: {}
+        '404':
+          description: No message found for the provided ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '429':
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '500':
+          description: There was an error in upserting message's status attributes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+  /third-party-messages/{id}:
+    get:
+      summary: Retrieve Third Party message
+      description: Returns the Third Party message with the provided message ID.
+      operationId: getThirdPartyMessage
+      parameters:
+        - name: id
+          in: path
+          description: The message id in ulid format
+          required: true
+          schema:
+            maxLength: 26
+            minLength: 26
+            pattern: '[0-9a-hjkmnp-tv-zA-HJKMNP-TV-Z]{26}'
+            type: string
+      responses:
+        '200':
+          description: Found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThirdPartyMessageWithContent'
+            text/json:
+              example: |
+                content: {
+                  markdown: "hey hey !! <a style=\"color: red\" href=\"http://example.com\"> some content here ..... this is a link with a style applied, some other content</a>",
+                  subject: "my subject ............",
+                  third_party_data: [{id: "aThirdPartyMessageId"}]
+                },
+                third_party_message: { 
+                  attachments: [], 
+                  custom_property: "a custom property" 
+                },
+                created_at: "2018-06-06T12:22:24.523Z",
+                fiscal_code: "LSSLCU79B24L219P",
+                id: "01CFAGRMGB9XCA8B2CQ4QA7K76",
+                sender_service_id: "5a25abf4fcc89605c082f042c49a",
+                time_to_live: 3600
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+          content: {}
+        '403':
+          description: Forbidden
+          content: {}
+        '404':
+          description: No message found for the provided ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '410':
+          description: Third Party Service no longer available
+          content: {}
+        '429':
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '500':
+          description: There was an error in retrieving the message.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '501':
+          description: Not Implemented
+          content: {}
+        '504':
+          description: Gateway Timeout
+          content: {}
+  /third-party-messages/{id}/attachments/{attachment_url}:
+    get:
+      summary: Retrieve an attachment of a Thrid Party message
+      operationId: getThirdPartyMessageAttachment
+      parameters:
+        - name: id
+          in: path
+          description: The message id in ulid format
+          required: true
+          schema:
+            maxLength: 26
+            minLength: 26
+            pattern: '[0-9a-hjkmnp-tv-zA-HJKMNP-TV-Z]{26}'
+            type: string
+        - name: attachment_url
+          in: path
+          required: true
+          schema:
+            minLength: 1
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Bad Request
+          content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+        '403':
+          description: Forbidden
+          content: {}
+        '404':
+          description: No message found for the provided ID.
+          content:
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '410':
+          description: Third Party Service no longer available
+          content: {}
+        '429':
+          description: Too Many Requests
+          content: {}
+        '500':
+          description: Internal Server Error
+          content: {}
+        '501':
+          description: Not Implemented
+          content: {}
+        '504':
+          description: Gateway Timeout
+          content: {}
+  /third-party-messages/{id}/precondition:
+    get:
+      summary: >-
+        Retrieve Third Party message precondition to receive the third party
+        content
+      description: >-
+        Returns the Third Party message precondition associated to the provided
+        message ID to receive the third party content.
+      operationId: getThirdPartyMessagePrecondition
+      parameters:
+        - name: id
+          in: path
+          description: The message id in ulid format
+          required: true
+          schema:
+            maxLength: 26
+            minLength: 26
+            pattern: '[0-9a-hjkmnp-tv-zA-HJKMNP-TV-Z]{26}'
+            type: string
+      responses:
+        '200':
+          description: Found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThirdPartyMessagePrecondition'
+            text/json:
+              example: >
+                "title": "Questo messaggio contiene una comunicazione a valore
+                legale",
+
+                "markdown": "Se continui, la notifica risulterà legalmente
+                recapitata a te. Aprire il messaggio su IO equivale infatti a
+                firmare la ricevuta di ritorno di una raccomandata
+                tradizionale.\n**Mittente**: Comune di Xxxxxxx  \n**Oggetto**:
+                Infrazione al codice della strada  \n**Data e ora**: 12 Luglio
+                2022 - 12.36  \n**Codice IUN**: YYYYMM-1-ABCD-EFGH-X"
+        '204':
+          description: Pre conditions not needed
+          content: {}
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+          content: {}
+        '403':
+          description: Forbidden
+          content: {}
+        '404':
+          description: No message found for the provided ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '410':
+          description: Third Party Service no longer available
+          content: {}
+        '429':
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '500':
+          description: There was an error in retrieving the message.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '501':
+          description: Not Implemented
+          content: {}
+        '504':
+          description: Gateway Timeout
+          content: {}
+  /installations/{installationID}:
+    put:
+      summary: Create or update an Installation
+      description: Create or update an Installation to the Azure Notification hub.
+      operationId: createOrUpdateInstallation
+      parameters:
+        - name: installationID
+          in: path
+          description: The ID of the message.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Installation'
+        required: true
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              example:
+                message: ok
+        '401':
+          description: Bearer token null or expired.
+          content: {}
+        '500':
+          description: >-
+            There was an error in registering the device to the Notification
+            Hub.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+components:
+  schemas:
+    FiscalCode:
+      type: string
+      description: User's fiscal code.
+      format: FiscalCode
+      x-import: '@pagopa/ts-commons/lib/strings'
+      example: SPNDNL80R13C555X
+    OrganizationFiscalCode:
+      type: string
+      description: Organization fiscal code.
+      format: OrganizationFiscalCode
+      x-import: '@pagopa/ts-commons/lib/strings'
+      example: '12345678901'
+    Timestamp:
+      type: string
+      format: UTCISODateFromString
+      description: A date-time field in ISO-8601 format and UTC timezone.
+      x-import: '@pagopa/ts-commons/lib/dates'
+      example: '2018-10-13T00:00:00.000Z'
+    TimeToLiveSeconds:
+      type: integer
+      default: 3600
+      minimum: 3600
+      maximum: 604800
+      description: |-
+        This parameter specifies for how long (in seconds) the system will
+        try to deliver the message to the channels configured by the user.
+      example: 3600
+    ProblemJson:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+          description: |-
+            An absolute URI that identifies the problem type. When dereferenced,
+            it SHOULD provide human-readable documentation for the problem type
+            (e.g., using HTML).
+          default: about:blank
+          example: https://example.com/problem/constraint-violation
+        title:
+          type: string
+          description: >-
+            A short, summary of the problem type. Written in english and
+            readable
+
+            for engineers (usually not suited for non technical stakeholders and
+
+            not localized); example: Service Unavailable
+        status:
+          type: integer
+          format: int32
+          description: >-
+            The HTTP status code generated by the origin server for this
+            occurrence of the problem.
+          minimum: 100
+          maximum: 600
+          exclusiveMaximum: true
+          example: 200
+        detail:
+          type: string
+          description: |-
+            A human readable explanation specific to this occurrence of the
+            problem.
+          example: There was an error processing the request
+        instance:
+          type: string
+          format: uri
+          description: >-
+            An absolute URI that identifies the specific occurrence of the
+            problem.
+
+            It may or may not yield further information if dereferenced.
+    PublicMessage:
+      x-one-of: true
+      allOf:
+        - $ref: '#/components/schemas/EnrichedMessage'
+        - $ref: '#/components/schemas/CreatedMessageWithoutContent'
+    PublicMessagesCollection:
+      description: A collection of messages
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicMessage'
+      required:
+        - items
+    PaginatedPublicMessagesCollection:
+      description: A paginated collection of messages
+      allOf:
+        - $ref: '#/components/schemas/PublicMessagesCollection'
+        - type: object
+          description: Pagination response parameters.
+          properties:
+            prev:
+              type: string
+              description: Contains a value useful to get the previous page
+              example: first_id_of_the_page
+            next:
+              type: string
+              description: Contains a value useful to get the next page
+              example: last_id_of_the_page
+    EnrichedMessage:
+      allOf:
+        - $ref: '#/components/schemas/BaseEnrichedMessage'
+        - $ref: '#/components/schemas/MessageStatusAttributes'
+    BaseEnrichedMessage:
+      type: object
+      properties:
+        id:
+          type: string
+        fiscal_code:
+          $ref: '#/components/schemas/FiscalCode'
+        time_to_live:
+          $ref: '#/components/schemas/TimeToLiveSeconds'
+        created_at:
+          $ref: '#/components/schemas/Timestamp'
+        sender_service_id:
+          $ref: '#/components/schemas/ServiceId'
+        service_name:
+          type: string
+        organization_name:
+          type: string
+        organization_fiscal_code:
+          $ref: '#/components/schemas/OrganizationFiscalCode'
+        message_title:
+          type: string
+        category:
+          $ref: '#/components/schemas/MessageCategory'
+        has_attachments:
+          type: boolean
+          default: false
+        has_precondition:
+          type: boolean
+          default: false
+      required:
+        - id
+        - fiscal_code
+        - created_at
+        - sender_service_id
+        - service_name
+        - organization_name
+        - organization_fiscal_code
+        - message_title
+    MessageStatusAttributes:
+      type: object
+      properties:
+        is_read:
+          type: boolean
+          default: false
+        is_archived:
+          type: boolean
+          default: false
+      required:
+        - is_read
+        - is_archived
+    CreatedMessageWithoutContent:
+      type: object
+      properties:
+        id:
+          type: string
+        fiscal_code:
+          $ref: '#/components/schemas/FiscalCode'
+        time_to_live:
+          $ref: '#/components/schemas/TimeToLiveSeconds'
+        created_at:
+          $ref: '#/components/schemas/Timestamp'
+        sender_service_id:
+          $ref: '#/components/schemas/ServiceId'
+      required:
+        - id
+        - fiscal_code
+        - created_at
+        - sender_service_id
+    CreatedMessageWithoutContentCollection:
+      description: A collection of messages
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreatedMessageWithoutContent'
+      required:
+        - items
+    CreatedMessageWithContentAndAttachments:
+      allOf:
+        - type: object
+          properties:
+            content:
+              $ref: '#/components/schemas/MessageContentWithAttachments'
+          required:
+            - content
+        - $ref: '#/components/schemas/CreatedMessageWithContentResponse'
+    MessageContentWithAttachments:
+      allOf:
+        - type: object
+          properties:
+            attachments:
+              type: array
+              items:
+                $ref: '#/components/schemas/MessageAttachment'
+        - $ref: '#/components/schemas/NewMessageContent'
+    MessageAttachment:
+      type: object
+      title: MessageAttachment
+      description: Describes a message's attachment
+      properties:
+        name:
+          type: string
+        content:
+          type: string
+        mime_type:
+          type: string
+      required:
+        - name
+        - content
+        - mime_type
+    NewMessageContent:
+      allOf:
+        - $ref: '#/components/schemas/MessageContentBase'
+        - type: object
+          properties:
+            payment_data:
+              $ref: '#/components/schemas/PaymentDataWithRequiredPayee'
+            due_date:
+              $ref: '#/components/schemas/Timestamp'
+            prescription_data:
+              $ref: '#/components/schemas/PrescriptionData'
+            eu_covid_cert:
+              $ref: '#/components/schemas/EUCovidCert'
+            third_party_data:
+              $ref: '#/components/schemas/ThirdPartyData'
+            legal_data:
+              $ref: '#/components/schemas/LegalData'
+    MessageContentBase:
+      type: object
+      properties:
+        subject:
+          $ref: '#/components/schemas/MessageSubject'
+        markdown:
+          $ref: '#/components/schemas/MessageBodyMarkdown'
+        require_secure_channels:
+          type: boolean
+          description: When true, messages won't trigger email notifications (only push).
+      required:
+        - subject
+        - markdown
+    MessageBodyMarkdown:
+      type: string
+      description: |-
+        The full version of the message, in plain text or Markdown format. The
+        content of this field will be delivered to channels that don't have any
+        limit in terms of content size (e.g. email, etc...).
+      minLength: 80
+      maxLength: 10000
+      example: |-
+        # This is a markdown header
+
+        to show how easily markdown can be converted to **HTML**
+
+        Remember: this has to be a long text.
+    MessageSubject:
+      type: string
+      description: >-
+        The subject of the message - note that only some notification
+
+        channels support the display of a subject. When a subject is not
+        provided,
+
+        one gets generated from the client attributes.
+      minLength: 10
+      maxLength: 120
+      example: Welcome new user !
+    EUCovidCert:
+      type: object
+      description: Paylod with access token to retrieve a EU Covid Certificate
+      properties:
+        auth_code:
+          type: string
+      required:
+        - auth_code
+    Payee:
+      type: object
+      description: Metadata needed to explicit payment's payee.
+      properties:
+        fiscal_code:
+          $ref: '#/components/schemas/OrganizationFiscalCode'
+      required:
+        - fiscal_code
+    PaymentDataBase:
+      type: object
+      description: Metadata needed to process pagoPA payments.
+      properties:
+        amount:
+          description: >-
+            Amount of payment in euro cent. PagoPA accepts up to 9999999999 euro
+            cents.
+          type: integer
+          minimum: 1
+          maximum: 9999999999
+        notice_number:
+          description: >-
+            The field "Numero Avviso" of pagoPa, needed to identify the payment.
+            Format is `<aux digit(1n)>[<application code> (2n)]<codice IUV
+            (15|17n)>`. See [pagoPa
+            specs](https://docs.pagopa.it/saci/specifiche-attuative-dei-codici-identificativi-di-versamento-riversamento-e-rendicontazione/premessa)
+            for more info on this field and the IUV.
+          type: string
+          pattern: ^[0123][0-9]{17}$
+        invalid_after_due_date:
+          type: boolean
+          default: false
+      required:
+        - amount
+        - notice_number
+    PaymentDataWithRequiredPayee:
+      allOf:
+        - $ref: '#/components/schemas/PaymentDataBase'
+        - type: object
+          properties:
+            payee:
+              $ref: '#/components/schemas/Payee'
+          required:
+            - payee
+    CreatedMessageWithContentResponse:
+      x-one-of: true
+      allOf:
+        - $ref: '#/components/schemas/CreatedMessageWithContent'
+        - $ref: '#/components/schemas/CreatedMessageWithContentAndEnrichedData'
+    CreatedMessageWithContentAndEnrichedData:
+      allOf:
+        - $ref: '#/components/schemas/CreatedMessageWithContent'
+        - $ref: '#/components/schemas/EnrichedMessage'
+    CreatedMessageWithContent:
+      type: object
+      properties:
+        id:
+          type: string
+        fiscal_code:
+          $ref: '#/components/schemas/FiscalCode'
+        time_to_live:
+          $ref: '#/components/schemas/TimeToLiveSeconds'
+        created_at:
+          $ref: '#/components/schemas/Timestamp'
+        content:
+          $ref: '#/components/schemas/NewMessageContent'
+        sender_service_id:
+          $ref: '#/components/schemas/ServiceId'
+      required:
+        - id
+        - fiscal_code
+        - created_at
+        - content
+        - sender_service_id
+    PrescriptionData:
+      type: object
+      description: Metadata needed to process medical prescriptions.
+      properties:
+        nre:
+          description: >-
+            The field *Numero ricetta elettronica* identifies the medical
+            prescription at national level.
+          type: string
+          minLength: 15
+          maxLength: 15
+        iup:
+          description: >-
+            The field *Identificativo Unico di Prescrizione* identifies the
+            medical prescription at regional level.
+          type: string
+          minLength: 1
+          maxLength: 16
+        prescriber_fiscal_code:
+          type: string
+          description: Fiscal code of the Doctor that made the prescription.
+          format: FiscalCode
+          x-import: '@pagopa/ts-commons/lib/strings'
+          example: TCNZRO80R13C555Y
+      required:
+        - nre
+    ThirdPartyData:
+      type: object
+      description: >-
+        Payload containing all information needed to retrieve and visualize
+        third party message details
+      properties:
+        id:
+          type: string
+          description: >-
+            Unique id for retrieving third party enriched information about the
+            message
+          minLength: 1
+        original_sender:
+          type: string
+          description: Either a ServiceId or a simple string representing the sender name
+          minLength: 1
+        original_receipt_date:
+          $ref: '#/components/schemas/Timestamp'
+        has_attachments:
+          type: boolean
+          default: false
+        has_remote_content:
+          type: boolean
+          default: false
+        has_precondition:
+          $ref: '#/components/schemas/HasPrecondition'
+        summary:
+          type: string
+          minLength: 1
+        configuration_id:
+          $ref: '#/components/schemas/Ulid'
+      required:
+        - id
+    HasPrecondition:
+      type: string
+      x-extensible-enum:
+        - ALWAYS
+        - ONCE
+        - NEVER
+    Ulid:
+      type: string
+      description: Ulid string.
+      format: Ulid
+      x-import: '@pagopa/ts-commons/lib/strings'
+      example: 01ARZ3NDEKTSV4RRFFQ69G5FAV
+    LegalData:
+      type: object
+      properties:
+        sender_mail_from:
+          type: string
+          minLength: 1
+        has_attachment:
+          type: boolean
+          default: false
+        message_unique_id:
+          type: string
+          minLength: 1
+        original_message_url:
+          type: string
+          minLength: 1
+        pec_server_service_id:
+          $ref: '#/components/schemas/ServiceId'
+      required:
+        - sender_mail_from
+        - has_attachment
+        - message_unique_id
+    ServiceId:
+      type: string
+      description: |-
+        The ID of the Service. Equals the subscriptionId of a registered
+        API user.
+      minLength: 1
+    MessageStatusReadingChange:
+      type: object
+      properties:
+        change_type:
+          type: string
+          enum:
+            - reading
+        is_read:
+          type: boolean
+          enum:
+            - true
+      required:
+        - change_type
+        - is_read
+    MessageStatusArchivingChange:
+      type: object
+      properties:
+        change_type:
+          type: string
+          enum:
+            - archiving
+        is_archived:
+          type: boolean
+      required:
+        - change_type
+        - is_archived
+    MessageStatusBulkChange:
+      type: object
+      properties:
+        change_type:
+          type: string
+          enum:
+            - bulk
+        is_archived:
+          type: boolean
+        is_read:
+          type: boolean
+          enum:
+            - true
+      required:
+        - change_type
+        - is_archived
+    MessageStatusChange:
+      x-one-of: true
+      allOf:
+        - $ref: '#/components/schemas/MessageStatusReadingChange'
+        - $ref: '#/components/schemas/MessageStatusArchivingChange'
+        - $ref: '#/components/schemas/MessageStatusBulkChange'
+    ThirdPartyMessageWithContent:
+      allOf:
+        - $ref: '#/components/schemas/CreatedMessageWithContent'
+        - type: object
+          properties:
+            third_party_message:
+              $ref: '#/components/schemas/ThirdPartyMessage'
+          required:
+            - third_party_message
+    ThirdPartyMessage:
+      type: object
+      properties:
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/ThirdPartyAttachment'
+        details:
+          type: object
+          additionalProperties: true
+    ThirdPartyAttachment:
+      type: object
+      properties:
+        id:
+          type: string
+          minLength: 1
+        content_type:
+          type: string
+          minLength: 1
+        name:
+          type: string
+          minLength: 1
+        url:
+          type: string
+          minLength: 1
+        category:
+          type: string
+          default: DOCUMENT
+      required:
+        - id
+        - url
+    ThirdPartyMessagePrecondition:
+      type: object
+      title: ThirdPartyMessagePrecondition
+      description: Describes a message precondition
+      properties:
+        title:
+          type: string
+        markdown:
+          type: string
+      required:
+        - title
+        - markdown
+    MessageCategory:
+      x-one-of: true
+      allOf:
+        - $ref: '#/components/schemas/MessageCategoryPayment'
+        - $ref: '#/components/schemas/MessageCategoryBase'
+        - $ref: '#/components/schemas/MessageCategoryPN'
+    MessageCategoryBase:
+      type: object
+      properties:
+        tag:
+          type: string
+          enum:
+            - LEGAL_MESSAGE
+            - EU_COVID_CERT
+            - GENERIC
+      required:
+        - tag
+    MessageCategoryPayment:
+      type: object
+      properties:
+        tag:
+          type: string
+          enum:
+            - PAYMENT
+        rptId:
+          type: string
+      required:
+        - tag
+        - rptId
+    MessageCategoryPN:
+      allOf:
+        - $ref: '#/components/schemas/ThirdPartyData'
+        - type: object
+          properties:
+            tag:
+              type: string
+              enum:
+                - PN
+          required:
+            - tag
+    InvalidThirdPartyMessageType:
+      type: string
+      x-extensible-enum:
+        - ATTACHMENTS_NOT_PRESENT
+        - REMOTE_CONTENT_NOT_PRESENT
+        - MARKDOWN_VALIDATION_ERROR
+        - SUBJECT_VALIDATION_ERROR
+      description: A representation of all the error type for an invalid ThirdPartyMessage
+      x-example: ATTACHMENTS_NOT_PRESENT
+    SuccessResponse:
+      type: object
+      properties:
+        message:
+          type: string
+    InstallationID:
+      type: string
+      description: >-
+        The sixteen octets of an Installation ID are represented as 32
+        hexadecimal (base 16) digits, displayed in five groups
+
+        separated by hyphens, in the form 8-4-4-4-12 for a total of 36
+        characters (32 alphanumeric characters and four
+
+        hyphens).
+
+        See https://en.wikipedia.org/wiki/Universally_unique_identifier
+      minLength: 1
+    Installation:
+      type: object
+      title: Installation
+      description: Describes an app installation.
+      properties:
+        platform:
+          $ref: '#/components/schemas/Platform'
+        pushChannel:
+          $ref: '#/components/schemas/PushChannel'
+      required:
+        - platform
+        - pushChannel
+    Platform:
+      type: string
+      description: The platform type where the installation happened.
+      x-extensible-enum:
+        - apns
+        - gcm
+    PushChannel:
+      type: string
+      description: >-
+        The Push Notification Service handle for this Installation.
+
+        See
+        https://docs.microsoft.com/en-us/azure/notification-hubs/notification-hubs-push-notification-registration-management
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer

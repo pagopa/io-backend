@@ -13,9 +13,9 @@ import * as O from "fp-ts/Option";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
-import { AssertionRefSha256 } from "../../generated/backend/AssertionRefSha256";
-import { AssertionRefSha384 } from "../../generated/backend/AssertionRefSha384";
-import { AssertionRefSha512 } from "../../generated/backend/AssertionRefSha512";
+import { AssertionRefSha256 } from "../../generated/auth/AssertionRefSha256";
+import { AssertionRefSha384 } from "../../generated/auth/AssertionRefSha384";
+import { AssertionRefSha512 } from "../../generated/auth/AssertionRefSha512";
 import { LollipopContentDigest } from "../../generated/lollipop/LollipopContentDigest";
 import { LollipopMethod } from "../../generated/lollipop/LollipopMethod";
 import { LollipopOriginalURL } from "../../generated/lollipop/LollipopOriginalURL";

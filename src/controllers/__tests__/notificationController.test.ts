@@ -1,10 +1,10 @@
 /* tslint:disable:no-object-mutation */
 import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
-import { EmailAddress } from "../../../generated/backend/EmailAddress";
-import { FiscalCode } from "../../../generated/backend/FiscalCode";
-import { InstallationID } from "../../../generated/backend/InstallationID";
-import { PlatformEnum } from "../../../generated/backend/Platform";
-import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
+import { EmailAddress } from "../../../generated/auth/EmailAddress";
+import { FiscalCode } from "../../../generated/auth/FiscalCode";
+import { InstallationID } from "../../../generated/communication/InstallationID";
+import { PlatformEnum } from "../../../generated/communication/Platform";
+import { SpidLevelEnum } from "../../../generated/auth/SpidLevel";
 import { Notification } from "../../../generated/notifications/Notification";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";

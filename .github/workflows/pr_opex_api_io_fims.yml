@@ -10,7 +10,7 @@ on:
     branches:
       - master
     paths:
-      - 'api_io_fims.yaml'
+      - 'openapi/generated/api_io_fims.yaml'
       - '.github/workflows/pr_opex_api_io_fims.yml'
       - '.github/workflows/opex_api_io_fims.yml'
       - '.opex/api_io_fims/**'

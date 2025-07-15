@@ -8,13 +8,12 @@ import * as E from "fp-ts/lib/Either";
 import { NodeEnvironmentEnum } from "@pagopa/ts-commons/lib/environment";
 import { CIDR } from "@pagopa/ts-commons/lib/strings";
 import * as request from "supertest";
-import { ServerInfo } from "../../generated/public/ServerInfo";
+import { ServerInfo } from "../../generated/platform/ServerInfo";
 import * as redisUtils from "../utils/redis";
 
 jest.mock("@azure/storage-queue");
 
 jest.mock("../services/redisSessionStorage");
-jest.mock("../services/redisUserMetadataStorage");
 jest.mock("../services/apiClientFactory");
 jest
   .spyOn(redisUtils, "createClusterRedisClient")
@@ -59,7 +58,6 @@ const aValidCIDR = "192.168.0.0/16" as CIDR;
 const X_FORWARDED_PROTO_HEADER = "X-Forwarded-Proto";
 
 const aAPIBasePath = "/api/v1";
-const aBonusAPIBasePath = "/bonus/api/v1";
 const aCgnAPIBasePath = "/api/v1/cgn";
 const aCgnOperatorSearchAPIBasePath = "/api/v1/cgn-operator-search";
 const aIoFimsAPIBasePath = "/api/v1/fims";
@@ -68,6 +66,7 @@ const aServicesAppBackendBasePath = "/api/v2";
 const aTrialSystemBasePath = "/trials/api/v1";
 const aIoWalletAPIBasePath = "/api/v1/wallet";
 const aIoWalletUatAPIBasePath = "/api/v1/wallet/uat";
+const aAPIPathProxyMock = "/api/v1";
 
 describe("Success app start", () => {
   // tslint:disable:no-let
@@ -75,7 +74,6 @@ describe("Success app start", () => {
   beforeAll(async () => {
     app = await appModule.newApp({
       APIBasePath: aAPIBasePath,
-      BonusAPIBasePath: aBonusAPIBasePath,
       CGNAPIBasePath: aCgnAPIBasePath,
       CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
       IoFimsAPIBasePath: aIoFimsAPIBasePath,
@@ -85,8 +83,18 @@ describe("Success app start", () => {
       ServicesAppBackendBasePath: aServicesAppBackendBasePath,
       TrialSystemBasePath: aTrialSystemBasePath,
       allowNotifyIPSourceRange: [aValidCIDR],
-      authenticationBasePath: "",
-      env: NodeEnvironmentEnum.PRODUCTION
+      env: NodeEnvironmentEnum.PRODUCTION,
+      // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+      APIBasePathProxy: aAPIPathProxyMock,
+      CGNAPIBasePathProxy: aAPIPathProxyMock,
+      CGNOperatorSearchAPIBasePathProxy: aAPIPathProxyMock,
+      IoFimsAPIBasePathProxy: aAPIPathProxyMock,
+      IoSignAPIBasePathProxy: aAPIPathProxyMock,
+      IoWalletAPIBasePathProxy: aAPIPathProxyMock,
+      IoWalletUatAPIBasePathProxy: aAPIPathProxyMock,
+      ServicesAppBackendBasePathProxy: aAPIPathProxyMock,
+      TrialSystemBasePathProxy: aAPIPathProxyMock,
+      LollipopAPIBasePathProxy: aAPIPathProxyMock
     });
   });
 
@@ -183,7 +191,6 @@ describe("Failure app start", () => {
     try {
       await appModule.newApp({
         APIBasePath: aAPIBasePath,
-        BonusAPIBasePath: aBonusAPIBasePath,
         CGNAPIBasePath: aCgnAPIBasePath,
         CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
         IoFimsAPIBasePath: aIoFimsAPIBasePath,
@@ -193,8 +200,18 @@ describe("Failure app start", () => {
         ServicesAppBackendBasePath: aServicesAppBackendBasePath,
         TrialSystemBasePath: aTrialSystemBasePath,
         allowNotifyIPSourceRange: [aValidCIDR],
-        authenticationBasePath: "",
-        env: NodeEnvironmentEnum.PRODUCTION
+        env: NodeEnvironmentEnum.PRODUCTION,
+        // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+        APIBasePathProxy: aAPIPathProxyMock,
+        CGNAPIBasePathProxy: aAPIPathProxyMock,
+        CGNOperatorSearchAPIBasePathProxy: aAPIPathProxyMock,
+        IoFimsAPIBasePathProxy: aAPIPathProxyMock,
+        IoSignAPIBasePathProxy: aAPIPathProxyMock,
+        IoWalletAPIBasePathProxy: aAPIPathProxyMock,
+        IoWalletUatAPIBasePathProxy: aAPIPathProxyMock,
+        ServicesAppBackendBasePathProxy: aAPIPathProxyMock,
+        TrialSystemBasePathProxy: aAPIPathProxyMock,
+        LollipopAPIBasePathProxy: aAPIPathProxyMock
       });
     } catch (err) {
       expect(mockNotificationService).toBeCalledTimes(1);

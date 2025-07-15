@@ -1,0 +1,18 @@
+oa3_spec: openapi/generated/api_auth.yaml
+name: opex_iobackend_api_auth
+location: West Europe
+timespan: 5m
+evaluation_frequency: 10
+evaluation_time_window: 30
+event_occurrences: 4 # After 5*4=20 min
+data_source: /subscriptions/ec285037-c673-4f58-b594-d7c480da4e8b/resourceGroups/io-p-itn-common-rg-01/providers/Microsoft.Network/applicationGateways/io-p-itn-agw-01
+action_groups:
+  - /subscriptions/EC285037-C673-4F58-B594-D7C480DA4E8B/resourceGroups/io-p-rg-common/providers/microsoft.insights/actionGroups/iopquarantineerror
+overrides:
+  hosts:
+    - app-backend.io.italia.it
+    - api-app.io.pagopa.it
+  endpoints:
+    /api/v1/profile:
+      response_time_threshold: 8
+      availability_threshold: 0.70

@@ -13,6 +13,8 @@ import { expressLollipopMiddleware } from "../utils/middleware/lollipop";
  *
  * @param app The Express application
  * @param basePath The base path for the First lollipop consumer APIs
+ * TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+ * @param basePathProxy The proxy base path for the First lollipop consumer APIs (RFC IOPLT-1156)
  * @param lollipopClient The client that handles the Lollipop requests
  * @param sessionStorage The session storage service that handles the user session data
  * @param firstLollipopConsumerClient The Client that handles the first lollipop consumer requests
@@ -21,6 +23,8 @@ import { expressLollipopMiddleware } from "../utils/middleware/lollipop";
 export const registerFirstLollipopConsumer = (
   app: Express,
   basePath: string,
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  basePathProxy: string,
   lollipopClient: ReturnType<typeof LollipopApiClient>,
   sessionStorage: ISessionStorage,
   firstLollipopConsumerClient: ReturnType<typeof FirstLollipopConsumerClient>,
@@ -28,6 +32,13 @@ export const registerFirstLollipopConsumer = (
 ): void => {
   app.post(
     `${basePath}/sign`,
+    bearerSessionTokenAuth,
+    expressLollipopMiddleware(lollipopClient, sessionStorage),
+    toExpressHandler(firstLollipopSign(firstLollipopConsumerClient))
+  );
+  // TODO: [IOPLT-1156] REMOVE ONCE APIM IS DEPLOYED
+  app.post(
+    `${basePathProxy}/sign`,
     bearerSessionTokenAuth,
     expressLollipopMiddleware(lollipopClient, sessionStorage),
     toExpressHandler(firstLollipopSign(firstLollipopConsumerClient))

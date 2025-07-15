@@ -1,0 +1,852 @@
+openapi: 3.0.2
+servers:
+  - url: https://api-app.io.pagopa.it/api
+    description: prod env
+  - url: https://api-app.io.pagopa.it/api/services
+    description: proxy endpoint
+info:
+  title: Services App Backend API
+  version: 17.1.0
+tags:
+  - name: search
+    description: Search APIs
+  - name: details
+    description: Retrieve resources details
+  - name: featured
+    description: Retrieve featured Lists
+security:
+  - Bearer: []
+paths:
+  /v2/institutions:
+    get:
+      tags:
+        - search
+      summary: Find institutions
+      description: Multiple status values can be provided with comma separated strings
+      operationId: findInstitutions
+      parameters:
+        - name: search
+          in: query
+          description: A full-text search query expression
+          required: false
+          schema:
+            type: string
+        - name: scope
+          in: query
+          description: Institution scope
+          required: false
+          schema:
+            $ref: '#/components/schemas/ScopeType'
+        - name: limit
+          in: query
+          description: >-
+            The number of search results to retrieve. This can be used in
+            conjunction with skip to implement client-side paging of search
+            results
+            (https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html#sec_SystemQueryOptionstopandskip).
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          description: >-
+            The number of search results to skip
+            (https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html#sec_SystemQueryOptionstopandskip).
+            This value cannot be greater than 100,000.
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 100
+            default: 0
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstitutionsResource'
+        '400':
+          description: Bad Request
+        '401':
+          description: Bearer token null or expired
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '502':
+          description: Bad gateway
+        '504':
+          description: Gateway timeout
+  /v2/institutions/featured:
+    get:
+      tags:
+        - featured
+      summary: Retrieve featured intitutions
+      operationId: getFeaturedInstitutions
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Institutions'
+        '401':
+          description: Bearer token null or expired
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '502':
+          description: Bad gateway
+        '504':
+          description: Gateway timeout
+  /v2/institutions/{institutionId}/services:
+    get:
+      tags:
+        - search
+      summary: Find services for institution
+      description: Given an Institution allow to find its services
+      operationId: findInstutionServices
+      parameters:
+        - name: institutionId
+          in: path
+          description: ID of the institution to search for services
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: >-
+            The number of search results to retrieve. This can be used in
+            conjunction with skip to implement client-side paging of search
+            results
+            (https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html#sec_SystemQueryOptionstopandskip).
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          description: >-
+            The number of search results to skip
+            (https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html#sec_SystemQueryOptionstopandskip).
+            This value cannot be greater than 100,000.
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 100
+            default: 0
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstitutionServicesResource'
+        '400':
+          description: Bad Request
+        '401':
+          description: Bearer token null or expired
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '502':
+          description: Bad gateway
+        '504':
+          description: Gateway timeout
+  /v2/services/featured:
+    get:
+      tags:
+        - featured
+      summary: Retrieve featured services
+      operationId: getFeaturedServices
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeaturedServices'
+        '401':
+          description: Bearer token null or expired
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '502':
+          description: Bad gateway
+        '504':
+          description: Gateway timeout
+  /v2/services/{serviceId}:
+    get:
+      tags:
+        - details
+      summary: Retrieve service details
+      description: Retrieve a service by ID
+      operationId: getServiceById
+      parameters:
+        - name: serviceId
+          in: path
+          description: ID of service to return
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceDetails'
+        '401':
+          description: Bearer token null or expired
+        '404':
+          description: Not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '502':
+          description: Bad gateway
+        '504':
+          description: Gateway timeout
+  /v1/services/{service_id}:
+    get:
+      summary: Get Service
+      description: A previously created service with the provided service ID is returned.
+      operationId: getService
+      parameters:
+        - name: service_id
+          in: path
+          description: The ID of an existing Service.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Service found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServicePublic'
+              example:
+                department_name: IO
+                organization_fiscal_code: '00000000000'
+                organization_name: IO
+                service_id: 5a563817fcc896087002ea46c49a
+                service_name: App IO
+                version: 1
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+          content: {}
+        '404':
+          description: No service found for the provided ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '429':
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '500':
+          description: There was an error in retrieving the service.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+  /v1/services:
+    get:
+      summary: Get all visible services
+      description: Returns the description of all visible services.
+      operationId: getVisibleServices
+      parameters:
+        - name: cursor
+          in: query
+          description: An opaque identifier that points to the next item in the collection.
+          schema:
+            minimum: 1
+            type: string
+      responses:
+        '200':
+          description: Found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedServiceTupleCollection'
+              example:
+                items:
+                  - service_id: AzureDeployc49a
+                    version: 1
+                  - service_id: 5a25abf4fcc89605c082f042c49a
+                    version: 0
+                page_size: 1
+        '401':
+          description: Bearer token null or expired.
+          content: {}
+        '429':
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '500':
+          description: There was an error in retrieving the services.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+  /v1/pn/activation:
+    get:
+      summary: Get Piattaforma Notifiche Activation
+      description: >
+        Get the Piattaforma Notifiche activation for Special Service "Avvisi di
+        Cortesia"
+      operationId: getPNActivation
+      parameters:
+        - name: isTest
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Request created.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PNActivation'
+        '401':
+          description: Bearer token null or expired.
+          content: {}
+        '500':
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+    post:
+      summary: Upsert Piattaforma Notifiche Activation
+      description: >
+        Upsert the Piattaforma Notifiche activation for Special Service "Avvisi
+        di Cortesia"
+      operationId: upsertPNActivation
+      parameters:
+        - name: isTest
+          in: query
+          schema:
+            type: boolean
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/PNActivation'
+        required: true
+      responses:
+        '204':
+          description: Request created.
+          content: {}
+        '400':
+          description: Bad request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+          content: {}
+        '500':
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+components:
+  securitySchemes:
+    Bearer:
+      type: apiKey
+      name: Authorization
+      in: header
+  schemas:
+    InstitutionsResource:
+      allOf:
+        - $ref: '#/components/schemas/Institutions'
+        - $ref: '#/components/schemas/PaginationResultSet'
+    Institutions:
+      type: object
+      properties:
+        institutions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Institution'
+      required:
+        - institutions
+    Institution:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Institution ID
+        name:
+          type: string
+          description: Institution Name
+        fiscal_code:
+          $ref: '#/components/schemas/OrganizationFiscalCode'
+      required:
+        - id
+        - name
+        - fiscal_code
+    InstitutionServicesResource:
+      allOf:
+        - $ref: '#/components/schemas/Services'
+        - $ref: '#/components/schemas/PaginationResultSet'
+    Services:
+      type: object
+      properties:
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceMinified'
+      required:
+        - services
+    ServiceMinified:
+      type: object
+      description: Service data (minified)
+      properties:
+        id:
+          $ref: '#/components/schemas/ServiceId'
+        name:
+          type: string
+          description: Service Name
+          example: Tari
+        version:
+          type: integer
+          description: Service Version
+      required:
+        - id
+        - name
+        - version
+    ServiceDetails:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ServiceId'
+        name:
+          type: string
+          description: Service name
+        description:
+          type: string
+          description: Service description
+        organization:
+          $ref: '#/components/schemas/Organization'
+        metadata:
+          $ref: '#/components/schemas/ServiceMetadataV2'
+      required:
+        - id
+        - name
+        - description
+        - organization
+        - metadata
+    FeaturedServices:
+      type: object
+      properties:
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeaturedService'
+      required:
+        - services
+    FeaturedService:
+      allOf:
+        - $ref: '#/components/schemas/ServiceMinified'
+        - type: object
+          properties:
+            organization_name:
+              type: string
+              description: Organization Name
+    ServiceMetadataV2:
+      description: A set of service metadata properties
+      x-one-of: true
+      allOf:
+        - $ref: '#/components/schemas/StandardServiceMetadataV2'
+        - $ref: '#/components/schemas/SpecialServiceMetadataV2'
+    StandardServiceMetadataV2:
+      allOf:
+        - $ref: '#/components/schemas/ServiceBaseMetadata'
+        - type: object
+          properties:
+            category:
+              $ref: '#/components/schemas/StandardServiceCategory'
+          required:
+            - category
+    StandardServiceCategory:
+      type: string
+      x-extensible-enum:
+        - STANDARD
+    SpecialServiceMetadataV2:
+      allOf:
+        - $ref: '#/components/schemas/ServiceBaseMetadata'
+        - type: object
+          properties:
+            category:
+              $ref: '#/components/schemas/SpecialServiceCategory'
+            custom_special_flow:
+              type: string
+              minLength: 1
+          required:
+            - category
+    SpecialServiceCategory:
+      type: string
+      x-extensible-enum:
+        - SPECIAL
+    ServiceBaseMetadata:
+      type: object
+      description: A set of common service metadata properties
+      properties:
+        web_url:
+          type: string
+          minLength: 1
+        app_ios:
+          type: string
+          minLength: 1
+        app_android:
+          type: string
+          minLength: 1
+        tos_url:
+          type: string
+          minLength: 1
+        privacy_url:
+          type: string
+          minLength: 1
+        address:
+          type: string
+          minLength: 1
+        phone:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          minLength: 1
+        pec:
+          type: string
+          minLength: 1
+        cta:
+          type: string
+          minLength: 1
+        token_name:
+          type: string
+          minLength: 1
+        support_url:
+          type: string
+          minLength: 1
+        scope:
+          $ref: '#/components/schemas/ScopeType'
+      required:
+        - scope
+    Organization:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        fiscal_code:
+          $ref: '#/components/schemas/OrganizationFiscalCode'
+      required:
+        - name
+        - fiscal_code
+    OrganizationFiscalCode:
+      type: string
+      x-import: '@pagopa/ts-commons/lib/strings'
+      format: OrganizationFiscalCode
+    PaginationResultSet:
+      type: object
+      properties:
+        offset:
+          type: number
+          description: result set offset
+        limit:
+          type: number
+          description: result set size
+        count:
+          type: number
+          description: total record count
+      required:
+        - offset
+        - limit
+        - count
+    ScopeType:
+      type: string
+      description: Institutions/Services Scopes
+      enum:
+        - NATIONAL
+        - LOCAL
+    ServiceId:
+      type: string
+      description: |-
+        The ID of the Service. Equals the subscriptionId of a registered
+        API user.
+      minLength: 1
+    ProblemJson:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+          description: |-
+            An absolute URI that identifies the problem type. When dereferenced,
+            it SHOULD provide human-readable documentation for the problem type
+            (e.g., using HTML).
+          default: about:blank
+          example: https://example.com/problem/constraint-violation
+        title:
+          type: string
+          description: >-
+            A short, summary of the problem type. Written in english and
+            readable
+
+            for engineers (usually not suited for non technical stakeholders and
+
+            not localized); example: Service Unavailable
+        status:
+          type: integer
+          format: int32
+          description: >-
+            The HTTP status code generated by the origin server for this
+            occurrence of the problem.
+          minimum: 100
+          maximum: 600
+          exclusiveMaximum: true
+          example: 200
+        detail:
+          type: string
+          description: |-
+            A human readable explanation specific to this occurrence of the
+            problem.
+          example: There was an error processing the request
+        instance:
+          type: string
+          format: uri
+          description: >-
+            An absolute URI that identifies the specific occurrence of the
+            problem.
+
+            It may or may not yield further information if dereferenced.
+    ServiceMetadata:
+      x-one-of: true
+      allOf:
+        - $ref: '#/components/schemas/StandardServiceMetadata'
+        - $ref: '#/components/schemas/SpecialServiceMetadata'
+        - $ref: '#/components/schemas/CommonServiceMetadata'
+    ServicePublic:
+      title: Service (public)
+      description: A Service associated to an user's subscription.
+      type: object
+      properties:
+        service_id:
+          $ref: '#/components/schemas/ServiceId'
+        service_name:
+          $ref: '#/components/schemas/ServiceName'
+        organization_name:
+          $ref: '#/components/schemas/OrganizationName'
+        department_name:
+          $ref: '#/components/schemas/DepartmentName'
+        organization_fiscal_code:
+          type: string
+          description: Organization fiscal code.
+          format: OrganizationFiscalCode
+          x-import: '@pagopa/ts-commons/lib/strings'
+          example: '12345678901'
+        available_notification_channels:
+          description: All the notification channels available for a service.
+          type: array
+          items:
+            type: string
+            description: All notification channels.
+            x-extensible-enum:
+              - EMAIL
+              - WEBHOOK
+            example: EMAIL
+        version:
+          type: integer
+        service_metadata:
+          $ref: '#/components/schemas/ServiceMetadata'
+      required:
+        - service_id
+        - service_name
+        - organization_name
+        - department_name
+        - organization_fiscal_code
+        - version
+    ServiceName:
+      type: string
+      description: The name of the service. Will be added to the content of sent messages.
+      minLength: 1
+    StandardServiceMetadata:
+      allOf:
+        - $ref: '#/components/schemas/CommonServiceMetadata'
+        - type: object
+          properties:
+            category:
+              type: string
+              x-extensible-enum:
+                - STANDARD
+          required:
+            - category
+    SpecialServiceMetadata:
+      allOf:
+        - $ref: '#/components/schemas/CommonServiceMetadata'
+        - type: object
+          properties:
+            category:
+              type: string
+              x-extensible-enum:
+                - SPECIAL
+            custom_special_flow:
+              type: string
+              minLength: 1
+          required:
+            - category
+    CommonServiceMetadata:
+      type: object
+      description: A set of metadata properties related to this service.
+      properties:
+        description:
+          type: string
+          minLength: 1
+        web_url:
+          type: string
+          minLength: 1
+        app_ios:
+          type: string
+          minLength: 1
+        app_android:
+          type: string
+          minLength: 1
+        tos_url:
+          type: string
+          minLength: 1
+        privacy_url:
+          type: string
+          minLength: 1
+        address:
+          type: string
+          minLength: 1
+        phone:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          minLength: 1
+        pec:
+          type: string
+          minLength: 1
+        cta:
+          type: string
+          minLength: 1
+        token_name:
+          type: string
+          minLength: 1
+        support_url:
+          type: string
+          minLength: 1
+        scope:
+          $ref: '#/components/schemas/ServiceScope'
+      required:
+        - scope
+    MaxAllowedPaymentAmount:
+      description: >-
+        Maximum amount in euro cents that a service is allowed to charge to a
+        user.
+      type: integer
+      minimum: 0
+      maximum: 9999999999
+      default: 0
+    OrganizationName:
+      type: string
+      description: |-
+        The organization that runs the service. Will be added to the content
+        of sent messages to identify the sender.
+      minLength: 1
+    DepartmentName:
+      type: string
+      description: |-
+        The department inside the organization that runs the service. Will
+        be added to the content of sent messages.
+      minLength: 1
+    PaginatedServiceTupleCollection:
+      description: A paginated collection of services tuples
+      allOf:
+        - $ref: '#/components/schemas/ServiceTupleCollection'
+        - $ref: '#/components/schemas/PaginationResponse'
+    PaginationResponse:
+      type: object
+      description: Pagination response parameters.
+      properties:
+        prev:
+          type: string
+          description: Contains a value useful to get the previous page
+          example: first_id_of_the_page
+        next:
+          type: string
+          description: Contains a value useful to get the next page
+          example: last_id_of_the_page
+    ServiceTupleCollection:
+      description: A collection of services tuples (service and version)
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceTuple'
+      required:
+        - items
+    ServiceTuple:
+      description: Service identifier and version used to return list of services.
+      type: object
+      properties:
+        service_id:
+          $ref: '#/components/schemas/ServiceId'
+        scope:
+          $ref: '#/components/schemas/ServiceScope'
+        version:
+          type: integer
+      required:
+        - service_id
+        - version
+    ServiceScope:
+      type: string
+      x-extensible-enum:
+        - NATIONAL
+        - LOCAL
+    PNActivation:
+      required:
+        - activation_status
+      type: object
+      properties:
+        activation_status:
+          type: boolean

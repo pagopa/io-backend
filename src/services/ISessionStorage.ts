@@ -7,7 +7,7 @@ import { Either } from "fp-ts/lib/Either";
 import { Option } from "fp-ts/lib/Option";
 import * as O from "fp-ts/lib/Option";
 
-import { AssertionRef as BackendAssertionRef } from "../../generated/backend/AssertionRef";
+import { AssertionRef as BackendAssertionRef } from "../../generated/auth/AssertionRef";
 import { LollipopData } from "../types/assertionRef";
 import { MyPortalToken, SessionToken } from "../types/token";
 import { User } from "../types/user";
