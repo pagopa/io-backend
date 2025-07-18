@@ -281,6 +281,13 @@ export default class IoWalletController {
       this.ioWalletService.isFiscalCodeWhitelisted(user.fiscal_code)
     );
 
+  /**
+   * Health check
+   */
+  public readonly healthCheck = (): Promise<
+    IResponseErrorInternal | IResponseSuccessJson<undefined>
+  > => this.ioWalletService.healthCheck();
+
   private readonly ensureFiscalCodeIsAllowed = (fiscalCode: FiscalCode) =>
     FF_IO_WALLET_TRIAL_ENABLED
       ? pipe(
