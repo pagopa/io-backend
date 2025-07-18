@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 17.2.0
+
+### Minor Changes
+
+- 3370aaa: Add wallet health check endpoint
+
 ## 17.1.0
 
 ### Minor Changes
