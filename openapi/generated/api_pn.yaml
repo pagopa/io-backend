@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 17.1.0
+  version: 17.2.0
   title: Piattaforma Notifiche
 host: localhost
 basePath: /api/v1/pn
