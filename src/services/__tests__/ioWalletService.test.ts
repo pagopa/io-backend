@@ -18,6 +18,7 @@ const mockSetWalletInstanceStatus = jest.fn();
 const mockDeleteWalletInstances = jest.fn();
 const mockIsFiscalCodeWhitelisted = jest.fn();
 const mockCreateWalletAttestationV2 = jest.fn();
+const mockGenerateCertificateChain = jest.fn();
 
 mockGetNonce.mockImplementation(() =>
   t.success({
@@ -93,6 +94,15 @@ mockCreateWalletAttestationV2.mockImplementation(() =>
   })
 );
 
+mockHealthCheck.mockImplementation(() =>
+  t.success({
+    status: 200,
+    value: {
+      message: "it works"
+    }
+  })
+);
+
 const api = {
   getEntityConfiguration: mockGetEntityConfiguration,
   getNonce: mockGetNonce,
@@ -104,7 +114,8 @@ const api = {
   setWalletInstanceStatus: mockSetWalletInstanceStatus,
   deleteWalletInstances: mockDeleteWalletInstances,
   getCurrentWalletInstanceStatus: mockGetCurrentWalletInstanceStatus,
-  isFiscalCodeWhitelisted: mockIsFiscalCodeWhitelisted
+  isFiscalCodeWhitelisted: mockIsFiscalCodeWhitelisted,
+  generateCertificateChain: mockGenerateCertificateChain
 };
 
 const mockCreateSubscription = jest.fn();
@@ -1109,6 +1120,73 @@ describe("IoWalletService#getSubscription", () => {
     const service = new IoWalletService(api, trialSystemApi);
 
     const res = await service.getSubscription(userId);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+});
+
+describe("IoWalletService#healthCheck", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct api call", async () => {
+    const service = new IoWalletService(api, trialSystemApi);
+
+    await service.healthCheck();
+
+    expect(mockHealthCheck).toHaveBeenCalledWith({});
+  });
+
+  it("should handle a success response", async () => {
+    const service = new IoWalletService(api, trialSystemApi);
+
+    const res = await service.healthCheck();
+
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson"
+    });
+  });
+
+  it("should handle an internal error when the API client returns 500", async () => {
+    const aGenericProblem = {};
+    mockHealthCheck.mockImplementationOnce(() =>
+      t.success({ status: 500, value: aGenericProblem })
+    );
+
+    const service = new IoWalletService(api, trialSystemApi);
+
+    const res = await service.healthCheck();
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should handle an internal error when the API client returns a code not specified in spec", async () => {
+    const aGenericProblem = {};
+    mockHealthCheck.mockImplementationOnce(() =>
+      t.success({ status: 599, value: aGenericProblem })
+    );
+
+    const service = new IoWalletService(api, trialSystemApi);
+
+    const res = await service.healthCheck();
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should return an error if the api call throws an error", async () => {
+    mockHealthCheck.mockImplementationOnce(() => {
+      throw new Error();
+    });
+    const service = new IoWalletService(api, trialSystemApi);
+
+    const res = await service.healthCheck();
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal"

@@ -454,4 +454,26 @@ export default class IoWalletService {
         }
       });
     });
+
+  /**
+   * Health check
+   */
+  public readonly healthCheck = (): Promise<
+    IResponseErrorInternal | IResponseSuccessJson<undefined>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.ioWalletApiClient.healthCheck({});
+      return withValidatedOrInternalError(validated, (response) => {
+        switch (response.status) {
+          case 200:
+            return ResponseSuccessJson(response.value);
+          case 500:
+            return ResponseErrorInternal(
+              `Internal server error | ${response.value}`
+            );
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
 }

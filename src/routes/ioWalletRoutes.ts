@@ -89,4 +89,10 @@ export const registerIoWalletAPIRoutes = (
       ioWalletController
     )
   );
+
+  // public route
+  app.get(
+    `${basePath}/info`,
+    toExpressHandler(ioWalletController.healthCheck, ioWalletController)
+  );
 };
