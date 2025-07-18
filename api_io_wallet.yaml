@@ -204,6 +204,21 @@ paths:
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
 
+  /info:
+    get:
+      operationId: healthCheck
+      summary: Used to check if the function is healthy
+      responses:
+        "200":
+          description: The function is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+        "500":
+          $ref: "#/components/responses/Unexpected"
+
+
 components:
   securitySchemes:
     Bearer:
