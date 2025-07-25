@@ -2,21 +2,21 @@ import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { EmailAddress } from "../../generated/backend/EmailAddress";
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 import { SpidLevelEnum } from "../../generated/backend/SpidLevel";
-import { IsInboxEnabled } from "@pagopa/io-functions-app-sdk/IsInboxEnabled";
-import { IsWebhookEnabled } from "@pagopa/io-functions-app-sdk/IsWebhookEnabled";
+import { IsInboxEnabled } from "../../generated/io-profile/IsInboxEnabled";
+import { IsWebhookEnabled } from "../../generated/io-profile/IsWebhookEnabled";
 import {
   PreferredLanguage,
-  PreferredLanguageEnum,
-} from "@pagopa/io-functions-app-sdk/PreferredLanguage";
-import { ServicePreferencesSettings } from "@pagopa/io-functions-app-sdk/ServicePreferencesSettings";
-import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-app-sdk/ServicesPreferencesMode";
+  PreferredLanguageEnum
+} from "../../generated/io-profile/PreferredLanguage";
+import { ServicePreferencesSettings } from "../../generated/io-profile/ServicePreferencesSettings";
+import { ServicesPreferencesModeEnum } from "../../generated/io-profile/ServicesPreferencesMode";
 import {
   BPDToken,
   FIMSToken,
   MyPortalToken,
   SessionToken,
   WalletToken,
-  ZendeskToken,
+  ZendeskToken
 } from "../types/token";
 import { User } from "../types/user";
 import { UserIdentity } from "../../generated/io-auth/UserIdentity";
@@ -58,7 +58,7 @@ export const mockedUser: User = {
   bpd_token: mockBPDToken,
   zendesk_token: mockZendeskToken,
   fims_token: mockFIMSToken,
-  session_tracking_id: aSessionTrackingId,
+  session_tracking_id: aSessionTrackingId
 };
 
 export const mockedUserIdentity: UserIdentity = {
@@ -68,7 +68,7 @@ export const mockedUserIdentity: UserIdentity = {
   date_of_birth: aValidDateofBirth,
   spid_email: aSpidEmailAddress,
   spid_level: aValidSpidLevel,
-  session_tracking_id: aSessionTrackingId,
+  session_tracking_id: aSessionTrackingId
 };
 
 export const aCustomEmailAddress = "custom-email@example.com" as EmailAddress;
@@ -76,10 +76,10 @@ export const aCustomEmailAddress = "custom-email@example.com" as EmailAddress;
 export const anIsInboxEnabled = true as IsInboxEnabled;
 export const anIsWebookEnabled = true as IsWebhookEnabled;
 export const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
-  PreferredLanguageEnum.it_IT,
+  PreferredLanguageEnum.it_IT
 ];
 export const aServicePreferencesSettings: ServicePreferencesSettings = {
-  mode: ServicesPreferencesModeEnum.AUTO,
+  mode: ServicesPreferencesModeEnum.AUTO
 };
 
 export const mockedInitializedProfile: InitializedProfile = {
@@ -95,5 +95,5 @@ export const mockedInitializedProfile: InitializedProfile = {
   name: mockedUser.name,
   preferred_languages: aPreferredLanguages,
   service_preferences_settings: aServicePreferencesSettings,
-  version: 42,
+  version: 42
 };
