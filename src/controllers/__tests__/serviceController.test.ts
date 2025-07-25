@@ -12,12 +12,12 @@ import { DepartmentName } from "../../../generated/backend/DepartmentName";
 import { OrganizationName } from "../../../generated/backend/OrganizationName";
 import { ServiceName } from "../../../generated/backend/ServiceName";
 import { ServicePublic } from "../../../generated/backend/ServicePublic";
-import { NotificationChannelEnum } from "@pagopa/io-functions-app-sdk/NotificationChannel";
 import mockReq from "../../__mocks__/request";
 import ApiClient from "../../services/apiClientFactory";
 import FunctionsAppService from "../../services/functionAppService";
 import { mockedUser } from "../../__mocks__/user_mock";
 import ServicesController from "../servicesController";
+import { NotificationChannelEnum } from "../../../generated/backend/NotificationChannel";
 
 const aServiceId: string = "service-id";
 

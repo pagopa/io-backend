@@ -4,17 +4,16 @@ import * as e from "express";
 import * as t from "io-ts";
 import { OrganizationFiscalCode } from "@pagopa/ts-commons/lib/strings";
 
-import { ServiceId } from "@pagopa/io-functions-app-sdk/ServiceId";
-
 import { APIClient } from "../../clients/api";
 import { mockedUser } from "../../__mocks__/user_mock";
 import ApiClientFactory from "../apiClientFactory";
 import FunctionsAppService from "../functionAppService";
 import mockRes from "../../__mocks__/response";
-import { ProblemJson } from "@pagopa/io-functions-app-sdk/ProblemJson";
+import { ProblemJson } from "@pagopa/ts-commons/lib/responses";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
-import { UpsertServicePreference } from "@pagopa/io-functions-app-sdk/UpsertServicePreference";
 import { PathTraversalSafePathParam } from "../../../generated/backend/PathTraversalSafePathParam";
+import { ServiceId } from "../../../generated/io-profile/ServiceId";
+import { UpsertServicePreference } from "../../../generated/io-profile/UpsertServicePreference";
 
 const aValidDepartmentName = "Department name";
 const aValidOrganizationName = "Organization name";
@@ -30,19 +29,19 @@ const validApiServiceResponse = {
     organization_name: aValidOrganizationName,
     service_id: aValidServiceID,
     service_name: aValidServiceName,
-    version: 0,
-  },
+    version: 0
+  }
 };
 
 const tooManyReqApiMessagesResponse = {
-  status: 429,
+  status: 429
 };
 
 const invalidApiServiceResponse = {
-  status: 500,
+  status: 500
 };
 const problemJson = {
-  status: 500,
+  status: 500
 };
 
 const proxyServiceResponse = {
@@ -51,7 +50,7 @@ const proxyServiceResponse = {
   organization_name: aValidOrganizationName,
   service_id: aValidServiceID,
   service_name: aValidServiceName,
-  version: 0,
+  version: 0
 };
 
 const mockGetService = jest.fn();
@@ -67,7 +66,7 @@ jest.mock("../apiClientFactory");
 const mockClient: Partial<ReturnType<APIClient>> = {
   getService: mockGetService,
   getServicePreferences: mockGetServicePreferences,
-  upsertServicePreferences: mockUpsertServicePreferences,
+  upsertServicePreferences: mockUpsertServicePreferences
 };
 jest
   .spyOn(ApiClientFactory.prototype, "getClient")
@@ -84,11 +83,11 @@ describe("FunctionsAppService#getService", () => {
     const res = await service.getService(aValidServiceID);
 
     expect(mockGetService).toHaveBeenCalledWith({
-      service_id: aValidServiceID,
+      service_id: aValidServiceID
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
-      value: proxyServiceResponse,
+      value: proxyServiceResponse
     });
   });
 
@@ -98,7 +97,7 @@ describe("FunctionsAppService#getService", () => {
     const service = new FunctionsAppService(api);
     const res = await service.getService(aValidServiceID);
     expect(mockGetService).toHaveBeenCalledWith({
-      service_id: aValidServiceID,
+      service_id: aValidServiceID
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
@@ -112,7 +111,7 @@ describe("FunctionsAppService#getService", () => {
 
     const res = await service.getService(aValidServiceID);
     expect(mockGetService).toHaveBeenCalledWith({
-      service_id: aValidServiceID,
+      service_id: aValidServiceID
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
@@ -135,7 +134,7 @@ describe("FunctionsAppService#getServicePreferences", () => {
     is_email_enabled: true,
     is_inbox_enabled: true,
     is_webhook_enabled: true,
-    settings_version: 0,
+    settings_version: 0
   };
 
   beforeEach(() => {
@@ -146,7 +145,7 @@ describe("FunctionsAppService#getServicePreferences", () => {
     mockGetServicePreferences.mockImplementation(() => {
       return t.success({
         status: 200,
-        value: aServicePreferences,
+        value: aServicePreferences
       });
     });
 
@@ -158,12 +157,12 @@ describe("FunctionsAppService#getServicePreferences", () => {
 
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
-      value: aServicePreferences,
+      value: aServicePreferences
     });
 
     expect(mockGetServicePreferences).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
-      service_id: aValidServiceID as ServiceId,
+      service_id: aValidServiceID as ServiceId
     });
   });
 
@@ -183,12 +182,12 @@ describe("FunctionsAppService#getServicePreferences", () => {
       value,
       expected_status_code,
       expected_kind,
-      expected_detail,
+      expected_detail
     }) => {
       mockGetServicePreferences.mockImplementation(() => {
         return t.success({
           status: status_code,
-          value,
+          value
         });
       });
 
@@ -205,7 +204,7 @@ describe("FunctionsAppService#getServicePreferences", () => {
 
       expect(res).toMatchObject({
         kind: expected_kind,
-        detail: expected_detail,
+        detail: expected_detail
       });
     }
   );
@@ -216,7 +215,7 @@ describe("FunctionsAppService#upsertServicePreferences", () => {
     is_email_enabled: true,
     is_inbox_enabled: true,
     is_webhook_enabled: false,
-    settings_version: 0 as NonNegativeInteger,
+    settings_version: 0 as NonNegativeInteger
   };
 
   beforeEach(() => {
@@ -227,7 +226,7 @@ describe("FunctionsAppService#upsertServicePreferences", () => {
     mockUpsertServicePreferences.mockImplementation(() => {
       return t.success({
         status: 200,
-        value: aServicePreferences,
+        value: aServicePreferences
       });
     });
 
@@ -240,13 +239,13 @@ describe("FunctionsAppService#upsertServicePreferences", () => {
 
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
-      value: aServicePreferences,
+      value: aServicePreferences
     });
 
     expect(mockUpsertServicePreferences).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
       service_id: aValidServiceID as ServiceId,
-      body: aServicePreferences,
+      body: aServicePreferences
     });
   });
 
@@ -266,12 +265,12 @@ describe("FunctionsAppService#upsertServicePreferences", () => {
       value,
       expected_status_code,
       expected_kind,
-      expected_detail,
+      expected_detail
     }) => {
       mockUpsertServicePreferences.mockImplementation(() => {
         return t.success({
           status: status_code,
-          value,
+          value
         });
       });
 
@@ -289,7 +288,7 @@ describe("FunctionsAppService#upsertServicePreferences", () => {
 
       expect(res).toMatchObject({
         kind: expected_kind,
-        detail: expected_detail,
+        detail: expected_detail
       });
     }
   );
