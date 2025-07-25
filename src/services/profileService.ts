@@ -3,9 +3,6 @@
  * an API client.
  */
 
-import { ExtendedProfile as ExtendedProfileApi } from "@pagopa/io-functions-app-sdk/ExtendedProfile";
-import { NewProfile } from "@pagopa/io-functions-app-sdk/NewProfile";
-import { Profile as ProfileApi } from "@pagopa/io-functions-app-sdk/Profile";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import {
   IResponseErrorConflict,
@@ -28,6 +25,9 @@ import { pipe } from "fp-ts/lib/function";
 
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 import { Profile as ProfileBackend } from "../../generated/backend/Profile";
+import { ExtendedProfile as ExtendedProfileApi } from "../../generated/io-profile/ExtendedProfile";
+import { NewProfile } from "../../generated/io-profile/NewProfile";
+import { Profile as ProfileApi } from "../../generated/io-profile/Profile";
 import { toInitializedProfile } from "../types/profile";
 import { User } from "../types/user";
 import {

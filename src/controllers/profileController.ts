@@ -3,7 +3,6 @@
  * app by forwarding the call to the API system.
  */
 
-import { ExtendedProfile as ExtendedProfileApi } from "@pagopa/io-functions-app-sdk/ExtendedProfile";
 import {
   IResponseErrorConflict,
   IResponseErrorInternal,
@@ -19,6 +18,7 @@ import { ISessionStorage } from "src/services/ISessionStorage";
 
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 import { Profile } from "../../generated/backend/Profile";
+import { ExtendedProfile as ExtendedProfileApi } from "../../generated/io-profile/ExtendedProfile";
 import ProfileService from "../services/profileService";
 import { profileMissingErrorResponse } from "../types/profile";
 import { withUserFromRequest } from "../types/user";

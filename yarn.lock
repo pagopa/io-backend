@@ -1108,15 +1108,6 @@
     eslint-plugin-vitest "^0.5.3"
     typescript-eslint "^7.6.0"
 
-"@pagopa/io-functions-app-sdk@x":
-  version "5.18.0"
-  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-app-sdk/-/io-functions-app-sdk-5.18.0.tgz#842f456ec2705e41f7bb9618a020abebf15ce615"
-  integrity sha512-QEAakZNAvRKbu/sg3Am+Z5KBs6GD49jtBzkLF+NQhq4mJtj72k9qCCtuvwR4yOhF/JL5yCZB4h0d7+TLB87h7Q==
-  dependencies:
-    "@pagopa/ts-commons" "^10.0.0"
-    fp-ts "^2.10.5"
-    io-ts "^2.2.16"
-
 "@pagopa/io-functions-cgn-sdk@x":
   version "2.6.5"
   resolved "https://registry.yarnpkg.com/@pagopa/io-functions-cgn-sdk/-/io-functions-cgn-sdk-2.6.5.tgz#8d708bd6a5ac5160bdc9f90cad96841a1555649e"
