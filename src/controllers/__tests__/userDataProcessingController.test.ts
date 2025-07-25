@@ -4,17 +4,18 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 
 import * as E from "fp-ts/lib/Either";
-import {
-  UserDataProcessingChoice,
-  UserDataProcessingChoiceEnum
-} from "@pagopa/io-functions-app-sdk/UserDataProcessingChoice";
-import { UserDataProcessingChoiceRequest } from "@pagopa/io-functions-app-sdk/UserDataProcessingChoiceRequest";
+
 import UserDataProcessingService from "../../../src/services/userDataProcessingService";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
 import { mockedUser } from "../../__mocks__/user_mock";
 import UserDataProcessingController from "../userDataProcessingController";
+import {
+  UserDataProcessingChoice,
+  UserDataProcessingChoiceEnum
+} from "../../../generated/io-profile/UserDataProcessingChoice";
+import { UserDataProcessingChoiceRequest } from "../../../generated/io-profile/UserDataProcessingChoiceRequest";
 
 const aUserDataProcessingChoice = "DOWNLOAD";
 
@@ -177,9 +178,8 @@ describe("UserDataProcessingController#upsertUserDataProcessing", () => {
     );
     const response = await controller.upsertUserDataProcessing(req);
 
-    const errorOrUserDataProcessingChoice = UserDataProcessingChoiceRequest.decode(
-      req.body
-    );
+    const errorOrUserDataProcessingChoice =
+      UserDataProcessingChoiceRequest.decode(req.body);
     expect(E.isRight(errorOrUserDataProcessingChoice)).toBeTruthy();
     if (E.isRight(errorOrUserDataProcessingChoice)) {
       expect(mockUpsertUserDataProcessing).toHaveBeenCalledWith(

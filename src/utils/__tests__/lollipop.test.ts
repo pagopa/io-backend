@@ -1,22 +1,22 @@
 import { aFiscalCode } from "../../__mocks__/user_mock";
 import {
   checkIfLollipopIsEnabled,
-  extractLollipopLocalsFromLollipopHeaders,
+  extractLollipopLocalsFromLollipopHeaders
 } from "../lollipop";
 import * as E from "fp-ts/lib/Either";
-import { FiscalCode } from "@pagopa/io-functions-app-sdk/FiscalCode";
 import { LollipopApiClient } from "../../clients/lollipop";
 import { AssertionTypeEnum } from "../../../generated/lollipop-api/AssertionType";
 import {
   anAssertionRef,
   lollipopRequiredHeaders,
-  mockSessionStorage,
+  mockSessionStorage
 } from "../../__mocks__/lollipop";
 import { PubKeyStatusEnum } from "../../../generated/lollipop-api/PubKeyStatus";
 import { LollipopRequiredHeaders } from "../../types/lollipop";
 import { pipe } from "fp-ts/lib/function";
 import * as RA from "fp-ts/ReadonlyArray";
 import { aRemoteContentConfigurationWithBothEnv } from "../../__mocks__/remote-configuration";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
 const aLollipopEnabledFiscalCode = "ABCABC00A00B000C" as FiscalCode;
 const aLollipopDisabledFiscalCode = "ABCABC01A00B000C" as FiscalCode;
@@ -47,10 +47,10 @@ describe("checkIfLollipopIsEnabled", () => {
   });
 
   it("Should return false when lollipop is disabled and the user is not in the blacklist", async () => {
-    const res = await checkIfLollipopIsEnabled(
-      aLollipopEnabledFiscalCode,
-      { ...aRemoteContentConfigurationWithBothEnv, is_lollipop_enabled: false }
-    )();
+    const res = await checkIfLollipopIsEnabled(aLollipopEnabledFiscalCode, {
+      ...aRemoteContentConfigurationWithBothEnv,
+      is_lollipop_enabled: false
+    })();
 
     expect(E.isRight(res)).toBeTruthy();
     if (E.isRight(res)) {
@@ -59,10 +59,10 @@ describe("checkIfLollipopIsEnabled", () => {
   });
 
   it("Should return false when lollipop is disabled and the user is in the blacklist", async () => {
-    const res = await checkIfLollipopIsEnabled(
-      aLollipopDisabledFiscalCode,
-      { ...aRemoteContentConfigurationWithBothEnv, is_lollipop_enabled: false }
-    )();
+    const res = await checkIfLollipopIsEnabled(aLollipopDisabledFiscalCode, {
+      ...aRemoteContentConfigurationWithBothEnv,
+      is_lollipop_enabled: false
+    })();
 
     expect(E.isRight(res)).toBeTruthy();
     if (E.isRight(res)) {
@@ -88,15 +88,15 @@ describe("extractLollipopLocalsFromLollipopHeaders|>missing fiscal code", () => 
         pub_key: aPubKey,
         version: 1,
         status: PubKeyStatusEnum.VALID,
-        ttl: 900,
-      },
+        ttl: 900
+      }
     })
   );
   const mockLollipopClient: ReturnType<typeof LollipopApiClient> = {
     generateLCParams: mockGenerateLCParams,
     activatePubKey: jest.fn(),
     ping: jest.fn(),
-    reservePubKey: jest.fn(),
+    reservePubKey: jest.fn()
   };
 
   beforeEach(() => {
@@ -136,7 +136,7 @@ describe("extractLollipopLocalsFromLollipopHeaders|>missing fiscal code", () => 
           "x-pagopa-lollipop-assertion-type": "SAML",
           "x-pagopa-lollipop-auth-jwt": "aBearerTokenJWT",
           "x-pagopa-lollipop-public-key": "aPubKey",
-          "x-pagopa-lollipop-user-id": "GRBGPP87L04L741X",
+          "x-pagopa-lollipop-user-id": "GRBGPP87L04L741X"
         })
       );
     }
@@ -163,7 +163,7 @@ describe("extractLollipopLocalsFromLollipopHeaders|>missing fiscal code", () => 
     expect(res).toMatchObject(
       E.left({
         detail: "Internal server error: Missing assertion ref",
-        kind: "IResponseErrorInternal",
+        kind: "IResponseErrorInternal"
       })
     );
   });
