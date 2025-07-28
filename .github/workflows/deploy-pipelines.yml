@@ -10,7 +10,7 @@ on:
         description: Web App names.
         type: string
         required: true
-        default: "['io-p-app-appbackendl1', 'io-p-app-appbackendl2']"
+        default: "['io-p-app-appbackendl1', 'io-p-app-appbackendl2', 'io-p-app-appbackendl3']"
 
 env:
   BUNDLE_NAME: bundle
