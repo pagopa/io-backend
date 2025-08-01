@@ -31,7 +31,7 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - uses: pagopa/opex-dashboard-azure-action@v1.1.2
+      - uses: pagopa/opex-dashboard-azure-action@ece3bc2b133be74cabb50aec14cdb9b8051b886f # v1.1.2
         with:
           environment: prod
           api-name: ${{ env.API_NAME }}
