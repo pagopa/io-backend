@@ -1,17 +1,13 @@
 import { ResponseErrorInternal } from "@pagopa/ts-commons/lib/responses";
 import { NextFunction, Request, Response } from "express";
 import * as E from "fp-ts/Either";
-import * as O from "fp-ts/Option";
 import * as TE from "fp-ts/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 
 import { LollipopApiClient } from "../../clients/lollipop";
 import { ISessionStorage } from "../../services/ISessionStorage";
 import { withLollipopHeadersFromRequest } from "../../types/lollipop";
-import {
-  withOptionalUserFromRequest,
-  withUserFromRequest
-} from "../../types/user";
+import { withUserFromRequest } from "../../types/user";
 import { log } from "../logger";
 import {
   extractLollipopLocalsFromLollipopHeaders,
@@ -63,22 +59,25 @@ export const expressLollipopMiddlewareLegacy: (
       TE.toUnion
     )();
 
+/**
+ * ⚠️ This middleware should only be used once the `FF_IO_X_USER_TOKEN` feature flag is set to `ALL`.
+ *
+ * Retrieves Lollipop LC parameters if the user has a valid Lollipop session, and integrate into res.locals values
+ */
 export const expressLollipopMiddleware: (
-  lollipopClient: ReturnType<typeof LollipopApiClient>,
-  sessionStorage: ISessionStorage
+  lollipopClient: ReturnType<typeof LollipopApiClient>
 ) => (req: Request, res: Response, next: NextFunction) => Promise<void> =
-  (lollipopClient, sessionStorage) => (req, res, next) =>
+  (lollipopClient) => (req, res, next) =>
     pipe(
       TE.tryCatch(
         () =>
-          withOptionalUserFromRequest(req, async (user) =>
+          withUserFromRequest(req, async (user) =>
             withLollipopHeadersFromRequest(req, async (lollipopHeaders) =>
               pipe(
                 extractLollipopLocalsFromLollipopHeaders(
                   lollipopClient,
-                  sessionStorage,
                   lollipopHeaders,
-                  O.toUndefined(user)?.fiscal_code
+                  user
                 ),
                 TE.map((lollipopLocals) => {
                   res.locals = { ...res.locals, ...lollipopLocals };
