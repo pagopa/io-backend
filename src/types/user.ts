@@ -13,6 +13,7 @@ import * as t from "io-ts";
 import { CieUserIdentity } from "../../generated/auth/CieUserIdentity";
 import { SpidUserIdentity } from "../../generated/auth/SpidUserIdentity";
 import { UserIdentity } from "../../generated/auth/UserIdentity";
+import { AssertionRef } from "../../generated/backend/AssertionRef";
 import { EmailAddress } from "../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../generated/backend/FiscalCode";
 import { SpidLevel } from "../../generated/backend/SpidLevel";
@@ -39,6 +40,7 @@ export const UserWithoutTokens = t.intersection([
     spid_level: SpidLevel
   }),
   t.partial({
+    assertionRef: AssertionRef,
     nameID: t.string,
     nameIDFormat: t.string,
     sessionIndex: t.string,
