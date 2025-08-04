@@ -247,7 +247,7 @@ export const extractLollipopLocalsFromLollipopHeaders = (
     ),
     TE.bindW("assertionRef", ({ operationId, keyThumbprint }) =>
       pipe(
-        TE.of(user.assertionRef),
+        TE.of(user.assertion_ref),
         TE.chainW(TE.fromNullable(ResponseErrorForbiddenNotAuthorized)),
         eventLog.taskEither.errorLeft(() => [
           `lollipopMiddleware| error: AssertionRef is missing`,
