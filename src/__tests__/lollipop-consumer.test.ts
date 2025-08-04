@@ -25,7 +25,7 @@ const basePath = "/api/v1";
 
 export const mockedUserWithAssertionRef: User = {
   ...mockedUser,
-  assertionRef: anAssertionRef
+  assertion_ref: anAssertionRef
 };
 
 const mockGenerateLCParams = jest.fn();

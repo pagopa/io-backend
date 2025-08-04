@@ -40,7 +40,7 @@ export const UserWithoutTokens = t.intersection([
     spid_level: SpidLevel
   }),
   t.partial({
-    assertionRef: AssertionRef,
+    assertion_ref: AssertionRef,
     nameID: t.string,
     nameIDFormat: t.string,
     sessionIndex: t.string,

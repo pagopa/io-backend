@@ -19,7 +19,7 @@ import { User } from "../../../types/user";
 
 export const mockedUserWithAssertionRef: User = {
   ...mockedUser,
-  assertionRef: anAssertionRef
+  assertion_ref: anAssertionRef
 };
 
 const aBearerToken = "a bearer token";
