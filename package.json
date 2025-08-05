@@ -198,7 +198,7 @@
     ]
   },
   "resolutions": {
-    "handlebars": "~4.5.3",
+    "handlebars": "~4.7.0",
     "applicationinsights": "~2.9.5",
     "@types/serve-static": "1.13.10",
     "@types/node": "^20.17.0",
