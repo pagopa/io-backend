@@ -2,7 +2,6 @@
 
 import * as e from "express";
 import * as t from "io-ts";
-import { OrganizationFiscalCode } from "@pagopa/ts-commons/lib/strings";
 
 import { ServiceId } from "@pagopa/io-functions-app-sdk/ServiceId";
 
@@ -16,43 +15,7 @@ import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { UpsertServicePreference } from "@pagopa/io-functions-app-sdk/UpsertServicePreference";
 import { PathTraversalSafePathParam } from "../../../generated/backend/PathTraversalSafePathParam";
 
-const aValidDepartmentName = "Department name";
-const aValidOrganizationName = "Organization name";
 const aValidServiceID = "5a563817fcc896087002ea46c49a";
-const aValidServiceName = "Service name";
-const aValidOrganizationFiscalCode = "01234567891" as OrganizationFiscalCode;
-
-const validApiServiceResponse = {
-  status: 200,
-  value: {
-    department_name: aValidDepartmentName,
-    organization_fiscal_code: aValidOrganizationFiscalCode,
-    organization_name: aValidOrganizationName,
-    service_id: aValidServiceID,
-    service_name: aValidServiceName,
-    version: 0,
-  },
-};
-
-const tooManyReqApiMessagesResponse = {
-  status: 429,
-};
-
-const invalidApiServiceResponse = {
-  status: 500,
-};
-const problemJson = {
-  status: 500,
-};
-
-const proxyServiceResponse = {
-  department_name: aValidDepartmentName,
-  organization_fiscal_code: aValidOrganizationFiscalCode,
-  organization_name: aValidOrganizationName,
-  service_id: aValidServiceID,
-  service_name: aValidServiceName,
-  version: 0,
-};
 
 const mockGetService = jest.fn();
 const mockGetServicePreferences = jest.fn();
@@ -74,61 +37,6 @@ jest
   .mockImplementation(() => mockClient as unknown as ReturnType<APIClient>);
 
 const api = new ApiClientFactory("", "");
-
-describe("FunctionsAppService#getService", () => {
-  it("returns a service from the API", async () => {
-    mockGetService.mockImplementation(() => t.success(validApiServiceResponse));
-
-    const service = new FunctionsAppService(api);
-
-    const res = await service.getService(aValidServiceID);
-
-    expect(mockGetService).toHaveBeenCalledWith({
-      service_id: aValidServiceID,
-    });
-    expect(res).toMatchObject({
-      kind: "IResponseSuccessJson",
-      value: proxyServiceResponse,
-    });
-  });
-
-  it("returns an error if the API returns an error", async () => {
-    mockGetService.mockImplementation(() => t.success(problemJson));
-
-    const service = new FunctionsAppService(api);
-    const res = await service.getService(aValidServiceID);
-    expect(mockGetService).toHaveBeenCalledWith({
-      service_id: aValidServiceID,
-    });
-    expect(res.kind).toEqual("IResponseErrorInternal");
-  });
-
-  it("returns unknown response if the response from the API returns something wrong", async () => {
-    mockGetService.mockImplementation(() =>
-      t.success(invalidApiServiceResponse)
-    );
-
-    const service = new FunctionsAppService(api);
-
-    const res = await service.getService(aValidServiceID);
-    expect(mockGetService).toHaveBeenCalledWith({
-      service_id: aValidServiceID,
-    });
-    expect(res.kind).toEqual("IResponseErrorInternal");
-  });
-
-  it("returns an 429 HTTP error from getService upstream API", async () => {
-    mockGetService.mockImplementation(() =>
-      t.success(tooManyReqApiMessagesResponse)
-    );
-
-    const service = new FunctionsAppService(api);
-
-    const res = await service.getService(aValidServiceID);
-
-    expect(res.kind).toEqual("IResponseErrorTooManyRequests");
-  });
-});
 
 describe("FunctionsAppService#getServicePreferences", () => {
   const aServicePreferences = {
