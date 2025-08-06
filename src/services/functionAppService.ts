@@ -23,11 +23,9 @@ import { APIClient } from "src/clients/api";
 
 import { PathTraversalSafePathParam } from "../../generated/backend/PathTraversalSafePathParam";
 import { ServicePreference } from "../../generated/backend/ServicePreference";
-import { ServicePublic } from "../../generated/backend/ServicePublic";
 import {
   ResponseErrorStatusNotDefinedInSpec,
   ResponseErrorUnexpectedAuthProblem,
-  unhandledResponseStatus,
   withCatchAsInternalError,
   withValidatedOrInternalError
 } from "../utils/responses";
@@ -66,38 +64,6 @@ const handleGetServicePreferencesResponse = (
 
 export default class FunctionsAppService {
   constructor(private readonly apiClient: IApiClientFactoryInterface) {}
-
-  /**
-   * Retrieve all the information about the service that has sent a message.
-   */
-  public readonly getService = (
-    serviceId: string
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorNotFound
-    | IResponseErrorTooManyRequests
-    | IResponseSuccessJson<ServicePublic>
-  > =>
-    withCatchAsInternalError(async () => {
-      const client = this.apiClient.getClient();
-
-      const validated = await client.getService({
-        service_id: serviceId
-      });
-
-      return withValidatedOrInternalError(validated, (response) =>
-        response.status === 200
-          ? withValidatedOrInternalError(
-              ServicePublic.decode(response.value),
-              ResponseSuccessJson
-            )
-          : response.status === 404
-            ? ResponseErrorNotFound("Not found", "Service not found")
-            : response.status === 429
-              ? ResponseErrorTooManyRequests()
-              : unhandledResponseStatus(response.status)
-      );
-    });
 
   /**
    * Retrieve the service preferences fot the defined user and service
