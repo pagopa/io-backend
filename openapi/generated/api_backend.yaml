@@ -10,50 +10,6 @@ schemes:
 security:
   - Bearer: []
 paths:
-  /services/{service_id}:
-    x-swagger-router-controller: ServicesController
-    parameters:
-      - name: service_id
-        in: path
-        type: string
-        required: true
-        description: The ID of an existing Service.
-    get:
-      operationId: getService
-      summary: Get Service
-      description: A previously created service with the provided service ID is returned.
-      responses:
-        '200':
-          description: Service found.
-          schema:
-            $ref: '#/definitions/ServicePublic'
-          examples:
-            application/json:
-              department_name: IO
-              organization_fiscal_code: '00000000000'
-              organization_name: IO
-              service_id: 5a563817fcc896087002ea46c49a
-              service_name: App IO
-              version: 1
-        '400':
-          description: Bad request
-          schema:
-            $ref: '#/definitions/ProblemJson'
-        '401':
-          description: Bearer token null or expired.
-        '404':
-          description: No service found for the provided ID.
-          schema:
-            $ref: '#/definitions/ProblemJson'
-        '429':
-          description: Too many requests
-          schema:
-            $ref: '#/definitions/ProblemJson'
-        '500':
-          description: There was an error in retrieving the service.
-          schema:
-            $ref: '#/definitions/ProblemJson'
-      parameters: []
   /services/{service_id}/preferences:
     post:
       operationId: upsertServicePreferences
@@ -1411,37 +1367,6 @@ definitions:
     type: string
     description: The name of the service. Will be added to the content of sent messages.
     minLength: 1
-  ServicePublic:
-    title: Service (public)
-    description: A Service associated to an user's subscription.
-    type: object
-    properties:
-      service_id:
-        $ref: '#/definitions/ServiceId'
-      service_name:
-        $ref: '#/definitions/ServiceName'
-      organization_name:
-        $ref: '#/definitions/OrganizationName'
-      department_name:
-        $ref: '#/definitions/DepartmentName'
-      organization_fiscal_code:
-        $ref: '#/definitions/OrganizationFiscalCode'
-      available_notification_channels:
-        description: All the notification channels available for a service.
-        type: array
-        items:
-          $ref: '#/definitions/NotificationChannel'
-      version:
-        type: integer
-      service_metadata:
-        $ref: '#/definitions/ServiceMetadata'
-    required:
-      - service_id
-      - service_name
-      - organization_name
-      - department_name
-      - organization_fiscal_code
-      - version
   ServiceMetadata:
     x-one-of: true
     allOf:
