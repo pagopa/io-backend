@@ -214,12 +214,6 @@ export const registerAPIRoutes = (
   );
 
   app.get(
-    `${basePath}/services/:id`,
-    bearerSessionTokenAuth,
-    toExpressHandler(servicesController.getService, servicesController)
-  );
-
-  app.get(
     `${basePath}/services/:id/preferences`,
     bearerSessionTokenAuth,
     toExpressHandler(

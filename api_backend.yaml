@@ -10,50 +10,6 @@ schemes:
 security:
   - Bearer: []
 paths:
-  "/services/{service_id}":
-    x-swagger-router-controller: ServicesController
-    parameters:
-      - in: path
-        name: service_id
-        required: true
-        description: The ID of an existing Service.
-        type: string
-    get:
-      operationId: getService
-      summary: Get Service
-      description: A previously created service with the provided service ID is returned.
-      responses:
-        '200':
-          description: Service found.
-          schema:
-            "$ref": "#/definitions/ServicePublic"
-          examples:
-            application/json:
-              department_name: "IO"
-              organization_fiscal_code: "00000000000"
-              organization_name: "IO"
-              service_id: "5a563817fcc896087002ea46c49a"
-              service_name: "App IO"
-              version: 1
-        "400":
-          description: Bad request
-          schema:
-            $ref: "#/definitions/ProblemJson"
-        "401":
-          description: Bearer token null or expired.
-        "404":
-          description: No service found for the provided ID.
-          schema:
-            $ref: "#/definitions/ProblemJson"
-        "429":
-          description: Too many requests
-          schema:
-            $ref: "#/definitions/ProblemJson"
-        "500":
-          description: There was an error in retrieving the service.
-          schema:
-            $ref: "#/definitions/ProblemJson"
-      parameters: []
   "/services/{service_id}/preferences":
     post:
       operationId: upsertServicePreferences
@@ -1071,8 +1027,6 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v29.1.1/openapi/definitions.yaml#/ServiceId"
   ServiceName:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v29.1.1/openapi/definitions.yaml#/ServiceName"
-  ServicePublic:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v29.1.1/openapi/definitions.yaml#/ServicePublic"
   ServiceMetadata:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v29.1.1/openapi/definitions.yaml#/ServiceMetadata"
   CommonServiceMetadata:
