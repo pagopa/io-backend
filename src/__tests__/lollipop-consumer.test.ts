@@ -14,19 +14,14 @@ import {
 import * as E from "fp-ts/Either";
 import { FirstLollipopConsumerClient } from "../clients/firstLollipopConsumer";
 import * as bodyParser from "body-parser";
-import { aFiscalCode, mockedUser } from "../__mocks__/user_mock";
+import { aFiscalCode } from "../__mocks__/user_mock";
 import { AssertionTypeEnum } from "../../generated/lollipop-api/AssertionType";
 import { PubKeyStatusEnum } from "../../generated/lollipop-api/PubKeyStatus";
 import * as http from "http";
 import nodeFetch from "node-fetch";
-import { User } from "../types/user";
+import { mockedUserWithAssertionRef } from "../utils/middleware/__tests__/lollipop.test";
 
 const basePath = "/api/v1";
-
-export const mockedUserWithAssertionRef: User = {
-  ...mockedUser,
-  assertion_ref: anAssertionRef
-};
 
 const mockGenerateLCParams = jest.fn();
 const mockClient = {
