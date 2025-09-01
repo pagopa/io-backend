@@ -7,7 +7,10 @@ import { pipe } from "fp-ts/lib/function";
 import { LollipopApiClient } from "../../clients/lollipop";
 import { ISessionStorage } from "../../services/ISessionStorage";
 import { withLollipopHeadersFromRequest } from "../../types/lollipop";
-import { withUserFromRequest } from "../../types/user";
+import {
+  withUserFromRequest,
+  withUserIdentityFromRequest
+} from "../../types/user";
 import { log } from "../logger";
 import {
   extractLollipopLocalsFromLollipopHeaders,
@@ -71,7 +74,7 @@ export const expressLollipopMiddleware: (
     pipe(
       TE.tryCatch(
         () =>
-          withUserFromRequest(req, async (user) =>
+          withUserIdentityFromRequest(req, async (user) =>
             withLollipopHeadersFromRequest(req, async (lollipopHeaders) =>
               pipe(
                 extractLollipopLocalsFromLollipopHeaders(

@@ -1,7 +1,16 @@
 import { LollipopApiClient } from "../../../clients/lollipop";
 import { expressLollipopMiddleware } from "../lollipop";
 import mockReq from "../../../__mocks__/request";
-import { aFiscalCode, mockedUser } from "../../../__mocks__/user_mock";
+import {
+  aFiscalCode,
+  aSessionTrackingId,
+  aSpidEmailAddress,
+  aValidDateofBirth,
+  aValidFamilyname,
+  aValidName,
+  aValidSpidLevel,
+  mockedUser
+} from "../../../__mocks__/user_mock";
 import {
   aLollipopOriginalMethod,
   aLollipopOriginalUrl,
@@ -15,10 +24,16 @@ import * as E from "fp-ts/Either";
 import { AssertionTypeEnum } from "../../../../generated/lollipop-api/AssertionType";
 import { PubKeyStatusEnum } from "../../../../generated/lollipop-api/PubKeyStatus";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { User } from "../../../types/user";
+import { UserIdentity } from "../../../../generated/io-auth/UserIdentity";
 
-export const mockedUserWithAssertionRef: User = {
-  ...mockedUser,
+export const mockedUserWithAssertionRef: UserIdentity = {
+  fiscal_code: aFiscalCode,
+  family_name: aValidFamilyname,
+  name: aValidName,
+  date_of_birth: aValidDateofBirth,
+  spid_email: aSpidEmailAddress,
+  spid_level: aValidSpidLevel,
+  session_tracking_id: aSessionTrackingId,
   assertion_ref: anAssertionRef
 };
 

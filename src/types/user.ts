@@ -6,17 +6,16 @@
 import { IResponseErrorValidation } from "@pagopa/ts-commons/lib/responses";
 import * as express from "express";
 import * as E from "fp-ts/Either";
-import * as O from "fp-ts/Option";
-import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
 import { CieUserIdentity } from "../../generated/auth/CieUserIdentity";
 import { SpidUserIdentity } from "../../generated/auth/SpidUserIdentity";
-import { UserIdentity } from "../../generated/auth/UserIdentity";
+import { UserIdentity as UserIdentityLegacy } from "../../generated/auth/UserIdentity";
 import { AssertionRef } from "../../generated/backend/AssertionRef";
 import { EmailAddress } from "../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../generated/backend/FiscalCode";
 import { SpidLevel } from "../../generated/backend/SpidLevel";
+import { UserIdentity } from "../../generated/io-auth/UserIdentity";
 import { withValidatedOrValidationError } from "../utils/responses";
 import {
   BPDToken,
@@ -110,24 +109,22 @@ export function isSpidUserIdentity(
 }
 
 export function exactUserIdentityDecode(
-  user: UserIdentity
-): E.Either<t.Errors, UserIdentity> {
+  user: UserIdentityLegacy
+): E.Either<t.Errors, UserIdentityLegacy> {
   return isSpidUserIdentity(user)
     ? t.exact(SpidUserIdentity.type).decode(user)
     : t.exact(CieUserIdentity.type).decode(user);
 }
 
+// @deprecated - Use `withUserIdentityFromRequest` instead
 export const withUserFromRequest = async <T>(
   req: express.Request,
   f: (user: User) => Promise<T>
 ): Promise<IResponseErrorValidation | T> =>
   withValidatedOrValidationError(User.decode(req.user), f);
 
-export const withOptionalUserFromRequest = async <T>(
+export const withUserIdentityFromRequest = async <T>(
   req: express.Request,
-  f: (user: O.Option<User>) => Promise<T>
+  f: (user: UserIdentity) => Promise<T>
 ): Promise<IResponseErrorValidation | T> =>
-  withValidatedOrValidationError(
-    req.user ? pipe(User.decode(req.user), E.map(O.some)) : E.right(O.none),
-    f
-  );
+  withValidatedOrValidationError(UserIdentity.decode(req.user), f);

@@ -11,6 +11,7 @@ import { eventLog } from "@pagopa/winston-ts";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
 import { flow, identity, pipe } from "fp-ts/lib/function";
+import { UserIdentity } from "generated/io-auth/UserIdentity";
 import { Errors } from "io-ts";
 import { ulid } from "ulid";
 
@@ -25,7 +26,6 @@ import {
   Thumbprint,
   getAlgoFromAssertionRef
 } from "../types/lollipop";
-import { User } from "../types/user";
 import { log } from "./logger";
 
 type ErrorsResponses =
@@ -223,7 +223,7 @@ export const extractLollipopLocalsFromLollipopHeadersLegacy = (
 export const extractLollipopLocalsFromLollipopHeaders = (
   lollipopClient: ReturnType<typeof LollipopApiClient>,
   lollipopHeaders: LollipopRequiredHeaders,
-  user: User
+  user: UserIdentity
 ) =>
   pipe(
     TE.of(getNonceOrUlid(lollipopHeaders["signature-input"])),
