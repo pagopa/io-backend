@@ -6,7 +6,7 @@ import { LollipopApiClient } from "../clients/lollipop";
 import { firstLollipopSign } from "../controllers/firstLollipopConsumerController";
 import { ISessionStorage } from "../services/ISessionStorage";
 import { toExpressHandler } from "../utils/express";
-import { expressLollipopMiddleware } from "../utils/middleware/lollipop";
+import { expressLollipopMiddlewareLegacy } from "../utils/middleware/lollipop";
 
 /**
  * Mount the First lollipop consumer routes into the Express application
@@ -29,7 +29,7 @@ export const registerFirstLollipopConsumer = (
   app.post(
     `${basePath}/sign`,
     bearerSessionTokenAuth,
-    expressLollipopMiddleware(lollipopClient, sessionStorage),
+    expressLollipopMiddlewareLegacy(lollipopClient, sessionStorage),
     toExpressHandler(firstLollipopSign(firstLollipopConsumerClient))
   );
 };

@@ -1,6 +1,6 @@
 import * as express from "express";
 import { toExpressHandler } from "../utils/express";
-import { expressLollipopMiddleware } from "../utils/middleware/lollipop";
+import { expressLollipopMiddlewareLegacy } from "../utils/middleware/lollipop";
 import { firstLollipopSign } from "../controllers/firstLollipopConsumerController";
 import * as request from "supertest";
 import { LollipopApiClient } from "../clients/lollipop";
@@ -12,14 +12,15 @@ import {
   aSignatureInput
 } from "../__mocks__/lollipop";
 import * as E from "fp-ts/Either";
+import * as O from "fp-ts/Option";
+import { ISessionStorage } from "../services/ISessionStorage";
 import { FirstLollipopConsumerClient } from "../clients/firstLollipopConsumer";
 import * as bodyParser from "body-parser";
-import { aFiscalCode } from "../__mocks__/user_mock";
+import { aFiscalCode, mockedUser } from "../__mocks__/user_mock";
 import { AssertionTypeEnum } from "../../generated/lollipop-api/AssertionType";
 import { PubKeyStatusEnum } from "../../generated/lollipop-api/PubKeyStatus";
 import * as http from "http";
 import nodeFetch from "node-fetch";
-import { mockedUserWithAssertionRef } from "../utils/middleware/__tests__/lollipop.test";
 
 const basePath = "/api/v1";
 
@@ -30,6 +31,16 @@ const mockClient = {
   ping: jest.fn(),
   reservePubKey: jest.fn()
 } as ReturnType<typeof LollipopApiClient>;
+
+const mockGetlollipopAssertionRefForUser = jest
+  .fn()
+  .mockImplementation(async () => {
+    console.log("ho chiamato mockGetlollipopAssertionRefForUser");
+    return E.right(O.some(anAssertionRef));
+  });
+const mockSessionStorage = {
+  getLollipopAssertionRefForUser: mockGetlollipopAssertionRefForUser
+} as unknown as ISessionStorage;
 
 const aBearerToken = "aBearerTokenJWT";
 const aPubKey = "aPubKey";
@@ -98,6 +109,9 @@ describe("lollipopSign", () => {
         }
       })
     );
+    mockGetlollipopAssertionRefForUser.mockResolvedValue(
+      E.right(O.some(anAssertionRef))
+    );
     // Generate a mocked express App;
     const app = express();
     // Initialize the custom body parser
@@ -118,10 +132,10 @@ describe("lollipopSign", () => {
     app.post(
       `${basePath}/sign`,
       (req, _, next) => {
-        req.user = mockedUserWithAssertionRef;
+        req.user = mockedUser;
         next();
       },
-      expressLollipopMiddleware(mockClient),
+      expressLollipopMiddlewareLegacy(mockClient, mockSessionStorage),
       toExpressHandler(firstLollipopSign(FIRST_LOLLIPOP_CONSUMER_CLIENT))
     );
 

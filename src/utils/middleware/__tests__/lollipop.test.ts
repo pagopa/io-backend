@@ -1,23 +1,41 @@
 import { LollipopApiClient } from "../../../clients/lollipop";
-import { ISessionStorage } from "../../../services/ISessionStorage";
 import { expressLollipopMiddleware } from "../lollipop";
 import mockReq from "../../../__mocks__/request";
-import { aFiscalCode, mockedUser } from "../../../__mocks__/user_mock";
+import {
+  aFiscalCode,
+  aSessionTrackingId,
+  aSpidEmailAddress,
+  aValidDateofBirth,
+  aValidFamilyname,
+  aValidName,
+  aValidSpidLevel,
+  mockedUser
+} from "../../../__mocks__/user_mock";
 import {
   aLollipopOriginalMethod,
   aLollipopOriginalUrl,
   anAssertionRef,
   anInvalidSignatureInput,
-  anotherAssertionRef,
   aSignature,
-  aSignatureInput,
+  aSignatureInput
 } from "../../../__mocks__/lollipop";
 import mockRes from "../../../__mocks__/response";
 import * as E from "fp-ts/Either";
 import { AssertionTypeEnum } from "../../../../generated/lollipop-api/AssertionType";
-import * as O from "fp-ts/Option";
 import { PubKeyStatusEnum } from "../../../../generated/lollipop-api/PubKeyStatus";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { UserIdentity } from "../../../../generated/io-auth/UserIdentity";
+
+export const mockedUserWithAssertionRef: UserIdentity = {
+  fiscal_code: aFiscalCode,
+  family_name: aValidFamilyname,
+  name: aValidName,
+  date_of_birth: aValidDateofBirth,
+  spid_email: aSpidEmailAddress,
+  spid_level: aValidSpidLevel,
+  session_tracking_id: aSessionTrackingId,
+  assertion_ref: anAssertionRef
+};
 
 const aBearerToken = "a bearer token";
 const aPubKey = "a pub key";
@@ -34,29 +52,22 @@ const mockGenerateLCParams = jest.fn().mockResolvedValue(
       pub_key: aPubKey,
       version: 1,
       status: PubKeyStatusEnum.VALID,
-      ttl: 900,
-    },
+      ttl: 900
+    }
   })
 );
 const mockClient = {
   generateLCParams: mockGenerateLCParams,
   activatePubKey: jest.fn(),
   ping: jest.fn(),
-  reservePubKey: jest.fn(),
+  reservePubKey: jest.fn()
 } as ReturnType<typeof LollipopApiClient>;
-
-const mockGetlollipopAssertionRefForUser = jest
-  .fn()
-  .mockResolvedValue(E.right(O.some(anAssertionRef)));
-const mockSessionStorage = {
-  getLollipopAssertionRefForUser: mockGetlollipopAssertionRefForUser,
-} as unknown as ISessionStorage;
 
 const aValidLollipopRequestHeaders = {
   signature: aSignature,
   ["signature-input"]: aSignatureInput,
   ["x-pagopa-lollipop-original-method"]: aLollipopOriginalMethod,
-  ["x-pagopa-lollipop-original-url"]: aLollipopOriginalUrl,
+  ["x-pagopa-lollipop-original-url"]: aLollipopOriginalUrl
 };
 
 const mockNext = jest.fn();
@@ -65,26 +76,23 @@ describe("lollipopMiddleware", () => {
     jest.clearAllMocks();
   });
   it(`
-  GIVEN a valid user and valid Lollipop Headers
-  WHEN redis returns an assertionRef for the user and lollipop-fn generate LC Params
+  GIVEN a valid Lollipop user and valid Lollipop Headers
+  WHEN lollipop-fn generate LC Params
   THEN additional lollipop headers are included in res.locals
   `, async () => {
     const req = mockReq({
       headers: aValidLollipopRequestHeaders,
-      user: mockedUser,
+      user: mockedUserWithAssertionRef
     });
     const res = mockRes();
-    const middleware = expressLollipopMiddleware(
-      mockClient,
-      mockSessionStorage
-    );
+    const middleware = expressLollipopMiddleware(mockClient);
     await middleware(req, res, mockNext);
     expect(mockGenerateLCParams).toBeCalledTimes(1);
     expect(mockGenerateLCParams).toBeCalledWith({
       assertion_ref: anAssertionRef,
       body: {
-        operation_id: expect.any(String),
-      },
+        operation_id: expect.any(String)
+      }
     });
     expect(res.json).not.toBeCalled();
     expect(res.status).not.toBeCalled();
@@ -94,57 +102,49 @@ describe("lollipopMiddleware", () => {
       ["x-pagopa-lollipop-auth-jwt"]: aBearerToken,
       ["x-pagopa-lollipop-public-key"]: aPubKey,
       ["x-pagopa-lollipop-user-id"]: aFiscalCode,
-      ...aValidLollipopRequestHeaders,
+      ...aValidLollipopRequestHeaders
     });
     expect(mockNext).toBeCalledTimes(1);
     expect(mockNext).toBeCalledWith();
   });
 
   it(`
-  GIVEN a valid user and Lollipop Headers
+  GIVEN a valid Lollipop user and Lollipop Headers
   WHEN the headers are invalid
   THEN returns a validation error
   `, async () => {
     const lollipopRequestHeaders = {
       ...aValidLollipopRequestHeaders,
-      ["x-pagopa-lollipop-original-url"]: undefined,
+      ["x-pagopa-lollipop-original-url"]: undefined
     };
     const req = mockReq({
       headers: lollipopRequestHeaders,
-      user: mockedUser,
+      user: mockedUserWithAssertionRef
     });
     const res = mockRes();
-    const middleware = expressLollipopMiddleware(
-      mockClient,
-      mockSessionStorage
-    );
+    const middleware = expressLollipopMiddleware(mockClient);
     await middleware(req, res, mockNext);
-    expect(mockGetlollipopAssertionRefForUser).not.toBeCalled();
     expect(mockGenerateLCParams).not.toBeCalled();
     expect(res.status).toBeCalledWith(400);
     expect(mockNext).not.toBeCalled();
   });
 
   it(`
-  GIVEN a valid user and Lollipop Headers
+  GIVEN a valid Lollipop user and Lollipop Headers
   WHEN the keyid in signature-input is invalid
   THEN returns a an internal server error
   `, async () => {
     const lollipopRequestHeaders = {
       ...aValidLollipopRequestHeaders,
-      ["signature-input"]: anInvalidSignatureInput,
+      ["signature-input"]: anInvalidSignatureInput
     };
     const req = mockReq({
       headers: lollipopRequestHeaders,
-      user: mockedUser,
+      user: mockedUserWithAssertionRef
     });
     const res = mockRes();
-    const middleware = expressLollipopMiddleware(
-      mockClient,
-      mockSessionStorage
-    );
+    const middleware = expressLollipopMiddleware(mockClient);
     await middleware(req, res, mockNext);
-    expect(mockGetlollipopAssertionRefForUser).not.toBeCalled();
     expect(mockGenerateLCParams).not.toBeCalled();
     expect(res.status).toBeCalledWith(500);
     expect(mockNext).not.toBeCalled();
@@ -157,83 +157,50 @@ describe("lollipopMiddleware", () => {
   `, async () => {
     const req = mockReq({
       headers: aValidLollipopRequestHeaders,
-      user: { ...mockedUser, fiscal_code: "invalidFiscalCode" },
+      user: { ...mockedUser, fiscal_code: "invalidFiscalCode" }
     });
     const res = mockRes();
-    const middleware = expressLollipopMiddleware(
-      mockClient,
-      mockSessionStorage
-    );
+    const middleware = expressLollipopMiddleware(mockClient);
     await middleware(req, res, mockNext);
-    expect(mockGetlollipopAssertionRefForUser).not.toBeCalled();
     expect(mockGenerateLCParams).not.toBeCalled();
     expect(res.status).toBeCalledWith(400);
     expect(mockNext).not.toBeCalled();
   });
 
   it(`
-  GIVEN valid Lollipop Headers without a User
-  WHEN the API is not authenticated
+  GIVEN valid Lollipop Headers
+  WHEN the API is called without a user
   THEN returns success
   `, async () => {
     const req = mockReq({
-      headers: aValidLollipopRequestHeaders,
+      headers: aValidLollipopRequestHeaders
     });
     const res = mockRes();
     // Delete the default user value
     req.user = undefined;
-    const middleware = expressLollipopMiddleware(
-      mockClient,
-      mockSessionStorage
-    );
+    const middleware = expressLollipopMiddleware(mockClient);
     await middleware(req, res, mockNext);
-    expect(mockGenerateLCParams).toBeCalled();
-    expect(mockGetlollipopAssertionRefForUser).toBeCalled();
-    expect(res.json).not.toBeCalled();
-    expect(res.status).not.toBeCalled();
-    expect(res.locals).toEqual({
-      ["x-pagopa-lollipop-assertion-ref"]: anAssertionRef,
-      ["x-pagopa-lollipop-assertion-type"]: AssertionTypeEnum.SAML,
-      ["x-pagopa-lollipop-auth-jwt"]: aBearerToken,
-      ["x-pagopa-lollipop-public-key"]: aPubKey,
-      ["x-pagopa-lollipop-user-id"]: aFiscalCode,
-      ...aValidLollipopRequestHeaders,
-    });
-    expect(mockNext).toBeCalledTimes(1);
-    expect(mockNext).toBeCalledWith();
+    expect(mockGenerateLCParams).not.toBeCalled();
+    expect(res.status).toBeCalledWith(400);
+    expect(mockNext).not.toBeCalled();
   });
 
-  it.each`
-    title                                                                              | lollipopAssertionRefForUser                                                | expectedResponseStatus
-    ${"the lollipopAssertionRefForUser returns a different assertionRef from request"} | ${() => Promise.resolve(E.right(O.some(anotherAssertionRef)))}             | ${403}
-    ${"the lollipopAssertionRefForUser rejects"}                                       | ${() => Promise.reject(new Error("promise reject"))}                       | ${500}
-    ${"the lollipopAssertionRefForUser returns an error"}                              | ${() => Promise.resolve(E.left(new Error("Error executing the request")))} | ${500}
-    ${"the lollipopAssertionRefForUser not found the value"}                           | ${() => Promise.resolve(E.right(O.none))}                                  | ${403}
-  `(
-    `
-  GIVEN a valid user and Lollipop Headers
-  WHEN $title
-  THEN returns a response error with status $expectedResponseStatus
-  `,
-    async ({ lollipopAssertionRefForUser, expectedResponseStatus }) => {
-      const req = mockReq({
-        headers: aValidLollipopRequestHeaders,
-        user: mockedUser,
-      });
-      const res = mockRes();
-      mockGetlollipopAssertionRefForUser.mockImplementationOnce(
-        lollipopAssertionRefForUser
-      );
-      const middleware = expressLollipopMiddleware(
-        mockClient,
-        mockSessionStorage
-      );
-      await middleware(req, res, mockNext);
-      expect(mockGenerateLCParams).not.toBeCalled();
-      expect(res.status).toBeCalledWith(expectedResponseStatus);
-      expect(mockNext).not.toBeCalled();
-    }
-  );
+  it(`
+  GIVEN a valid user with no Lollipop session and Lollipop Headers
+  THEN returns a response error with status 403
+  `, async () => {
+    const req = mockReq({
+      headers: aValidLollipopRequestHeaders,
+      user: mockedUser
+    });
+    const res = mockRes();
+
+    const middleware = expressLollipopMiddleware(mockClient);
+    await middleware(req, res, mockNext);
+    expect(mockGenerateLCParams).not.toBeCalled();
+    expect(res.status).toBeCalledWith(403);
+    expect(mockNext).not.toBeCalled();
+  });
 
   it.each`
     title                                            | generateLCParams                                     | expectedResponseStatus
@@ -252,14 +219,11 @@ describe("lollipopMiddleware", () => {
     async ({ generateLCParams, expectedResponseStatus }) => {
       const req = mockReq({
         headers: aValidLollipopRequestHeaders,
-        user: mockedUser,
+        user: mockedUserWithAssertionRef
       });
       const res = mockRes();
       mockGenerateLCParams.mockImplementationOnce(generateLCParams);
-      const middleware = expressLollipopMiddleware(
-        mockClient,
-        mockSessionStorage
-      );
+      const middleware = expressLollipopMiddleware(mockClient);
       await middleware(req, res, mockNext);
       expect(mockGenerateLCParams).toBeCalledTimes(1);
       expect(res.status).toBeCalledWith(expectedResponseStatus);
