@@ -26,5 +26,6 @@
 #### Checklist:
 <!--- Go over all the following points, and put an `x` in all the boxes that apply. -->
 <!--- If you're unsure about any of these, don't hesitate to ask. We're here to help! -->
+- [ ] My change requires a changeset, which I've added.
 - [ ] My change requires a change to the documentation.
 - [ ] I have updated the documentation accordingly.
