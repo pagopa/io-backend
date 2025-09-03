@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 17.3.0
+
+### Minor Changes
+
+- 291c062: [#IOPID-3336] Setup lollipop middleware without Redis interaction
+
 ## 17.2.0
 
 ### Minor Changes
