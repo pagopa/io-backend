@@ -16,7 +16,6 @@ import { UpsertServicePreference } from "../../../generated/io-profile/UpsertSer
 
 const aValidServiceID = "5a563817fcc896087002ea46c49a";
 
-const mockGetService = jest.fn();
 const mockGetServicePreferences = jest.fn();
 const mockUpsertServicePreferences = jest.fn();
 
@@ -27,7 +26,6 @@ beforeEach(() => {
 jest.mock("../apiClientFactory");
 // partial because we may not want to mock every operation
 const mockClient: Partial<ReturnType<APIClient>> = {
-  getService: mockGetService,
   getServicePreferences: mockGetServicePreferences,
   upsertServicePreferences: mockUpsertServicePreferences
 };
