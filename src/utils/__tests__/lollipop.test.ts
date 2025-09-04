@@ -1,8 +1,8 @@
 import { aFiscalCode } from "../../__mocks__/user_mock";
 import { checkIfLollipopIsEnabled } from "../lollipop";
 import * as E from "fp-ts/lib/Either";
-import { FiscalCode } from "@pagopa/io-functions-app-sdk/FiscalCode";
 import { aRemoteContentConfigurationWithBothEnv } from "../../__mocks__/remote-configuration";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
 const aLollipopEnabledFiscalCode = "ABCABC00A00B000C" as FiscalCode;
 const aLollipopDisabledFiscalCode = "ABCABC01A00B000C" as FiscalCode;

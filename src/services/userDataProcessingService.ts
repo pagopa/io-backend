@@ -3,9 +3,6 @@
  * an API client.
  */
 
-import { UserDataProcessing } from "@pagopa/io-functions-app-sdk/UserDataProcessing";
-import { UserDataProcessingChoice } from "@pagopa/io-functions-app-sdk/UserDataProcessingChoice";
-import { UserDataProcessingChoiceRequest } from "@pagopa/io-functions-app-sdk/UserDataProcessingChoiceRequest";
 import {
   IResponseErrorConflict,
   IResponseErrorInternal,
@@ -23,6 +20,9 @@ import {
 import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
 
+import { UserDataProcessing } from "../../generated/io-profile/UserDataProcessing";
+import { UserDataProcessingChoice } from "../../generated/io-profile/UserDataProcessingChoice";
+import { UserDataProcessingChoiceRequest } from "../../generated/io-profile/UserDataProcessingChoiceRequest";
 import { User } from "../types/user";
 import {
   unhandledResponseStatus,

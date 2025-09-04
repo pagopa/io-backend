@@ -2,7 +2,6 @@
  * This file contains the ProfileWithEmail and ProfileWithoutEmail models and
  * some functions to validate and convert type to and from them.
  */
-import { ExtendedProfile } from "@pagopa/io-functions-app-sdk/ExtendedProfile";
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
@@ -14,6 +13,7 @@ import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
 
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
+import { ExtendedProfile } from "../../generated/io-profile/ExtendedProfile";
 import { formatDate } from "../utils/date";
 import { User } from "./user";
 
