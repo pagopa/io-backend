@@ -1,4 +1,4 @@
-import { FiscalCode } from "@pagopa/io-functions-app-sdk/FiscalCode";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { eventLog } from "@pagopa/winston-ts";
 import { pipe } from "fp-ts/lib/function";
 import { RCAuthenticationConfig } from "generated/io-messages-api/RCAuthenticationConfig";
