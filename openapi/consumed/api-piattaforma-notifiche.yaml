@@ -33,7 +33,7 @@ tags:
 - name: AppIO-PN-LegalFacts
   description: Notification Legal Facts
 paths:
-  /ext-registry-private/io/v1/notification-disclaimer/{iun}:
+  ext-registry-private/io/v1/notification-disclaimer/{iun}:
     get:
       tags:
       - AppIO-PN-Notification
@@ -123,7 +123,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: "#/components/schemas/Problem"
-  /delivery/notifications/received/{iun}:
+  delivery/notifications/received/{iun}:
     get:
       tags:
       - AppIO-PN-Notification
@@ -202,7 +202,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery/notifications/received/{iun}/attachments/documents/{docIdx}:
+  delivery/notifications/received/{iun}/attachments/documents/{docIdx}:
     get:
       tags:
       - AppIO-PN-Documents
@@ -291,7 +291,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery/notifications/received/{iun}/attachments/payment/{attachmentName}:
+  delivery/notifications/received/{iun}/attachments/payment/{attachmentName}:
     get:
       tags:
       - AppIO-PN-Payments
@@ -402,11 +402,11 @@ components:
         title:
           type: string
           description: The title to be rendered in App
-          minLength: 1
+          minlength: 1
         markdown:
           type: string
           description: The markdown content to be rendered in App
-          minLength: 1
+          minlength: 1
       required:
         - title
         - markdown
@@ -718,7 +718,7 @@ components:
         - DELETE
     LollipopOriginalURL:
       type: string
-      pattern: "^https://"
+      pattern: "^https:\/\/"
     LollipopSignatureInput:
       type: string
       pattern: "^(?:sig\\d+=[^,]*)(?:,\\s*(?:sig\\d+=[^,]*))*$"
