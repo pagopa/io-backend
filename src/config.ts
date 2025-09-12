@@ -23,6 +23,7 @@ import * as t from "io-ts";
 
 import { AppMessagesAPIClient } from "./clients/app-messages.client";
 import { BonusAPIClient } from "./clients/bonus";
+import { CdcSupportAPIClient } from "./clients/cdc-support";
 import { CgnAPIClient } from "./clients/cgn";
 import { CgnOperatorSearchAPIClient } from "./clients/cgn-operator-search";
 import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
@@ -46,7 +47,6 @@ import { log } from "./utils/logger";
 import { decodeCIDRs } from "./utils/network";
 import { ognlTypeFor } from "./utils/ognl";
 import { CommaSeparatedListOf } from "./utils/separated-list";
-import { CdcSupportAPIClient } from "./clients/cdc-support";
 
 // Without this, the environment variables loaded by dotenv aren't available in
 // this file.

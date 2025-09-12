@@ -10,9 +10,10 @@ import {
   IResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import * as express from "express";
-import { withUserFromRequest } from "../types/user";
-import CdcSupportService from "src/services/cdcSupportService";
 import { CitizenStatus } from "generated/io-cdc-support-func-api/CitizenStatus";
+import CdcSupportService from "src/services/cdcSupportService";
+
+import { withUserFromRequest } from "../types/user";
 
 export default class CdcSupportController {
   constructor(private readonly cdcSupportService: CdcSupportService) {}

@@ -1,8 +1,9 @@
+import nodeFetch from "node-fetch";
+
 import {
   Client,
   createClient
 } from "../../generated/io-cdc-support-func-api/client";
-import nodeFetch from "node-fetch";
 
 export function CdcSupportAPIClient(
   token: string,

@@ -61,6 +61,7 @@ import {
 import { registerAuthenticationRoutes } from "./routes/authenticationRoutes";
 import { registerAPIRoutes } from "./routes/baseRoutes";
 import { registerBonusAPIRoutes } from "./routes/bonusRoutes";
+import { registerCdcSupportAPIRoutes } from "./routes/cdcSupportRoutes";
 import {
   registerCgnAPIRoutes,
   registerCgnOperatorSearchAPIRoutes
@@ -74,6 +75,7 @@ import { registerPublicRoutes } from "./routes/publicRoutes";
 import { registerServicesAppBackendRoutes } from "./routes/servicesRoutes";
 import { registerTrialSystemAPIRoutes } from "./routes/trialSystemRoutes";
 import BonusService from "./services/bonusService";
+import CdcSupportService from "./services/cdcSupportService";
 import CgnOperatorSearchService from "./services/cgnOperatorSearchService";
 import CgnService from "./services/cgnService";
 import IoFimsService from "./services/fimsService";
@@ -101,8 +103,6 @@ import { expressErrorMiddleware } from "./utils/middleware/express";
 import { RedisClientMode, RedisClientSelector } from "./utils/redis";
 
 import expressEnforcesSsl = require("express-enforces-ssl");
-import CdcSupportService from "./services/cdcSupportService";
-import { registerCdcSupportAPIRoutes } from "./routes/cdcSupportRoutes";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
