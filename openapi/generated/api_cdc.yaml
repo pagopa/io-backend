@@ -12,7 +12,7 @@ security:
   - Bearer: []
 paths:
   /status:
-    post:
+    get:
       tags:
         - secured
       summary: Get the citizen's status about the Carta della Cultura
@@ -39,23 +39,6 @@ components:
       name: Authorization
       in: header
   schemas:
-    FiscalCodePayload:
-      type: object
-      properties:
-        fiscal_code:
-          $ref: '#/components/schemas/FiscalCode'
-      required:
-        - fiscal_code
-      example: |
-        {
-          "fiscal_code": "AAABBB00C00D000E"
-        }
-    FiscalCode:
-      type: string
-      description: User's fiscal code.
-      format: FiscalCode
-      x-import: '@pagopa/ts-commons/lib/strings'
-      example: AAABBB00C00D000E
     CitizenStatus:
       type: object
       properties:

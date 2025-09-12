@@ -23,7 +23,7 @@ export const registerCdcSupportAPIRoutes = (
     cdcSupportService
   );
 
-  app.post(
+  app.get(
     `${basePath}/status`,
     bearerSessionTokenAuth,
     toExpressHandler(cdcSupportController.status, cdcSupportController)

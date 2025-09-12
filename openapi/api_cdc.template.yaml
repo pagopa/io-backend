@@ -12,7 +12,7 @@ security:
   - Bearer: []
 paths:
   /status:
-    post:
+    get:
       tags:
         - secured
       summary: Get the citizen's status about the Carta della Cultura
@@ -39,10 +39,6 @@ components:
       name: Authorization
       in: header
   schemas:
-    FiscalCodePayload:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-cdc/refs/heads/main/apps/support-func/api/internal.yaml#/components/schemas/FiscalCodePayload"
-    FiscalCode:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-cdc/refs/heads/main/apps/support-func/api/internal.yaml#/components/schemas/FiscalCode"
     CitizenStatus:
       $ref: "https://raw.githubusercontent.com/pagopa/io-cdc/refs/heads/main/apps/support-func/api/internal.yaml#/components/schemas/CitizenStatus"
     ProblemJson:
