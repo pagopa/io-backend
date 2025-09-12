@@ -10,10 +10,10 @@ import { IsInboxEnabled } from "../../../generated/backend/IsInboxEnabled";
 import { IsWebhookEnabled } from "../../../generated/backend/IsWebhookEnabled";
 import {
   PreferredLanguage,
-  PreferredLanguageEnum,
+  PreferredLanguageEnum
 } from "../../../generated/backend/PreferredLanguage";
 import { Version } from "../../../generated/backend/Version";
-import { ExtendedProfile as ExtendedProfileApi } from "@pagopa/io-functions-app-sdk/ExtendedProfile";
+import { ExtendedProfile as ExtendedProfileApi } from "../../../generated/io-profile/ExtendedProfile";
 import { ResponseErrorNotFound } from "@pagopa/ts-commons/lib/responses";
 import { AcceptedTosVersion } from "../../../generated/backend/AcceptedTosVersion";
 import { IsEmailEnabled } from "../../../generated/backend/IsEmailEnabled";
@@ -21,7 +21,7 @@ import { IsEmailValidated } from "../../../generated/backend/IsEmailValidated";
 import {
   notFoundProfileToInternalServerError,
   profileMissingErrorResponse,
-  toInitializedProfile,
+  toInitializedProfile
 } from "../profile";
 import { mockedUser } from "../../__mocks__/user_mock";
 import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
@@ -32,7 +32,7 @@ import { AppVersion } from "../../../generated/backend/AppVersion";
 const aTosVersion = 1 as AcceptedTosVersion;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
-  PreferredLanguageEnum.it_IT,
+  PreferredLanguageEnum.it_IT
 ];
 const anIsWebhookEnabled = true as IsWebhookEnabled;
 const anIsInboxEnabled = true as IsInboxEnabled;
@@ -40,7 +40,7 @@ const anIsEmailEnabled = true as IsEmailEnabled;
 const anIsEmailValidated = true as IsEmailValidated;
 const aReminderStatus = "ENABLED" as ReminderStatus;
 const aServicePreferencesSettings: ServicePreferencesSettings = {
-  mode: ServicesPreferencesModeEnum.LEGACY,
+  mode: ServicesPreferencesModeEnum.LEGACY
 };
 
 // mock for a valid ExtendedProfile profile
@@ -57,7 +57,7 @@ const mockedExtendedProfile: ExtendedProfileApi = {
   preferred_languages: aPreferredLanguages,
   reminder_status: aReminderStatus,
   service_preferences_settings: aServicePreferencesSettings,
-  version: 1 as Version,
+  version: 1 as Version
 };
 
 // mock for a valid ExtendedProfile profile used for ToS test
@@ -70,7 +70,7 @@ const mockedExtendedProfileWithoutTos: ExtendedProfileApi = {
   is_webhook_enabled: anIsWebhookEnabled,
   preferred_languages: aPreferredLanguages,
   service_preferences_settings: aServicePreferencesSettings,
-  version: 1 as Version,
+  version: 1 as Version
 };
 
 describe("profile type", () => {
@@ -129,7 +129,7 @@ describe("profile type", () => {
       expect(userDataOK._tag).toBe("Right");
       expect(userDataOK.right).toEqual({
         ...mockedExtendedProfile,
-        is_email_already_taken: false,
+        is_email_already_taken: false
       });
     }
 
@@ -162,7 +162,7 @@ describe("profile type", () => {
 
     expect(response).toEqual({
       ...profileMissingErrorResponse,
-      apply: expect.any(Function),
+      apply: expect.any(Function)
     });
   });
 });

@@ -1,6 +1,6 @@
 {
   "name": "@pagopa/io-backend",
-  "version": "17.3.0",
+  "version": "17.3.1",
   "min_app_version": {
     "ios": "2.3.0",
     "android": "2.3.0"
@@ -45,6 +45,7 @@
     "generate:proxy:io-fims-models": "rimraf generated/io-fims && gen-api-models --api-spec api_io_fims.yaml --out-dir generated/io-fims",
     "generate:proxy:cgn-operator-search-models": "rimraf generated/cgn-operator-search && gen-api-models --api-spec api_cgn_operator_search.yaml --out-dir generated/cgn-operator-search",
     "generate:proxy:io-auth": "rimraf generated/io-auth && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-auth-n-identity-domain/6da6a1d6628778db9325c48e9bfdd9968a3369ee/apps/io-session-manager/api/internal.yaml --no-strict --out-dir generated/io-auth --request-types",
+    "generate:proxy:io-profile": "rimraf generated/io-profile && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-auth-n-identity-domain/6da6a1d6628778db9325c48e9bfdd9968a3369ee/apps/io-profile/api/index.yaml --no-strict --out-dir generated/io-profile --request-types --response-decoders --client",
     "generate:api:io-bonus": "rimraf generated/io-bonus-api && gen-api-models --api-spec openapi/consumed/fn_bonus.yaml --no-strict --out-dir generated/io-bonus-api --request-types --response-decoders --client",
     "generate:api:io-sign": "rimraf generated/io-sign-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-sign/0a9124b7c782b2569dd82c094496e50a17b418f4/apps/io-func-sign-user/openapi.yaml --no-strict --out-dir generated/io-sign-api --request-types --response-decoders --client",
     "generate:api:io-fims": "rimraf generated/io-fims-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-fims/44c478f9b9ca024aa4db963873a85f8d9c37f5d3/apps/user-func/openapi.yaml --no-strict --out-dir generated/io-fims-api --request-types --response-decoders --client",
@@ -84,7 +85,6 @@
   "homepage": "https://github.com/pagopa/io-backend#readme",
   "dependencies": {
     "@azure/storage-queue": "^12.0.0",
-    "@pagopa/io-functions-app-sdk": "x",
     "@pagopa/io-functions-cgn-sdk": "x",
     "@pagopa/io-functions-commons": "^29.3.0",
     "@pagopa/ts-commons": "^13.1.2",

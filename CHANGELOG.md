@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 17.3.1
+
+### Patch Changes
+
+- a1cf651: [#IOPID-3330] fn-profile: migrate from SDK to generated client
+
 ## 17.3.0
 
 ### Minor Changes
