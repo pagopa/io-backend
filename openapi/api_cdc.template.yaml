@@ -7,7 +7,7 @@ info:
   description: |
     These APIs support App IO about Carta della Cultura
 servers:
-  - url: /api/cdc/v1
+  - url: /api/v1/cdc
 security:
   - Bearer: []
 paths:
