@@ -61,6 +61,7 @@ const X_FORWARDED_PROTO_HEADER = "X-Forwarded-Proto";
 const aAPIBasePath = "/api/v1";
 const aBonusAPIBasePath = "/bonus/api/v1";
 const aCgnAPIBasePath = "/api/v1/cgn";
+const aCdcIOAPIBasePath = "/api/v1/cdc";
 const aCgnOperatorSearchAPIBasePath = "/api/v1/cgn-operator-search";
 const aIoFimsAPIBasePath = "/api/v1/fims";
 const aIoSignAPIBasePath = "/api/v1/sign";
@@ -76,6 +77,7 @@ describe("Success app start", () => {
     app = await appModule.newApp({
       APIBasePath: aAPIBasePath,
       BonusAPIBasePath: aBonusAPIBasePath,
+      CdcSupportAPIbasePath: aCdcIOAPIBasePath,
       CGNAPIBasePath: aCgnAPIBasePath,
       CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
       IoFimsAPIBasePath: aIoFimsAPIBasePath,
@@ -184,6 +186,7 @@ describe("Failure app start", () => {
       await appModule.newApp({
         APIBasePath: aAPIBasePath,
         BonusAPIBasePath: aBonusAPIBasePath,
+        CdcSupportAPIbasePath: aCdcIOAPIBasePath,
         CGNAPIBasePath: aCgnAPIBasePath,
         CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
         IoFimsAPIBasePath: aIoFimsAPIBasePath,

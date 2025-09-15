@@ -1,8 +1,8 @@
 import { Express } from "express";
 import * as passport from "passport";
-import CdcSupportController from "src/controllers/cdcSupportController";
-import CdcSupportService from "src/services/cdcSupportService";
 
+import CdcSupportController from "../controllers/cdcSupportController";
+import CdcSupportService from "../services/cdcSupportService";
 import { toExpressHandler } from "../utils/express";
 
 /**
