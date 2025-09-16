@@ -1,0 +1,45 @@
+openapi: 3.0.1
+info:
+  version: 17.3.1
+  title: CdC Support API
+  x-logo:
+    url: https://io.italia.it/assets/img/io-logo-blue.svg
+  description: |
+    These APIs support App IO about Carta della Cultura
+servers:
+  - url: /api/v1/cdc
+security:
+  - Bearer: []
+paths:
+  /status:
+    get:
+      tags:
+        - secured
+      summary: Get the citizen's status about the Carta della Cultura
+      operationId: getStatus
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CitizenStatus"
+        "401":
+          description: Login expired.
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+components:
+  securitySchemes:
+    Bearer:
+      type: apiKey
+      name: Authorization
+      in: header
+  schemas:
+    CitizenStatus:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cdc/refs/heads/main/apps/support-func/api/internal.yaml#/components/schemas/CitizenStatus"
+    ProblemJson:
+      $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ProblemJson"

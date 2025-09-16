@@ -23,10 +23,12 @@ import {
   API_CLIENT,
   APP_MESSAGES_API_CLIENT,
   BONUS_API_CLIENT,
+  CDC_SUPPORT_API_CLIENT,
   CGN_API_CLIENT,
   CGN_OPERATOR_SEARCH_API_CLIENT,
   ENV,
   FF_BONUS_ENABLED,
+  FF_CDC_ENABLED,
   FF_CGN_ENABLED,
   FF_IO_FIMS_ENABLED,
   FF_IO_SIGN_ENABLED,
@@ -59,6 +61,7 @@ import {
 import { registerAuthenticationRoutes } from "./routes/authenticationRoutes";
 import { registerAPIRoutes } from "./routes/baseRoutes";
 import { registerBonusAPIRoutes } from "./routes/bonusRoutes";
+import { registerCdcSupportAPIRoutes } from "./routes/cdcSupportRoutes";
 import {
   registerCgnAPIRoutes,
   registerCgnOperatorSearchAPIRoutes
@@ -72,6 +75,7 @@ import { registerPublicRoutes } from "./routes/publicRoutes";
 import { registerServicesAppBackendRoutes } from "./routes/servicesRoutes";
 import { registerTrialSystemAPIRoutes } from "./routes/trialSystemRoutes";
 import BonusService from "./services/bonusService";
+import CdcSupportService from "./services/cdcSupportService";
 import CgnOperatorSearchService from "./services/cgnOperatorSearchService";
 import CgnService from "./services/cgnService";
 import IoFimsService from "./services/fimsService";
@@ -112,6 +116,7 @@ export interface IAppFactoryParameters {
   readonly authenticationBasePath: string;
   readonly APIBasePath: string;
   readonly BonusAPIBasePath: string;
+  readonly CdcSupportAPIbasePath: string;
   readonly CGNAPIBasePath: string;
   readonly CGNOperatorSearchAPIBasePath: string;
   readonly IoSignAPIBasePath: string;
@@ -129,6 +134,7 @@ export async function newApp({
   authenticationBasePath,
   APIBasePath,
   BonusAPIBasePath,
+  CdcSupportAPIbasePath,
   CGNAPIBasePath,
   IoSignAPIBasePath,
   IoFimsAPIBasePath,
@@ -262,6 +268,11 @@ export async function newApp({
 
         // Create the bonus service
         const BONUS_SERVICE = new BonusService(BONUS_API_CLIENT);
+
+        // Create the cdc support service
+        const CDC_SUPPORT_SERVICE = new CdcSupportService(
+          CDC_SUPPORT_API_CLIENT
+        );
 
         // Create the cgn service
         const CGN_SERVICE = new CgnService(CGN_API_CLIENT);
@@ -415,6 +426,15 @@ export async function newApp({
             CGNOperatorSearchAPIBasePath,
             CGN_SERVICE,
             CGN_OPERATOR_SEARCH_SERVICE,
+            authMiddlewares.bearerSession
+          );
+        }
+
+        if (FF_CDC_ENABLED) {
+          registerCdcSupportAPIRoutes(
+            app,
+            CdcSupportAPIbasePath,
+            CDC_SUPPORT_SERVICE,
             authMiddlewares.bearerSession
           );
         }

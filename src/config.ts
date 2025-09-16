@@ -23,6 +23,7 @@ import * as t from "io-ts";
 
 import { AppMessagesAPIClient } from "./clients/app-messages.client";
 import { BonusAPIClient } from "./clients/bonus";
+import { CdcSupportAPIClient } from "./clients/cdc-support";
 import { CgnAPIClient } from "./clients/cgn";
 import { CgnOperatorSearchAPIClient } from "./clients/cgn-operator-search";
 import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
@@ -176,6 +177,21 @@ export const CGN_API_CLIENT = CgnAPIClient(
   CGN_API_KEY,
   CGN_API_URL,
   CGN_API_BASE_PATH,
+  httpOrHttpsApiFetch
+);
+
+export const CDC_SUPPORT_API_KEY = getRequiredENVVar("CDC_SUPPORT_API_KEY");
+export const CDC_SUPPORT_API_URL = getRequiredENVVar("CDC_SUPPORT_API_URL");
+export const CDC_SUPPORT_API_BASE_PATH = getRequiredENVVar(
+  "CDC_SUPPORT_API_BASE_PATH"
+);
+export const CDC_SUPPORT_IO_API_BASE_PATH = getRequiredENVVar(
+  "CDC_SUPPORT_IO_API_BASE_PATH"
+);
+export const CDC_SUPPORT_API_CLIENT = CdcSupportAPIClient(
+  CDC_SUPPORT_API_KEY,
+  CDC_SUPPORT_API_URL,
+  CDC_SUPPORT_API_BASE_PATH,
   httpOrHttpsApiFetch
 );
 
@@ -403,6 +419,7 @@ export const errorOrAppInsightConfig: t.Validation<AppInsightsConfig> =
 // Feature flags
 export const FF_BONUS_ENABLED = process.env.FF_BONUS_ENABLED === "1";
 export const FF_CGN_ENABLED = process.env.FF_CGN_ENABLED === "1";
+export const FF_CDC_ENABLED = process.env.FF_CDC_ENABLED === "1";
 export const FF_IO_SIGN_ENABLED = process.env.FF_IO_SIGN_ENABLED === "1";
 export const FF_IO_FIMS_ENABLED = process.env.FF_IO_FIMS_ENABLED === "1";
 
