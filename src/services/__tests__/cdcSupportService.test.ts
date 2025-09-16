@@ -51,6 +51,9 @@ describe("CdcSupportService#status", () => {
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson"
     });
+    if (res.kind === "IResponseSuccessJson") {
+      expect(res.value).toEqual(mockedCitizenStatus);
+    }
   });
 
   it("should handle an internal error when the client returns 401", async () => {
