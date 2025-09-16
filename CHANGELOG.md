@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 17.4.0
+
+### Minor Changes
+
+- 0a27f46: new cdc api
+
 ## 17.3.1
 
 ### Patch Changes
