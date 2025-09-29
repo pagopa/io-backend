@@ -119,6 +119,7 @@ describe("serviceAppBackendController#findInstitutions", () => {
       "search",
       "NATIONAL",
       undefined,
+      undefined,
       undefined
     );
 
@@ -168,6 +169,7 @@ describe("serviceAppBackendController#findInstitutions", () => {
       "search",
       undefined,
       undefined,
+      undefined,
       undefined
     );
 
@@ -175,6 +177,35 @@ describe("serviceAppBackendController#findInstitutions", () => {
       apply: expect.any(Function),
       kind: "IResponseErrorInternal",
       detail: expect.any(String),
+    });
+  });
+
+  it("should pass sessionId parameter when provided", async () => {
+    mockFindInstitutions.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(mockFindInstitutionsResponse))
+    );
+
+    const req = mockReq({
+      query: { search: "search", scope: "NATIONAL", sessionId: 'session-123' }
+    });
+
+    const controller = new ServiceAppBackendController(
+      serviceAppBackendService
+    );
+
+    const response = await controller.findInstitutions(req);
+    expect(mockFindInstitutions).toHaveBeenCalledWith(
+      "search",
+      "NATIONAL",
+      undefined,
+      undefined,
+      'session-123'
+    );
+
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: mockFindInstitutionsResponse
     });
   });
 });
@@ -378,6 +409,7 @@ describe("serviceAppBackendController#findInstutionServices", () => {
     expect(mockFindInstutionServices).toHaveBeenCalledWith(
       "anInstitutionId",
       undefined,
+      undefined,
       undefined
     );
 
@@ -406,6 +438,7 @@ describe("serviceAppBackendController#findInstutionServices", () => {
     expect(mockFindInstutionServices).toHaveBeenCalledWith(
       "anInstitutionId",
       undefined,
+      undefined,
       undefined
     );
 
@@ -413,6 +446,36 @@ describe("serviceAppBackendController#findInstutionServices", () => {
       apply: expect.any(Function),
       kind: "IResponseErrorInternal",
       detail: expect.any(String),
+    });
+  });
+
+  it("should pass sessionId parameter when provided", async () => {
+    mockFindInstutionServices.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(mockFindInstutionServicesResponse))
+    );
+
+    const req = mockReq({
+      params: { institutionId: "anInstitutionId" },
+      query: { sessionId: 'session-123' },
+    });
+
+    const controller = new ServiceAppBackendController(
+      serviceAppBackendService
+    );
+
+    const response = await controller.findInstutionServices(req);
+
+    expect(mockFindInstutionServices).toHaveBeenCalledWith(
+      "anInstitutionId",
+      undefined,
+      undefined,
+      'session-123'
+    );
+
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: mockFindInstutionServicesResponse,
     });
   });
 });
