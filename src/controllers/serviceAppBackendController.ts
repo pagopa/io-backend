@@ -54,7 +54,8 @@ export default class ServicesAppBackendController {
           parseOptionalStringParam(req.query.search),
           scope,
           parseOptionalNumberParam(req.query.limit),
-          parseOptionalNumberParam(req.query.offset)
+          parseOptionalNumberParam(req.query.offset),
+          parseOptionalStringParam(req.query.sessionId)
         )
     );
 
@@ -95,7 +96,8 @@ export default class ServicesAppBackendController {
         this.servicesAppBackendService.findInstutionServices(
           institutionId,
           parseOptionalNumberParam(req.query.limit),
-          parseOptionalNumberParam(req.query.offset)
+          parseOptionalNumberParam(req.query.offset),
+          parseOptionalStringParam(req.query.sessionId)
         )
     );
 }

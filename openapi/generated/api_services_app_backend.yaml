@@ -59,6 +59,12 @@ paths:
             minimum: 0
             maximum: 100
             default: 0
+        - name: sessionId
+          in: query
+          description: An unique identifier of the session
+          required: false
+          schema:
+            type: string    
       responses:
         '200':
           description: successful operation
@@ -144,6 +150,12 @@ paths:
             minimum: 0
             maximum: 100
             default: 0
+        - name: sessionId
+          in: query
+          description: An unique identifier of the session
+          required: false
+          schema:
+            type: string      
       responses:
         '200':
           description: successful operation
