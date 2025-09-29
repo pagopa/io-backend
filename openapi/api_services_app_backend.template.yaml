@@ -57,7 +57,8 @@ paths:
           description: An unique identifier of the session
           required: false
           schema:
-            type: string     
+            type: string
+            minLength: 1   
       responses:
         "200":
           description: successful operation
@@ -141,7 +142,8 @@ paths:
           description: An unique identifier of the session
           required: false
           schema:
-            type: string     
+            type: string
+            minLength: 1  
       responses:
         "200":
           description: successful operation
