@@ -30,7 +30,8 @@ export default class ServicesAppBackendService {
     search?: string,
     scope?: ScopeType,
     limit?: number,
-    offset?: number
+    offset?: number,
+    sessionId?: string
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
@@ -41,7 +42,8 @@ export default class ServicesAppBackendService {
         limit,
         offset,
         scope,
-        search
+        search,
+        sessionId
       });
 
       return withValidatedOrInternalError(validated, (response) =>
@@ -116,7 +118,8 @@ export default class ServicesAppBackendService {
     // TODO: fix institutionId type
     institutionId: string,
     limit?: number,
-    offset?: number
+    offset?: number,
+    sessionId?: string
   ): Promise<
     IResponseErrorInternal | IResponseSuccessJson<InstitutionServicesResource>
   > =>
@@ -124,7 +127,8 @@ export default class ServicesAppBackendService {
       const validated = await this.apiClient.findInstutionServices({
         institutionId,
         limit,
-        offset
+        offset,
+        sessionId
       });
 
       // TODO: sistemare i vari return
