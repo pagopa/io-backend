@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 17.5.0
+
+### Minor Changes
+
+- 9e0406c: add optional sessionId parameter to institution and service api requests to prevent duplicates
+
 ## 17.4.0
 
 ### Minor Changes
