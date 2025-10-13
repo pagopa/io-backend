@@ -248,6 +248,13 @@ paths:
       summary: Retrieve all user favourite services
       description: Retrieve all user favourite services
       operationId: getAllUserFavouriteServices
+      parameters:
+        - name: continuation_token
+          in: query
+          description: pagination continuation token
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: Successful operation
