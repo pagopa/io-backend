@@ -11,6 +11,8 @@ tags:
     description: Retrieve resources details
   - name: featured
     description: Retrieve featured Lists
+  - name: favourites
+    description: Manage user favourite services
 security:
   - Bearer: []
 paths:
@@ -225,6 +227,123 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ProblemJson"
+  /favourites/services:
+    get:
+      tags:
+        - favourites
+      summary: Retrieve all user favourite services
+      description: Retrieve all user favourite services
+      operationId: getAllUserFavouriteServices
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FavouriteServicesResource'
+        '401':
+          description: Bearer token null or expired
+        '404':
+          description: Not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '502':
+          description: Bad gateway
+        '504':
+          description: Gateway timeout
+  /favourites/services/{serviceId}:
+    get:
+      tags:
+        - favourites
+      summary: Retrieve user favourite service
+      description: Retrieve a user favourite service by ID
+      operationId: getUserFavouriteService
+      parameters:
+        - name: serviceId
+          in: path
+          description: ID of favourite service to return
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+        '401':
+          description: Bearer token null or expired
+        '404':
+          description: Not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '502':
+          description: Bad gateway
+        '504':
+          description: Gateway timeout
+    put:
+      tags:
+        - favourites
+      summary: Set user favourite service
+      description: Set a user favourite service by ID
+      operationId: setUserFavouriteService
+      parameters:
+        - name: serviceId
+          in: path
+          description: ID of favourite service to set
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Successful operation
+        '401':
+          description: Bearer token null or expired
+        '404':
+          description: Not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '502':
+          description: Bad gateway
+        '504':
+          description: Gateway timeout
+    delete:
+      tags:
+        - favourites
+      summary: Remove user favourite service
+      description: Remove a user favourite service by ID
+      operationId: removeUserFavouriteService
+      parameters:
+        - name: serviceId
+          in: path
+          description: ID of favourite service to remove
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Successful operation
+        '401':
+          description: Bearer token null or expired
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '502':
+          description: Bad gateway
+        '504':
+          description: Gateway timeout
 components:
   securitySchemes:
     Bearer:
@@ -264,6 +383,39 @@ components:
       allOf:
         - $ref: "#/components/schemas/Services"
         - $ref: "#/components/schemas/PaginationResultSet"
+    FavouriteServicesResource:
+      allOf:
+        - $ref: '#/components/schemas/FavouriteServices'
+        - type: object
+          properties:
+            continuation_token:
+              type: string
+              description: pagination continuation token
+    FavouriteServices:
+      type: object
+      properties:
+        favourite_services:
+          type: array
+          items:
+            $ref: '#/components/schemas/FavouriteService'
+      required:
+        - favourite_services
+    FavouriteService:
+      type: object
+      description: Favourite service data
+      properties:
+        id:
+          type: string
+          description: Service Id (ULID format)
+        name:
+          type: string
+          description: Service Name
+        institution:
+          $ref: '#/components/schemas/Institution'
+      required:
+        - id
+        - name
+        - institution
     Services:
       type: object
       properties:
