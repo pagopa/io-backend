@@ -28,7 +28,7 @@ paths:
             $ref: '#/definitions/PNActivation'
         '401':
           description: Bearer token null or expired.
-        "429":
+        '429':
           description: Too many requests
         '500':
           description: Internal Server Error
@@ -62,7 +62,7 @@ paths:
             $ref: '#/definitions/ProblemJson'
         '401':
           description: Bearer token null or expired.
-        "429":
+        '429':
           description: Too many requests
         '500':
           description: Internal Server Error
