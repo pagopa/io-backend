@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 17.5.1
+
+### Patch Changes
+
+- ac31b7b: fix send activation response statuses
+
 ## 17.5.0
 
 ### Minor Changes
