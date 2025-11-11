@@ -27,7 +27,7 @@ paths:
         "401":
           description: Login expired.
         "404":
-          description: No service found for the provided ID.
+          description: No cards found for Citizen.
         "500":
           description: Internal Server Error
           content:
