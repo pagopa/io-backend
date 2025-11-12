@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 17.5.3
+
+### Patch Changes
+
+- be0822d: updated outdated specs
+
 ## 17.5.2
 
 ### Patch Changes
