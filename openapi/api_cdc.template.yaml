@@ -26,6 +26,8 @@ paths:
                 $ref: "#/components/schemas/CitizenStatus"
         "401":
           description: Login expired.
+        "404":
+          description: No cards found for Citizen.
         "500":
           description: Internal Server Error
           content:
