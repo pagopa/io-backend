@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 17.5.2
+
+### Patch Changes
+
+- 0c94bba: fixed status code
+
 ## 17.5.1
 
 ### Patch Changes
