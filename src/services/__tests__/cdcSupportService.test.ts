@@ -23,6 +23,7 @@ const mockGetStatus = jest
 
 const api = {
   info: mockInfo,
+  getRequests: jest.fn(),
   getStatus: mockGetStatus
 } as ReturnType<CdcSupportAPIClient>;
 
