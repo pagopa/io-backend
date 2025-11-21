@@ -25,11 +25,9 @@ import { pipe } from "fp-ts/lib/function";
 import { Errors } from "io-ts";
 
 import { CreateWalletAttestationBody } from "../../generated/io-wallet/CreateWalletAttestationBody";
-import { CreateWalletAttestationV2Body } from "../../generated/io-wallet/CreateWalletAttestationV2Body";
 import { CreateWalletInstanceBody } from "../../generated/io-wallet/CreateWalletInstanceBody";
 import { NonceDetailView } from "../../generated/io-wallet/NonceDetailView";
 import { SetWalletInstanceStatusBody } from "../../generated/io-wallet/SetWalletInstanceStatusBody";
-import { WalletAttestationView } from "../../generated/io-wallet/WalletAttestationView";
 import { WalletAttestationsView } from "../../generated/io-wallet/WalletAttestationsView";
 import { WalletInstanceData } from "../../generated/io-wallet/WalletInstanceData";
 import { WhitelistedFiscalCodeData } from "../../generated/io-wallet/WhitelistedFiscalCodeData";
@@ -92,45 +90,9 @@ export default class IoWalletController {
     );
 
   /**
-   * Create a Wallet Attestation
-   */
-  public readonly createWalletAttestation = (
-    req: express.Request
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorGeneric
-    | IResponseErrorValidation
-    | IResponseErrorForbiddenNotAuthorized
-    | IResponseSuccessJson<WalletAttestationView>
-    | IResponseErrorNotFound
-    | IResponseErrorServiceUnavailable
-  > =>
-    withUserFromRequest(req, async (user) =>
-      pipe(
-        this.ensureFiscalCodeIsAllowed(user.fiscal_code),
-        TE.chainW(() =>
-          pipe(
-            req.body,
-            CreateWalletAttestationBody.decode,
-            E.mapLeft(toValidationError),
-            TE.fromEither
-          )
-        ),
-        TE.map(({ grant_type, assertion }) =>
-          this.ioWalletService.createWalletAttestation(
-            assertion,
-            grant_type,
-            user.fiscal_code
-          )
-        ),
-        TE.toUnion
-      )()
-    );
-
-  /**
    * Create a list of Wallet Attestations
    */
-  public readonly createWalletAttestationV2 = (
+  public readonly createWalletAttestation = (
     req: express.Request
   ): Promise<
     | IResponseErrorInternal
@@ -144,11 +106,11 @@ export default class IoWalletController {
     withUserFromRequest(req, async (user) =>
       pipe(
         req.body,
-        CreateWalletAttestationV2Body.decode,
+        CreateWalletAttestationBody.decode,
         E.mapLeft(toValidationError),
         TE.fromEither,
         TE.map(({ assertion }) =>
-          this.ioWalletService.createWalletAttestationV2(
+          this.ioWalletService.createWalletAttestation(
             assertion,
             user.fiscal_code
           )

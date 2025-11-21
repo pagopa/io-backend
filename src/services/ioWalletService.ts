@@ -22,14 +22,12 @@ import {
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/Option";
 import { pipe } from "fp-ts/lib/function";
-import { Grant_typeEnum } from "generated/io-wallet-api/CreateWalletAttestationBody";
 import { NonceDetailView } from "generated/io-wallet-api/NonceDetailView";
 import { WalletAttestationsView } from "generated/io-wallet-api/WalletAttestationsView";
 import { WhitelistedFiscalCodeData } from "generated/io-wallet-api/WhitelistedFiscalCodeData";
 import * as t from "io-ts";
 
 import { SetWalletInstanceStatusWithFiscalCodeData } from "../../generated/io-wallet-api/SetWalletInstanceStatusWithFiscalCodeData";
-import { WalletAttestationView } from "../../generated/io-wallet-api/WalletAttestationView";
 import { WalletInstanceData } from "../../generated/io-wallet-api/WalletInstanceData";
 import { Subscription } from "../../generated/trial-system-api/Subscription";
 import { IoWalletAPIClient } from "../clients/io-wallet";
@@ -200,37 +198,9 @@ export default class IoWalletService {
     });
 
   /**
-   * Create a Wallet Attestation.
-   */
-  public readonly createWalletAttestation = (
-    assertion: NonEmptyString,
-    grant_type: Grant_typeEnum,
-    fiscal_code: FiscalCode
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorGeneric
-    | IResponseErrorForbiddenNotAuthorized
-    | IResponseErrorNotFound
-    | IResponseSuccessJson<WalletAttestationView>
-    | IResponseErrorServiceUnavailable
-  > =>
-    withCatchAsInternalError(async () => {
-      const validated = await this.ioWalletApiClient.createWalletAttestation({
-        body: {
-          assertion,
-          fiscal_code,
-          grant_type
-        }
-      });
-      return this.mapWalletAttestationApiResponse<WalletAttestationView>(
-        validated
-      );
-    });
-
-  /**
    * Create a list of Wallet Attestations.
    */
-  public readonly createWalletAttestationV2 = (
+  public readonly createWalletAttestation = (
     assertion: NonEmptyString,
     fiscal_code: FiscalCode
   ): Promise<
@@ -242,7 +212,7 @@ export default class IoWalletService {
     | IResponseErrorServiceUnavailable
   > =>
     withCatchAsInternalError(async () => {
-      const validated = await this.ioWalletApiClient.createWalletAttestationV2({
+      const validated = await this.ioWalletApiClient.createWalletAttestation({
         body: {
           assertion,
           fiscal_code
