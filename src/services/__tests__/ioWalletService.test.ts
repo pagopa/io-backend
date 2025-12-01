@@ -1,7 +1,6 @@
 import * as t from "io-ts";
 import IoWalletService from "../ioWalletService";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { Grant_typeEnum } from "../../../generated/io-wallet-api/CreateWalletAttestationBody";
 import { TrialSystemAPIClient } from "../../clients/trial-system.client";
 import { SubscriptionStateEnum } from "../../../generated/trial-system-api/SubscriptionState";
 import { IO_WALLET_TRIAL_ID } from "../../config";
@@ -17,7 +16,6 @@ const mockGetCurrentWalletInstanceStatus = jest.fn();
 const mockSetWalletInstanceStatus = jest.fn();
 const mockDeleteWalletInstances = jest.fn();
 const mockIsFiscalCodeWhitelisted = jest.fn();
-const mockCreateWalletAttestationV2 = jest.fn();
 const mockGenerateCertificateChain = jest.fn();
 
 mockGetNonce.mockImplementation(() =>
@@ -33,13 +31,6 @@ mockCreateWalletInstance.mockImplementation(() =>
   t.success({
     status: 204,
     value: undefined
-  })
-);
-
-mockCreateWalletAttestation.mockImplementation(() =>
-  t.success({
-    status: 200,
-    value: "value"
   })
 );
 
@@ -76,7 +67,7 @@ mockIsFiscalCodeWhitelisted.mockImplementation(() =>
   })
 );
 
-mockCreateWalletAttestationV2.mockImplementation(() =>
+mockCreateWalletAttestation.mockImplementation(() =>
   t.success({
     status: 200,
     value: {
@@ -108,7 +99,6 @@ const api = {
   getNonce: mockGetNonce,
   createWalletInstance: mockCreateWalletInstance,
   createWalletAttestation: mockCreateWalletAttestation,
-  createWalletAttestationV2: mockCreateWalletAttestationV2,
   healthCheck: mockHealthCheck,
   getWalletInstanceStatus: mockGetWalletInstanceStatus,
   setWalletInstanceStatus: mockSetWalletInstanceStatus,
@@ -331,21 +321,16 @@ describe("IoWalletService#createWalletAttestation", () => {
     jest.clearAllMocks();
   });
 
-  const grant_type =
-    Grant_typeEnum["urn:ietf:params:oauth:grant-type:jwt-bearer"];
-
   it("should make the correct api call", async () => {
     const service = new IoWalletService(api, trialSystemApi);
 
     await service.createWalletAttestation(
       "assertion" as NonEmptyString,
-      grant_type,
       aFiscalCode
     );
 
     expect(mockCreateWalletAttestation).toHaveBeenCalledWith({
       body: {
-        grant_type,
         assertion: "assertion",
         fiscal_code: aFiscalCode
       }
@@ -357,7 +342,6 @@ describe("IoWalletService#createWalletAttestation", () => {
 
     const res = await service.createWalletAttestation(
       "assertion" as NonEmptyString,
-      grant_type,
       aFiscalCode
     );
 
@@ -375,7 +359,6 @@ describe("IoWalletService#createWalletAttestation", () => {
 
     const res = await service.createWalletAttestation(
       "assertion" as NonEmptyString,
-      grant_type,
       aFiscalCode
     );
 
@@ -394,7 +377,6 @@ describe("IoWalletService#createWalletAttestation", () => {
 
     const res = await service.createWalletAttestation(
       "assertion" as NonEmptyString,
-      grant_type,
       aFiscalCode
     );
 
@@ -413,7 +395,6 @@ describe("IoWalletService#createWalletAttestation", () => {
 
     const res = await service.createWalletAttestation(
       "assertion" as NonEmptyString,
-      grant_type,
       aFiscalCode
     );
 
@@ -429,111 +410,6 @@ describe("IoWalletService#createWalletAttestation", () => {
     const service = new IoWalletService(api, trialSystemApi);
 
     const res = await service.createWalletAttestation(
-      "assertion" as NonEmptyString,
-      grant_type,
-      aFiscalCode
-    );
-
-    expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
-    });
-  });
-});
-
-describe("IoWalletService#createWalletAttestationV2", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("should make the correct api call", async () => {
-    const service = new IoWalletService(api, trialSystemApi);
-
-    await service.createWalletAttestationV2(
-      "assertion" as NonEmptyString,
-      aFiscalCode
-    );
-
-    expect(mockCreateWalletAttestationV2).toHaveBeenCalledWith({
-      body: {
-        assertion: "assertion",
-        fiscal_code: aFiscalCode
-      }
-    });
-  });
-
-  it("should handle a success response", async () => {
-    const service = new IoWalletService(api, trialSystemApi);
-
-    const res = await service.createWalletAttestationV2(
-      "assertion" as NonEmptyString,
-      aFiscalCode
-    );
-
-    expect(res).toMatchObject({
-      kind: "IResponseSuccessJson"
-    });
-  });
-
-  it("should handle an internal error when the API client returns 422", async () => {
-    mockCreateWalletAttestationV2.mockImplementationOnce(() =>
-      t.success({ status: 422 })
-    );
-
-    const service = new IoWalletService(api, trialSystemApi);
-
-    const res = await service.createWalletAttestationV2(
-      "assertion" as NonEmptyString,
-      aFiscalCode
-    );
-
-    expect(res).toMatchObject({
-      kind: "IResponseErrorGeneric"
-    });
-  });
-
-  it("should handle an internal error when the API client returns 500", async () => {
-    const aGenericProblem = {};
-    mockCreateWalletAttestationV2.mockImplementationOnce(() =>
-      t.success({ status: 500, value: aGenericProblem })
-    );
-
-    const service = new IoWalletService(api, trialSystemApi);
-
-    const res = await service.createWalletAttestationV2(
-      "assertion" as NonEmptyString,
-      aFiscalCode
-    );
-
-    expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
-    });
-  });
-
-  it("should handle an internal error when the API client returns a code not specified in spec", async () => {
-    const aGenericProblem = {};
-    mockCreateWalletAttestationV2.mockImplementationOnce(() =>
-      t.success({ status: 599, value: aGenericProblem })
-    );
-
-    const service = new IoWalletService(api, trialSystemApi);
-
-    const res = await service.createWalletAttestationV2(
-      "assertion" as NonEmptyString,
-      aFiscalCode
-    );
-
-    expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
-    });
-  });
-
-  it("should return an error if the api call throws an error", async () => {
-    mockCreateWalletAttestationV2.mockImplementationOnce(() => {
-      throw new Error();
-    });
-    const service = new IoWalletService(api, trialSystemApi);
-
-    const res = await service.createWalletAttestationV2(
       "assertion" as NonEmptyString,
       aFiscalCode
     );
