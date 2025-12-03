@@ -50,7 +50,6 @@ microservice-chart:
     API_BASE_PATH: '/api/v1'
     API_URL: 'https://io-p-app-fn-1.azurewebsites.net/api/v1'
     APP_MESSAGES_API_URL: 'https://io-p-app-messages-fn-1.azurewebsites.net/api/v1'
-    AUTHENTICATION_BASE_PATH: ""
     BONUS_API_BASE_PATH: '/api/v1'
     BONUS_API_URL: 'http://io-p-func-bonus.azurewebsites.net/api/v1'
     CGN_API_BASE_PATH: '/api/v1/cgn'
