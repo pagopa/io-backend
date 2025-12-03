@@ -5,12 +5,8 @@
 
 import { IResponseErrorValidation } from "@pagopa/ts-commons/lib/responses";
 import * as express from "express";
-import * as E from "fp-ts/Either";
 import * as t from "io-ts";
 
-import { CieUserIdentity } from "../../generated/auth/CieUserIdentity";
-import { SpidUserIdentity } from "../../generated/auth/SpidUserIdentity";
-import { UserIdentity as UserIdentityLegacy } from "../../generated/auth/UserIdentity";
 import { AssertionRef } from "../../generated/backend/AssertionRef";
 import { EmailAddress } from "../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../generated/backend/FiscalCode";
@@ -95,26 +91,6 @@ export type UserV5 = t.TypeOf<typeof UserV5>;
 
 export const User = t.union([UserV1, UserV2, UserV3, UserV4, UserV5], "User");
 export type User = t.TypeOf<typeof User>;
-
-/**
- * Discriminate from a CieUserIdentity and a SpidUserIdentity
- * checking the spid_email property.
- *
- * @param user
- */
-export function isSpidUserIdentity(
-  user: CieUserIdentity | SpidUserIdentity
-): user is SpidUserIdentity {
-  return (user as SpidUserIdentity).spid_email !== undefined;
-}
-
-export function exactUserIdentityDecode(
-  user: UserIdentityLegacy
-): E.Either<t.Errors, UserIdentityLegacy> {
-  return isSpidUserIdentity(user)
-    ? t.exact(SpidUserIdentity.type).decode(user)
-    : t.exact(CieUserIdentity.type).decode(user);
-}
 
 // @deprecated - Use `withUserIdentityFromRequest` instead
 export const withUserFromRequest = async <T>(
