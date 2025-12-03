@@ -58,7 +58,6 @@ import {
   SERVICES_APP_BACKEND_CLIENT,
   TRIAL_SYSTEM_CLIENT
 } from "./config";
-import { registerAuthenticationRoutes } from "./routes/authenticationRoutes";
 import { registerAPIRoutes } from "./routes/baseRoutes";
 import { registerBonusAPIRoutes } from "./routes/bonusRoutes";
 import { registerCdcSupportAPIRoutes } from "./routes/cdcSupportRoutes";
@@ -113,7 +112,6 @@ export interface IAppFactoryParameters {
   readonly env: NodeEnvironment;
   readonly appInsightsClient?: appInsights.TelemetryClient;
   readonly allowNotifyIPSourceRange: ReadonlyArray<CIDR>;
-  readonly authenticationBasePath: string;
   readonly APIBasePath: string;
   readonly BonusAPIBasePath: string;
   readonly CdcSupportAPIbasePath: string;
@@ -131,7 +129,6 @@ export async function newApp({
   env,
   allowNotifyIPSourceRange,
   appInsightsClient,
-  authenticationBasePath,
   APIBasePath,
   BonusAPIBasePath,
   CdcSupportAPIbasePath,
@@ -362,12 +359,6 @@ export async function newApp({
           LOLLIPOP_API_CLIENT,
           SESSION_STORAGE,
           FIRST_LOLLIPOP_CONSUMER_CLIENT,
-          authMiddlewares.bearerSession
-        );
-
-        registerAuthenticationRoutes(
-          app,
-          authenticationBasePath,
           authMiddlewares.bearerSession
         );
 
