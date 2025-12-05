@@ -87,7 +87,6 @@ describe("Success app start", () => {
       ServicesAppBackendBasePath: aServicesAppBackendBasePath,
       TrialSystemBasePath: aTrialSystemBasePath,
       allowNotifyIPSourceRange: [aValidCIDR],
-      authenticationBasePath: "",
       env: NodeEnvironmentEnum.PRODUCTION
     });
   });
@@ -196,7 +195,6 @@ describe("Failure app start", () => {
         ServicesAppBackendBasePath: aServicesAppBackendBasePath,
         TrialSystemBasePath: aTrialSystemBasePath,
         allowNotifyIPSourceRange: [aValidCIDR],
-        authenticationBasePath: "",
         env: NodeEnvironmentEnum.PRODUCTION
       });
     } catch (err) {

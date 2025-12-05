@@ -113,7 +113,6 @@ Those are all Environment variables needed by the application:
 | ALLOW_NOTIFY_IP_SOURCE_RANGE              | The range in CIDR form of allowed IPs for the webhook notifications                                  | string |
 | NOTIFICATIONS_STORAGE_CONNECTION_STRING   | Connection string to Azure queue storage for notification hub messages                               | string |
 | NOTIFICATIONS_QUEUE_NAME                  | Queue name of Azure queue storage for notification hub messages                                      | string |
-| AUTHENTICATION_BASE_PATH                  | The root path for the authentication endpoints                                                       | string |
 | PAGOPA_API_URL_PROD                       | The url for the PagoPA api endpoints in prod mode                                                    | string |
 | PAGOPA_API_KEY_PROD                       | The api-key needed to call the pagopa proxy API                                                      | string |
 | PAGOPA_API_URL_TEST                       | The url for the PagoPA api endpoints in test mode                                                    | string |
