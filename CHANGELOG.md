@@ -1,5 +1,15 @@
 # @pagopa/io-backend
 
+## 18.0.0
+
+### Major Changes
+
+- 267a94c: Removed /token wallet endpoint
+
+### Patch Changes
+
+- c708c71: Remove unused `user-identity` endpoint
+
 ## 17.5.3
 
 ### Patch Changes
