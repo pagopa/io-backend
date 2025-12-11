@@ -9,7 +9,7 @@ import * as O from "fp-ts/lib/Option";
 
 import { AssertionRef as BackendAssertionRef } from "../../generated/backend/AssertionRef";
 import { LollipopData } from "../types/assertionRef";
-import { MyPortalToken, SessionToken } from "../types/token";
+import { SessionToken } from "../types/token";
 import { User } from "../types/user";
 
 export interface ISessionStorage {
@@ -18,13 +18,6 @@ export interface ISessionStorage {
    */
   readonly getBySessionToken: (
     token: SessionToken
-  ) => Promise<Either<Error, Option<User>>>;
-
-  /**
-   * Retrieves a value from the cache using the myportal token.
-   */
-  readonly getByMyPortalToken: (
-    token: MyPortalToken
   ) => Promise<Either<Error, Option<User>>>;
 
   /**
