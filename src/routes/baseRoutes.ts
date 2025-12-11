@@ -14,7 +14,6 @@ import PagoPAEcommerceController from "../controllers/pagoPAEcommerceController"
 import PagoPAProxyController from "../controllers/pagoPAProxyController";
 import ProfileController from "../controllers/profileController";
 import ServicesController from "../controllers/servicesController";
-import SessionController from "../controllers/sessionController";
 import UserDataProcessingController from "../controllers/userDataProcessingController";
 import FunctionsAppService from "../services/functionAppService";
 import NewMessagesService from "../services/newMessagesService";
@@ -78,10 +77,6 @@ export const registerAPIRoutes = (
       notificationDefaultSubject: NOTIFICATION_DEFAULT_SUBJECT,
       notificationDefaultTitle: NOTIFICATION_DEFAULT_TITLE
     });
-
-  const sessionController: SessionController = new SessionController(
-    sessionStorage
-  );
 
   const pagoPAProxyController: PagoPAProxyController =
     new PagoPAProxyController(pagoPaProxyService);
@@ -225,12 +220,6 @@ export const registerAPIRoutes = (
       notificationController.createOrUpdateInstallation,
       notificationController
     )
-  );
-
-  app.get(
-    `${basePath}/sessions`,
-    bearerSessionTokenAuth,
-    toExpressHandler(sessionController.listSessions, sessionController)
   );
 
   app.get(
