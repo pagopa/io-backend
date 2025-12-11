@@ -38,7 +38,6 @@ import { toExpressHandler } from "../utils/express";
  * @param notificationServiceFactory The factory that build the Service service to handle services
  * @param sessionStorage The session storage service that handles the user sessions
  * @param pagoPaProxyService The service that handles the PagoPA Proxy
- * @param userMetadataStorage The user metadata storage service that handles the user metadata
  * @param userDataProcessingService The service that handles the user request for data processing
  * @param bearerSessionTokenAuth The autentication middleware for user session token
  * @param lollipopClient The API Client that handles the Lollipop protocol requests
