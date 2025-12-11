@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 18.0.1
+
+### Patch Changes
+
+- b09a287: Remove unused `user-metadata` endpoints
+
 ## 18.0.0
 
 ### Major Changes
