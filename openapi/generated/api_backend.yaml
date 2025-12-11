@@ -911,6 +911,50 @@ definitions:
         type: integer
     required:
       - version
+  ExtendedProfile:
+    description: |-
+      Describes the citizen's profile, mostly interesting for preferences
+      attributes.
+    type: object
+    properties:
+      email:
+        $ref: '#/definitions/EmailAddress'
+      service_preferences_settings:
+        $ref: '#/definitions/ServicePreferencesSettings'
+      blocked_inbox_or_channels:
+        $ref: '#/definitions/BlockedInboxOrChannels'
+      preferred_languages:
+        $ref: '#/definitions/PreferredLanguages'
+      is_inbox_enabled:
+        $ref: '#/definitions/IsInboxEnabled'
+      accepted_tos_version:
+        $ref: '#/definitions/AcceptedTosVersion'
+      is_webhook_enabled:
+        $ref: '#/definitions/IsWebhookEnabled'
+      is_email_enabled:
+        $ref: '#/definitions/IsEmailEnabled'
+      is_email_validated:
+        $ref: '#/definitions/IsEmailValidated'
+      is_email_already_taken:
+        $ref: '#/definitions/IsEmailAlreadyTaken'
+      reminder_status:
+        $ref: '#/definitions/ReminderStatus'
+      is_test_profile:
+        $ref: '#/definitions/IsTestProfile'
+      last_app_version:
+        $ref: '#/definitions/AppVersion'
+      push_notifications_content_type:
+        $ref: '#/definitions/PushNotificationsContentType'
+      version:
+        type: integer
+    required:
+      - is_email_enabled
+      - is_email_validated
+      - is_email_already_taken
+      - is_inbox_enabled
+      - is_webhook_enabled
+      - service_preferences_settings
+      - version
   FiscalCode:
     type: string
     description: User's fiscal code.
