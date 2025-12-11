@@ -18,7 +18,6 @@ import { ISessionStorage } from "src/services/ISessionStorage";
 
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 import { Profile } from "../../generated/backend/Profile";
-import { ExtendedProfile as ExtendedProfileApi } from "../../generated/io-profile/ExtendedProfile";
 import ProfileService from "../services/profileService";
 import { profileMissingErrorResponse } from "../types/profile";
 import { withUserFromRequest } from "../types/user";
@@ -48,21 +47,6 @@ export default class ProfileController {
         ? profileMissingErrorResponse
         : response;
     });
-
-  /**
-   * Returns the profile for the user identified by the provided fiscal
-   * code stored into the API.
-   */
-  public readonly getApiProfile = (
-    req: express.Request
-  ): Promise<
-    | IResponseErrorValidation
-    | IResponseErrorInternal
-    | IResponseErrorTooManyRequests
-    | IResponseErrorNotFound
-    | IResponseSuccessJson<ExtendedProfileApi>
-  > =>
-    withUserFromRequest(req, (user) => this.profileService.getApiProfile(user));
 
   /**
    * Update the preferences for the user identified by the provided

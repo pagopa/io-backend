@@ -60,15 +60,6 @@ const proxyUserResponse = {
   version: 1 as NonNegativeInteger,
 };
 
-const apiUserProfileResponse = {
-  email: anEmailAddress,
-  is_email_validated: true,
-  is_inbox_enabled: true,
-  is_webhook_enabled: true,
-  preferred_languages: ["it_IT"],
-  version: 42,
-};
-
 // mock for upsert user (Extended Profile)
 const mockedUpsertProfile: ExtendedProfile = {
   email: anEmailAddress,
@@ -90,14 +81,12 @@ const badRequestErrorResponse = {
 };
 
 const mockGetProfile = jest.fn();
-const mockGetApiProfile = jest.fn();
 const mockUpdateProfile = jest.fn();
 const mockEmailValidationProcess = jest.fn();
 jest.mock("../../services/profileService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
       emailValidationProcess: mockEmailValidationProcess,
-      getApiProfile: mockGetApiProfile,
       getProfile: mockGetProfile,
       updateProfile: mockUpdateProfile,
     })),
@@ -243,130 +232,6 @@ describe("ProfileController#getProfile", () => {
       ...profileMissingErrorResponse,
       apply: expect.any(Function),
     });
-  });
-});
-
-describe("ProfileController#getApiProfile", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("calls the getApiProfile on the ProfileService with valid values and return a profile without new features related properties", async () => {
-    const req = mockReq();
-
-    mockGetApiProfile.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(apiUserProfileResponse))
-    );
-
-    req.user = mockedUser;
-
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const profileService = new ProfileService(apiClient);
-    const controller = new ProfileController(
-      profileService,
-      redisSessionStorage
-    );
-    const response = await controller.getApiProfile(req);
-
-    expect(mockGetApiProfile).toHaveBeenCalledWith(mockedUser);
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessJson",
-      value: apiUserProfileResponse,
-    });
-  });
-
-  it.each`
-    feature                                   | additionalProperty                   | value
-    ${"app version tracking"}                 | ${"last_app_version"}                | ${"0.0.1" as AppVersion}
-    ${"descriptive push notification opt-in"} | ${"push_notifications_content_type"} | ${PushNotificationsContentTypeEnum.ANONYMOUS}
-    ${"descriptive push notification opt-in"} | ${"push_notifications_content_type"} | ${PushNotificationsContentTypeEnum.FULL}
-    ${"reminder opt-in"}                      | ${"reminder_status"}                 | ${ReminderStatusEnum.DISABLED}
-    ${"reminder opt-in"}                      | ${"reminder_status"}                 | ${ReminderStatusEnum.ENABLED}
-  `(
-    "calls the getApiProfile on the ProfileService with valid values and return a profile with $additionalProperty=$value property relative to $feature feature",
-    async ({ additionalProperty, value }) => {
-      const req = mockReq();
-
-      mockGetApiProfile.mockReturnValue(
-        Promise.resolve(
-          ResponseSuccessJson({
-            ...apiUserProfileResponse,
-            [additionalProperty]: value,
-          })
-        )
-      );
-
-      req.user = mockedUser;
-
-      const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-      const profileService = new ProfileService(apiClient);
-      const controller = new ProfileController(
-        profileService,
-        redisSessionStorage
-      );
-      const response = await controller.getApiProfile(req);
-
-      expect(mockGetApiProfile).toHaveBeenCalledWith(mockedUser);
-      expect(response).toEqual({
-        apply: expect.any(Function),
-        kind: "IResponseSuccessJson",
-        value: {
-          ...apiUserProfileResponse,
-          [additionalProperty]: value,
-        },
-      });
-    }
-  );
-
-  it("calls the getApiProfile on the ProfileService with valid values", async () => {
-    const req = mockReq();
-
-    mockGetApiProfile.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(apiUserProfileResponse))
-    );
-
-    req.user = mockedUser;
-
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const profileService = new ProfileService(apiClient);
-    const controller = new ProfileController(
-      profileService,
-      redisSessionStorage
-    );
-    const response = await controller.getApiProfile(req);
-
-    expect(mockGetApiProfile).toHaveBeenCalledWith(mockedUser);
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessJson",
-      value: apiUserProfileResponse,
-    });
-  });
-
-  it("calls the getApiProfile on the ProfileService with empty user", async () => {
-    const req = mockReq();
-    const res = mockRes();
-
-    mockGetApiProfile.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(apiUserProfileResponse))
-    );
-
-    req.user = "";
-
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const profileService = new ProfileService(apiClient);
-    const controller = new ProfileController(
-      profileService,
-      redisSessionStorage
-    );
-
-    const response = await controller.getApiProfile(req);
-    response.apply(res);
-
-    // getApiProfile is not called
-    expect(mockGetApiProfile).not.toBeCalled();
-    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
 });
 
