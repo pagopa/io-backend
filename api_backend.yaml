@@ -620,27 +620,6 @@ paths:
           description: There was an error in registering the device to the Notification Hub.
           schema:
             $ref: "#/definitions/ProblemJson"
-  "/sessions":
-    x-swagger-router-controller: AuthenticationController
-    get:
-      operationId: listUserSessions
-      summary: List sessions of a User
-      description: Return all the active sessions for an authenticated User.
-      responses:
-        "200":
-          description: Found.
-          schema:
-            $ref: "#/definitions/SessionsList"
-        "400":
-          description: Bad request
-          schema:
-            $ref: "#/definitions/ProblemJson"
-        "401":
-          description: Bearer token null or expired.
-        "500":
-          description: Unavailable service
-          schema:
-            $ref: "#/definitions/ProblemJson"
   "/payment-requests/{rptId}":
     x-swagger-router-controller: PagoPAProxyController
     parameters:
