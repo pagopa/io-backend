@@ -89,7 +89,6 @@ import PagoPAProxyService from "./services/pagoPAProxyService";
 import { PNService } from "./services/pnService";
 import ProfileService from "./services/profileService";
 import RedisSessionStorage from "./services/redisSessionStorage";
-import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import ServicesAppBackendService from "./services/servicesAppBackendService";
 import TrialService from "./services/trialService";
 import UserDataProcessingService from "./services/userDataProcessingService";
@@ -376,10 +375,6 @@ export async function newApp({
           PAGOPA_ECOMMERCE_UAT_CLIENT
         );
 
-        // Register the user metadata storage service.
-        const USER_METADATA_STORAGE = new RedisUserMetadataStorage(
-          REDIS_CLIENT_SELECTOR.selectOne(RedisClientMode.FAST)
-        );
         registerAPIRoutes(
           app,
           APIBasePath,
@@ -391,7 +386,6 @@ export async function newApp({
           SESSION_STORAGE,
           PAGOPA_PROXY_SERVICE,
           PAGOPA_ECOMMERCE_SERVICE,
-          USER_METADATA_STORAGE,
           USER_DATA_PROCESSING_SERVICE,
           authMiddlewares.bearerSession,
           LOLLIPOP_API_CLIENT

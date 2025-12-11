@@ -14,7 +14,6 @@ import * as redisUtils from "../utils/redis";
 jest.mock("@azure/storage-queue");
 
 jest.mock("../services/redisSessionStorage");
-jest.mock("../services/redisUserMetadataStorage");
 jest.mock("../services/apiClientFactory");
 jest
   .spyOn(redisUtils, "createClusterRedisClient")
