@@ -810,6 +810,8 @@ definitions:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PreferredLanguages"
   Profile:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/Profile"
+  ExtendedProfile:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ExtendedProfile"
   FiscalCode:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/FiscalCode"
   IsEmailEnabled:

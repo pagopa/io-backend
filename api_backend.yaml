@@ -876,6 +876,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v29.1.1/openapi/definitions.yaml#/PreferredLanguages"
   Profile:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v29.1.1/openapi/definitions.yaml#/Profile"
+  ExtendedProfile:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v29.1.1/openapi/definitions.yaml#/ExtendedProfile"
   FiscalCode:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v29.1.1/openapi/definitions.yaml#/FiscalCode"
   IsEmailEnabled:
