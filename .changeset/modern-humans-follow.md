@@ -2,4 +2,4 @@
 "@pagopa/io-backend": patch
 ---
 
-Remove uused pagopa-proxy endpoints
+Remove unused pagopa-proxy endpoints
