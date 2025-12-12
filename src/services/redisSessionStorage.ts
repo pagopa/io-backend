@@ -85,28 +85,6 @@ export default class RedisSessionStorage
     return E.right(O.some(user));
   }
 
-  public async listUserSessions(
-    user: User
-  ): Promise<Either<Error, SessionsList>> {
-    // If some user session was expired we update the USERSESSION Redis set.
-    await this.clearExpiredSetValues(user.fiscal_code);
-
-    const sessionKeys = await this.readSessionInfoKeys(user.fiscal_code);
-
-    if (E.isLeft(sessionKeys)) {
-      return E.left(sessionKeys.left);
-    }
-
-    return pipe(
-      this.mGet([...sessionKeys.right]),
-      TE.map((keys) =>
-        this.parseUserSessionList(
-          keys.filter((key) => key !== null) as ReadonlyArray<string>
-        )
-      )
-    )();
-  }
-
   /**
    * Remove expired `SESSIONINFO` value from the `USERSESSION` redis set.
    *
