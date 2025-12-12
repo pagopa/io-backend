@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 18.0.3
+
+### Patch Changes
+
+- 31e490c: Remove unused `sessions` endpoint
+
 ## 18.0.2
 
 ### Patch Changes

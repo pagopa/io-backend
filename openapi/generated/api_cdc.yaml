@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  version: 18.0.2
+  version: 18.0.3
   title: CdC Support API
   x-logo:
     url: https://io.italia.it/assets/img/io-logo-blue.svg
