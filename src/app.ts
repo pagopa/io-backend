@@ -48,7 +48,6 @@ import {
   LOLLIPOP_API_CLIENT,
   NOTIFICATIONS_QUEUE_NAME,
   NOTIFICATIONS_STORAGE_CONNECTION_STRING,
-  PAGOPA_CLIENT,
   PAGOPA_ECOMMERCE_CLIENT,
   PAGOPA_ECOMMERCE_UAT_CLIENT,
   PN_ADDRESS_BOOK_CLIENT_SELECTOR,
@@ -85,7 +84,6 @@ import NewMessagesService from "./services/newMessagesService";
 import NotificationService from "./services/notificationService";
 import { getNotificationServiceFactory } from "./services/notificationServiceFactory";
 import PagoPAEcommerceService from "./services/pagoPAEcommerceService";
-import PagoPAProxyService from "./services/pagoPAProxyService";
 import { PNService } from "./services/pnService";
 import ProfileService from "./services/profileService";
 import RedisSessionStorage from "./services/redisSessionStorage";
@@ -368,8 +366,6 @@ export async function newApp({
           APP_MESSAGES_API_CLIENT
         );
 
-        const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT);
-
         const PAGOPA_ECOMMERCE_SERVICE = new PagoPAEcommerceService(
           PAGOPA_ECOMMERCE_CLIENT,
           PAGOPA_ECOMMERCE_UAT_CLIENT
@@ -384,7 +380,6 @@ export async function newApp({
           APP_MESSAGES_SERVICE,
           notificationServiceFactory,
           SESSION_STORAGE,
-          PAGOPA_PROXY_SERVICE,
           PAGOPA_ECOMMERCE_SERVICE,
           USER_DATA_PROCESSING_SERVICE,
           authMiddlewares.bearerSession,

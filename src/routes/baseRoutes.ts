@@ -11,7 +11,6 @@ import {
 import MessagesController from "../controllers/messagesController";
 import NotificationController from "../controllers/notificationController";
 import PagoPAEcommerceController from "../controllers/pagoPAEcommerceController";
-import PagoPAProxyController from "../controllers/pagoPAProxyController";
 import ProfileController from "../controllers/profileController";
 import ServicesController from "../controllers/servicesController";
 import UserDataProcessingController from "../controllers/userDataProcessingController";
@@ -19,7 +18,6 @@ import FunctionsAppService from "../services/functionAppService";
 import NewMessagesService from "../services/newMessagesService";
 import { NotificationServiceFactory } from "../services/notificationServiceFactory";
 import PagoPAEcommerceService from "../services/pagoPAEcommerceService";
-import PagoPAProxyService from "../services/pagoPAProxyService";
 import ProfileService from "../services/profileService";
 import RedisSessionStorage from "../services/redisSessionStorage";
 import UserDataProcessingService from "../services/userDataProcessingService";
@@ -36,7 +34,6 @@ import { toExpressHandler } from "../utils/express";
  * @param appMessagesService The service that handles the user messages
  * @param notificationServiceFactory The factory that build the Service service to handle services
  * @param sessionStorage The session storage service that handles the user sessions
- * @param pagoPaProxyService The service that handles the PagoPA Proxy
  * @param userDataProcessingService The service that handles the user request for data processing
  * @param bearerSessionTokenAuth The autentication middleware for user session token
  * @param lollipopClient The API Client that handles the Lollipop protocol requests
@@ -51,7 +48,6 @@ export const registerAPIRoutes = (
   appMessagesService: NewMessagesService,
   notificationServiceFactory: NotificationServiceFactory,
   sessionStorage: RedisSessionStorage,
-  pagoPaProxyService: PagoPAProxyService,
   PagoPaEcommerceService: PagoPAEcommerceService,
   userDataProcessingService: UserDataProcessingService,
   bearerSessionTokenAuth: ReturnType<passport.Authenticator["authenticate"]>,
@@ -77,9 +73,6 @@ export const registerAPIRoutes = (
       notificationDefaultSubject: NOTIFICATION_DEFAULT_SUBJECT,
       notificationDefaultTitle: NOTIFICATION_DEFAULT_TITLE
     });
-
-  const pagoPAProxyController: PagoPAProxyController =
-    new PagoPAProxyController(pagoPaProxyService);
 
   const pagoPAEcommerceController: PagoPAEcommerceController =
     new PagoPAEcommerceController(PagoPaEcommerceService);
@@ -217,38 +210,11 @@ export const registerAPIRoutes = (
   );
 
   app.get(
-    `${basePath}/payment-requests/:rptId`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      pagoPAProxyController.getPaymentInfo,
-      pagoPAProxyController
-    )
-  );
-
-  app.get(
     `${basePath}/payment-info/:rptId`,
     bearerSessionTokenAuth,
     toExpressHandler(
       pagoPAEcommerceController.getPaymentInfo,
       pagoPAEcommerceController
-    )
-  );
-
-  app.post(
-    `${basePath}/payment-activations`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      pagoPAProxyController.activatePayment,
-      pagoPAProxyController
-    )
-  );
-
-  app.get(
-    `${basePath}/payment-activations/:codiceContestoPagamento`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      pagoPAProxyController.getActivationStatus,
-      pagoPAProxyController
     )
   );
 };
