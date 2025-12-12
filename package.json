@@ -32,7 +32,6 @@
     "generate:proxy:api-parameters": "gen-api-models --api-spec api_parameters.yaml --out-dir generated/parameters",
     "generate:proxy:notification-models": "rimraf generated/notifications && gen-api-models --api-spec api_notifications.yaml --out-dir generated/notifications",
     "generate:messages:notifications": "rimraf generated/messages && gen-api-models --api-spec notification_queue_messages.yaml --out-dir generated/messages",
-    "generate:proxy:myportal-models": "rimraf generated/myportal && gen-api-models --api-spec api_myportal.yaml --out-dir generated/myportal",
     "generate:proxy:trial-system-models": "rimraf generated/trial-system && gen-api-models --api-spec api_trial_system.yaml --out-dir generated/trial-system",
     "generate:api:trial-system": "rimraf generated/trial-system-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/trial-system/081d98c37a116c9d842f31c54a2fe641680c5424/infra/resources/modules/commons/api/ts_management/v1/_openapi.yaml --no-strict --out-dir generated/trial-system-api --request-types --response-decoders --client",
     "generate:proxy:first-lc-models": "rimraf generated/first-lc-proxy-models && gen-api-models --api-spec api_lollipop_first_consumer.yaml --out-dir generated/first-lc-proxy-models",

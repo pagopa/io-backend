@@ -23,14 +23,7 @@ import {
   LollipopData,
   NullableBackendAssertionRefFromString
 } from "../types/assertionRef";
-import {
-  BPDToken,
-  FIMSToken,
-  MyPortalToken,
-  SessionToken,
-  WalletToken,
-  ZendeskToken
-} from "../types/token";
+import { SessionToken } from "../types/token";
 import { User } from "../types/user";
 import { LoginTypeEnum } from "../utils/fastLogin";
 import { log } from "../utils/logger";
@@ -79,29 +72,6 @@ export default class RedisSessionStorage
     token: SessionToken
   ): Promise<Either<Error, Option<User>>> {
     const errorOrSession = await this.loadSessionBySessionToken(token);
-
-    if (E.isLeft(errorOrSession)) {
-      if (errorOrSession.left === sessionNotFoundError) {
-        return E.right(O.none);
-      }
-      return E.left(errorOrSession.left);
-    }
-
-    const user = errorOrSession.right;
-
-    return E.right(O.some(user));
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public async getByMyPortalToken(
-    token: MyPortalToken
-  ): Promise<Either<Error, Option<User>>> {
-    const errorOrSession = await this.loadSessionByToken(
-      myPortalTokenPrefix,
-      token
-    );
 
     if (E.isLeft(errorOrSession)) {
       if (errorOrSession.left === sessionNotFoundError) {
@@ -432,39 +402,6 @@ export default class RedisSessionStorage
           E.fromOption(() => sessionNotFoundError),
           E.chain(this.parseUser),
           TE.fromEither
-        )
-      )
-    )();
-  }
-
-  /**
-   * Return a Session for this token.
-   */
-  private loadSessionByToken(
-    prefix: string,
-    token: WalletToken | MyPortalToken | BPDToken | ZendeskToken | FIMSToken
-  ): Promise<Either<Error, User>> {
-    return pipe(
-      TE.tryCatch(
-        () =>
-          this.redisClientSelector
-            .selectOne(RedisClientMode.FAST)
-            .get(`${prefix}${token}`),
-        E.toError
-      ),
-      TE.chain(
-        flow(
-          O.fromNullable,
-          TE.fromOption(() => sessionNotFoundError)
-        )
-      ),
-      TE.chain((value) =>
-        pipe(
-          TE.tryCatch(
-            () => this.loadSessionBySessionToken(value as SessionToken),
-            E.toError
-          ),
-          TE.chain(TE.fromEither)
         )
       )
     )();
