@@ -58,7 +58,6 @@ const aValidCIDR = "192.168.0.0/16" as CIDR;
 const X_FORWARDED_PROTO_HEADER = "X-Forwarded-Proto";
 
 const aAPIBasePath = "/api/v1";
-const aBonusAPIBasePath = "/bonus/api/v1";
 const aCgnAPIBasePath = "/api/v1/cgn";
 const aCdcIOAPIBasePath = "/api/v1/cdc";
 const aCgnOperatorSearchAPIBasePath = "/api/v1/cgn-operator-search";
@@ -75,7 +74,6 @@ describe("Success app start", () => {
   beforeAll(async () => {
     app = await appModule.newApp({
       APIBasePath: aAPIBasePath,
-      BonusAPIBasePath: aBonusAPIBasePath,
       CdcSupportAPIbasePath: aCdcIOAPIBasePath,
       CGNAPIBasePath: aCgnAPIBasePath,
       CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
@@ -183,7 +181,6 @@ describe("Failure app start", () => {
     try {
       await appModule.newApp({
         APIBasePath: aAPIBasePath,
-        BonusAPIBasePath: aBonusAPIBasePath,
         CdcSupportAPIbasePath: aCdcIOAPIBasePath,
         CGNAPIBasePath: aCgnAPIBasePath,
         CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
