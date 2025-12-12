@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 18.0.2
+
+### Patch Changes
+
+- ee49c4d: Remove unused myportal endpoint
+
 ## 18.0.1
 
 ### Patch Changes
