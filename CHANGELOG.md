@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 18.0.4
+
+### Patch Changes
+
+- 7dd132f: Remove unused `api-profile` endpoint
+
 ## 18.0.3
 
 ### Patch Changes
