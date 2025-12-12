@@ -3,7 +3,6 @@
  * an API client.
  */
 
-import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import {
   IResponseErrorConflict,
   IResponseErrorInternal,
@@ -20,8 +19,6 @@ import {
   ResponseSuccessAccepted,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-import * as E from "fp-ts/lib/Either";
-import { pipe } from "fp-ts/lib/function";
 
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 import { Profile as ProfileBackend } from "../../generated/backend/Profile";
@@ -74,52 +71,6 @@ export default class ProfileService {
 
         if (response.status === 404) {
           return ResponseErrorNotFound("Not Found", "Profile not found");
-        }
-
-        // The user has sent too many requests in a given amount of time ("rate limiting").
-        if (response.status === 429) {
-          return ResponseErrorTooManyRequests();
-        }
-
-        if (response.status === 500) {
-          return ResponseErrorInternal(
-            `Error retrieving the profile [${response.value.detail}]`
-          );
-        }
-
-        return unhandledResponseStatus(response.status);
-      });
-    });
-  };
-
-  public readonly getApiProfile = (
-    user: User
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorTooManyRequests
-    | IResponseErrorNotFound
-    | IResponseSuccessJson<ExtendedProfileApi>
-  > => {
-    const client = this.apiClient.getClient();
-    return withCatchAsInternalError(async () => {
-      const validated = await client.getProfile({
-        fiscal_code: user.fiscal_code
-      });
-      return withValidatedOrInternalError(validated, (response) => {
-        if (response.status === 200) {
-          return pipe(
-            response.value,
-            ExtendedProfileApi.decode,
-            E.mapLeft((_) =>
-              ResponseErrorInternal(errorsToReadableMessages(_).join(" / "))
-            ),
-            E.map(ResponseSuccessJson),
-            E.toUnion
-          );
-        }
-        // The profile doesn't exists for the user
-        if (response.status === 404) {
-          return ResponseErrorNotFound("Not found", "Profile not found.");
         }
 
         // The user has sent too many requests in a given amount of time ("rate limiting").

@@ -93,12 +93,6 @@ export const registerAPIRoutes = (
     toExpressHandler(profileController.getProfile, profileController)
   );
 
-  app.get(
-    `${basePath}/api-profile`,
-    bearerSessionTokenAuth,
-    toExpressHandler(profileController.getApiProfile, profileController)
-  );
-
   app.post(
     `${basePath}/profile`,
     bearerSessionTokenAuth,
