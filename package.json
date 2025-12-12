@@ -48,7 +48,6 @@
     "generate:api:io-sign": "rimraf generated/io-sign-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-sign/0a9124b7c782b2569dd82c094496e50a17b418f4/apps/io-func-sign-user/openapi.yaml --no-strict --out-dir generated/io-sign-api --request-types --response-decoders --client",
     "generate:api:io-fims": "rimraf generated/io-fims-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-fims/44c478f9b9ca024aa4db963873a85f8d9c37f5d3/apps/user-func/openapi.yaml --no-strict --out-dir generated/io-fims-api --request-types --response-decoders --client",
     "generate:api:io-cgn-operator-search": "rimraf generated/io-cgn-operator-search-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml --no-strict --out-dir generated/io-cgn-operator-search-api --request-types --response-decoders --client",
-    "generate:api:pagopaproxy": "rimraf generated/pagopa-proxy && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-for-io.yaml --no-strict --out-dir generated/pagopa-proxy --request-types --response-decoders --client",
     "generate:api:pagopa-ecommerce": "rimraf generated/pagopa-ecommerce && gen-api-models --api-spec openapi/consumed/pagopa_ecommerce.yaml --no-strict --out-dir generated/pagopa-ecommerce --request-types --response-decoders --client",
     "generate:api:lollipop": "rimraf generated/lollipop-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-functions-lollipop/724c3ba79d272d4e2555dbc2a8e1657bec9f84ce/openapi/internal.yaml --no-strict --out-dir generated/lollipop-api --request-types --response-decoders --client",
     "generate:api:services-app-backend": "rimraf generated/services-app-backend && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-services-cms/cb23b9b6a0196a851b7db2bcc96bd9ea2a7be5b2/apps/app-backend/api/internal.yaml --no-strict --out-dir generated/services-app-backend --request-types --response-decoders --client",
@@ -191,8 +190,6 @@
       "src/**/*.ts",
       "!src/clients/api/*.ts",
       "!src/clients/api/models/*.ts",
-      "!src/clients/pagopa/*.ts",
-      "!src/clients/pagopa/models/*.ts",
       "!src/types/api/*.ts",
       "!src/**/*.d.ts"
     ]
