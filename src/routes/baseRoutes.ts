@@ -1,4 +1,3 @@
-import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { CIDR } from "@pagopa/ts-commons/lib/strings";
 import { Express } from "express";
 import * as passport from "passport";
@@ -194,15 +193,6 @@ export const registerAPIRoutes = (
     bearerSessionTokenAuth,
     toExpressHandler(
       servicesController.upsertServicePreferences,
-      servicesController
-    )
-  );
-
-  app.get(
-    `${basePath}/services`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      () => Promise.resolve(ResponseSuccessJson({ items: [] })),
       servicesController
     )
   );

@@ -87,38 +87,6 @@ paths:
           description: Too many requests
         "500":
           description: Internal Server Error
-  "/services":
-    x-swagger-router-controller: ServicesController
-    get:
-      operationId: getVisibleServices
-      summary: Get all visible services
-      description: |-
-        Returns the description of all visible services.
-      responses:
-        "200":
-          description: Found.
-          schema:
-            $ref: "#/definitions/PaginatedServiceTupleCollection"
-          examples:
-            application/json:
-              items:
-                - service_id: "AzureDeployc49a"
-                  version: 1
-                - service_id: "5a25abf4fcc89605c082f042c49a"
-                  version: 0
-              page_size: 1
-        "401":
-          description: Bearer token null or expired.
-        "429":
-          description: Too many requests
-          schema:
-            $ref: "#/definitions/ProblemJson"
-        "500":
-          description: There was an error in retrieving the services.
-          schema:
-            $ref: "#/definitions/ProblemJson"
-      parameters:
-        - $ref: "#/parameters/PaginationRequest"
   "/messages":
     x-swagger-router-controller: MessagesController
     parameters:
@@ -869,8 +837,6 @@ definitions:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/SpecialServiceCategory"
   StandardServiceCategory:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/StandardServiceCategory"
-  PaginatedServiceTupleCollection:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PaginatedServiceTupleCollection"
   Timestamp:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/Timestamp"
   PaymentNoticeNumber:
@@ -1307,12 +1273,6 @@ parameters:
     pattern: >-
       [0-9a-hjkmnp-tv-zA-HJKMNP-TV-Z]{26}
     x-example: 01ARZ3NDEKTSV4RRFFQ69G5FAV
-  PaginationRequest:
-    type: string
-    name: cursor
-    in: query
-    minimum: 1
-    description: An opaque identifier that points to the next item in the collection.
   UserDataProcessingChoiceParam:
     name: choice
     in: path
