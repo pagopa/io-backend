@@ -2,4 +2,4 @@
 "@pagopa/io-backend": patch
 ---
 
-Remove bonus vancanze endpoints
+Remove bonus vacanze endpoints
