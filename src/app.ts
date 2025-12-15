@@ -37,7 +37,6 @@ import {
   FF_ROUTING_PUSH_NOTIF,
   FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST,
   FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX,
-  FF_TRIAL_SYSTEM_ENABLED,
   FIRST_LOLLIPOP_CONSUMER_CLIENT,
   IO_FIMS_API_CLIENT,
   IO_SIGN_API_CLIENT,
@@ -52,8 +51,7 @@ import {
   PNAddressBookConfig,
   PUSH_NOTIFICATIONS_QUEUE_NAME,
   PUSH_NOTIFICATIONS_STORAGE_CONNECTION_STRING,
-  SERVICES_APP_BACKEND_CLIENT,
-  TRIAL_SYSTEM_CLIENT
+  SERVICES_APP_BACKEND_CLIENT
 } from "./config";
 import { registerAPIRoutes } from "./routes/baseRoutes";
 import { registerCdcSupportAPIRoutes } from "./routes/cdcSupportRoutes";
@@ -68,7 +66,6 @@ import { registerIoWalletAPIRoutes } from "./routes/ioWalletRoutes";
 import { registerPNRoutes } from "./routes/pnRoutes";
 import { registerPublicRoutes } from "./routes/publicRoutes";
 import { registerServicesAppBackendRoutes } from "./routes/servicesRoutes";
-import { registerTrialSystemAPIRoutes } from "./routes/trialSystemRoutes";
 import CdcSupportService from "./services/cdcSupportService";
 import CgnOperatorSearchService from "./services/cgnOperatorSearchService";
 import CgnService from "./services/cgnService";
@@ -84,7 +81,6 @@ import { PNService } from "./services/pnService";
 import ProfileService from "./services/profileService";
 import RedisSessionStorage from "./services/redisSessionStorage";
 import ServicesAppBackendService from "./services/servicesAppBackendService";
-import TrialService from "./services/trialService";
 import UserDataProcessingService from "./services/userDataProcessingService";
 import bearerSessionTokenStrategy from "./strategies/bearerSessionTokenStrategy";
 import { User } from "./types/user";
@@ -114,7 +110,6 @@ export interface IAppFactoryParameters {
   readonly IoWalletAPIBasePath: string;
   readonly IoWalletUatAPIBasePath: string;
   readonly ServicesAppBackendBasePath: string;
-  readonly TrialSystemBasePath: string;
 }
 
 export async function newApp({
@@ -129,8 +124,7 @@ export async function newApp({
   IoWalletAPIBasePath,
   IoWalletUatAPIBasePath,
   CGNOperatorSearchAPIBasePath,
-  ServicesAppBackendBasePath,
-  TrialSystemBasePath
+  ServicesAppBackendBasePath
 }: IAppFactoryParameters): Promise<Express> {
   const isDevEnvironment = ENV === NodeEnvironmentEnum.DEVELOPMENT;
   const REDIS_CLIENT_SELECTOR = await RedisClientSelector(
@@ -284,15 +278,11 @@ export async function newApp({
         );
 
         // Create the io wallet
-        const IO_WALLET_SERVICE = new IoWalletService(
-          IO_WALLET_API_CLIENT,
-          TRIAL_SYSTEM_CLIENT
-        );
+        const IO_WALLET_SERVICE = new IoWalletService(IO_WALLET_API_CLIENT);
 
         // Create the io wallet - uat routes
         const IO_WALLET_UAT_SERVICE = new IoWalletService(
-          IO_WALLET_UAT_API_CLIENT,
-          TRIAL_SYSTEM_CLIENT
+          IO_WALLET_UAT_API_CLIENT
         );
 
         // Create the Notification Service
@@ -336,8 +326,6 @@ export async function newApp({
           FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX,
           FF_ROUTING_PUSH_NOTIF
         );
-
-        const TRIAL_SERVICE = new TrialService(TRIAL_SYSTEM_CLIENT);
 
         registerPublicRoutes(app);
 
@@ -440,15 +428,6 @@ export async function newApp({
             app,
             PNAddressBookConfig.PN_ACTIVATION_BASE_PATH,
             pnService,
-            authMiddlewares.bearerSession
-          );
-        }
-
-        if (FF_TRIAL_SYSTEM_ENABLED) {
-          registerTrialSystemAPIRoutes(
-            app,
-            TrialSystemBasePath,
-            TRIAL_SERVICE,
             authMiddlewares.bearerSession
           );
         }
