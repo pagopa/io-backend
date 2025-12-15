@@ -1,5 +1,13 @@
 # @pagopa/io-backend
 
+## 18.0.5
+
+### Patch Changes
+
+- 1a3bce7: Remove bonus vacanze endpoints
+- 3d58dbf: Remove unused `getVisibleServices` endpoint
+- 78a5a0e: Remove unused pagopa-proxy endpoints
+
 ## 18.0.4
 
 ### Patch Changes
