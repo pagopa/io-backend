@@ -22,12 +22,10 @@ import * as passport from "passport";
 import {
   API_CLIENT,
   APP_MESSAGES_API_CLIENT,
-  BONUS_API_CLIENT,
   CDC_SUPPORT_API_CLIENT,
   CGN_API_CLIENT,
   CGN_OPERATOR_SEARCH_API_CLIENT,
   ENV,
-  FF_BONUS_ENABLED,
   FF_CDC_ENABLED,
   FF_CGN_ENABLED,
   FF_IO_FIMS_ENABLED,
@@ -59,7 +57,6 @@ import {
   TRIAL_SYSTEM_CLIENT
 } from "./config";
 import { registerAPIRoutes } from "./routes/baseRoutes";
-import { registerBonusAPIRoutes } from "./routes/bonusRoutes";
 import { registerCdcSupportAPIRoutes } from "./routes/cdcSupportRoutes";
 import {
   registerCgnAPIRoutes,
@@ -73,7 +70,6 @@ import { registerPNRoutes } from "./routes/pnRoutes";
 import { registerPublicRoutes } from "./routes/publicRoutes";
 import { registerServicesAppBackendRoutes } from "./routes/servicesRoutes";
 import { registerTrialSystemAPIRoutes } from "./routes/trialSystemRoutes";
-import BonusService from "./services/bonusService";
 import CdcSupportService from "./services/cdcSupportService";
 import CgnOperatorSearchService from "./services/cgnOperatorSearchService";
 import CgnService from "./services/cgnService";
@@ -112,7 +108,6 @@ export interface IAppFactoryParameters {
   readonly appInsightsClient?: appInsights.TelemetryClient;
   readonly allowNotifyIPSourceRange: ReadonlyArray<CIDR>;
   readonly APIBasePath: string;
-  readonly BonusAPIBasePath: string;
   readonly CdcSupportAPIbasePath: string;
   readonly CGNAPIBasePath: string;
   readonly CGNOperatorSearchAPIBasePath: string;
@@ -129,7 +124,6 @@ export async function newApp({
   allowNotifyIPSourceRange,
   appInsightsClient,
   APIBasePath,
-  BonusAPIBasePath,
   CdcSupportAPIbasePath,
   CGNAPIBasePath,
   IoSignAPIBasePath,
@@ -262,9 +256,6 @@ export async function newApp({
         // Create the profile service
         const PROFILE_SERVICE = new ProfileService(API_CLIENT);
 
-        // Create the bonus service
-        const BONUS_SERVICE = new BonusService(BONUS_API_CLIENT);
-
         // Create the cdc support service
         const CDC_SUPPORT_SERVICE = new CdcSupportService(
           CDC_SUPPORT_API_CLIENT
@@ -390,14 +381,6 @@ export async function newApp({
           authMiddlewares.bearerSession,
           LOLLIPOP_API_CLIENT
         );
-        if (FF_BONUS_ENABLED) {
-          registerBonusAPIRoutes(
-            app,
-            BonusAPIBasePath,
-            BONUS_SERVICE,
-            authMiddlewares.bearerSession
-          );
-        }
         if (FF_CGN_ENABLED) {
           registerCgnAPIRoutes(
             app,
