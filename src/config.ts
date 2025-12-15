@@ -35,7 +35,6 @@ import { PNClientFactory } from "./clients/pn-clients";
 import { ServicesAppBackendAPIClient } from "./clients/services-app-backend";
 import { TrialSystemAPIClient } from "./clients/trial-system.client";
 import ApiClientFactory from "./services/apiClientFactory";
-import PagoPAClientFactory from "./services/pagoPAClientFactory";
 import { getRequiredENVVar } from "./utils/container";
 import {
   FeatureFlag,
@@ -295,19 +294,6 @@ export const PN_ADDRESS_BOOK_CLIENT_SELECTOR: O.Option<
 // HTTPs-only fetch with optional keepalive agent
 // @see https://github.com/pagopa/io-ts-commons/blob/master/src/agent.ts#L10
 const simpleHttpsApiFetch = agent.getHttpsFetch(process.env);
-
-// Register a factory service to create PagoPA client.
-const pagoPAApiUrlProd = getRequiredENVVar("PAGOPA_API_URL_PROD");
-const pagoPAApiUrlTest = getRequiredENVVar("PAGOPA_API_URL_TEST");
-const pagoPAApiKeyProd = getRequiredENVVar("PAGOPA_API_KEY_PROD");
-const pagoPAApiKeyTest = getRequiredENVVar("PAGOPA_API_KEY_UAT");
-export const PAGOPA_CLIENT = new PagoPAClientFactory(
-  pagoPAApiUrlProd,
-  pagoPAApiKeyProd,
-  pagoPAApiUrlTest,
-  pagoPAApiKeyTest,
-  simpleHttpsApiFetch
-);
 
 const pagoPAEcommerceApiUrl = getRequiredENVVar("PAGOPA_ECOMMERCE_BASE_URL");
 const pagoPAEcommerceApiKey = getRequiredENVVar("PAGOPA_ECOMMERCE_API_KEY");

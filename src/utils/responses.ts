@@ -26,9 +26,6 @@ import { ProblemJson } from "generated/io-messages-api/ProblemJson";
 import { PartyConfigurationFaultPaymentProblemJson } from "generated/pagopa-ecommerce/PartyConfigurationFaultPaymentProblemJson";
 import { PaymentInfoConflictResponse } from "generated/pagopa-ecommerce/PaymentInfoConflictResponse";
 import { PaymentInfoNotFoundResponse } from "generated/pagopa-ecommerce/PaymentInfoNotFoundResponse";
-import { PaymentFaultEnum } from "generated/pagopa-proxy/PaymentFault";
-import { PaymentFaultV2Enum } from "generated/pagopa-proxy/PaymentFaultV2";
-import { PaymentProblemJson } from "generated/pagopa-proxy/PaymentProblemJson";
 import * as t from "io-ts";
 
 import { errorsToError } from "./errorsFormatter";
@@ -190,29 +187,6 @@ export const HttpStatusCode = t.union([
 ]);
 
 export type IResponsePaymentInternalError = IResponse<"IResponseErrorInternal">;
-
-/**
- * Returns a 500 with json response.
- */
-export const ResponsePaymentError = (
-  detail: PaymentFaultEnum,
-  detailV2: PaymentFaultV2Enum
-): IResponsePaymentInternalError => {
-  const problem: PaymentProblemJson = {
-    detail,
-    detail_v2: detailV2,
-    status: HttpStatusCodeEnum.HTTP_STATUS_500 as HttpStatusCode,
-    title: "Internal server error"
-  };
-  return {
-    apply: (res) =>
-      res
-        .status(HttpStatusCodeEnum.HTTP_STATUS_500)
-        .set("Content-Type", "application/problem+json")
-        .json(problem),
-    kind: "IResponseErrorInternal"
-  };
-};
 
 /**
  * Returns a 404 error response payment api
