@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 18.0.6
+
+### Patch Changes
+
+- afce08b: Remove Trial System endpoints
+
 ## 18.0.5
 
 ### Patch Changes
