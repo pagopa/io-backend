@@ -143,10 +143,6 @@ Those are all Environment variables needed by the application:
 | SERVICES_APP_BACKEND_BASE_PATH            | New Service APIs(include search engine) basepath                                                     | string |
 | SERVICES_APP_BACKEND_API_URL              | Services App Backend FunctionApp Url                                                                 | string |
 | SERVICES_APP_BACKEND_API_BASE_PATH        | Services App Backend FunctionApp Api Basepath                                                        | string |
-| FF_TRIAL_SYSTEM_ENABLED                   | (Optional) enables Trial System API to be registered into backend app - default false                | string |
-| TRIAL_SYSTEM_API_BASE_PATH                | Trial System Api Base path                                                                           | string |
-| TRIAL_SYSTEM_API_URL                      | Trial System FunctionApp Api url                                                                     | string |
-| TRIAL_SYSTEM_API_KEY                      | The key used to authenticate to the Trial System API                                                 | string |
 | FF_IO_X_USER_TOKEN                        | Enables/disables the use of the x-user header                                                        | string (enum: NONE, BETA, ALL) |
 | FF_IO_X_USER_TOKEN_BETA_TESTER_SHA_LIST   | List of fiscal codes enabled for the feature                                                         | csv     |
 | FF_IO_X_USER_TOKEN_CANARY_SHA_USERS_REGEX | Regex used to identify canary users enabled for the feature                                          | regex   |

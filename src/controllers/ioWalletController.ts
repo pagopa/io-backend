@@ -13,8 +13,7 @@ import {
   IResponseErrorValidation,
   IResponseSuccessJson,
   IResponseSuccessNoContent,
-  ResponseErrorValidation,
-  getResponseErrorForbiddenNotAuthorized
+  ResponseErrorValidation
 } from "@pagopa/ts-commons/lib/responses";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as express from "express";
@@ -31,7 +30,6 @@ import { SetWalletInstanceStatusBody } from "../../generated/io-wallet/SetWallet
 import { WalletAttestationsView } from "../../generated/io-wallet/WalletAttestationsView";
 import { WalletInstanceData } from "../../generated/io-wallet/WalletInstanceData";
 import { WhitelistedFiscalCodeData } from "../../generated/io-wallet/WhitelistedFiscalCodeData";
-import { FF_IO_WALLET_TRIAL_ENABLED } from "../config";
 import IoWalletService from "../services/ioWalletService";
 import { withUserFromRequest } from "../types/user";
 
@@ -211,23 +209,6 @@ export default class IoWalletController {
       this.ioWalletService.getCurrentWalletInstanceStatus(user.fiscal_code)
     );
 
-  private readonly ensureUserIsAllowed = (
-    userId: NonEmptyString
-  ): TE.TaskEither<Error, void> =>
-    pipe(
-      TE.tryCatch(
-        () => this.ioWalletService.getSubscription(userId),
-        E.toError
-      ),
-      // if a successful response with state != "ACTIVE" or an error is returned, return left
-      TE.chain((response) =>
-        response.kind === "IResponseSuccessJson" &&
-        response.value.state === "ACTIVE"
-          ? TE.right(undefined)
-          : TE.left(new Error())
-      )
-    );
-
   /**
    * Check if a fiscal code is whitelisted or not.
    */
@@ -250,18 +231,7 @@ export default class IoWalletController {
     IResponseErrorInternal | IResponseSuccessJson<undefined>
   > => this.ioWalletService.healthCheck();
 
-  private readonly ensureFiscalCodeIsAllowed = (fiscalCode: FiscalCode) =>
-    FF_IO_WALLET_TRIAL_ENABLED
-      ? pipe(
-          fiscalCode,
-          NonEmptyString.decode,
-          TE.fromEither,
-          TE.chainW(this.ensureUserIsAllowed),
-          TE.mapLeft(() =>
-            getResponseErrorForbiddenNotAuthorized(
-              "Not authorized to perform this action"
-            )
-          )
-        )
-      : TE.right(undefined);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private readonly ensureFiscalCodeIsAllowed = (_fiscalCode: FiscalCode) =>
+    TE.right(undefined);
 }
