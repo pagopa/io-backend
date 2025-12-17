@@ -14,15 +14,10 @@ import { User } from "../../types/user";
 import NotificationController from "../notificationController";
 
 import * as E from "fp-ts/lib/Either";
-import {
-  mockedUser,
-  mockSessionToken,
-  mockWalletToken,
-} from "../../__mocks__/user_mock";
+import { mockedUser } from "../../__mocks__/user_mock";
 import { MessageSubject } from "../../../generated/notifications/MessageSubject";
 import { mockRedisClientSelector } from "../../__mocks__/redis";
 
-const aTimestamp = 1518010929530;
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anInvalidFiscalNumber = "xxx" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
@@ -32,15 +27,12 @@ const aValidInstallationID =
 const anInvalidInstallationID = "" as InstallationID;
 
 const mockedInvalidUser: User = {
-  created_at: aTimestamp,
   date_of_birth: "2002-01-01",
   family_name: "Garibaldi",
   fiscal_code: anInvalidFiscalNumber,
   name: "Giuseppe Maria",
-  session_token: mockSessionToken,
   spid_email: anEmailAddress,
-  spid_level: aValidSpidLevel,
-  wallet_token: mockWalletToken,
+  spid_level: aValidSpidLevel
 };
 
 const aNotificationSubject = "this is a notification subject" as MessageSubject;
@@ -50,13 +42,13 @@ const aValidNotificationWithoutContent = {
     created_at: new Date(),
     fiscal_code: aFiscalNumber,
     id: "01CCKCY7QQ7WCHWTH8NB504386",
-    sender_service_id: "234567",
+    sender_service_id: "234567"
   },
   sender_metadata: {
     department_name: "test department",
     organization_name: "test organization",
-    service_name: "test service",
-  },
+    service_name: "test service"
+  }
 };
 
 const aValidNotification = {
@@ -65,43 +57,43 @@ const aValidNotification = {
     ...aValidNotificationWithoutContent.message,
     content: {
       markdown: "test".repeat(80),
-      subject: aNotificationSubject,
-    },
-  },
+      subject: aNotificationSubject
+    }
+  }
 };
 
 const anInvalidNotification = {
   message: {
     content: {
       markdown: "invalid",
-      subject: aNotificationSubject,
+      subject: aNotificationSubject
     },
     created_at: new Date(),
     fiscal_code: anInvalidFiscalNumber,
-    sender_service_id: "234567",
+    sender_service_id: "234567"
   },
   sender_metadata: {
     department_name: "test department",
     organization_name: "test organization",
-    service_name: "test service",
-  },
+    service_name: "test service"
+  }
 };
 
 const aPushChannel =
   "fLKP3EATnBI:APA91bEy4go681jeSEpLkNqhtIrdPnEKu6Dfi-STtUiEnQn8RwMfBiPGYaqdWrmzJyXIh5Yms4017MYRS9O1LGPZwA4sOLCNIoKl4Fwg7cSeOkliAAtlQ0rVg71Kr5QmQiLlDJyxcq3p";
 const anAppleDevice = {
   platform: PlatformEnum.apns,
-  pushChannel: aPushChannel,
+  pushChannel: aPushChannel
 };
 const anInvalidDevice = {
-  platform: "invalid",
+  platform: "invalid"
 };
 
 const badRequestErrorResponse = {
   detail: expect.any(String),
   status: 400,
   title: expect.any(String),
-  type: undefined,
+  type: undefined
 };
 
 jest.mock("../../services/notificationService");
@@ -131,7 +123,7 @@ const controller = new NotificationController(
   redisSessionStorage,
   {
     notificationDefaultSubject: "default subject",
-    notificationDefaultTitle: "default title",
+    notificationDefaultTitle: "default title"
   }
 );
 
@@ -158,7 +150,7 @@ describe("NotificationController#notify", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: { message: "ok" },
+      value: { message: "ok" }
     });
   });
 
@@ -189,7 +181,7 @@ describe("NotificationController#notify", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: { message: "ok" },
+      value: { message: "ok" }
     });
   });
 
@@ -222,7 +214,7 @@ describe("NotificationController#notify", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: { message: "ok" },
+      value: { message: "ok" }
     });
   });
 
@@ -257,7 +249,7 @@ describe("NotificationController#notify", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       detail: expect.stringContaining("Exception"),
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 
@@ -280,7 +272,7 @@ describe("NotificationController#notify", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       detail: expect.stringContaining("Exception"),
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 
@@ -301,7 +293,7 @@ describe("NotificationController#notify", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       detail: expect.stringContaining("Exception"),
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 });
@@ -327,7 +319,7 @@ describe("NotificationController#createOrUpdateInstallation", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: { message: "ok" },
+      value: { message: "ok" }
     });
   });
 

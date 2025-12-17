@@ -38,6 +38,4 @@ export interface ISessionStorage {
   readonly getLollipopDataForUser: (
     fiscalCode: FiscalCode
   ) => Promise<Either<Error, O.Option<LollipopData>>>;
-
-  readonly delPagoPaNoticeEmail: (user: User) => Promise<Either<Error, true>>;
 }
