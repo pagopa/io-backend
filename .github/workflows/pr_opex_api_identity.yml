@@ -1,0 +1,30 @@
+name: PR - Opex Dashboard api_identity
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+    branches:
+      - master
+    paths:
+      - 'api_identity.yaml'
+      - '.github/workflows/pr_opex_api_identity.yml'
+      - '.github/workflows/opex_api_identity.yml'
+      - '.opex/api_identity/**'
+
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    uses: ./.github/workflows/call_pr_opex_api.yml
+    name: Plan changes against Production
+    secrets: inherit
+    with:
+      api_name: api_identity
