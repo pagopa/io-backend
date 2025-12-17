@@ -59,7 +59,10 @@ import {
   registerCgnAPIRoutes,
   registerCgnOperatorSearchAPIRoutes
 } from "./routes/cgnRoutes";
-import { registerFirstLollipopConsumer } from "./routes/firstLollipopConsumerRoutes";
+import {
+  registerIdentityRoutes,
+  registerLegacyIdentityRoutes
+} from "./routes/identityRoutes";
 import { registerIoFimsAPIRoutes } from "./routes/ioFimsRoutes";
 import { registerIoSignAPIRoutes } from "./routes/ioSignRoutes";
 import { registerIoWalletAPIRoutes } from "./routes/ioWalletRoutes";
@@ -329,17 +332,8 @@ export async function newApp({
 
         registerPublicRoutes(app);
 
-        registerFirstLollipopConsumer(
-          app,
-          "/first-lollipop",
-          LOLLIPOP_API_CLIENT,
-          SESSION_STORAGE,
-          FIRST_LOLLIPOP_CONSUMER_CLIENT,
-          authMiddlewares.bearerSession
-        );
-
         // Create the function app service.
-        const FN_APP_SERVICE = new FunctionsAppService(API_CLIENT);
+        const SERVICE_PREFERENCES_SERVICE = new FunctionsAppService(API_CLIENT);
         // Create the new messages service.
         const APP_MESSAGES_SERVICE = new NewMessagesService(
           APP_MESSAGES_API_CLIENT
@@ -354,16 +348,39 @@ export async function newApp({
           app,
           APIBasePath,
           allowNotifyIPSourceRange,
-          PROFILE_SERVICE,
-          FN_APP_SERVICE,
           APP_MESSAGES_SERVICE,
           notificationServiceFactory,
           SESSION_STORAGE,
           PAGOPA_ECOMMERCE_SERVICE,
-          USER_DATA_PROCESSING_SERVICE,
           authMiddlewares.bearerSession,
           LOLLIPOP_API_CLIENT
         );
+
+        // Register legacy A&I routes (/api/v1/profile, /api/v1/user-data-processing, etc.)
+        registerLegacyIdentityRoutes(
+          app,
+          APIBasePath,
+          authMiddlewares.bearerSession,
+          PROFILE_SERVICE,
+          SERVICE_PREFERENCES_SERVICE,
+          SESSION_STORAGE,
+          USER_DATA_PROCESSING_SERVICE,
+          LOLLIPOP_API_CLIENT,
+          FIRST_LOLLIPOP_CONSUMER_CLIENT
+        );
+
+        // Register A&I API routes with new authentication middleware
+        registerIdentityRoutes(
+          app,
+          authMiddlewares.bearerSession,
+          PROFILE_SERVICE,
+          SERVICE_PREFERENCES_SERVICE,
+          SESSION_STORAGE,
+          USER_DATA_PROCESSING_SERVICE,
+          LOLLIPOP_API_CLIENT,
+          FIRST_LOLLIPOP_CONSUMER_CLIENT
+        );
+
         if (FF_CGN_ENABLED) {
           registerCgnAPIRoutes(
             app,
