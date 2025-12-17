@@ -359,6 +359,17 @@ export const ROOT_REDIRECT_URL = pipe(
   })
 );
 
+export const APP_BACKEND_PRIMARY_KEY = getRequiredENVVar(
+  "APP_BACKEND_PRIMARY_KEY"
+);
+
+export const APP_BACKEND_SECONDARY_KEY = pipe(
+  process.env.APP_BACKEND_SECONDARY_KEY,
+  O.fromNullable,
+  O.chain((value) => O.fromEither(NonEmptyString.decode(value))),
+  O.toUndefined
+);
+
 // Push notifications
 export const NOTIFICATION_DEFAULT_SUBJECT =
   "Entra nell'app per leggere il contenuto";

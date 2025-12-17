@@ -9,7 +9,7 @@ export default function mockReq({
   body = {},
   query = {},
   user = {},
-  ip = "10.0.0.1",
+  ip = "10.0.0.1"
 } = {}): any {
   const request = {
     accepts: jest.fn(),
@@ -29,10 +29,12 @@ export default function mockReq({
     query,
     range: jest.fn(),
     reset: resetMock,
-    user,
+    user
   };
 
-  request.header.mockImplementation(() => request);
+  request.header.mockImplementation(
+    (key: string) => (request.headers as Record<string, unknown>)[key]
+  );
   request.accepts.mockImplementation(() => request);
   request.acceptsEncodings.mockImplementation(() => request);
   request.acceptsEncoding.mockImplementation(() => request);
