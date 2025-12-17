@@ -16,7 +16,7 @@ import { getByXUserToken } from "../x-user-token";
  * @param res Express response object, used to send `401` on authentication failure.
  * @param next Callback to pass control to the next middleware when authentication succeeds.
  */
-export const userSessionAuthMiddleware = (
+export const xUserMiddleware = (
   req: express.Request,
   res: express.Response,
   next: express.NextFunction
@@ -71,12 +71,12 @@ export const getApiKeyAuthMiddleware =
     next();
   };
 
-export const getXUserAuthMiddleware = (
+export const getAuthenticatedXUserMiddleware = (
   apiKeyHeaderName: NonEmptyString,
   primaryKey: NonEmptyString,
   secondaryKey?: NonEmptyString
 ) =>
   sequenceMiddleware(
     getApiKeyAuthMiddleware(apiKeyHeaderName, primaryKey, secondaryKey),
-    userSessionAuthMiddleware
+    xUserMiddleware
   );

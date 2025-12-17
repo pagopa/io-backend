@@ -1,6 +1,6 @@
 import mockReq from "../../../__mocks__/request";
 import mockRes from "../../../__mocks__/response";
-import { getApiKeyAuthMiddleware, userSessionAuthMiddleware } from "../session";
+import { getApiKeyAuthMiddleware, xUserMiddleware } from "../session";
 import { mockedUserIdentity } from "../../../__mocks__/user_mock";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
@@ -23,7 +23,7 @@ describe("UserSessionAuthMiddleware", () => {
   const mockNext = jest.fn().mockImplementation(() => {});
 
   it("should succeed on user parsing", () => {
-    userSessionAuthMiddleware(validMockRequest, mockResponse, mockNext);
+    xUserMiddleware(validMockRequest, mockResponse, mockNext);
 
     expect(validMockRequest.user).toEqual(mockedUserIdentity);
     expect(mockResponse.status).not.toHaveBeenCalled();
@@ -32,7 +32,7 @@ describe("UserSessionAuthMiddleware", () => {
 
   it("should fail with 401 on missing header", () => {
     const mockRequest = mockReq();
-    userSessionAuthMiddleware(mockRequest, mockResponse, mockNext);
+    xUserMiddleware(mockRequest, mockResponse, mockNext);
 
     expect(mockResponse.status).toHaveBeenCalledTimes(1);
     expect(mockResponse.status).toHaveBeenCalledWith(401);
@@ -49,7 +49,7 @@ describe("UserSessionAuthMiddleware", () => {
       headers: { "x-user": value },
       user: undefined
     });
-    userSessionAuthMiddleware(mockRequest, mockResponse, mockNext);
+    xUserMiddleware(mockRequest, mockResponse, mockNext);
 
     expect(mockResponse.status).toHaveBeenCalledTimes(1);
     expect(mockResponse.status).toHaveBeenCalledWith(401);
