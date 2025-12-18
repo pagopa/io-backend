@@ -359,8 +359,17 @@ export const ROOT_REDIRECT_URL = pipe(
   })
 );
 
-export const APP_BACKEND_PRIMARY_KEY = getRequiredENVVar(
-  "APP_BACKEND_PRIMARY_KEY"
+export const APP_BACKEND_PRIMARY_KEY = pipe(
+  process.env.APP_BACKEND_PRIMARY_KEY,
+  NonEmptyString.decode,
+  E.getOrElseW((errs) => {
+    log.error(
+      `Missing or invalid APP_BACKEND_PRIMARY_KEY environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
 );
 
 export const APP_BACKEND_SECONDARY_KEY = pipe(
