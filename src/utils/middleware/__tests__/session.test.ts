@@ -28,6 +28,7 @@ describe("UserSessionAuthMiddleware", () => {
     expect(validMockRequest.user).toEqual(mockedUserIdentity);
     expect(mockResponse.status).not.toHaveBeenCalled();
     expect(mockResponse.send).not.toHaveBeenCalled();
+    expect(mockNext).toHaveBeenCalledTimes(1);
   });
 
   it("should fail with 401 on missing header", () => {
@@ -37,6 +38,7 @@ describe("UserSessionAuthMiddleware", () => {
     expect(mockResponse.status).toHaveBeenCalledTimes(1);
     expect(mockResponse.status).toHaveBeenCalledWith(401);
     expect(mockResponse.send).toHaveBeenCalledTimes(1);
+    expect(mockNext).not.toHaveBeenCalled();
   });
 
   it.each`
@@ -44,6 +46,7 @@ describe("UserSessionAuthMiddleware", () => {
     ${"wrong base64"}             | ${"=="}
     ${"header with empty string"} | ${""}
     ${"wrong payload"}            | ${Buffer.from(JSON.stringify({ foo: "bar" })).toString("base64")}
+    ${"malformed JSON"}           | ${Buffer.from("{invalid json").toString("base64")}
   `("should fail with 401 on $scenario", ({ value }) => {
     const mockRequest = mockReq({
       headers: { "x-user": value },
@@ -54,6 +57,7 @@ describe("UserSessionAuthMiddleware", () => {
     expect(mockResponse.status).toHaveBeenCalledTimes(1);
     expect(mockResponse.status).toHaveBeenCalledWith(401);
     expect(mockResponse.send).toHaveBeenCalledTimes(1);
+    expect(mockNext).not.toHaveBeenCalled();
   });
 });
 

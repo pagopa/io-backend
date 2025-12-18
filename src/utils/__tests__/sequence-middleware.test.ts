@@ -73,10 +73,10 @@ describe("SequenceMiddleware", () => {
   );
 
   it("Should propagate an error instead of sending response", () => {
+    const anError = Error("unknown");
     const propageErrorMiddleware: ExpressMiddleware = jest
       .fn()
       .mockImplementation((_req, _res, next) => {
-        const anError = Error("unknown");
         next(anError);
       });
     sequenceMiddleware(propageErrorMiddleware, errorMiddleware)(
@@ -86,6 +86,7 @@ describe("SequenceMiddleware", () => {
     );
 
     expect(mockNext).toHaveBeenCalledTimes(1);
+    expect(mockNext).toHaveBeenCalledWith(anError);
     expect(propageErrorMiddleware).toHaveBeenCalledTimes(1);
     expect(errorMiddleware).not.toHaveBeenCalled();
 
