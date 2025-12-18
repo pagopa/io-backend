@@ -14,6 +14,8 @@ on:
 concurrency:
   group: ${{ github.workflow }}
 
+permissions: {}
+
 jobs:
   apply:
     uses: ./.github/workflows/call_opex_api.yml
