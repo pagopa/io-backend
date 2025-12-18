@@ -1,8 +1,9 @@
 openapi: 3.0.3
 info:
   version: 18.0.6
-  title: Identity API
-  description: Mobile and web proxy API gateway - Identity endpoints.
+  title: IO Auth&Identity API
+  description: |
+    API for managing user profile data, and service preferences.
 servers:
   - url: https://localhost/api/identity/v1
 security:
