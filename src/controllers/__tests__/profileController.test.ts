@@ -2,7 +2,7 @@ import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {
   ResponseErrorNotFound,
   ResponseSuccessAccepted,
-  ResponseSuccessJson,
+  ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import * as E from "fp-ts/lib/Either";
 import { mockedUser } from "../../__mocks__/user_mock";
@@ -13,14 +13,13 @@ import { IsInboxEnabled } from "../../../generated/backend/IsInboxEnabled";
 import { IsWebhookEnabled } from "../../../generated/backend/IsWebhookEnabled";
 import {
   PreferredLanguage,
-  PreferredLanguageEnum,
+  PreferredLanguageEnum
 } from "../../../generated/backend/PreferredLanguage";
 import { Profile } from "../../../generated/backend/Profile";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
 import ProfileService from "../../services/profileService";
-import RedisSessionStorage from "../../services/redisSessionStorage";
 import { profileMissingErrorResponse } from "../../types/profile";
 import ProfileController from "../profileController";
 import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
@@ -28,7 +27,6 @@ import { ServicesPreferencesModeEnum } from "../../../generated/backend/Services
 import { AppVersion } from "../../../generated/backend/AppVersion";
 import { PushNotificationsContentTypeEnum } from "../../../generated/backend/PushNotificationsContentType";
 import { ReminderStatusEnum } from "../../../generated/backend/ReminderStatus";
-import { mockRedisClientSelector } from "../../__mocks__/redis";
 
 const aTimestamp = 1518010929530;
 
@@ -39,10 +37,10 @@ const aValidFamilyname = "Garibaldi";
 const anIsInboxEnabled = true as IsInboxEnabled;
 const anIsWebookEnabled = true as IsWebhookEnabled;
 const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
-  PreferredLanguageEnum.it_IT,
+  PreferredLanguageEnum.it_IT
 ];
 const aServicePreferencesSettings: ServicePreferencesSettings = {
-  mode: ServicesPreferencesModeEnum.AUTO,
+  mode: ServicesPreferencesModeEnum.AUTO
 };
 
 const proxyUserResponse = {
@@ -57,7 +55,7 @@ const proxyUserResponse = {
   preferredLanguages: aPreferredLanguages,
   spid_email: anEmailAddress,
   token: "123hexToken",
-  version: 1 as NonNegativeInteger,
+  version: 1 as NonNegativeInteger
 };
 
 // mock for upsert user (Extended Profile)
@@ -70,14 +68,14 @@ const mockedUpsertProfile: ExtendedProfile = {
   is_webhook_enabled: anIsWebookEnabled,
   preferred_languages: aPreferredLanguages,
   service_preferences_settings: aServicePreferencesSettings,
-  version: 1 as NonNegativeInteger,
+  version: 1 as NonNegativeInteger
 };
 
 const badRequestErrorResponse = {
   detail: expect.any(String),
   status: 400,
   title: expect.any(String),
-  type: undefined,
+  type: undefined
 };
 
 const mockGetProfile = jest.fn();
@@ -88,24 +86,10 @@ jest.mock("../../services/profileService", () => {
     default: jest.fn().mockImplementation(() => ({
       emailValidationProcess: mockEmailValidationProcess,
       getProfile: mockGetProfile,
-      updateProfile: mockUpdateProfile,
-    })),
+      updateProfile: mockUpdateProfile
+    }))
   };
 });
-
-const mockDelPagoPaNoticeEmail = jest
-  .fn()
-  .mockImplementation((_) => Promise.resolve(E.right(true)));
-
-jest.mock("../../services/redisSessionStorage", () => {
-  return {
-    default: jest.fn().mockImplementation(() => ({
-      delPagoPaNoticeEmail: mockDelPagoPaNoticeEmail,
-    })),
-  };
-});
-
-const redisSessionStorage = new RedisSessionStorage(mockRedisClientSelector);
 
 describe("ProfileController#getProfile", () => {
   beforeEach(() => {
@@ -123,10 +107,7 @@ describe("ProfileController#getProfile", () => {
 
     const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
     const profileService = new ProfileService(apiClient);
-    const controller = new ProfileController(
-      profileService,
-      redisSessionStorage
-    );
+    const controller = new ProfileController(profileService);
 
     const response = await controller.getProfile(req);
 
@@ -134,7 +115,7 @@ describe("ProfileController#getProfile", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: proxyUserResponse,
+      value: proxyUserResponse
     });
   });
 
@@ -154,7 +135,7 @@ describe("ProfileController#getProfile", () => {
         Promise.resolve(
           ResponseSuccessJson({
             ...proxyUserResponse,
-            [additionalProperty]: value,
+            [additionalProperty]: value
           })
         )
       );
@@ -163,10 +144,7 @@ describe("ProfileController#getProfile", () => {
 
       const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
       const profileService = new ProfileService(apiClient);
-      const controller = new ProfileController(
-        profileService,
-        redisSessionStorage
-      );
+      const controller = new ProfileController(profileService);
 
       const response = await controller.getProfile(req);
 
@@ -176,8 +154,8 @@ describe("ProfileController#getProfile", () => {
         kind: "IResponseSuccessJson",
         value: {
           ...proxyUserResponse,
-          [additionalProperty]: value,
-        },
+          [additionalProperty]: value
+        }
       });
     }
   );
@@ -194,10 +172,7 @@ describe("ProfileController#getProfile", () => {
 
     const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
     const profileService = new ProfileService(apiClient);
-    const controller = new ProfileController(
-      profileService,
-      redisSessionStorage
-    );
+    const controller = new ProfileController(profileService);
 
     const response = await controller.getProfile(req);
     response.apply(res);
@@ -219,10 +194,7 @@ describe("ProfileController#getProfile", () => {
 
     const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
     const profileService = new ProfileService(apiClient);
-    const controller = new ProfileController(
-      profileService,
-      redisSessionStorage
-    );
+    const controller = new ProfileController(profileService);
 
     const response = await controller.getProfile(req);
     response.apply(res);
@@ -230,7 +202,7 @@ describe("ProfileController#getProfile", () => {
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
     expect(response).toEqual({
       ...profileMissingErrorResponse,
-      apply: expect.any(Function),
+      apply: expect.any(Function)
     });
   });
 });
@@ -252,16 +224,12 @@ describe("ProfileController#upsertProfile", () => {
 
     const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
     const profileService = new ProfileService(apiClient);
-    const controller = new ProfileController(
-      profileService,
-      redisSessionStorage
-    );
+    const controller = new ProfileController(profileService);
 
     const response = await controller.updateProfile(req);
 
     const errorOrProfile = Profile.decode(req.body);
     expect(E.isRight(errorOrProfile)).toBeTruthy();
-    expect(mockDelPagoPaNoticeEmail).toBeCalledWith(mockedUser);
     if (E.isRight(errorOrProfile)) {
       expect(mockUpdateProfile).toHaveBeenCalledWith(
         mockedUser,
@@ -271,7 +239,7 @@ describe("ProfileController#upsertProfile", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: proxyUserResponse,
+      value: proxyUserResponse
     });
   });
 
@@ -291,7 +259,7 @@ describe("ProfileController#upsertProfile", () => {
         Promise.resolve(
           ResponseSuccessJson({
             ...proxyUserResponse,
-            [additionalProperty]: value,
+            [additionalProperty]: value
           })
         )
       );
@@ -299,21 +267,17 @@ describe("ProfileController#upsertProfile", () => {
       req.user = mockedUser;
       req.body = {
         ...mockedUpsertProfile,
-        [additionalProperty]: value,
+        [additionalProperty]: value
       };
 
       const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
       const profileService = new ProfileService(apiClient);
-      const controller = new ProfileController(
-        profileService,
-        redisSessionStorage
-      );
+      const controller = new ProfileController(profileService);
 
       const response = await controller.updateProfile(req);
 
       const errorOrProfile = Profile.decode(req.body);
       expect(E.isRight(errorOrProfile)).toBeTruthy();
-      expect(mockDelPagoPaNoticeEmail).toBeCalledWith(mockedUser);
       if (E.isRight(errorOrProfile)) {
         expect(mockUpdateProfile).toHaveBeenCalledWith(
           mockedUser,
@@ -325,8 +289,8 @@ describe("ProfileController#upsertProfile", () => {
         kind: "IResponseSuccessJson",
         value: {
           ...proxyUserResponse,
-          [additionalProperty]: value,
-        },
+          [additionalProperty]: value
+        }
       });
     }
   );
@@ -344,10 +308,7 @@ describe("ProfileController#upsertProfile", () => {
 
     const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
     const profileService = new ProfileService(apiClient);
-    const controller = new ProfileController(
-      profileService,
-      redisSessionStorage
-    );
+    const controller = new ProfileController(profileService);
 
     const response = await controller.updateProfile(req);
     response.apply(res);
@@ -369,10 +330,7 @@ describe("ProfileController#upsertProfile", () => {
 
     const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
     const profileService = new ProfileService(apiClient);
-    const controller = new ProfileController(
-      profileService,
-      redisSessionStorage
-    );
+    const controller = new ProfileController(profileService);
 
     const response = await controller.updateProfile(req);
     response.apply(res);
@@ -398,17 +356,14 @@ describe("ProfileController#startEmailValidationProcess", () => {
 
     const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
     const profileService = new ProfileService(apiClient);
-    const controller = new ProfileController(
-      profileService,
-      redisSessionStorage
-    );
+    const controller = new ProfileController(profileService);
 
     const response = await controller.startEmailValidationProcess(req);
 
     expect(mockEmailValidationProcess).toHaveBeenCalledWith(mockedUser);
     expect(response).toEqual({
       apply: expect.any(Function),
-      kind: "IResponseSuccessAccepted",
+      kind: "IResponseSuccessAccepted"
     });
   });
 });

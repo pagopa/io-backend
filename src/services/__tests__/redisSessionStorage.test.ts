@@ -16,16 +16,9 @@ import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { SessionToken } from "../../types/token";
-import { User, UserV5 } from "../../types/user";
+import { User } from "../../types/user";
 import RedisSessionStorage from "../redisSessionStorage";
-import {
-  mockBPDToken,
-  mockFIMSToken,
-  mockMyPortalToken,
-  mockSessionToken,
-  mockWalletToken,
-  mockZendeskToken,
-} from "../../__mocks__/user_mock";
+import { mockSessionToken } from "../../__mocks__/user_mock";
 import { anAssertionRef } from "../../__mocks__/lollipop";
 import { LoginTypeEnum } from "../../utils/fastLogin";
 import {
@@ -37,7 +30,7 @@ import {
   mockSelectOne,
   mockSetEx,
   mockSmembers,
-  mockSrem,
+  mockSrem
 } from "../../__mocks__/redis";
 import { RedisClientMode } from "../../utils/redis";
 
@@ -49,26 +42,19 @@ const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 // mock for a valid User
-const aValidUser: UserV5 = {
-  bpd_token: mockBPDToken,
-  created_at: 1183518855,
+const aValidUser: User = {
   date_of_birth: "2002-01-01",
   family_name: "Garibaldi",
-  fims_token: mockFIMSToken,
   fiscal_code: aFiscalCode,
-  myportal_token: mockMyPortalToken,
   name: "Giuseppe Maria",
-  session_token: mockSessionToken,
   spid_email: anEmailAddress,
-  spid_level: aValidSpidLevel,
-  wallet_token: mockWalletToken,
-  zendesk_token: mockZendeskToken,
+  spid_level: aValidSpidLevel
 };
 
 // mock for a invalid User
 const anInvalidUser: User = {
   ...aValidUser,
-  fiscal_code: anInvalidFiscalCode,
+  fiscal_code: anInvalidFiscalCode
 };
 
 mockSetEx.mockImplementation((_, __, ___) => Promise.resolve("OK"));
@@ -114,34 +100,32 @@ describe("RedisSessionStorage#getBySessionToken", () => {
     const expectedError = new Error(
       errorsToReadableMessages(expectedDecodedError.left).join("/")
     );
-    const response = await sessionStorage.getBySessionToken(
-      aValidUser.session_token
-    );
+    const response = await sessionStorage.getBySessionToken(mockSessionToken);
 
     expect(mockGet).toHaveBeenCalledTimes(1);
-    expect(mockGet).toHaveBeenCalledWith(`SESSION-${aValidUser.session_token}`);
+    expect(mockGet).toHaveBeenCalledWith(`SESSION-${mockSessionToken}`);
     expect(response).toEqual(E.left(expectedError));
   });
 
   it("should fail parse of user payload", async () => {
     mockGet.mockImplementationOnce((_) => Promise.resolve("Invalid JSON"));
 
-    const response = await sessionStorage.getBySessionToken(
-      aValidUser.session_token
-    );
+    const response = await sessionStorage.getBySessionToken(mockSessionToken);
 
     expect(mockGet).toHaveBeenCalledTimes(1);
-    expect(mockGet).toHaveBeenCalledWith(`SESSION-${aValidUser.session_token}`);
+    expect(mockGet).toHaveBeenCalledWith(`SESSION-${mockSessionToken}`);
     expect(response).toEqual(
-      E.left(new SyntaxError("Unexpected token 'I', \"Invalid JSON\" is not valid JSON"))
+      E.left(
+        new SyntaxError(
+          "Unexpected token 'I', \"Invalid JSON\" is not valid JSON"
+        )
+      )
     );
   });
 
   it("should return error if the session is expired", async () => {
     mockGet.mockImplementationOnce((_) => Promise.resolve(null));
-    const response = await sessionStorage.getBySessionToken(
-      aValidUser.session_token
-    );
+    const response = await sessionStorage.getBySessionToken(mockSessionToken);
 
     expect(mockGet).toHaveBeenCalledTimes(1);
     expect(response).toEqual(E.right(O.none));
@@ -152,12 +136,10 @@ describe("RedisSessionStorage#getBySessionToken", () => {
       Promise.resolve(JSON.stringify(aValidUser))
     );
 
-    const response = await sessionStorage.getBySessionToken(
-      aValidUser.session_token
-    );
+    const response = await sessionStorage.getBySessionToken(mockSessionToken);
 
     expect(mockGet).toHaveBeenCalledTimes(1);
-    expect(mockGet).toHaveBeenCalledWith(`SESSION-${aValidUser.session_token}`);
+    expect(mockGet).toHaveBeenCalledWith(`SESSION-${mockSessionToken}`);
     expect(response).toEqual(E.right(O.some(aValidUser)));
   });
 });
@@ -176,8 +158,8 @@ describe("RedisSessionStorage#clearExpiredSetValues", () => {
   it("delete expired session key reference from user token set", async () => {
     mockSmembers.mockImplementationOnce((_) =>
       Promise.resolve([
-        `SESSIONINFO-${aValidUser.session_token}`,
-        `SESSIONINFO-expired_session_token`,
+        `SESSIONINFO-${mockSessionToken}`,
+        `SESSIONINFO-expired_session_token`
       ])
     );
 
@@ -194,9 +176,7 @@ describe("RedisSessionStorage#clearExpiredSetValues", () => {
       `USERSESSIONS-${aValidUser.fiscal_code}`
     );
     expect(mockExists).toHaveBeenCalledTimes(2);
-    expect(mockExists.mock.calls[0][0]).toBe(
-      `SESSIONINFO-${aValidUser.session_token}`
-    );
+    expect(mockExists.mock.calls[0][0]).toBe(`SESSIONINFO-${mockSessionToken}`);
     expect(mockExists.mock.calls[1][0]).toBe(
       `SESSIONINFO-expired_session_token`
     );
@@ -213,15 +193,15 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
   it("should return true if exists an active user session", async () => {
     mockSmembers.mockImplementationOnce((_) =>
       Promise.resolve([
-        `SESSIONINFO-${aValidUser.session_token}`,
-        `SESSIONINFO-expired_session_token`,
+        `SESSIONINFO-${mockSessionToken}`,
+        `SESSIONINFO-expired_session_token`
       ])
     );
     mockGet.mockImplementationOnce((_, __) =>
       Promise.resolve(
         JSON.stringify({
           createdAt: new Date(),
-          sessionToken: aValidUser.session_token,
+          sessionToken: mockSessionToken
         })
       )
     );
@@ -229,7 +209,7 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
       Promise.resolve(
         JSON.stringify({
           createdAt: new Date(),
-          sessionToken: "expired_session_token",
+          sessionToken: "expired_session_token"
         })
       )
     );
@@ -239,10 +219,7 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
     const userHasActiveSessionsResult =
       await sessionStorage.userHasActiveSessions(aValidUser.fiscal_code);
 
-    expect(mockGet).toHaveBeenNthCalledWith(
-      3,
-      `SESSION-${aValidUser.session_token}`
-    );
+    expect(mockGet).toHaveBeenNthCalledWith(3, `SESSION-${mockSessionToken}`);
 
     expect(E.isRight(userHasActiveSessionsResult)).toBeTruthy();
     if (E.isRight(userHasActiveSessionsResult)) {
@@ -253,8 +230,8 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
   it("should return false if doens't exists an active user session", async () => {
     mockSmembers.mockImplementationOnce((_) =>
       Promise.resolve([
-        `SESSIONINFO-${aValidUser.session_token}`,
-        `SESSIONINFO-expired_session_token`,
+        `SESSIONINFO-${mockSessionToken}`,
+        `SESSIONINFO-expired_session_token`
       ])
     );
 
@@ -262,7 +239,7 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
       Promise.resolve(
         JSON.stringify({
           createdAt: new Date(),
-          sessionToken: aValidUser.session_token,
+          sessionToken: mockSessionToken
         })
       )
     );
@@ -270,7 +247,7 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
       Promise.resolve(
         JSON.stringify({
           createdAt: new Date(),
-          sessionToken: "expired_session_token",
+          sessionToken: "expired_session_token"
         })
       )
     );
@@ -300,8 +277,8 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
   it("should return false if sessions info for a user are missing", async () => {
     mockSmembers.mockImplementationOnce((_) =>
       Promise.resolve([
-        `SESSIONINFO-${aValidUser.session_token}`,
-        `SESSIONINFO-expired_session_token`,
+        `SESSIONINFO-${mockSessionToken}`,
+        `SESSIONINFO-expired_session_token`
       ])
     );
 
@@ -318,8 +295,8 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
   it("should return a left value if a redis call fail", async () => {
     mockSmembers.mockImplementationOnce((_) =>
       Promise.resolve([
-        `SESSIONINFO-${aValidUser.session_token}`,
-        `SESSIONINFO-expired_session_token`,
+        `SESSIONINFO-${mockSessionToken}`,
+        `SESSIONINFO-expired_session_token`
       ])
     );
 
@@ -394,12 +371,12 @@ describe("RedisSessionStorage#userHasActiveSessionsOrLV", () => {
       JSON.stringify(legacyLollipopData)
     );
     mockSmembers.mockImplementationOnce(async (_) => [
-      `SESSIONINFO-${aValidUser.session_token}`,
+      `SESSIONINFO-${mockSessionToken}`
     ]);
     mockGet.mockImplementationOnce(async (_, __) =>
       JSON.stringify({
         createdAt: new Date(),
-        sessionToken: aValidUser.session_token,
+        sessionToken: mockSessionToken
       })
     );
     mockGet.mockImplementationOnce(async (_, __) => JSON.stringify(aValidUser));
@@ -411,7 +388,7 @@ describe("RedisSessionStorage#userHasActiveSessionsOrLV", () => {
 
     expectLollipopDataAndSessionInfoAreRetrieved(
       aValidUser.fiscal_code,
-      aValidUser.session_token
+      mockSessionToken
     );
     expect(mockSelectOne).toHaveBeenCalledTimes(4);
   });
@@ -432,7 +409,7 @@ describe("RedisSessionStorage#userHasActiveSessionsOrLV", () => {
       JSON.stringify({ a: anAssertionRef, t: LoginTypeEnum.LEGACY })
     );
     mockSmembers.mockImplementationOnce(async (_) => [
-      `SESSIONINFO-${aValidUser.session_token}`,
+      `SESSIONINFO-${mockSessionToken}`
     ]);
 
     mockGet.mockImplementationOnce(() => Promise.resolve(null));
@@ -444,7 +421,7 @@ describe("RedisSessionStorage#userHasActiveSessionsOrLV", () => {
 
     expectLollipopDataAndSessionInfoAreRetrieved(
       aValidUser.fiscal_code,
-      aValidUser.session_token
+      mockSessionToken
     );
     expect(mockSelectOne).toHaveBeenCalledTimes(3);
   });
@@ -560,24 +537,6 @@ describe("RedisSessionStorage#unsetBlockedUser", () => {
     if (E.isLeft(result)) {
       expect(result.left).toBe(aError);
     }
-  });
-});
-
-describe("RedisSessionStorage#delPagoPaNoticeEmail", () => {
-  it("should succeded deleting a notice email", async () => {
-    mockDel.mockImplementationOnce((_) => Promise.resolve(1));
-
-    const response = await sessionStorage.delPagoPaNoticeEmail(aValidUser);
-    expect(response).toEqual(E.right(true));
-  });
-
-  it("should fail deleting a notice email", async () => {
-    const expectedError = new Error("Redis Error");
-
-    mockDel.mockImplementationOnce((_) => Promise.reject(expectedError));
-
-    const response = await sessionStorage.delPagoPaNoticeEmail(aValidUser);
-    expect(response).toEqual(E.left(expectedError));
   });
 });
 

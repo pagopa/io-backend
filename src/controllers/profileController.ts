@@ -14,7 +14,6 @@ import {
   IResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import * as express from "express";
-import { ISessionStorage } from "src/services/ISessionStorage";
 
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 import { Profile } from "../../generated/backend/Profile";
@@ -24,10 +23,7 @@ import { withUserFromRequest } from "../types/user";
 import { withValidatedOrValidationError } from "../utils/responses";
 
 export default class ProfileController {
-  constructor(
-    private readonly profileService: ProfileService,
-    private readonly sessionStorage: ISessionStorage
-  ) {}
+  constructor(private readonly profileService: ProfileService) {}
 
   /**
    * Returns the profile for the user identified by the provided fiscal
@@ -66,10 +62,8 @@ export default class ProfileController {
     withUserFromRequest(req, async (user) =>
       withValidatedOrValidationError(
         Profile.decode(req.body),
-        async (extendedProfile) => {
-          await this.sessionStorage.delPagoPaNoticeEmail(user);
-          return this.profileService.updateProfile(user, extendedProfile);
-        }
+        async (extendedProfile) =>
+          this.profileService.updateProfile(user, extendedProfile)
       )
     );
 

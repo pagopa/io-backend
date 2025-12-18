@@ -11,10 +11,10 @@ import { eventLog } from "@pagopa/winston-ts";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
 import { flow, identity, pipe } from "fp-ts/lib/function";
-import { UserIdentity } from "generated/io-auth/UserIdentity";
 import { Errors } from "io-ts";
 import { ulid } from "ulid";
 
+import { UserIdentity } from "../../generated/io-auth/UserIdentity";
 import { RCConfigurationPublic } from "../../generated/io-messages-api/RCConfigurationPublic";
 import { LollipopSignatureInput } from "../../generated/lollipop/LollipopSignatureInput";
 import { LcParams } from "../../generated/lollipop-api/LcParams";

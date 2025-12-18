@@ -272,22 +272,6 @@ export default class RedisSessionStorage
   }
 
   /**
-   * Delete notify email cache related to an user
-   */
-  public async delPagoPaNoticeEmail(user: User): Promise<Either<Error, true>> {
-    return pipe(
-      TE.tryCatch(
-        () =>
-          this.redisClientSelector
-            .selectOne(RedisClientMode.FAST)
-            .del(`${noticeEmailPrefix}${user.session_token}`),
-        E.toError
-      ),
-      TE.map<number, true>(() => true)
-    )();
-  }
-
-  /**
    * {@inheritDoc}
    */
   public async getLollipopAssertionRefForUser(

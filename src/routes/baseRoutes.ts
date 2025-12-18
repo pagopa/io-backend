@@ -53,8 +53,7 @@ export const registerAPIRoutes = (
   lollipopClient: ReturnType<typeof LollipopApiClient>
 ): void => {
   const profileController: ProfileController = new ProfileController(
-    profileService,
-    sessionStorage
+    profileService
   );
 
   const messagesController: MessagesController = new MessagesController(
