@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 18.1.0
+
+### Minor Changes
+
+- 3c6d331: Implemented x-user middleware (later to be used)
+
 ## 18.0.6
 
 ### Patch Changes
