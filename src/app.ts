@@ -6,7 +6,7 @@ import {
   NodeEnvironment,
   NodeEnvironmentEnum
 } from "@pagopa/ts-commons/lib/environment";
-import { CIDR } from "@pagopa/ts-commons/lib/strings";
+import { CIDR, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as appInsights from "applicationinsights";
 import * as bodyParser from "body-parser";
 import * as express from "express";
@@ -21,6 +21,8 @@ import * as passport from "passport";
 
 import {
   API_CLIENT,
+  APP_BACKEND_PRIMARY_KEY,
+  APP_BACKEND_SECONDARY_KEY,
   APP_MESSAGES_API_CLIENT,
   CDC_SUPPORT_API_CLIENT,
   CGN_API_CLIENT,
@@ -91,6 +93,7 @@ import { attachTrackingData } from "./utils/appinsights";
 import { getRequiredENVVar } from "./utils/container";
 import { log } from "./utils/logger";
 import { expressErrorMiddleware } from "./utils/middleware/express";
+import { getAuthenticatedXUserMiddleware } from "./utils/middleware/session";
 import { RedisClientMode, RedisClientSelector } from "./utils/redis";
 
 import expressEnforcesSsl = require("express-enforces-ssl");
@@ -158,7 +161,12 @@ export async function newApp({
   const authMiddlewares = {
     bearerSession: passport.authenticate("bearer.session", {
       session: false
-    })
+    }),
+    xUserMiddleware: getAuthenticatedXUserMiddleware(
+      "x-user" as NonEmptyString,
+      APP_BACKEND_PRIMARY_KEY,
+      APP_BACKEND_SECONDARY_KEY
+    )
   };
 
   // Create and setup the Express app.
@@ -372,7 +380,7 @@ export async function newApp({
         // Register A&I API routes with new authentication middleware
         registerIdentityRoutes(
           app,
-          authMiddlewares.bearerSession,
+          authMiddlewares.xUserMiddleware,
           PROFILE_SERVICE,
           SERVICE_PREFERENCES_SERVICE,
           SESSION_STORAGE,
