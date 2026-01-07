@@ -57,8 +57,7 @@ export const registerLegacyIdentityRoutes = (
   firstLollipopConsumerClient: ReturnType<typeof FirstLollipopConsumerClient>
 ): void => {
   const profileController: ProfileController = new ProfileController(
-    profileService,
-    sessionStorage
+    profileService
   );
 
   const servicesController: ServicesController = new ServicesController(
@@ -170,8 +169,7 @@ export const registerIdentityRoutes = (
 ): void => {
   const basePath = IDENTITY_API_BASE_PATH;
   const profileController: ProfileController = new ProfileController(
-    profileService,
-    sessionStorage
+    profileService
   );
 
   const servicesController: ServicesController = new ServicesController(
