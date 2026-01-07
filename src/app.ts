@@ -383,7 +383,6 @@ export async function newApp({
           authMiddlewares.xUserMiddleware,
           PROFILE_SERVICE,
           SERVICE_PREFERENCES_SERVICE,
-          SESSION_STORAGE,
           USER_DATA_PROCESSING_SERVICE,
           LOLLIPOP_API_CLIENT,
           FIRST_LOLLIPOP_CONSUMER_CLIENT

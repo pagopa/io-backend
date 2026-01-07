@@ -12,7 +12,10 @@ import FunctionsAppService from "../services/functionAppService";
 import ProfileService from "../services/profileService";
 import UserDataProcessingService from "../services/userDataProcessingService";
 import { toExpressHandler } from "../utils/express";
-import { expressLollipopMiddlewareLegacy } from "../utils/middleware/lollipop";
+import {
+  expressLollipopMiddleware,
+  expressLollipopMiddlewareLegacy
+} from "../utils/middleware/lollipop";
 
 // Identity API base path - hardcoded to match OpenAPI specification
 const IDENTITY_API_BASE_PATH = "/api/identity/v1";
@@ -152,7 +155,6 @@ export const registerLegacyIdentityRoutes = (
  * @param authMiddleware The authentication middleware (generic middleware that will be replaced)
  * @param profileService The service that handles the user profiles
  * @param fnAppService The API Client for the Function App
- * @param sessionStorage The session storage service that handles the user sessions
  * @param userDataProcessingService The service that handles the user request for data processing
  * @param lollipopApiClient The API Client that handles the Lollipop protocol requests
  * @param firstLollipopConsumerClient The First Lollipop Consumer client for sign operations
@@ -162,7 +164,6 @@ export const registerIdentityRoutes = (
   authMiddleware: express.RequestHandler,
   profileService: ProfileService,
   fnAppService: FunctionsAppService,
-  sessionStorage: ISessionStorage,
   userDataProcessingService: UserDataProcessingService,
   lollipopApiClient: ReturnType<typeof LollipopApiClient>,
   firstLollipopConsumerClient: ReturnType<typeof FirstLollipopConsumerClient>
@@ -252,7 +253,7 @@ export const registerIdentityRoutes = (
   app.post(
     `${basePath}/first-lollipop/sign`,
     authMiddleware,
-    expressLollipopMiddlewareLegacy(lollipopApiClient, sessionStorage),
+    expressLollipopMiddleware(lollipopApiClient),
     toExpressHandler(firstLollipopSign(firstLollipopConsumerClient))
   );
 };
