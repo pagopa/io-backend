@@ -1,4 +1,4 @@
-import { FiscalCode } from "../../../generated/backend/FiscalCode";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { toFiscalCodeHash } from "../notification";
 
 const aFiscalCode = "GRBGPP87L04L741X" as FiscalCode;

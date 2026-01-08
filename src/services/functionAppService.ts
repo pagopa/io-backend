@@ -18,11 +18,11 @@ import {
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { PromiseType } from "@pagopa/ts-commons/lib/types";
 import * as E from "fp-ts/Either";
-import { UpsertServicePreference } from "generated/backend/UpsertServicePreference";
+import { UpsertServicePreference } from "generated/identity/UpsertServicePreference";
 import { APIClient } from "src/clients/api";
 
 import { PathTraversalSafePathParam } from "../../generated/backend/PathTraversalSafePathParam";
-import { ServicePreference } from "../../generated/backend/ServicePreference";
+import { ServicePreference } from "../../generated/identity/ServicePreference";
 import {
   ResponseErrorStatusNotDefinedInSpec,
   ResponseErrorUnexpectedAuthProblem,

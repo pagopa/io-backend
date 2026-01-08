@@ -15,8 +15,8 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import * as express from "express";
 
-import { InitializedProfile } from "../../generated/backend/InitializedProfile";
-import { Profile } from "../../generated/backend/Profile";
+import { InitializedProfile } from "../../generated/identity/InitializedProfile";
+import { Profile } from "../../generated/identity/Profile";
 import ProfileService from "../services/profileService";
 import { profileMissingErrorResponse } from "../types/profile";
 import { withUserFromRequest } from "../types/user";

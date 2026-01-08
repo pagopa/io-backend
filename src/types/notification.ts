@@ -2,11 +2,9 @@
  * This file contains the CreatedMessageEventSenderMetadata and Notification models.
  */
 
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as crypto from "crypto";
 import * as t from "io-ts";
-
-import { FiscalCode } from "../../generated/backend/FiscalCode";
 
 /**
  * An hashed fiscal code.

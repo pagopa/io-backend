@@ -1,14 +1,14 @@
 import * as t from "io-ts";
-import { IsInboxEnabled } from "../../../generated/backend/IsInboxEnabled";
-import { IsWebhookEnabled } from "../../../generated/backend/IsWebhookEnabled";
+import { IsInboxEnabled } from "../../../generated/identity/IsInboxEnabled";
+import { IsWebhookEnabled } from "../../../generated/identity/IsWebhookEnabled";
 import {
   PreferredLanguage,
   PreferredLanguageEnum
-} from "../../../generated/backend/PreferredLanguage";
-import { PushNotificationsContentTypeEnum } from "../../../generated/backend/PushNotificationsContentType";
-import { ReminderStatusEnum } from "../../../generated/backend/ReminderStatus";
-import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
-import { ServicesPreferencesModeEnum } from "../../../generated/backend/ServicesPreferencesMode";
+} from "../../../generated/identity/PreferredLanguage";
+import { PushNotificationsContentTypeEnum } from "../../../generated/identity/PushNotificationsContentType";
+import { ReminderStatusEnum } from "../../../generated/identity/ReminderStatus";
+import { ServicePreferencesSettings } from "../../../generated/identity/ServicePreferencesSettings";
+import { ServicesPreferencesModeEnum } from "../../../generated/identity/ServicesPreferencesMode";
 import { AppVersion } from "../../../generated/io-profile/AppVersion";
 import { ExtendedProfile as ExtendedProfileApi } from "../../../generated/io-profile/ExtendedProfile";
 import { NewProfile } from "../../../generated/io-profile/NewProfile";
@@ -24,7 +24,7 @@ import {
 } from "../../__mocks__/user_mock";
 import ApiClientFactory from "../apiClientFactory";
 import ProfileService from "../profileService";
-import { Profile } from "../../../generated/backend/Profile";
+import { Profile } from "../../../generated/identity/Profile";
 import { UpdateProfileParams } from "../../../generated/io-profile/UpdateProfileParams";
 
 const aValidAPIEmail = anEmailAddress;
