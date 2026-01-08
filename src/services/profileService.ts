@@ -20,8 +20,8 @@ import {
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 
-import { InitializedProfile } from "../../generated/backend/InitializedProfile";
-import { Profile as ProfileBackend } from "../../generated/backend/Profile";
+import { InitializedProfile } from "../../generated/identity/InitializedProfile";
+import { Profile as ProfileBackend } from "../../generated/identity/Profile";
 import { ExtendedProfile as ExtendedProfileApi } from "../../generated/io-profile/ExtendedProfile";
 import { NewProfile } from "../../generated/io-profile/NewProfile";
 import { Profile as ProfileApi } from "../../generated/io-profile/Profile";

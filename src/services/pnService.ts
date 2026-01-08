@@ -1,4 +1,5 @@
-import { FiscalCode } from "../../generated/backend/FiscalCode";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+
 import { IoCourtesyDigitalAddressActivation } from "../../generated/piattaforma-notifiche-courtesy/IoCourtesyDigitalAddressActivation";
 import { PNClientFactory, PNEnvironment } from "../clients/pn-clients";
 

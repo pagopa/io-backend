@@ -1,6 +1,6 @@
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { EmailAddress } from "../../generated/backend/EmailAddress";
-import { InitializedProfile } from "../../generated/backend/InitializedProfile";
+import { EmailAddress } from "../../generated/identity/EmailAddress";
+import { InitializedProfile } from "../../generated/identity/InitializedProfile";
 import { SpidLevelEnum } from "../../generated/backend/SpidLevel";
 import { IsInboxEnabled } from "../../generated/io-profile/IsInboxEnabled";
 import { IsWebhookEnabled } from "../../generated/io-profile/IsWebhookEnabled";

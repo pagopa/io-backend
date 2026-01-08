@@ -3,8 +3,8 @@
 import * as E from "fp-ts/lib/Either";
 
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
-import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { MessageBodyMarkdown } from "../../../generated/backend/MessageBodyMarkdown";
 import { MessageSubject } from "../../../generated/backend/MessageSubject";
 import { PlatformEnum } from "../../../generated/backend/Platform";
@@ -87,7 +87,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
   });
 
   it("should submit a correct installation to the Queue Storage, Apple platform", async () => {
-    mockSendMessage.mockImplementation(_ => Promise.resolve());
+    mockSendMessage.mockImplementation((_) => Promise.resolve());
 
     const service = new NotificationService("", "");
 
@@ -107,7 +107,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
   });
 
   it("should submit a correct installation to the Queue Storage, Google platform", async () => {
-    mockSendMessage.mockImplementation(_ => Promise.resolve());
+    mockSendMessage.mockImplementation((_) => Promise.resolve());
 
     const service = new NotificationService("", "");
 
@@ -127,7 +127,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
   });
 
   it("should fail if the Queue Storage fails on createOrUpdateInstallation", async () => {
-    mockSendMessage.mockImplementation(_ => Promise.reject(genericError));
+    mockSendMessage.mockImplementation((_) => Promise.reject(genericError));
 
     const service = new NotificationService("", "");
 
@@ -153,7 +153,7 @@ describe("NotificationService#notify", () => {
   });
 
   it("should submit a notification to the Queue Storage", async () => {
-    mockSendMessage.mockImplementation(_ => Promise.resolve());
+    mockSendMessage.mockImplementation((_) => Promise.resolve());
     const service = new NotificationService("", "");
 
     const res = await service.notify(aValidNotification, aNotificationSubject);
@@ -171,7 +171,7 @@ describe("NotificationService#notify", () => {
   });
 
   it("should write organization name in title, if notificationTitle parameter is empty", async () => {
-    mockSendMessage.mockImplementation(_ => Promise.resolve());
+    mockSendMessage.mockImplementation((_) => Promise.resolve());
     const service = new NotificationService("", "");
 
     const res = await service.notify(aValidNotification, aNotificationSubject);
@@ -189,7 +189,7 @@ describe("NotificationService#notify", () => {
     pipe(
       decodedMessage,
       NotifyMessage.decode,
-      E.map(m =>
+      E.map((m) =>
         expect(m).toEqual({
           installationId: toFiscalCodeHash(
             aValidNotification.message.fiscal_code
@@ -202,12 +202,12 @@ describe("NotificationService#notify", () => {
           }
         })
       ),
-      E.mapLeft(_ => fail("Cannot decode NotifyMessage"))
+      E.mapLeft((_) => fail("Cannot decode NotifyMessage"))
     );
   });
 
   it("should write notificationTitle in title, if notificationTitle not empty", async () => {
-    mockSendMessage.mockImplementation(_ => Promise.resolve());
+    mockSendMessage.mockImplementation((_) => Promise.resolve());
     const service = new NotificationService("", "");
 
     const res = await service.notify(
@@ -229,7 +229,7 @@ describe("NotificationService#notify", () => {
     pipe(
       decodedMessage,
       NotifyMessage.decode,
-      E.map(m =>
+      E.map((m) =>
         expect(m).toEqual({
           installationId: toFiscalCodeHash(
             aValidNotification.message.fiscal_code
@@ -242,12 +242,12 @@ describe("NotificationService#notify", () => {
           }
         })
       ),
-      E.mapLeft(_ => fail("Cannot decode NotifyMessage"))
+      E.mapLeft((_) => fail("Cannot decode NotifyMessage"))
     );
   });
 
   it("should fail if the Queue Storage fails on notify", async () => {
-    mockSendMessage.mockImplementation(_ => Promise.reject(genericError));
+    mockSendMessage.mockImplementation((_) => Promise.reject(genericError));
 
     const service = new NotificationService("", "");
 
@@ -277,7 +277,7 @@ describe("NotificationService#deleteInstallation", () => {
   };
 
   it("should submit a delete installation message to the Queue Storage", async () => {
-    mockSendMessage.mockImplementation(_ => Promise.resolve());
+    mockSendMessage.mockImplementation((_) => Promise.resolve());
     const service = new NotificationService("", "");
 
     const res = await service.deleteInstallation(aFiscalCode);
@@ -294,7 +294,7 @@ describe("NotificationService#deleteInstallation", () => {
   });
 
   it("should fail if the Queue Storage fails on deleteInstallation", async () => {
-    mockSendMessage.mockImplementation(_ => Promise.reject(genericError));
+    mockSendMessage.mockImplementation((_) => Promise.reject(genericError));
     const service = new NotificationService("", "");
 
     const res = await service.deleteInstallation(aFiscalCode);

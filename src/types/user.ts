@@ -8,9 +8,9 @@ import * as express from "express";
 import * as t from "io-ts";
 
 import { AssertionRef } from "../../generated/backend/AssertionRef";
-import { EmailAddress } from "../../generated/backend/EmailAddress";
-import { FiscalCode } from "../../generated/backend/FiscalCode";
 import { SpidLevel } from "../../generated/backend/SpidLevel";
+import { EmailAddress } from "../../generated/identity/EmailAddress";
+import { FiscalCode } from "../../generated/identity/FiscalCode";
 import { UserIdentity } from "../../generated/io-auth/UserIdentity";
 import { withValidatedOrValidationError } from "../utils/responses";
 
