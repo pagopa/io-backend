@@ -21,7 +21,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: false
 
-permissions: {}
+permissions:
+  id-token: write
+  pull-requests: write
 
 jobs:
   plan:
