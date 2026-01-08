@@ -163,7 +163,7 @@ export async function newApp({
       session: false
     }),
     xUserMiddleware: getAuthenticatedXUserMiddleware(
-      "x-user" as NonEmptyString,
+      "x-appbackend-api-key" as NonEmptyString,
       APP_BACKEND_PRIMARY_KEY,
       APP_BACKEND_SECONDARY_KEY
     )
