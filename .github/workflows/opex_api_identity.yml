@@ -14,7 +14,9 @@ on:
 concurrency:
   group: ${{ github.workflow }}
 
-permissions: {}
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   apply:
