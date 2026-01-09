@@ -10,6 +10,8 @@ import CgnService from "../services/cgnService";
 import { toExpressHandler } from "../utils/express";
 
 export const CGN_PLATFORM_API_BASE_PATH = "/api/cgn/v1";
+export const CGN_OPERATOR_SEARCH_PLATFORM_API_BASE_PATH =
+  "/api/cgn-operator-search/v1";
 
 /**
  * IMPORTANT: CGN Routes Management Strategy
@@ -158,7 +160,16 @@ export const registerCgnAPIRoutes = (
   );
 };
 
-export const registerCgnOperatorSearchAPIRoutes = (
+/**
+ * Mount the cgn operator search LEGACY routes into the Express application
+ *
+ * @param app The Express application
+ * @param basePath The base path for the cgn APIs
+ * @param cgnService The service that handles the cgn requests
+ * @param cgnOperatorSearchService The operator search service
+ * @param bearerSessionTokenAuth The autentication middleware for user session token
+ */
+export const registerLegacyCgnOperatorSearchAPIRoutes = (
   app: Express,
   basePath: string,
   cgnService: CgnService,
@@ -217,6 +228,79 @@ export const registerCgnOperatorSearchAPIRoutes = (
   app.get(
     `${basePath}/discount-bucket-code/:discountId`,
     bearerSessionTokenAuth,
+    toExpressHandler(
+      cgnOperatorController.getDiscountBucketCode,
+      cgnOperatorController
+    )
+  );
+};
+
+/**
+ * Mount the cgn operator search routes into the Express application
+ *
+ * @param app The Express application
+ * @param cgnService The service that handles the cgn requests
+ * @param cgnOperatorSearchService The operator search service
+ * @param authMiddleware The autentication middleware for user session token
+ */
+export const registerCgnOperatorSearchAPIRoutes = (
+  app: Express,
+  cgnService: CgnService,
+  cgnOperatorSearchService: CgnOperatorSearchService,
+  authMiddleware: express.RequestHandler
+): void => {
+  const basePath = CGN_OPERATOR_SEARCH_PLATFORM_API_BASE_PATH;
+  const cgnOperatorController: CgnOperatorSearchController =
+    new CgnOperatorSearchController(cgnService, cgnOperatorSearchService);
+
+  app.get(
+    `${basePath}/published-product-categories`,
+    authMiddleware,
+    toExpressHandler(
+      cgnOperatorController.getPublishedProductCategories,
+      cgnOperatorController
+    )
+  );
+
+  app.get(
+    `${basePath}/merchants/:merchantId`,
+    authMiddleware,
+    toExpressHandler(cgnOperatorController.getMerchant, cgnOperatorController)
+  );
+
+  app.get(
+    `${basePath}/count`,
+    authMiddleware,
+    toExpressHandler(cgnOperatorController.count, cgnOperatorController)
+  );
+
+  app.post(
+    `${basePath}/search`,
+    authMiddleware,
+    toExpressHandler(cgnOperatorController.search, cgnOperatorController)
+  );
+
+  app.post(
+    `${basePath}/online-merchants`,
+    authMiddleware,
+    toExpressHandler(
+      cgnOperatorController.getOnlineMerchants,
+      cgnOperatorController
+    )
+  );
+
+  app.post(
+    `${basePath}/offline-merchants`,
+    authMiddleware,
+    toExpressHandler(
+      cgnOperatorController.getOfflineMerchants,
+      cgnOperatorController
+    )
+  );
+
+  app.get(
+    `${basePath}/discount-bucket-code/:discountId`,
+    authMiddleware,
     toExpressHandler(
       cgnOperatorController.getDiscountBucketCode,
       cgnOperatorController
