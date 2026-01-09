@@ -6,6 +6,9 @@ host: localhost
 basePath: /api/v1/cgn
 schemes:
   - https
+description: |
+  LEGACY SPEC. This is scheduled to be deleted after
+  api_cgn_platform OpenAPI spec has been fully adopted
 security:
   - Bearer: []
 paths:
@@ -14,7 +17,7 @@ paths:
       operationId: getCgnStatus
       summary: Get the CGN status details
       description: |
-        Get the CGN status details 
+        Get the CGN status details
         by the provided fiscal code
       responses:
         "200":
@@ -36,7 +39,7 @@ paths:
     post:
       operationId: startCgnActivation
       summary: Start a CGN activation procedure
-      description: | 
+      description: |
         Start a new CGN activation procedure
         for the logged user calculating if the user is
         eligible to get a CGN.
@@ -93,7 +96,7 @@ paths:
     post:
       operationId: startEycaActivation
       summary: Start an EYCA activation procedure
-      description: | 
+      description: |
         Start a new EYCA activation procedure
         for the logged user calculating if the user is
         eligible to enable EYCA on his CGN card.
@@ -170,12 +173,12 @@ paths:
           description: Service unavailable.
           schema:
             $ref: "#/definitions/ProblemJson"
-  
+
   "/delete":
     post:
       operationId: startCgnUnsubscription
       summary: Start a CGN unsubscription procedure
-      description: | 
+      description: |
         Start a new CGN unsubscription procedure
         for the logged user
       responses:

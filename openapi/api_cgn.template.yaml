@@ -6,6 +6,9 @@ host: localhost
 basePath: /api/v1
 schemes:
   - https
+description: |
+  LEGACY SPEC. This is scheduled to be deleted after
+  api_cgn_platform OpenAPI spec has been fully adopted
 security:
   - Bearer: []
 paths:

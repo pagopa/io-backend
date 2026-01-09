@@ -37,6 +37,7 @@
     "generate:proxy:public-models": "rimraf generated/public  && gen-api-models --api-spec api_public.yaml --out-dir generated/public",
     "generate:api:io-messages": "rimraf generated/io-messages-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-functions-app-messages/v5.3.0/openapi/index.yaml --no-strict --out-dir generated/io-messages-api --request-types --response-decoders --client",
     "generate:proxy:cgn-models": "rimraf generated/cgn && gen-api-models --api-spec api_cgn.yaml --out-dir generated/cgn",
+    "generate:proxy:cgn-platform-api-models": "rimraf generated/cgn-platform && gen-api-models --api-spec openapi/generated/api_cgn_platform.yaml --out-dir generated/cgn-platform",
     "generate:proxy:io-sign-models": "rimraf generated/io-sign && gen-api-models --api-spec api_io_sign.yaml --out-dir generated/io-sign",
     "generate:proxy:io-fims-models": "rimraf generated/io-fims && gen-api-models --api-spec api_io_fims.yaml --out-dir generated/io-fims",
     "generate:proxy:cgn-operator-search-models": "rimraf generated/cgn-operator-search && gen-api-models --api-spec api_cgn_operator_search.yaml --out-dir generated/cgn-operator-search",
