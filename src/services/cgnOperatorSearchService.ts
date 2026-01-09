@@ -20,9 +20,9 @@ import { SearchRequest } from "generated/io-cgn-operator-search-api/SearchReques
 import { SearchResult } from "generated/io-cgn-operator-search-api/SearchResult";
 import { GetPublishedCategoriesParameters } from "generated/parameters/GetPublishedCategoriesParameters";
 
-import { Merchant } from "../../generated/cgn-operator-search/Merchant";
-import { OfflineMerchants } from "../../generated/cgn-operator-search/OfflineMerchants";
-import { OnlineMerchants } from "../../generated/cgn-operator-search/OnlineMerchants";
+import { Merchant } from "../../generated/cgn-operator-search-platform/Merchant";
+import { OfflineMerchants } from "../../generated/cgn-operator-search-platform/OfflineMerchants";
+import { OnlineMerchants } from "../../generated/cgn-operator-search-platform/OnlineMerchants";
 import { OfflineMerchantSearchRequest } from "../../generated/io-cgn-operator-search-api/OfflineMerchantSearchRequest";
 import { OnlineMerchantSearchRequest } from "../../generated/io-cgn-operator-search-api/OnlineMerchantSearchRequest";
 import { CgnOperatorSearchAPIClient } from "../../src/clients/cgn-operator-search";
