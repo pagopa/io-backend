@@ -2,6 +2,9 @@ swagger: "2.0"
 info:
   version: 1.0.0
   title: Carta Giovani Nazionale Operator Search API
+  description: |
+    LEGACY SPEC. This is scheduled to be deleted after
+    api_cgn_operator_search_platform OpenAPI spec has been fully adopted
 host: localhost
 basePath: /api/v1/cgn/operator-search
 schemes:
@@ -27,7 +30,7 @@ paths:
         "500":
           description: Service unavailable.
           schema:
-            $ref: "#/definitions/ProblemJson" 
+            $ref: "#/definitions/ProblemJson"
 
   "/count":
     get:
@@ -47,7 +50,7 @@ paths:
         "500":
           description: Service unavailable.
           schema:
-            $ref: "#/definitions/ProblemJson" 
+            $ref: "#/definitions/ProblemJson"
 
   "/search":
     post:
@@ -73,7 +76,7 @@ paths:
         "500":
           description: Service unavailable.
           schema:
-            $ref: "#/definitions/ProblemJson" 
+            $ref: "#/definitions/ProblemJson"
 
   "/online-merchants":
     post:
@@ -97,7 +100,7 @@ paths:
         "500":
           description: Service unavailable.
           schema:
-            $ref: "#/definitions/ProblemJson" 
+            $ref: "#/definitions/ProblemJson"
 
   "/offline-merchants":
     post:
