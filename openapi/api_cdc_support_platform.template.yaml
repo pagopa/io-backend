@@ -5,10 +5,9 @@ info:
   x-logo:
     url: https://io.italia.it/assets/img/io-logo-blue.svg
   description: |
-    LEGACY SPEC. This is scheduled to be deleted after
-    api_cdc_support_platform OpenAPI spec has been fully adopted
+    These APIs support App IO about Carta della Cultura
 servers:
-  - url: /api/v1/cdc
+  - url: /api/cdc-support/v1
 security:
   - Bearer: []
 paths:
@@ -43,6 +42,6 @@ components:
       in: header
   schemas:
     CitizenStatus:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-cdc/refs/heads/main/apps/support-func/api/internal.yaml#/components/schemas/CitizenStatus"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cdc/refs/tags/support-func@1.1.8/apps/support-func/api/internal.yaml#/components/schemas/CitizenStatus"
     ProblemJson:
-      $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ProblemJson"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cdc/refs/tags/support-func@1.1.8/apps/support-func/api/internal.yaml#/components/schemas/ProblemJson"
