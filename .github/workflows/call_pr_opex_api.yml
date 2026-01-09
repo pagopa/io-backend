@@ -4,6 +4,13 @@ on:
       api_name:
         type: string
         required: true
+    secrets:
+      AZURE_CLIENT_ID_CI:
+        required: true
+      AZURE_TENANT_ID:
+        required: true
+      AZURE_SUBSCRIPTION_ID:
+        required: true
 
 jobs:
   plan:
