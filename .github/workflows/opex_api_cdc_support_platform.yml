@@ -1,0 +1,31 @@
+name: Opex Dashboard api_cdc_support_platform
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'openapi/generated/api_cdc_support_platform.yaml'
+      - '.github/workflows/opex_api_cdc_support_platform.yml'
+      - '.opex/api_cdc_support_platform/**'
+
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  apply:
+    uses: ./.github/workflows/call_opex_api.yml
+    name: Apply changes to Production
+    secrets:
+      AZURE_CLIENT_ID_CI: ${{ secrets.AZURE_CLIENT_ID_CI }}
+      AZURE_CLIENT_ID_CD: ${{ secrets.AZURE_CLIENT_ID_CD }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+    with:
+      api_name: api_cdc_support_platform
