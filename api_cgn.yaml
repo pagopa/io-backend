@@ -2,13 +2,13 @@ swagger: "2.0"
 info:
   version: 1.0.0
   title: Carta Giovani Nazionale API
+  description: |
+    LEGACY SPEC. This is scheduled to be deleted after
+    api_cgn_platform OpenAPI spec has been fully adopted
 host: localhost
 basePath: /api/v1/cgn
 schemes:
   - https
-description: |
-  LEGACY SPEC. This is scheduled to be deleted after
-  api_cgn_platform OpenAPI spec has been fully adopted
 security:
   - Bearer: []
 paths:
