@@ -60,7 +60,8 @@ import { registerCdcSupportAPIRoutes } from "./routes/cdcSupportRoutes";
 import {
   registerCgnAPIRoutes,
   registerCgnOperatorSearchAPIRoutes,
-  registerLegacyCgnAPIRoutes
+  registerLegacyCgnAPIRoutes,
+  registerLegacyCgnOperatorSearchAPIRoutes
 } from "./routes/cgnRoutes";
 import {
   registerIdentityRoutes,
@@ -403,12 +404,19 @@ export async function newApp({
             authMiddlewares.xUserMiddleware
           );
 
-          registerCgnOperatorSearchAPIRoutes(
+          registerLegacyCgnOperatorSearchAPIRoutes(
             app,
             CGNOperatorSearchAPIBasePath,
             CGN_SERVICE,
             CGN_OPERATOR_SEARCH_SERVICE,
             authMiddlewares.bearerSession
+          );
+
+          registerCgnOperatorSearchAPIRoutes(
+            app,
+            CGN_SERVICE,
+            CGN_OPERATOR_SEARCH_SERVICE,
+            authMiddlewares.xUserMiddleware
           );
         }
 
