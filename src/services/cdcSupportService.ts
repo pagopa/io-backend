@@ -13,7 +13,7 @@ import {
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
-import { CitizenStatus } from "generated/io-cdc-support-func-api/CitizenStatus";
+import { CitizenStatus } from "generated/cdc-support-platform/CitizenStatus";
 import { CdcSupportAPIClient } from "src/clients/cdc-support";
 
 import { readableProblem } from "../utils/errorsFormatter";
