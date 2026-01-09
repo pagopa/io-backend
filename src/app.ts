@@ -56,7 +56,10 @@ import {
   SERVICES_APP_BACKEND_CLIENT
 } from "./config";
 import { registerAPIRoutes } from "./routes/baseRoutes";
-import { registerCdcSupportAPIRoutes } from "./routes/cdcSupportRoutes";
+import {
+  registerCdcSupportAPIRoutes,
+  registerLegacyCdcSupportAPIRoutes
+} from "./routes/cdcSupportRoutes";
 import {
   registerCgnAPIRoutes,
   registerCgnOperatorSearchAPIRoutes,
@@ -421,11 +424,17 @@ export async function newApp({
         }
 
         if (FF_CDC_ENABLED) {
-          registerCdcSupportAPIRoutes(
+          registerLegacyCdcSupportAPIRoutes(
             app,
             CdcSupportAPIbasePath,
             CDC_SUPPORT_SERVICE,
             authMiddlewares.bearerSession
+          );
+
+          registerCdcSupportAPIRoutes(
+            app,
+            CDC_SUPPORT_SERVICE,
+            authMiddlewares.xUserMiddleware
           );
         }
 
