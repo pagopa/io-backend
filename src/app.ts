@@ -59,7 +59,8 @@ import { registerAPIRoutes } from "./routes/baseRoutes";
 import { registerCdcSupportAPIRoutes } from "./routes/cdcSupportRoutes";
 import {
   registerCgnAPIRoutes,
-  registerCgnOperatorSearchAPIRoutes
+  registerCgnOperatorSearchAPIRoutes,
+  registerLegacyCgnAPIRoutes
 } from "./routes/cgnRoutes";
 import {
   registerIdentityRoutes,
@@ -389,11 +390,17 @@ export async function newApp({
         );
 
         if (FF_CGN_ENABLED) {
-          registerCgnAPIRoutes(
+          registerLegacyCgnAPIRoutes(
             app,
             CGNAPIBasePath,
             CGN_SERVICE,
             authMiddlewares.bearerSession
+          );
+
+          registerCgnAPIRoutes(
+            app,
+            CGN_SERVICE,
+            authMiddlewares.xUserMiddleware
           );
 
           registerCgnOperatorSearchAPIRoutes(
