@@ -6,7 +6,7 @@ import {
   NodeEnvironment,
   NodeEnvironmentEnum
 } from "@pagopa/ts-commons/lib/environment";
-import { CIDR } from "@pagopa/ts-commons/lib/strings";
+import { CIDR, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as appInsights from "applicationinsights";
 import * as bodyParser from "body-parser";
 import * as express from "express";
@@ -21,6 +21,8 @@ import * as passport from "passport";
 
 import {
   API_CLIENT,
+  APP_BACKEND_PRIMARY_KEY,
+  APP_BACKEND_SECONDARY_KEY,
   APP_MESSAGES_API_CLIENT,
   CDC_SUPPORT_API_CLIENT,
   CGN_API_CLIENT,
@@ -59,7 +61,10 @@ import {
   registerCgnAPIRoutes,
   registerCgnOperatorSearchAPIRoutes
 } from "./routes/cgnRoutes";
-import { registerFirstLollipopConsumer } from "./routes/firstLollipopConsumerRoutes";
+import {
+  registerIdentityRoutes,
+  registerLegacyIdentityRoutes
+} from "./routes/identityRoutes";
 import { registerIoFimsAPIRoutes } from "./routes/ioFimsRoutes";
 import { registerIoSignAPIRoutes } from "./routes/ioSignRoutes";
 import { registerIoWalletAPIRoutes } from "./routes/ioWalletRoutes";
@@ -88,6 +93,7 @@ import { attachTrackingData } from "./utils/appinsights";
 import { getRequiredENVVar } from "./utils/container";
 import { log } from "./utils/logger";
 import { expressErrorMiddleware } from "./utils/middleware/express";
+import { getAuthenticatedXUserMiddleware } from "./utils/middleware/session";
 import { RedisClientMode, RedisClientSelector } from "./utils/redis";
 
 import expressEnforcesSsl = require("express-enforces-ssl");
@@ -155,7 +161,12 @@ export async function newApp({
   const authMiddlewares = {
     bearerSession: passport.authenticate("bearer.session", {
       session: false
-    })
+    }),
+    xUserMiddleware: getAuthenticatedXUserMiddleware(
+      "x-appbackend-api-key" as NonEmptyString,
+      APP_BACKEND_PRIMARY_KEY,
+      APP_BACKEND_SECONDARY_KEY
+    )
   };
 
   // Create and setup the Express app.
@@ -329,17 +340,8 @@ export async function newApp({
 
         registerPublicRoutes(app);
 
-        registerFirstLollipopConsumer(
-          app,
-          "/first-lollipop",
-          LOLLIPOP_API_CLIENT,
-          SESSION_STORAGE,
-          FIRST_LOLLIPOP_CONSUMER_CLIENT,
-          authMiddlewares.bearerSession
-        );
-
         // Create the function app service.
-        const FN_APP_SERVICE = new FunctionsAppService(API_CLIENT);
+        const SERVICE_PREFERENCES_SERVICE = new FunctionsAppService(API_CLIENT);
         // Create the new messages service.
         const APP_MESSAGES_SERVICE = new NewMessagesService(
           APP_MESSAGES_API_CLIENT
@@ -354,16 +356,38 @@ export async function newApp({
           app,
           APIBasePath,
           allowNotifyIPSourceRange,
-          PROFILE_SERVICE,
-          FN_APP_SERVICE,
           APP_MESSAGES_SERVICE,
           notificationServiceFactory,
           SESSION_STORAGE,
           PAGOPA_ECOMMERCE_SERVICE,
-          USER_DATA_PROCESSING_SERVICE,
           authMiddlewares.bearerSession,
           LOLLIPOP_API_CLIENT
         );
+
+        // Register legacy A&I routes (/api/v1/profile, /api/v1/user-data-processing, etc.)
+        registerLegacyIdentityRoutes(
+          app,
+          APIBasePath,
+          authMiddlewares.bearerSession,
+          PROFILE_SERVICE,
+          SERVICE_PREFERENCES_SERVICE,
+          SESSION_STORAGE,
+          USER_DATA_PROCESSING_SERVICE,
+          LOLLIPOP_API_CLIENT,
+          FIRST_LOLLIPOP_CONSUMER_CLIENT
+        );
+
+        // Register A&I API routes with new authentication middleware
+        registerIdentityRoutes(
+          app,
+          authMiddlewares.xUserMiddleware,
+          PROFILE_SERVICE,
+          SERVICE_PREFERENCES_SERVICE,
+          USER_DATA_PROCESSING_SERVICE,
+          LOLLIPOP_API_CLIENT,
+          FIRST_LOLLIPOP_CONSUMER_CLIENT
+        );
+
         if (FF_CGN_ENABLED) {
           registerCgnAPIRoutes(
             app,

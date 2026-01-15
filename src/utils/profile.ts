@@ -4,8 +4,8 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
-import { EmailAddress } from "../../generated/backend/EmailAddress";
-import { InitializedProfile } from "../../generated/backend/InitializedProfile";
+import { EmailAddress } from "../../generated/identity/EmailAddress";
+import { InitializedProfile } from "../../generated/identity/InitializedProfile";
 import ProfileService from "../../src/services/profileService";
 import { User } from "../../src/types/user";
 

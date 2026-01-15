@@ -2,8 +2,7 @@ import {
   ResponseSuccessAccepted,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { FiscalCode } from "../../../generated/backend/FiscalCode";
+import { NonEmptyString, FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import { mockedUser } from "../../__mocks__/user_mock";

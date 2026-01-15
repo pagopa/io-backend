@@ -1,7 +1,6 @@
 /* tslint:disable:no-object-mutation */
 import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
-import { EmailAddress } from "../../../generated/backend/EmailAddress";
-import { FiscalCode } from "../../../generated/backend/FiscalCode";
+import { FiscalCode, EmailString } from "@pagopa/ts-commons/lib/strings";
 import { InstallationID } from "../../../generated/backend/InstallationID";
 import { PlatformEnum } from "../../../generated/backend/Platform";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
@@ -20,7 +19,7 @@ import { mockRedisClientSelector } from "../../__mocks__/redis";
 
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anInvalidFiscalNumber = "xxx" as FiscalCode;
-const anEmailAddress = "garibaldi@example.com" as EmailAddress;
+const anEmailAddress = "garibaldi@example.com" as EmailString;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 const aValidInstallationID =
   "550e8400e29b41d4a716446655440000" as InstallationID;
