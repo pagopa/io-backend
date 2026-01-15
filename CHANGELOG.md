@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 18.2.0
+
+### Minor Changes
+
+- bbd0273: Duplicate A&I endpoints
+
 ## 18.1.0
 
 ### Minor Changes
