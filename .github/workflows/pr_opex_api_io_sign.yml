@@ -10,7 +10,7 @@ on:
     branches:
       - master
     paths:
-      - 'api_io_sign.yaml'
+      - 'openapi/generated/api_io_sign.yaml'
       - '.github/workflows/pr_opex_api_io_sign.yml'
       - '.github/workflows/opex_api_io_sign.yml'
       - '.opex/api_io_sign/**'

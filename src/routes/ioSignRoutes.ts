@@ -26,7 +26,7 @@ const IO_SIGN_API_BASE_PATH = "/api/sign/v1";
  * AND the legacy routes (/api/v1/sign).
  *
  * WHY? To prevent accidental divergence during development:
- * - When adding/modifying profile endpoints, developers MUST update both versions
+ * - When adding/modifying IO-Sign endpoints, developers MUST update both versions
  * - Having them in the same file makes this requirement explicit and hard to miss
  * - Legacy routes will be removed once the Identity API is fully adopted
  *
@@ -41,7 +41,7 @@ const IO_SIGN_API_BASE_PATH = "/api/sign/v1";
  * @param basePath The base path for the Io Sign APIs
  * @param ioSignService The service that handles the Io Sign requests
  * @param profileService The service that provides user profiles
- * @param authMiddleware The autentication middleware for user session token
+ * @param authMiddleware The authentication middleware for user session token
  * @param lollipopClient The Lollipop client used to communicate with the Lollipop APIs
  * @param sessionStorage The session storage used to store user sessions
  */
@@ -110,7 +110,6 @@ export const registerIoSignAPIRoutesLegacy = (
  * @param ioSignService The service that handles the Io Sign requests
  * @param profileService The service that provides user profiles
  * @param lollipopClient The Lollipop client used to communicate with the Lollipop APIs
- * @param sessionStorage The session storage used to store user sessions
  */
 export const registerIoSignAPIRoutes = (
   app: Express,
