@@ -18,8 +18,8 @@ import {
   StatusEnum as ActivationStatusEnum
 } from "@pagopa/io-functions-cgn-sdk/CgnActivationDetail";
 import { EycaActivationDetail } from "@pagopa/io-functions-cgn-sdk/EycaActivationDetail";
-import { Otp } from "../../../generated/cgn/Otp";
-import { OtpCode } from "../../../generated/cgn/OtpCode";
+import { Otp } from "../../../generated/cgn-platform/Otp";
+import { OtpCode } from "../../../generated/cgn-platform/OtpCode";
 
 const API_KEY = "";
 const API_URL = "";

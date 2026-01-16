@@ -5,7 +5,7 @@ import { mockedUser } from "../../__mocks__/user_mock";
 import CdcSupportController from "../cdcSupportController";
 import { CdcSupportAPIClient } from "../../clients/cdc-support";
 import CdcSupportService from "../../services/cdcSupportService";
-import { CitizenStatus } from "../../../generated/io-cdc-support-func-api/CitizenStatus";
+import { CitizenStatus } from "../../../generated/cdc-support-platform/CitizenStatus";
 
 const API_KEY = "";
 const API_URL = "";

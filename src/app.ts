@@ -56,10 +56,15 @@ import {
   SERVICES_APP_BACKEND_CLIENT
 } from "./config";
 import { registerAPIRoutes } from "./routes/baseRoutes";
-import { registerCdcSupportAPIRoutes } from "./routes/cdcSupportRoutes";
+import {
+  registerCdcSupportAPIRoutes,
+  registerLegacyCdcSupportAPIRoutes
+} from "./routes/cdcSupportRoutes";
 import {
   registerCgnAPIRoutes,
-  registerCgnOperatorSearchAPIRoutes
+  registerCgnOperatorSearchAPIRoutes,
+  registerLegacyCgnAPIRoutes,
+  registerLegacyCgnOperatorSearchAPIRoutes
 } from "./routes/cgnRoutes";
 import {
   registerIdentityRoutes,
@@ -389,28 +394,47 @@ export async function newApp({
         );
 
         if (FF_CGN_ENABLED) {
-          registerCgnAPIRoutes(
+          registerLegacyCgnAPIRoutes(
             app,
             CGNAPIBasePath,
             CGN_SERVICE,
             authMiddlewares.bearerSession
           );
 
-          registerCgnOperatorSearchAPIRoutes(
+          registerCgnAPIRoutes(
+            app,
+            CGN_SERVICE,
+            authMiddlewares.xUserMiddleware
+          );
+
+          registerLegacyCgnOperatorSearchAPIRoutes(
             app,
             CGNOperatorSearchAPIBasePath,
             CGN_SERVICE,
             CGN_OPERATOR_SEARCH_SERVICE,
             authMiddlewares.bearerSession
           );
+
+          registerCgnOperatorSearchAPIRoutes(
+            app,
+            CGN_SERVICE,
+            CGN_OPERATOR_SEARCH_SERVICE,
+            authMiddlewares.xUserMiddleware
+          );
         }
 
         if (FF_CDC_ENABLED) {
-          registerCdcSupportAPIRoutes(
+          registerLegacyCdcSupportAPIRoutes(
             app,
             CdcSupportAPIbasePath,
             CDC_SUPPORT_SERVICE,
             authMiddlewares.bearerSession
+          );
+
+          registerCdcSupportAPIRoutes(
+            app,
+            CDC_SUPPORT_SERVICE,
+            authMiddlewares.xUserMiddleware
           );
         }
 

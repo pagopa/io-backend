@@ -2,7 +2,7 @@ import * as t from "io-ts";
 import { CdcSupportAPIClient } from "../../clients/cdc-support";
 import { mockedUser } from "../../__mocks__/user_mock";
 import CdcSupportService from "../cdcSupportService";
-import { CitizenStatus } from "../../../generated/io-cdc-support-func-api/CitizenStatus";
+import { CitizenStatus } from "../../../generated/cdc-support-platform/CitizenStatus";
 
 const mockedInfo = {};
 
