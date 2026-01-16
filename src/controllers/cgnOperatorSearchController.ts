@@ -23,9 +23,9 @@ import { DiscountBucketCode } from "generated/io-cgn-operator-search-api/Discoun
 import { SearchResult } from "generated/io-cgn-operator-search-api/SearchResult";
 import CgnService from "src/services/cgnService";
 
-import { OnlineMerchants } from "../../generated/cgn-operator-search/OnlineMerchants";
 import { Merchant } from "../../generated/cgn-operator-search-platform/Merchant";
 import { OfflineMerchants } from "../../generated/cgn-operator-search-platform/OfflineMerchants";
+import { OnlineMerchants } from "../../generated/cgn-operator-search-platform/OnlineMerchants";
 import { PublishedProductCategoriesResult } from "../../generated/cgn-operator-search-platform/PublishedProductCategoriesResult";
 import { OfflineMerchantSearchRequest } from "../../generated/io-cgn-operator-search-api/OfflineMerchantSearchRequest";
 import { OnlineMerchantSearchRequest } from "../../generated/io-cgn-operator-search-api/OnlineMerchantSearchRequest";
