@@ -8,7 +8,7 @@ event_occurrences: 4 # After 5*4=20 min
 data_source: /subscriptions/ec285037-c673-4f58-b594-d7c480da4e8b/resourceGroups/io-p-itn-common-rg-01/providers/Microsoft.Network/applicationGateways/io-p-itn-agw-01
 action_groups:
   # TBD: add action group for io-sign errors
-  - /subscriptions/EC285037-C673-4F58-B594-D7C480DA4E8B/resourceGroups/io-p-rg-common/providers/microsoft.insights/actionGroups/iopquarantineerror
+  - /subscriptions/EC285037-C673-4F58-B594-D7C480DA4E8B/resourceGroups/io-p-sign-integration-rg/providers/Microsoft.Insights/actiongroups/SlackFirmaConIoTech
 overrides:
   hosts:
     - app-backend.io.italia.it
