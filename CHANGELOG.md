@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 18.3.0
+
+### Minor Changes
+
+- 10d28c5: Duplicate IO-Sign endpoints
+
 ## 18.2.0
 
 ### Minor Changes
