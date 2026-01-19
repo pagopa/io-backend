@@ -6,7 +6,7 @@ import {
   NodeEnvironment,
   NodeEnvironmentEnum
 } from "@pagopa/ts-commons/lib/environment";
-import { CIDR, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as appInsights from "applicationinsights";
 import * as bodyParser from "body-parser";
 import * as express from "express";
@@ -55,7 +55,6 @@ import {
   PUSH_NOTIFICATIONS_STORAGE_CONNECTION_STRING,
   SERVICES_APP_BACKEND_CLIENT
 } from "./config";
-import { registerAPIRoutes } from "./routes/baseRoutes";
 import {
   registerCdcSupportAPIRoutes,
   registerLegacyCdcSupportAPIRoutes
@@ -66,6 +65,7 @@ import {
   registerLegacyCgnAPIRoutes,
   registerLegacyCgnOperatorSearchAPIRoutes
 } from "./routes/cgnRoutes";
+import { registerLegacyCommunicationRoutes } from "./routes/communicationRoutes";
 import {
   registerIdentityRoutes,
   registerLegacyIdentityRoutes
@@ -114,7 +114,6 @@ const defaultModule = {
 export interface IAppFactoryParameters {
   readonly env: NodeEnvironment;
   readonly appInsightsClient?: appInsights.TelemetryClient;
-  readonly allowNotifyIPSourceRange: ReadonlyArray<CIDR>;
   readonly APIBasePath: string;
   readonly CdcSupportAPIbasePath: string;
   readonly CGNAPIBasePath: string;
@@ -128,7 +127,6 @@ export interface IAppFactoryParameters {
 
 export async function newApp({
   env,
-  allowNotifyIPSourceRange,
   appInsightsClient,
   APIBasePath,
   CdcSupportAPIbasePath,
@@ -360,15 +358,15 @@ export async function newApp({
           PAGOPA_ECOMMERCE_UAT_CLIENT
         );
 
-        registerAPIRoutes(
+        // Register legacy Communication routes (/api/v1/messages, /api/v1/installations, etc.)
+        registerLegacyCommunicationRoutes(
           app,
           APIBasePath,
-          allowNotifyIPSourceRange,
+          authMiddlewares.bearerSession,
           APP_MESSAGES_SERVICE,
           notificationServiceFactory,
           SESSION_STORAGE,
           PAGOPA_ECOMMERCE_SERVICE,
-          authMiddlewares.bearerSession,
           LOLLIPOP_API_CLIENT
         );
 

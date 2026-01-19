@@ -109,7 +109,6 @@ Those are all Environment variables needed by the application:
 | CGN_API_BASE_PATH                         | The root path for the backend cgn api endpoints                                                      | string |
 | PORT                                      | The HTTP port the Express server is listening to                                                     | int    |
 | REDIS_URL                                 | The URL of a Redis instance                                                                          | string |
-| ALLOW_NOTIFY_IP_SOURCE_RANGE              | The range in CIDR form of allowed IPs for the webhook notifications                                  | string |
 | NOTIFICATIONS_STORAGE_CONNECTION_STRING   | Connection string to Azure queue storage for notification hub messages                               | string |
 | NOTIFICATIONS_QUEUE_NAME                  | Queue name of Azure queue storage for notification hub messages                                      | string |
 | CACHE_MAX_AGE_SECONDS                     | The value in seconds for duration of in-memory api cache                                             | int    |

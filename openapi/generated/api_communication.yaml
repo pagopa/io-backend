@@ -1,6 +1,6 @@
 openapi: 3.0.2
 info:
-  version: 18.3.0
+  version: 18.4.0
   title: IO Communication API
   description: |
     API for managing user messages, notifications and payment information.
