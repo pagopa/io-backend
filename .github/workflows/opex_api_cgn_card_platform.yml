@@ -1,13 +1,13 @@
-name: Opex Dashboard api_cgn_platform
+name: Opex Dashboard api_cgn_card_platform
 
 on:
   push:
     branches:
       - master
     paths:
-      - 'openapi/generated/api_cgn_platform.yaml'
-      - '.github/workflows/opex_api_cgn_platform.yml'
-      - '.opex/api_cgn_platform/**'
+      - 'openapi/generated/api_cgn_card_platform.yaml'
+      - '.github/workflows/opex_api_cgn_card_platform.yml'
+      - '.opex/api_cgn_card_platform/**'
 
   workflow_dispatch:
 
@@ -28,4 +28,4 @@ jobs:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
     with:
-      api_name: api_cgn_platform
+      api_name: api_cgn_card_platform

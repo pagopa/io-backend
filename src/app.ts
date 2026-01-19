@@ -61,7 +61,7 @@ import {
   registerLegacyCdcSupportAPIRoutes
 } from "./routes/cdcSupportRoutes";
 import {
-  registerCgnAPIRoutes,
+  registerCgnCardAPIRoutes,
   registerCgnSearchAPIRoutes,
   registerLegacyCgnAPIRoutes,
   registerLegacyCgnOperatorSearchAPIRoutes
@@ -401,7 +401,7 @@ export async function newApp({
             authMiddlewares.bearerSession
           );
 
-          registerCgnAPIRoutes(
+          registerCgnCardAPIRoutes(
             app,
             CGN_SERVICE,
             authMiddlewares.xUserMiddleware

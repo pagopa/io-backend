@@ -3,7 +3,7 @@ info:
   title: Carta Giovani Nazionale API
   version: 1.0.0
 servers:
-- url: https://localhost/api/cgn/v1
+- url: https://localhost/api/cgn-card/v1
 security:
 - Bearer: []
 paths:

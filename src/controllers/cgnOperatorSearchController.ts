@@ -17,7 +17,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as express from "express";
 import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
-import { Card } from "generated/cgn-platform/Card";
+import { Card } from "generated/cgn-card-platform/Card";
 import { CountResult } from "generated/io-cgn-operator-search-api/CountResult";
 import { DiscountBucketCode } from "generated/io-cgn-operator-search-api/DiscountBucketCode";
 import { SearchResult } from "generated/io-cgn-operator-search-api/SearchResult";

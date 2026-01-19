@@ -9,13 +9,13 @@ import CgnOperatorSearchService from "../services/cgnOperatorSearchService";
 import CgnService from "../services/cgnService";
 import { toExpressHandler } from "../utils/express";
 
-export const CGN_PLATFORM_API_BASE_PATH = "/api/cgn/v1";
+export const CGN_PLATFORM_API_BASE_PATH = "/api/cgn-card/v1";
 export const CGN_SEARCH_PLATFORM_API_BASE_PATH = "/api/cgn-search/v1";
 
 /**
  * IMPORTANT: CGN Routes Management Strategy
  *
- * This file contains BOTH the new CGN API routes (/api/cgn/v1, /api/cgn-search/v1)
+ * This file contains BOTH the new CGN API routes (/api/cgn-card/v1, /api/cgn-search/v1)
  * AND the legacy routes (/api/v1/cgn/*, /api/v1/cgn/operator-search/*) for cgn-related endpoints.
  *
  * WHY? To prevent accidental divergence during development:
@@ -99,7 +99,7 @@ export const registerLegacyCgnAPIRoutes = (
  * @param cgnService The service that handles the cgn requests
  * @param authMiddleware The autentication middleware for user session token
  */
-export const registerCgnAPIRoutes = (
+export const registerCgnCardAPIRoutes = (
   app: Express,
   cgnService: CgnService,
   authMiddleware: express.RequestHandler

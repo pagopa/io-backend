@@ -6,8 +6,8 @@ import {
   CardPending,
   StatusEnum
 } from "@pagopa/io-functions-cgn-sdk/CardPending";
-import { Otp } from "../../../generated/cgn-platform/Otp";
-import { OtpCode } from "../../../generated/cgn-platform/OtpCode";
+import { Otp } from "../../../generated/cgn-card-platform/Otp";
+import { OtpCode } from "../../../generated/cgn-card-platform/OtpCode";
 
 const mockGetCgnStatus = jest.fn();
 const mockGetEycaStatus = jest.fn();
