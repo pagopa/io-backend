@@ -6,7 +6,6 @@
 import { Express } from "express";
 import * as E from "fp-ts/lib/Either";
 import { NodeEnvironmentEnum } from "@pagopa/ts-commons/lib/environment";
-import { CIDR } from "@pagopa/ts-commons/lib/strings";
 import * as request from "supertest";
 import { ServerInfo } from "../../generated/public/ServerInfo";
 import * as redisUtils from "../utils/redis";
@@ -36,8 +35,6 @@ jest.mock("../services/notificationService", () => {
 
 import appModule from "../app";
 import { mockQuit, mockRedisClusterType, mockSelect } from "../__mocks__/redis";
-
-const aValidCIDR = "192.168.0.0/16" as CIDR;
 
 /* const aValidNotification = {
   message: {
@@ -81,7 +78,6 @@ describe("Success app start", () => {
       IoWalletAPIBasePath: aIoWalletAPIBasePath,
       IoWalletUatAPIBasePath: aIoWalletUatAPIBasePath,
       ServicesAppBackendBasePath: aServicesAppBackendBasePath,
-      allowNotifyIPSourceRange: [aValidCIDR],
       env: NodeEnvironmentEnum.PRODUCTION
     });
   });
@@ -187,7 +183,6 @@ describe("Failure app start", () => {
         IoWalletAPIBasePath: aIoWalletAPIBasePath,
         IoWalletUatAPIBasePath: aIoWalletUatAPIBasePath,
         ServicesAppBackendBasePath: aServicesAppBackendBasePath,
-        allowNotifyIPSourceRange: [aValidCIDR],
         env: NodeEnvironmentEnum.PRODUCTION
       });
     } catch (err) {
