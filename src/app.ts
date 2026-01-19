@@ -71,7 +71,10 @@ import {
   registerLegacyIdentityRoutes
 } from "./routes/identityRoutes";
 import { registerIoFimsAPIRoutes } from "./routes/ioFimsRoutes";
-import { registerIoSignAPIRoutes } from "./routes/ioSignRoutes";
+import {
+  registerIoSignAPIRoutes,
+  registerIoSignAPIRoutesLegacy
+} from "./routes/ioSignRoutes";
 import { registerIoWalletAPIRoutes } from "./routes/ioWalletRoutes";
 import { registerPNRoutes } from "./routes/pnRoutes";
 import { registerPublicRoutes } from "./routes/publicRoutes";
@@ -440,6 +443,14 @@ export async function newApp({
 
         if (FF_IO_SIGN_ENABLED) {
           registerIoSignAPIRoutes(
+            app,
+            authMiddlewares.xUserMiddleware,
+            IO_SIGN_SERVICE,
+            PROFILE_SERVICE,
+            LOLLIPOP_API_CLIENT
+          );
+
+          registerIoSignAPIRoutesLegacy(
             app,
             IoSignAPIBasePath,
             IO_SIGN_SERVICE,
