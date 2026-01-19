@@ -73,7 +73,10 @@ import {
 import { registerIoWalletAPIRoutes } from "./routes/ioWalletRoutes";
 import { registerPNRoutes } from "./routes/pnRoutes";
 import { registerPublicRoutes } from "./routes/publicRoutes";
-import { registerServicesAppBackendRoutes } from "./routes/servicesRoutes";
+import {
+  registerLegacyServicesAppBackendRoutes,
+  registerServicesAppBackendRoutes
+} from "./routes/servicesRoutes";
 import CdcSupportService from "./services/cdcSupportService";
 import CgnOperatorSearchService from "./services/cgnOperatorSearchService";
 import CgnService from "./services/cgnService";
@@ -447,11 +450,17 @@ export async function newApp({
           );
         }
 
-        registerServicesAppBackendRoutes(
+        registerLegacyServicesAppBackendRoutes(
           app,
           ServicesAppBackendBasePath,
           SERVICES_APP_BACKEND_SERVICE,
           authMiddlewares.bearerSession
+        );
+
+        registerServicesAppBackendRoutes(
+          app,
+          SERVICES_APP_BACKEND_SERVICE,
+          authMiddlewares.xUserMiddleware
         );
 
         if (
