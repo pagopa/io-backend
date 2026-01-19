@@ -1,5 +1,5 @@
-oa3_spec: openapi/generated/api_cgn_operator_search_platform.yaml
-name: opex_iobackend_api_cgn_operator_search_platform
+oa3_spec: openapi/generated/api_cgn_search_platform.yaml
+name: opex_iobackend_api_cgn_search_platform
 location: West Europe
 timespan: 5m
 evaluation_frequency: 10
