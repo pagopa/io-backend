@@ -65,7 +65,10 @@ import {
   registerLegacyCgnAPIRoutes,
   registerLegacyCgnOperatorSearchAPIRoutes
 } from "./routes/cgnRoutes";
-import { registerLegacyCommunicationRoutes } from "./routes/communicationRoutes";
+import {
+  registerCommunicationRoutes,
+  registerLegacyCommunicationRoutes
+} from "./routes/communicationRoutes";
 import {
   registerIdentityRoutes,
   registerLegacyIdentityRoutes
@@ -366,6 +369,16 @@ export async function newApp({
           APP_MESSAGES_SERVICE,
           notificationServiceFactory,
           SESSION_STORAGE,
+          PAGOPA_ECOMMERCE_SERVICE,
+          LOLLIPOP_API_CLIENT
+        );
+
+        // Register Communication API routes with new authentication middleware (NO sessionStorage)
+        registerCommunicationRoutes(
+          app,
+          authMiddlewares.xUserMiddleware,
+          APP_MESSAGES_SERVICE,
+          notificationServiceFactory,
           PAGOPA_ECOMMERCE_SERVICE,
           LOLLIPOP_API_CLIENT
         );

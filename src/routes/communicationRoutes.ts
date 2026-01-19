@@ -133,3 +133,108 @@ export const registerLegacyCommunicationRoutes = (
     )
   );
 };
+
+/**
+ * Mount the Communication API routes into the Express application
+ *
+ * This uses the NEW stateless controllers that do NOT use sessionStorage.
+ * Authentication is handled via JWT (xUserMiddleware) which provides UserIdentity.
+ *
+ * @param app The Express application
+ * @param authMiddleware The authentication middleware (xUserMiddleware)
+ * @param appMessagesService The service that handles the user messages
+ * @param notificationServiceFactory The factory that builds the notification service
+ * @param pagoPaEcommerceService The service that handles PagoPA ecommerce operations
+ * @param lollipopClient The API Client that handles the Lollipop protocol requests
+ * @param notificationDefaultSubject The default subject for notifications
+ * @param notificationDefaultTitle The default title for notifications
+ */
+// eslint-disable-next-line max-params
+export const registerCommunicationRoutes = (
+  app: Express,
+  authMiddleware: express.RequestHandler,
+  appMessagesService: NewMessagesService,
+  notificationServiceFactory: NotificationServiceFactory,
+  pagoPaEcommerceService: PagoPAEcommerceService,
+  lollipopClient: ReturnType<typeof LollipopApiClient>
+): void => {
+  const basePath = COMMUNICATION_API_BASE_PATH;
+
+  const messagesController = new CommunicationController(
+    appMessagesService,
+    lollipopClient
+  );
+
+  const notificationController = new NotificationController(
+    notificationServiceFactory
+  );
+
+  const pagoPAEcommerceController: PagoPAEcommerceController =
+    new PagoPAEcommerceController(pagoPaEcommerceService);
+
+  // Messages routes
+  app.get(
+    `${basePath}/messages`,
+    authMiddleware,
+    toExpressHandler(messagesController.getMessagesByUser, messagesController)
+  );
+
+  app.get(
+    `${basePath}/messages/:id`,
+    authMiddleware,
+    toExpressHandler(messagesController.getMessage, messagesController)
+  );
+
+  app.put(
+    `${basePath}/messages/:id/message-status`,
+    authMiddleware,
+    toExpressHandler(messagesController.upsertMessageStatus, messagesController)
+  );
+
+  app.get(
+    `${basePath}/third-party-messages/:id/precondition`,
+    authMiddleware,
+    toExpressHandler(
+      messagesController.getThirdPartyMessagePrecondition,
+      messagesController
+    )
+  );
+
+  app.get(
+    `${basePath}/third-party-messages/:id`,
+    authMiddleware,
+    toExpressHandler(
+      messagesController.getThirdPartyMessage,
+      messagesController
+    )
+  );
+
+  app.get(
+    `${basePath}/third-party-messages/:id/attachments/:attachment_url(*)`,
+    authMiddleware,
+    toExpressHandler(
+      messagesController.getThirdPartyMessageAttachment,
+      messagesController
+    )
+  );
+
+  // Installations route
+  app.put(
+    `${basePath}/installations/:id`,
+    authMiddleware,
+    toExpressHandler(
+      notificationController.createOrUpdateInstallation,
+      notificationController
+    )
+  );
+
+  // Payment info route
+  app.get(
+    `${basePath}/payment-info/:rptId`,
+    authMiddleware,
+    toExpressHandler(
+      pagoPAEcommerceController.getPaymentInfo,
+      pagoPAEcommerceController
+    )
+  );
+};
