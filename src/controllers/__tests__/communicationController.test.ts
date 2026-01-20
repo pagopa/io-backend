@@ -377,7 +377,7 @@ describe("CommunicationController#getThirdPartyAttachment", () => {
       mockLollipopApiClient
     );
 
-    const response = await controller.getThirdPartyMessageAttachment(req);
+    const response = await controller.getRemoteContentAttachment(req);
 
     expect(mockGetThirdPartyAttachment).toHaveBeenCalledWith(
       proxyThirdPartyMessageResponse,
@@ -418,7 +418,7 @@ describe("CommunicationController#getThirdPartyAttachment", () => {
       mockLollipopApiClient
     );
 
-    const response = await controller.getThirdPartyMessageAttachment(req);
+    const response = await controller.getRemoteContentAttachment(req);
 
     expect(mockGetThirdPartyAttachment).toHaveBeenCalledWith(
       proxyThirdPartyMessageResponse,
@@ -453,7 +453,7 @@ describe("CommunicationController#getThirdPartyAttachment", () => {
       mockLollipopApiClient
     );
 
-    const response = await controller.getThirdPartyMessageAttachment(req);
+    const response = await controller.getRemoteContentAttachment(req);
     response.apply(res);
 
     expect(mockGetThirdPartyAttachment).not.toBeCalled();
@@ -461,12 +461,12 @@ describe("CommunicationController#getThirdPartyAttachment", () => {
   });
 });
 
-describe("CommunicationController#getThirdPartyMessagePrecondition", () => {
+describe("CommunicationController#getRemoteContentPrecondition", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("should call the getThirdPartyMessagePrecondition on the CommunicationController with valid values and without lollipopParams", async () => {
+  it("should call the getRemoteContentPrecondition on the CommunicationController with valid values and without lollipopParams", async () => {
     const req = mockReq();
 
     mockGetThirdPartyMessageFnApp.mockReturnValue(
@@ -488,7 +488,7 @@ describe("CommunicationController#getThirdPartyMessagePrecondition", () => {
       mockLollipopApiClient
     );
 
-    const response = await controller.getThirdPartyMessagePrecondition(req);
+    const response = await controller.getRemoteContentPrecondition(req);
 
     expect(mockGetThirdPartyPrecondition).toHaveBeenCalledWith(
       proxyThirdPartyMessageResponse,
@@ -507,7 +507,7 @@ describe("CommunicationController#getThirdPartyMessagePrecondition", () => {
     });
   });
 
-  it("should call the getThirdPartyMessagePrecondition on the CommunicationController with valid values and with lollipopParams", async () => {
+  it("should call the getRemoteContentPrecondition on the CommunicationController with valid values and with lollipopParams", async () => {
     const req = mockReq();
 
     dummyCheckIfLollipopIsEnabled.mockReturnValueOnce(TE.of(true));
@@ -531,7 +531,7 @@ describe("CommunicationController#getThirdPartyMessagePrecondition", () => {
       mockLollipopApiClient
     );
 
-    const response = await controller.getThirdPartyMessagePrecondition(req);
+    const response = await controller.getRemoteContentPrecondition(req);
 
     expect(response).toEqual({
       apply: expect.any(Function),

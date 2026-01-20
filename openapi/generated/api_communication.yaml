@@ -186,15 +186,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-  /third-party-messages/{id}/precondition:
+  /remote-contents/{id}/precondition:
     get:
-      operationId: getThirdPartyMessagePrecondition
-      summary: >-
-        Retrieve Third Party message precondition to receive the third party
-        content
+      operationId: getRemoteContentPrecondition
+      summary: Retrieve remote content precondition
       description: >-
-        Returns the Third Party message precondition associated to the provided
-        message ID to receive the third party content.
+        Returns the precondition associated to the provided message ID to
+        receive the remote content.
       parameters:
         - $ref: '#/components/parameters/MessageId'
       responses:
@@ -254,11 +252,11 @@ paths:
           description: Not Implemented
         '504':
           description: Gateway Timeout
-  /third-party-messages/{id}:
+  /remote-contents/{id}:
     get:
-      operationId: getThirdPartyMessage
-      summary: Retrieve Third Party message
-      description: Returns the Third Party message with the provided message ID.
+      operationId: getRemoteContent
+      summary: Retrieve remote content
+      description: Returns the remote content with the provided message ID.
       parameters:
         - $ref: '#/components/parameters/MessageId'
       responses:
@@ -325,10 +323,10 @@ paths:
                 $ref: '#/components/schemas/ProblemJson'
         '504':
           description: Gateway Timeout
-  /third-party-messages/{id}/attachments/{attachment_url}:
+  /remote-contents/{id}/attachments/{attachment_url}:
     get:
-      operationId: getThirdPartyMessageAttachment
-      summary: Retrieve an attachment of a Third Party message
+      operationId: getRemoteContentAttachment
+      summary: Retrieve an attachment of a remote content message
       parameters:
         - $ref: '#/components/parameters/MessageId'
         - name: attachment_url

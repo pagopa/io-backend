@@ -160,7 +160,7 @@ export const registerCommunicationRoutes = (
 ): void => {
   const basePath = COMMUNICATION_API_BASE_PATH;
 
-  const messagesController = new CommunicationController(
+  const communicationController = new CommunicationController(
     appMessagesService,
     lollipopClient
   );
@@ -176,45 +176,54 @@ export const registerCommunicationRoutes = (
   app.get(
     `${basePath}/messages`,
     authMiddleware,
-    toExpressHandler(messagesController.getMessagesByUser, messagesController)
+    toExpressHandler(
+      communicationController.getMessagesByUser,
+      communicationController
+    )
   );
 
   app.get(
     `${basePath}/messages/:id`,
     authMiddleware,
-    toExpressHandler(messagesController.getMessage, messagesController)
+    toExpressHandler(
+      communicationController.getMessage,
+      communicationController
+    )
   );
 
   app.put(
     `${basePath}/messages/:id/message-status`,
     authMiddleware,
-    toExpressHandler(messagesController.upsertMessageStatus, messagesController)
-  );
-
-  app.get(
-    `${basePath}/third-party-messages/:id/precondition`,
-    authMiddleware,
     toExpressHandler(
-      messagesController.getThirdPartyMessagePrecondition,
-      messagesController
+      communicationController.upsertMessageStatus,
+      communicationController
     )
   );
 
   app.get(
-    `${basePath}/third-party-messages/:id`,
+    `${basePath}/remote-contents/:id/precondition`,
     authMiddleware,
     toExpressHandler(
-      messagesController.getThirdPartyMessage,
-      messagesController
+      communicationController.getRemoteContentPrecondition,
+      communicationController
     )
   );
 
   app.get(
-    `${basePath}/third-party-messages/:id/attachments/:attachment_url(*)`,
+    `${basePath}/remote-contents/:id`,
     authMiddleware,
     toExpressHandler(
-      messagesController.getThirdPartyMessageAttachment,
-      messagesController
+      communicationController.getRemoteContent,
+      communicationController
+    )
+  );
+
+  app.get(
+    `${basePath}/remote-contents/:id/attachments/:attachment_url(*)`,
+    authMiddleware,
+    toExpressHandler(
+      communicationController.getRemoteContentAttachment,
+      communicationController
     )
   );
 

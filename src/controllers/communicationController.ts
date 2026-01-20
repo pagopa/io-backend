@@ -223,9 +223,9 @@ export default class CommunicationController {
     );
 
   /**
-   * Returns the precondition for the required third party message.
+   * Returns the precondition for the required remote content.
    */
-  public readonly getThirdPartyMessagePrecondition = async (
+  public readonly getRemoteContentPrecondition = async (
     req: express.Request
   ): Promise<
     | IResponseErrorInternal
@@ -260,9 +260,9 @@ export default class CommunicationController {
     );
 
   /**
-   * Returns the Third Party message identified by the message id.
+   * Returns the remote content identified by the message id.
    */
-  public readonly getThirdPartyMessage = (
+  public readonly getRemoteContent = (
     req: express.Request
   ): Promise<
     | IResponseErrorInternal
@@ -297,9 +297,9 @@ export default class CommunicationController {
     );
 
   /**
-   * Returns the Third Party message attachments identified by the Third Party message id and the attachment relative url.
+   * Returns the remote content attachments identified by the message id and the attachment relative url.
    */
-  public readonly getThirdPartyMessageAttachment = (
+  public readonly getRemoteContentAttachment = (
     req: express.Request
   ): Promise<
     | IResponseErrorInternal
