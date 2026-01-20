@@ -349,6 +349,75 @@ paths:
         '504':
           description: Gateway Timeout
   
+  # SEND Activation
+  /send/activation:
+    get:
+      operationId: getSendActivation
+      summary: Get SEND Activation
+      description: |
+        Get the service activation status for Special Service "Avvisi di Cortesia"
+      parameters:
+        - name: isTest
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Request created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SendActivation"
+        "401":
+          description: Bearer token null or expired.
+        "429":
+          description: Too many requests
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+    post:
+      operationId: upsertSendActivation
+      summary: Upsert SEND Activation
+      description: |
+        Upsert the service activation status for Special Service "Avvisi di Cortesia"
+      parameters:
+        - name: isTest
+          in: query
+          required: false
+          schema:
+            type: boolean
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendActivation'
+            example:
+              activation_status: true
+      responses:
+        "204":
+          description: Request created.
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+        "401":
+          description: Bearer token null or expired.
+        "429":
+          description: Too many requests
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+  
   # Installation
   /installations/{installationID}:
     put:
@@ -736,6 +805,13 @@ components:
         - SUBJECT_VALIDATION_ERROR
       description: A representation of all the error type for an invalid ThirdPartyMessage
       example: ATTACHMENTS_NOT_PRESENT
+    SendActivation:
+      type: object
+      properties:
+        activation_status:
+          type: boolean
+      required:
+        - activation_status
   securitySchemes:
     Bearer:
       type: apiKey

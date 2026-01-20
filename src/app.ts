@@ -79,7 +79,10 @@ import {
   registerIoSignAPIRoutesLegacy
 } from "./routes/ioSignRoutes";
 import { registerIoWalletAPIRoutes } from "./routes/ioWalletRoutes";
-import { registerPNRoutes } from "./routes/pnRoutes";
+import {
+  registerLegacySENDRoutes,
+  registerSendActivationRoutes
+} from "./routes/pnRoutes";
 import { registerPublicRoutes } from "./routes/publicRoutes";
 import { registerServicesAppBackendRoutes } from "./routes/servicesRoutes";
 import CdcSupportService from "./services/cdcSupportService";
@@ -494,11 +497,17 @@ export async function newApp({
           O.isSome(PN_ADDRESS_BOOK_CLIENT_SELECTOR)
         ) {
           const pnService = PNService(PN_ADDRESS_BOOK_CLIENT_SELECTOR.value);
-          registerPNRoutes(
+          registerLegacySENDRoutes(
             app,
             PNAddressBookConfig.PN_ACTIVATION_BASE_PATH,
             pnService,
             authMiddlewares.bearerSession
+          );
+
+          registerSendActivationRoutes(
+            app,
+            authMiddlewares.xUserMiddleware,
+            pnService
           );
         }
 

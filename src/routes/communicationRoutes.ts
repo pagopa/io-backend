@@ -13,7 +13,7 @@ import RedisSessionStorage from "../services/redisSessionStorage";
 import { toExpressHandler } from "../utils/express";
 
 // Communication API base path - hardcoded to match OpenAPI specification
-const COMMUNICATION_API_BASE_PATH = "/api/communication/v1";
+export const COMMUNICATION_API_BASE_PATH = "/api/communication/v1";
 
 /**
  * IMPORTANT: Communication Routes Management Strategy
