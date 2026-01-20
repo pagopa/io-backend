@@ -361,7 +361,7 @@ paths:
           required: true
           description: The ID of the installation.
           schema:
-            type: string
+            $ref: "#/components/schemas/InstallationID"
       requestBody:
         required: true
         content:
@@ -719,6 +719,23 @@ components:
       $ref: "consumed/pagopa_ecommerce_v3.yaml#/components/schemas/PaymentDuplicatedStatusFaultPaymentProblemJson"
     GatewayFaultPaymentProblemJson:
       $ref: "consumed/pagopa_ecommerce_v3.yaml#/components/schemas/GatewayFaultPaymentProblemJson"
+    InstallationID:
+      type: string
+      minLength: 1
+      description: |-
+        The sixteen octets of an Installation ID are represented as 32 hexadecimal (base 16) digits, displayed in five groups
+        separated by hyphens, in the form 8-4-4-4-12 for a total of 36 characters (32 alphanumeric characters and four
+        hyphens).
+        See https://en.wikipedia.org/wiki/Universally_unique_identifier
+    InvalidThirdPartyMessageType:
+      type: string
+      x-extensible-enum:
+        - ATTACHMENTS_NOT_PRESENT
+        - REMOTE_CONTENT_NOT_PRESENT
+        - MARKDOWN_VALIDATION_ERROR
+        - SUBJECT_VALIDATION_ERROR
+      description: A representation of all the error type for an invalid ThirdPartyMessage
+      example: ATTACHMENTS_NOT_PRESENT
   securitySchemes:
     Bearer:
       type: apiKey
