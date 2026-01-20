@@ -319,10 +319,6 @@ export const PUSH_NOTIFICATIONS_QUEUE_NAME = getRequiredENVVar(
   "PUSH_NOTIFICATIONS_QUEUE_NAME"
 );
 
-// Default values for push notifications
-export const NOTIFICATION_DEFAULT_SUBJECT = "default subject";
-export const NOTIFICATION_DEFAULT_TITLE = "default title";
-
 // Root redirect
 const DEFAULT_ROOT_REDIRECT_URL = pipe(
   "https://io.italia.it",
