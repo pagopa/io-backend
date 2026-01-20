@@ -30,6 +30,7 @@
     "generate:dev-certs": "sh ./scripts/generate-test-certs.sh certs",
     "generate:proxy:api-models": "rimraf generated/backend && gen-api-models --api-spec api_backend.yaml --out-dir generated/backend",
     "generate:proxy:identity-api-models": "rimraf generated/identity && gen-api-models --api-spec openapi/generated/api_identity.yaml --out-dir generated/identity",
+    "generate:proxy:communication-api-models": "rimraf generated/communication && gen-api-models --api-spec openapi/generated/api_communication.yaml --out-dir generated/communication",
     "generate:proxy:api-parameters": "gen-api-models --api-spec api_parameters.yaml --out-dir generated/parameters",
     "generate:proxy:notification-models": "rimraf generated/notifications && gen-api-models --api-spec api_notifications.yaml --out-dir generated/notifications",
     "generate:messages:notifications": "rimraf generated/messages && gen-api-models --api-spec notification_queue_messages.yaml --out-dir generated/messages",

@@ -36,17 +36,17 @@ import nodeFetch from "node-fetch";
 import { AppMessagesAPIClient } from "src/clients/app-messages.client";
 import { LollipopLocalsType } from "src/types/lollipop";
 
-import { CreatedMessageWithContentAndAttachments } from "../../generated/backend/CreatedMessageWithContentAndAttachments";
-import { InvalidThirdPartyMessageTypeEnum } from "../../generated/backend/InvalidThirdPartyMessageType";
-import { MessageBodyMarkdown } from "../../generated/backend/MessageBodyMarkdown";
-import { MessageSubject } from "../../generated/backend/MessageSubject";
-import { ThirdPartyData } from "../../generated/backend/ThirdPartyData";
-import { ThirdPartyMessagePrecondition } from "../../generated/backend/ThirdPartyMessagePrecondition";
-import { ThirdPartyMessageWithContent } from "../../generated/backend/ThirdPartyMessageWithContent";
-import { CreatedMessageWithContent } from "../../generated/io-messages-api/CreatedMessageWithContent";
-import { MessageStatusAttributes } from "../../generated/io-messages-api/MessageStatusAttributes";
-import { MessageStatusChange } from "../../generated/io-messages-api/MessageStatusChange";
-import { PaginatedPublicMessagesCollection } from "../../generated/io-messages-api/PaginatedPublicMessagesCollection";
+import { CreatedMessageWithContent } from "../../generated/communication/CreatedMessageWithContent";
+import { CreatedMessageWithContentAndAttachments } from "../../generated/communication/CreatedMessageWithContentAndAttachments";
+import { InvalidThirdPartyMessageTypeEnum } from "../../generated/communication/InvalidThirdPartyMessageType";
+import { MessageBodyMarkdown } from "../../generated/communication/MessageBodyMarkdown";
+import { MessageStatusAttributes } from "../../generated/communication/MessageStatusAttributes";
+import { MessageStatusChange } from "../../generated/communication/MessageStatusChange";
+import { MessageSubject } from "../../generated/communication/MessageSubject";
+import { PaginatedPublicMessagesCollection } from "../../generated/communication/PaginatedPublicMessagesCollection";
+import { ThirdPartyData } from "../../generated/communication/ThirdPartyData";
+import { ThirdPartyMessagePrecondition } from "../../generated/communication/ThirdPartyMessagePrecondition";
+import { ThirdPartyMessageWithContent } from "../../generated/communication/ThirdPartyMessageWithContent";
 import { GetMessageParameters } from "../../generated/parameters/GetMessageParameters";
 import { GetMessagesParameters } from "../../generated/parameters/GetMessagesParameters";
 import {

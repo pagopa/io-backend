@@ -10,7 +10,7 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import { PagoPaEcommerceClient } from "src/clients/pagopa-ecommerce";
 
-import { PaymentInfoResponse } from "../../generated/backend/PaymentInfoResponse";
+import { PaymentInfoResponse } from "../../generated/communication/PaymentInfoResponse";
 import {
   ResponsePaymentInfoBadGateway,
   ResponsePaymentInfoConflict,

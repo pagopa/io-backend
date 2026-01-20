@@ -11,9 +11,9 @@ import { Millisecond } from "@pagopa/ts-commons/lib/units";
 import * as express from "express";
 import { NotificationServiceFactory } from "src/services/notificationServiceFactory";
 
-import { Installation } from "../../generated/backend/Installation";
-import { InstallationID } from "../../generated/backend/InstallationID";
-import { SuccessResponse } from "../../generated/notifications/SuccessResponse";
+import { Installation } from "../../generated/communication/Installation";
+import { InstallationID } from "../../generated/communication/InstallationID";
+import { SuccessResponse } from "../../generated/communication/SuccessResponse";
 import { withUserFromRequest } from "../types/user";
 import { log } from "../utils/logger";
 import { withValidatedOrValidationError } from "../utils/responses";

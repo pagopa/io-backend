@@ -11,7 +11,7 @@ import * as express from "express";
 import * as t from "io-ts";
 import PagoPAEcommerceService from "src/services/pagoPAEcommerceService";
 
-import { PaymentInfoResponse } from "../../generated/backend/PaymentInfoResponse";
+import { PaymentInfoResponse } from "../../generated/communication/PaymentInfoResponse";
 import { withValidatedOrInternalError } from "../utils/responses";
 
 const parsePagopaTestParam = (testParam: unknown) =>

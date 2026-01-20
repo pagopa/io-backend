@@ -24,14 +24,14 @@ import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
 import * as B from "fp-ts/boolean";
 import { pipe } from "fp-ts/lib/function";
-import { CreatedMessageWithContentAndAttachments } from "generated/backend/CreatedMessageWithContentAndAttachments";
+import { CreatedMessageWithContentAndAttachments } from "generated/communication/CreatedMessageWithContentAndAttachments";
 import * as t from "io-ts";
 import * as QueryString from "qs";
 import NewMessagesService from "src/services/newMessagesService";
 
-import { PaginatedPublicMessagesCollection } from "../../generated/backend/PaginatedPublicMessagesCollection";
-import { ThirdPartyMessagePrecondition } from "../../generated/backend/ThirdPartyMessagePrecondition";
-import { ThirdPartyMessageWithContent } from "../../generated/backend/ThirdPartyMessageWithContent";
+import { PaginatedPublicMessagesCollection } from "../../generated/communication/PaginatedPublicMessagesCollection";
+import { ThirdPartyMessagePrecondition } from "../../generated/communication/ThirdPartyMessagePrecondition";
+import { ThirdPartyMessageWithContent } from "../../generated/communication/ThirdPartyMessageWithContent";
 import { MessageStatusAttributes } from "../../generated/io-messages-api/MessageStatusAttributes";
 import { MessageStatusChange } from "../../generated/io-messages-api/MessageStatusChange";
 import { GetMessageParameters } from "../../generated/parameters/GetMessageParameters";

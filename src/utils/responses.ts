@@ -21,7 +21,7 @@ import * as express from "express";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
-import { PaymentInfoBadGatewayResponse } from "generated/backend/PaymentInfoBadGatewayResponse";
+import { PaymentInfoBadGatewayResponse } from "generated/communication/PaymentInfoBadGatewayResponse";
 import { ProblemJson } from "generated/io-messages-api/ProblemJson";
 import { PartyConfigurationFaultPaymentProblemJson } from "generated/pagopa-ecommerce/PartyConfigurationFaultPaymentProblemJson";
 import { PaymentInfoConflictResponse } from "generated/pagopa-ecommerce/PaymentInfoConflictResponse";
