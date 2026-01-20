@@ -10,25 +10,14 @@ import {
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
-import * as O from "fp-ts/lib/Option";
-import { pipe } from "fp-ts/lib/function";
 
-import { Installation } from "../../generated/backend/Installation";
+import { Installation } from "../../generated/communication/Installation";
+import { SuccessResponse } from "../../generated/communication/SuccessResponse";
 import {
   CreateOrUpdateInstallationMessage,
   KindEnum as CreateOrUpdateKind
 } from "../../generated/messages/CreateOrUpdateInstallationMessage";
-import {
-  DeleteInstallationMessage,
-  KindEnum as DeleteKind
-} from "../../generated/messages/DeleteInstallationMessage";
 import { NotificationMessageKindEnum } from "../../generated/messages/NotificationMessageKind";
-import {
-  KindEnum as NotifyKind,
-  NotifyMessage
-} from "../../generated/messages/NotifyMessage";
-import { Notification } from "../../generated/notifications/Notification";
-import { SuccessResponse } from "../../generated/notifications/SuccessResponse";
 import { toFiscalCodeHash } from "../types/notification";
 import { base64EncodeObject } from "../utils/messages";
 
@@ -44,37 +33,6 @@ export default class NotificationService {
       this.queueName
     );
   }
-
-  public readonly notify = (
-    notification: Notification,
-    notificationSubject: string,
-    notificationTitle?: string
-  ): Promise<
-    IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>
-  > => {
-    const notifyMessage: NotifyMessage = {
-      installationId: toFiscalCodeHash(notification.message.fiscal_code),
-      kind: NotifyKind[NotificationMessageKindEnum.Notify],
-      payload: {
-        message: notificationSubject,
-        message_id: notification.message.id,
-        title: pipe(
-          notificationTitle,
-          O.fromNullable,
-          O.getOrElse(() => `${notification.sender_metadata.organization_name}`)
-        )
-      }
-    };
-
-    return this.notificationQueueClient
-      .sendMessage(base64EncodeObject(notifyMessage))
-      .then(() => ResponseSuccessJson({ message: "ok" }))
-      .catch((error) =>
-        ResponseErrorInternal(
-          `Error while sending notify message to the queue [${error.message}]`
-        )
-      );
-  };
 
   public readonly createOrUpdateInstallation = (
     fiscalCode: FiscalCode,
@@ -101,26 +59,6 @@ export default class NotificationService {
       .catch((error) =>
         ResponseErrorInternal(
           `Error while sending create or update installation message to the queue [${error.message}]`
-        )
-      );
-  };
-
-  public readonly deleteInstallation = (
-    fiscalCode: FiscalCode
-  ): Promise<
-    IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>
-  > => {
-    const deleteMessage: DeleteInstallationMessage = {
-      installationId: toFiscalCodeHash(fiscalCode),
-      kind: DeleteKind[NotificationMessageKindEnum.DeleteInstallation]
-    };
-
-    return this.notificationQueueClient
-      .sendMessage(base64EncodeObject(deleteMessage))
-      .then(() => ResponseSuccessJson({ message: "ok" }))
-      .catch((error) =>
-        ResponseErrorInternal(
-          `Error while sending delete installation message to the queue [${error.message}]`
         )
       );
   };
