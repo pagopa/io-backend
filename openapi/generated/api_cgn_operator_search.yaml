@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 18.3.0
+  version: 18.4.0
   title: Carta Giovani Nazionale Operator Search API
   description: |
     LEGACY SPEC. This is scheduled to be deleted after
