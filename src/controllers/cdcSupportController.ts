@@ -10,7 +10,7 @@ import {
   IResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import * as express from "express";
-import { CitizenStatus } from "generated/io-cdc-support-func-api/CitizenStatus";
+import { CitizenStatus } from "generated/cdc-support-platform/CitizenStatus";
 import CdcSupportService from "src/services/cdcSupportService";
 
 import { withUserFromRequest } from "../types/user";

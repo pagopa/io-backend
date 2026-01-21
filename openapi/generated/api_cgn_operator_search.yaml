@@ -2,6 +2,9 @@ swagger: '2.0'
 info:
   version: 18.3.0
   title: Carta Giovani Nazionale Operator Search API
+  description: |
+    LEGACY SPEC. This is scheduled to be deleted after
+    api_cgn_operator_search_platform OpenAPI spec has been fully adopted
 host: localhost
 basePath: /api/v1/cgn/operator-search
 schemes:

@@ -5,10 +5,9 @@ info:
   x-logo:
     url: https://io.italia.it/assets/img/io-logo-blue.svg
   description: |
-    LEGACY SPEC. This is scheduled to be deleted after
-    api_cdc_support_platform OpenAPI spec has been fully adopted
+    These APIs support App IO about Carta della Cultura
 servers:
-  - url: /api/v1/cdc
+  - url: /api/cdc-support/v1
 security:
   - Bearer: []
 paths:
@@ -94,11 +93,3 @@ components:
             A human readable explanation specific to this occurrence of the
             problem.
           example: There was an error processing the request
-        instance:
-          type: string
-          format: uri
-          description: >-
-            An absolute URI that identifies the specific occurrence of the
-            problem.
-
-            It may or may not yield further information if dereferenced.

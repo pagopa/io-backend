@@ -1,0 +1,335 @@
+openapi: 3.0.1
+info:
+  title: Carta Giovani Nazionale API
+  version: 1.0.0
+servers:
+- url: https://localhost/api/cgn-card/v1
+security:
+- Bearer: []
+paths:
+  /status:
+    get:
+      summary: Get the CGN status details
+      description: "Get the CGN status details \nby the provided fiscal code\n"
+      operationId: getCgnStatus
+      responses:
+        "200":
+          description: CGN status details.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Card'
+        "401":
+          description: Bearer token null or expired.
+          content: {}
+        "403":
+          description: Forbidden.
+          content: {}
+        "404":
+          description: No CGN found.
+          content: {}
+        "500":
+          description: Service unavailable.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+  /activation:
+    get:
+      summary: |
+        Get CGN activation process status
+      description: |
+        Get informations about a CGN activation process
+      operationId: getCgnActivation
+      responses:
+        "200":
+          description: Cgn activation details.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CgnActivationDetail'
+        "401":
+          description: Bearer token null or expired.
+          content: {}
+        "403":
+          description: Forbidden.
+          content: {}
+        "404":
+          description: No CGN activation process found.
+          content: {}
+        "500":
+          description: Service unavailable.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+    post:
+      summary: Start a CGN activation procedure
+      description: |
+        Start a new CGN activation procedure
+        for the logged user calculating if the user is
+        eligible to get a CGN.
+      operationId: startCgnActivation
+      responses:
+        "201":
+          description: Request created.
+          headers:
+            Location:
+              description: |-
+                Location (URL) of created request resource.
+                A GET request to this URL returns the request status and details.
+              schema:
+                type: string
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/InstanceId'
+        "202":
+          description: Processing request.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/InstanceId'
+        "401":
+          description: Bearer token null or expired.
+          content: {}
+        "403":
+          description: |
+            Cannot activate a new CGN because the user is ineligible to get the CGN.
+          content: {}
+        "409":
+          description: |
+            Cannot activate the user's cgn because another updateCgn request was found
+            for this user or it is already active.
+          content: {}
+        "500":
+          description: Service unavailable.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+  /eyca/activation:
+    get:
+      summary: |
+        Get EYCA activation process' status
+      description: |
+        Get informations about an EYCA activation process
+      operationId: getEycaActivation
+      responses:
+        "200":
+          description: Eyca Card activation details.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/EycaActivationDetail'
+        "401":
+          description: Wrong or missing function key.
+          content: {}
+        "403":
+          description: Forbidden.
+          content: {}
+        "404":
+          description: No EYCA Card activation process found.
+          content: {}
+        "500":
+          description: Service unavailable.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+    post:
+      summary: Start an EYCA activation procedure
+      description: |
+        Start a new EYCA activation procedure
+        for the logged user calculating if the user is
+        eligible to enable EYCA on his CGN card.
+      operationId: startEycaActivation
+      responses:
+        "201":
+          description: Request created.
+          headers:
+            Location:
+              description: |-
+                Location (URL) of created request resource.
+                A GET request to this URL returns the request status and details.
+              schema:
+                type: string
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/InstanceId'
+        "202":
+          description: Processing request.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/InstanceId'
+        "401":
+          description: Bearer token null or expired.
+          content: {}
+        "403":
+          description: |
+            Cannot activate EYCA Card because the user is ineligible to enable EYCA.
+          content: {}
+        "409":
+          description: |
+            Cannot activate EYCA Card because another EYCA Card activation request was found
+            for this user or it is already active.
+          content: {}
+        "500":
+          description: Service unavailable.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+  /eyca/status:
+    get:
+      summary: Get the Eyca Card status details
+      description: |
+        Get the Eyca Card status details
+      operationId: getEycaStatus
+      responses:
+        "200":
+          description: Eyca Card status details.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/EycaCard'
+        "401":
+          description: Bearer token null or expired.
+          content: {}
+        "403":
+          description: Forbidden.
+          content: {}
+        "404":
+          description: No Eyca Card found.
+          content: {}
+        "409":
+          description: Conflict.
+          content: {}
+        "500":
+          description: Service unavailable.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+  /delete:
+    post:
+      summary: Start a CGN unsubscription procedure
+      description: |
+        Start a new CGN unsubscription procedure
+        for the logged user
+      operationId: startCgnUnsubscription
+      responses:
+        "201":
+          description: Request created.
+          headers:
+            Location:
+              description: |
+                Location (URL) of created request resource
+                This location actually points to a not existing api, but semantically 201
+                means that the request has been taken in charge
+              schema:
+                type: string
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/InstanceId'
+        "202":
+          description: Processing request.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/InstanceId'
+        "401":
+          description: Bearer token null or expired.
+          content: {}
+        "403":
+          description: |
+            Cannot unsubscribe because the user is ineligible to get the CGN
+          content: {}
+        "409":
+          description: |
+            Cannot unsubscribe the user's cgn because another updateCgn request was found
+            for this user
+          content: {}
+        "500":
+          description: Service unavailable.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+  /otp:
+    post:
+      summary: |
+        Generate a new Otp related to a CGN
+      description: |
+        Generate a new Otp used to discount an online purchase
+        through a valid CGN
+      operationId: generateOtp
+      responses:
+        "200":
+          description: Otp generated.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Otp'
+        "401":
+          description: Bearer token null or expired.
+          content: {}
+        "403":
+          description: Forbidden.
+          content: {}
+        "500":
+          description: Service unavailable.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+components:
+  schemas:
+    Timestamp:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/card-func@4.0.11/apps/card-func/openapi/index.yaml#/definitions/Timestamp"
+    FiscalCode:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/card-func@4.0.11/apps/card-func/openapi/index.yaml#/definitions/FiscalCode"
+    ProblemJson:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/card-func@4.0.11/apps/card-func/openapi/index.yaml#/definitions/ProblemJson"
+    InstanceId:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/card-func@4.0.11/apps/card-func/openapi/index.yaml#/definitions/InstanceId"
+    CommonCard:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/card-func@4.0.11/apps/card-func/openapi/index.yaml#/definitions/CommonCard"
+    CardPending:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/card-func@4.0.11/apps/card-func/openapi/index.yaml#/definitions/CardPending"
+    CardPendingDelete:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/card-func@4.0.11/apps/card-func/openapi/index.yaml#/definitions/CardPendingDelete"
+    CardActivated:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/card-func@4.0.11/apps/card-func/openapi/index.yaml#/definitions/CardActivated"
+    CardRevoked:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/card-func@4.0.11/apps/card-func/openapi/index.yaml#/definitions/CardRevoked"
+    CardExpired:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/card-func@4.0.11/apps/card-func/openapi/index.yaml#/definitions/CardExpired"
+    Card:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/card-func@4.0.11/apps/card-func/openapi/index.yaml#/definitions/Card"
+    CgnActivationDetail:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/card-func@4.0.11/apps/card-func/openapi/index.yaml#/definitions/CgnActivationDetail"
+    EycaActivationDetail:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/card-func@4.0.11/apps/card-func/openapi/index.yaml#/definitions/EycaActivationDetail"
+    EycaCard:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/card-func@4.0.11/apps/card-func/openapi/index.yaml#/definitions/EycaCard"
+    EycaCardActivated:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/card-func@4.0.11/apps/card-func/openapi/index.yaml#/definitions/EycaCardActivated"
+    EycaCardExpired:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/card-func@4.0.11/apps/card-func/openapi/index.yaml#/definitions/EycaCardExpired"
+    EycaCardRevoked:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/card-func@4.0.11/apps/card-func/openapi/index.yaml#/definitions/EycaCardRevoked"
+    CcdbNumber:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/card-func@4.0.11/apps/card-func/openapi/index.yaml#/definitions/CcdbNumber"
+    Otp:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/card-func@4.0.11/apps/card-func/openapi/index.yaml#/definitions/Otp"
+    OtpCode:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/card-func@4.0.11/apps/card-func/openapi/index.yaml#/definitions/OtpCode"
+  securitySchemes:
+    Bearer:
+      type: apiKey
+      name: Authorization
+      in: header

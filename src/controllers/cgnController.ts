@@ -19,10 +19,10 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import * as express from "express";
-import { Otp } from "generated/cgn/Otp";
+import { Otp } from "generated/cgn-card-platform/Otp";
 
-import { Card } from "../../generated/cgn/Card";
-import { InstanceId } from "../../generated/cgn/InstanceId";
+import { Card } from "../../generated/cgn-card-platform/Card";
+import { InstanceId } from "../../generated/cgn-card-platform/InstanceId";
 import CgnService from "../../src/services/cgnService";
 import { User, withUserFromRequest } from "../types/user";
 

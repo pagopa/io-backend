@@ -5,30 +5,30 @@ import { mockedUser } from "../../__mocks__/user_mock";
 import CgnOperatorSearchController from "../cgnOperatorSearchController";
 import {
   ResponseErrorInternal,
-  ResponseSuccessJson,
+  ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-import { Merchant } from "../../../generated/cgn-operator-search/Merchant";
-import { ProductCategoryEnum } from "../../../generated/cgn-operator-search/ProductCategory";
+import { Merchant } from "../../../generated/cgn-search-platform/Merchant";
+import { ProductCategoryEnum } from "../../../generated/cgn-search-platform/ProductCategory";
 import { CgnAPIClient } from "../../clients/cgn";
 import CgnService from "../../services/cgnService";
 import { CgnOperatorSearchAPIClient } from "../../clients/cgn-operator-search";
 import mockRes from "../../__mocks__/response";
-import { OnlineMerchantSearchRequest } from "../../../generated/cgn-operator-search/OnlineMerchantSearchRequest";
+import { OnlineMerchantSearchRequest } from "../../../generated/cgn-search-platform/OnlineMerchantSearchRequest";
 import {
   OfflineMerchantSearchRequest,
-  OrderingEnum,
-} from "../../../generated/cgn-operator-search/OfflineMerchantSearchRequest";
+  OrderingEnum
+} from "../../../generated/cgn-search-platform/OfflineMerchantSearchRequest";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {
   CardActivated,
-  StatusEnum as ActivatedStatusEnum,
+  StatusEnum as ActivatedStatusEnum
 } from "@pagopa/io-functions-cgn-sdk/CardActivated";
 import {
   CardExpired,
-  StatusEnum as ExpiredStatusEnum,
+  StatusEnum as ExpiredStatusEnum
 } from "@pagopa/io-functions-cgn-sdk/CardExpired";
 import { DiscountBucketCode } from "../../../generated/io-cgn-operator-search-api/DiscountBucketCode";
-import { SupportTypeEnum } from "../../../generated/cgn-operator-search/SupportType";
+import { SupportTypeEnum } from "../../../generated/cgn-search-platform/SupportType";
 import { SearchRequest } from "../../../generated/io-cgn-operator-search-api/SearchRequest";
 
 const anAPIKey = "";
@@ -50,8 +50,8 @@ jest.mock("../../services/cgnOperatorSearchService", () => {
       search: mockSearch,
       getOnlineMerchants: mockGetOnlineMerchants,
       getOfflineMerchants: mockGetOfflineMerchants,
-      getDiscountBucketCode: mockGetDiscountBucketCode,
-    })),
+      getDiscountBucketCode: mockGetDiscountBucketCode
+    }))
   };
 });
 
@@ -59,7 +59,7 @@ const mockGetCgnStatus = jest.fn().mockReturnValue(
   ResponseSuccessJson<CardActivated>({
     activation_date: new Date(),
     expiration_date: new Date(),
-    status: ActivatedStatusEnum.ACTIVATED,
+    status: ActivatedStatusEnum.ACTIVATED
   })
 );
 const mockGetEycaStatus = jest.fn();
@@ -78,8 +78,8 @@ jest.mock("../../services/cgnService", () => {
       startCgnActivation: mockStartCgnActivation,
       startEycaActivation: mockStartEycaActivation,
       getEycaStatus: mockGetEycaStatus,
-      generateOtp: mockGenerateOtp,
-    })),
+      generateOtp: mockGenerateOtp
+    }))
   };
 });
 
@@ -87,7 +87,7 @@ const badRequestErrorResponse = {
   detail: expect.any(String),
   status: 400,
   title: expect.any(String),
-  type: undefined,
+  type: undefined
 };
 
 const aMerchantId = "a_merchant_id" as NonEmptyString;
@@ -98,7 +98,7 @@ const aDiscountBucketCode = { code: "asdfgh" } as DiscountBucketCode;
 
 const productCategories = [
   ProductCategoryEnum.cultureAndEntertainment,
-  ProductCategoryEnum.learning,
+  ProductCategoryEnum.learning
 ];
 
 const aMerchant: Merchant = {
@@ -114,24 +114,24 @@ const aMerchant: Merchant = {
       productCategories: productCategories,
       startDate: new Date(),
       endDate: new Date(),
-      discount: 20,
-    },
+      discount: 20
+    }
   ],
   supportType: SupportTypeEnum.EMAILADDRESS,
-  supportValue: "-" as NonEmptyString,
+  supportValue: "-" as NonEmptyString
 };
 
 const aSearchRequest: SearchRequest = {
   token: "aMerchantName" as NonEmptyString,
   page: 0 as NonNegativeInteger,
-  pageSize: 100,
+  pageSize: 100
 };
 
 const anOnlineMerchantSearchRequest: OnlineMerchantSearchRequest = {
   merchantName: "aMerchantName" as NonEmptyString,
   page: 0 as NonNegativeInteger,
   pageSize: 100,
-  productCategories: productCategories,
+  productCategories: productCategories
 };
 
 const anOfflineMerchantSearchRequest: OfflineMerchantSearchRequest = {
@@ -142,16 +142,16 @@ const anOfflineMerchantSearchRequest: OfflineMerchantSearchRequest = {
   ordering: OrderingEnum.distance,
   userCoordinates: {
     latitude: 34.56,
-    longitude: 45.89,
+    longitude: 45.89
   },
   boundingBox: {
     coordinates: {
       latitude: 34.56,
-      longitude: 45.89,
+      longitude: 45.89
     },
     deltaLatitude: 6,
-    deltaLongitude: 8,
-  },
+    deltaLongitude: 8
+  }
 };
 
 const aCountResponse = { count: 5 };
@@ -176,7 +176,7 @@ describe("CgnOperatorController#getPublishedProductCategories", () => {
   it("should make the correct service method call without any query params", async () => {
     const req = {
       ...mockReq(),
-      user: mockedUser,
+      user: mockedUser
     };
 
     await controller.getPublishedProductCategories(req);
@@ -187,7 +187,7 @@ describe("CgnOperatorController#getPublishedProductCategories", () => {
   it("should make the correct service method call with the correct query param", async () => {
     const req = {
       ...mockReq(),
-      user: mockedUser,
+      user: mockedUser
     };
 
     req.query.count_new_discounts = "true"; // the query param is a string
@@ -200,7 +200,7 @@ describe("CgnOperatorController#getPublishedProductCategories", () => {
   it("should  make the correct service method call with a wrong query param name", async () => {
     const req = {
       ...mockReq(),
-      user: mockedUser,
+      user: mockedUser
     };
 
     req.query.not_a_valid_param = "a_not_boolean_value"; // this will be stripped
@@ -214,7 +214,7 @@ describe("CgnOperatorController#getPublishedProductCategories", () => {
   it("should fail with a wrong query param value", async () => {
     const req = {
       ...mockReq(),
-      user: mockedUser,
+      user: mockedUser
     };
 
     req.query.count_new_discounts = "a_not_boolean_value";
@@ -227,7 +227,7 @@ describe("CgnOperatorController#getPublishedProductCategories", () => {
   it("should call getPublishedProductCategories method on the CgnOperatorSearchService with valid values", async () => {
     const req = {
       ...mockReq(),
-      user: mockedUser,
+      user: mockedUser
     };
 
     mockGetPublishedProductCategories.mockReturnValue(
@@ -239,14 +239,14 @@ describe("CgnOperatorController#getPublishedProductCategories", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: productCategories,
+      value: productCategories
     });
   });
 
   it("should not call getPublishedProductCategories method on the CgnOperatorSearchService with empty user", async () => {
     const req = {
       ...mockReq(),
-      user: undefined,
+      user: undefined
     };
     const res = mockRes();
 
@@ -269,7 +269,7 @@ describe("CgnOperatorController#getMerchant", () => {
   it("should make the correct service method call", async () => {
     const req = {
       ...mockReq({ params: { merchantId: aMerchantId } }),
-      user: mockedUser,
+      user: mockedUser
     };
 
     await controller.getMerchant(req);
@@ -280,7 +280,7 @@ describe("CgnOperatorController#getMerchant", () => {
   it("should not call getMerchant method on the CgnOperatorSearchService if cgn card is expired", async () => {
     const req = {
       ...mockReq({ params: { merchantId: aMerchantId } }),
-      user: mockedUser,
+      user: mockedUser
     };
 
     mockGetMerchant.mockReturnValue(
@@ -291,7 +291,7 @@ describe("CgnOperatorController#getMerchant", () => {
       ResponseSuccessJson<CardExpired>({
         activation_date: new Date(),
         expiration_date: new Date(),
-        status: ExpiredStatusEnum.EXPIRED,
+        status: ExpiredStatusEnum.EXPIRED
       })
     );
 
@@ -301,14 +301,14 @@ describe("CgnOperatorController#getMerchant", () => {
       apply: expect.any(Function),
       kind: "IResponseErrorForbiddenNotAuthorized",
       detail:
-        "You are not allowed here: You do not have enough permission to complete the operation you requested",
+        "You are not allowed here: You do not have enough permission to complete the operation you requested"
     });
   });
 
   it("should not call getMerchant method on the CgnOperatorSearchService if cgn card status cannot be retrieved", async () => {
     const req = {
       ...mockReq({ params: { merchantId: aMerchantId } }),
-      user: mockedUser,
+      user: mockedUser
     };
 
     mockGetMerchant.mockReturnValue(
@@ -322,14 +322,14 @@ describe("CgnOperatorController#getMerchant", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseErrorInternal",
-      detail: "Internal server error: Cannot retrieve cgn card status",
+      detail: "Internal server error: Cannot retrieve cgn card status"
     });
   });
 
   it("should call getMerchant method on the CgnOperatorSearchService with valid values", async () => {
     const req = {
       ...mockReq({ params: { merchantId: aMerchantId } }),
-      user: mockedUser,
+      user: mockedUser
     };
 
     mockGetMerchant.mockReturnValue(
@@ -341,14 +341,14 @@ describe("CgnOperatorController#getMerchant", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: aMerchant,
+      value: aMerchant
     });
   });
 
   it("should not call getMerchant method on the CgnOperatorSearchService with empty user", async () => {
     const req = {
       ...mockReq({ params: { merchantId: aMerchantId } }),
-      user: undefined,
+      user: undefined
     };
     const res = mockRes();
 
@@ -371,7 +371,7 @@ describe("CgnOperatorController#count", () => {
   it("should make the correct service method call", async () => {
     const req = {
       ...mockReq({}),
-      user: mockedUser,
+      user: mockedUser
     };
 
     await controller.count(req);
@@ -382,7 +382,7 @@ describe("CgnOperatorController#count", () => {
   it("should call count method on the CgnOperatorSearchService with valid values", async () => {
     const req = {
       ...mockReq({}),
-      user: mockedUser,
+      user: mockedUser
     };
 
     mockCount.mockReturnValue(
@@ -394,14 +394,14 @@ describe("CgnOperatorController#count", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: aCountResponse,
+      value: aCountResponse
     });
   });
 
   it("should not call count method on the CgnOperatorSearchService with empty user", async () => {
     const req = {
-      ...mockReq({ }),
-      user: undefined,
+      ...mockReq({}),
+      user: undefined
     };
     const res = mockRes();
 
@@ -424,7 +424,7 @@ describe("CgnOperatorController#search", () => {
   it("should make the correct service method call", async () => {
     const req = {
       ...mockReq({ body: aSearchRequest }),
-      user: mockedUser,
+      user: mockedUser
     };
 
     await controller.search(req);
@@ -435,7 +435,7 @@ describe("CgnOperatorController#search", () => {
   it("should call search method on the CgnOperatorSearchService with valid values", async () => {
     const req = {
       ...mockReq({ body: aSearchRequest }),
-      user: mockedUser,
+      user: mockedUser
     };
 
     mockSearch.mockReturnValue(
@@ -447,14 +447,14 @@ describe("CgnOperatorController#search", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: aSearchResponse,
+      value: aSearchResponse
     });
   });
 
   it("should not call search method on the CgnOperatorSearchService with empty user", async () => {
     const req = {
       ...mockReq({ body: aSearchRequest }),
-      user: undefined,
+      user: undefined
     };
     const res = mockRes();
 
@@ -477,7 +477,7 @@ describe("CgnOperatorController#getOnlineMerchants", () => {
   it("should make the correct service method call", async () => {
     const req = {
       ...mockReq({ body: anOnlineMerchantSearchRequest }),
-      user: mockedUser,
+      user: mockedUser
     };
 
     await controller.getOnlineMerchants(req);
@@ -490,7 +490,7 @@ describe("CgnOperatorController#getOnlineMerchants", () => {
   it("should call getOnlineMerchants method on the CgnOperatorSearchService with valid values", async () => {
     const req = {
       ...mockReq({ body: anOnlineMerchantSearchRequest }),
-      user: mockedUser,
+      user: mockedUser
     };
 
     mockGetOnlineMerchants.mockReturnValue(
@@ -502,14 +502,14 @@ describe("CgnOperatorController#getOnlineMerchants", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: aSearchResponse,
+      value: aSearchResponse
     });
   });
 
   it("should not call getOnlineMerchants method on the CgnOperatorSearchService with empty user", async () => {
     const req = {
       ...mockReq({ body: anOnlineMerchantSearchRequest }),
-      user: undefined,
+      user: undefined
     };
     const res = mockRes();
 
@@ -532,7 +532,7 @@ describe("CgnOperatorController#getOfflineMerchants", () => {
   it("should make the correct service method call", async () => {
     const req = {
       ...mockReq({ body: anOfflineMerchantSearchRequest }),
-      user: mockedUser,
+      user: mockedUser
     };
 
     await controller.getOfflineMerchants(req);
@@ -545,7 +545,7 @@ describe("CgnOperatorController#getOfflineMerchants", () => {
   it("should call getOfflineMerchants method on the CgnOperatorSearchService with valid values", async () => {
     const req = {
       ...mockReq({ body: anOfflineMerchantSearchRequest }),
-      user: mockedUser,
+      user: mockedUser
     };
 
     mockGetOfflineMerchants.mockReturnValue(
@@ -557,14 +557,14 @@ describe("CgnOperatorController#getOfflineMerchants", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: aSearchResponse,
+      value: aSearchResponse
     });
   });
 
   it("should not call getOfflineMerchants method on the CgnOperatorSearchService with empty user", async () => {
     const req = {
       ...mockReq({ body: anOfflineMerchantSearchRequest }),
-      user: undefined,
+      user: undefined
     };
     const res = mockRes();
 
@@ -587,7 +587,7 @@ describe("CgnOperatorController#getDiscountBucketCode", () => {
   it("should make the correct service method call", async () => {
     const req = {
       ...mockReq({ params: { discountId: aDiscountId } }),
-      user: mockedUser,
+      user: mockedUser
     };
 
     await controller.getDiscountBucketCode(req);
@@ -598,7 +598,7 @@ describe("CgnOperatorController#getDiscountBucketCode", () => {
   it("should not call getDiscountBucketCode method on the CgnOperatorSearchService if cgn card is expired", async () => {
     const req = {
       ...mockReq({ params: { discountId: aDiscountId } }),
-      user: mockedUser,
+      user: mockedUser
     };
 
     mockGetDiscountBucketCode.mockReturnValue(
@@ -609,7 +609,7 @@ describe("CgnOperatorController#getDiscountBucketCode", () => {
       ResponseSuccessJson<CardExpired>({
         activation_date: new Date(),
         expiration_date: new Date(),
-        status: ExpiredStatusEnum.EXPIRED,
+        status: ExpiredStatusEnum.EXPIRED
       })
     );
 
@@ -619,14 +619,14 @@ describe("CgnOperatorController#getDiscountBucketCode", () => {
       apply: expect.any(Function),
       kind: "IResponseErrorForbiddenNotAuthorized",
       detail:
-        "You are not allowed here: You do not have enough permission to complete the operation you requested",
+        "You are not allowed here: You do not have enough permission to complete the operation you requested"
     });
   });
 
   it("should not call getDiscountBucketCode method on the CgnOperatorSearchService if cgn card status cannot be retrieved", async () => {
     const req = {
       ...mockReq({ params: { discountId: aDiscountId } }),
-      user: mockedUser,
+      user: mockedUser
     };
 
     mockGetDiscountBucketCode.mockReturnValue(
@@ -640,14 +640,14 @@ describe("CgnOperatorController#getDiscountBucketCode", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseErrorInternal",
-      detail: "Internal server error: Cannot retrieve cgn card status",
+      detail: "Internal server error: Cannot retrieve cgn card status"
     });
   });
 
   it("should call getDiscountBucketCode method on the CgnOperatorSearchService with valid values", async () => {
     const req = {
       ...mockReq({ params: { discountId: aDiscountId } }),
-      user: mockedUser,
+      user: mockedUser
     };
 
     mockGetDiscountBucketCode.mockReturnValue(
@@ -659,14 +659,14 @@ describe("CgnOperatorController#getDiscountBucketCode", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: aDiscountBucketCode,
+      value: aDiscountBucketCode
     });
   });
 
   it("should not call getDiscountBucketCode method on the CgnOperatorSearchService with empty user", async () => {
     const req = {
       ...mockReq({ params: { discountId: aDiscountId } }),
-      user: undefined,
+      user: undefined
     };
     const res = mockRes();
 

@@ -1,0 +1,280 @@
+openapi: 3.0.1
+info:
+  title: Carta Giovani Nazionale Operator Search API
+  version: 1.0.0
+servers:
+- url: https://localhost/api/cgn-search/v1
+security:
+- Bearer: []
+paths:
+  /published-product-categories:
+    get:
+      summary: List of published product categories
+      description: |
+        List of categories that have at least a published discount
+      operationId: getPublishedProductCategories
+      parameters:
+      - name: count_new_discounts
+        in: query
+        description: Indicates whether categories should be enriched with new discounts
+          count.
+        schema:
+          type: boolean
+      responses:
+        "200":
+          description: List of categories that have at least a published discount
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PublishedProductCategoriesResult'
+        "401":
+          description: Login expired.
+          content: {}
+        "500":
+          description: Service unavailable.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+  /count:
+    get:
+      summary: Count merchants and discounts to search within
+      description: |
+        Count merchants and discountsto search within
+      operationId: count
+      responses:
+        "200":
+          description: Count of merchants/discounts
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CountResult'
+        "400":
+          description: Bad request.
+          content: {}
+        "401":
+          description: Login expired.
+          content: {}
+        "500":
+          description: Service unavailable.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+  /search:
+    post:
+      summary: Search merchants or discounts
+      description: |
+        List of merchants and discounts with the token in name and/or description
+      operationId: search
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+        required: false
+      responses:
+        "200":
+          description: List of merchants/discounts for the given query parameters
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SearchResult'
+        "400":
+          description: Bad request.
+          content: {}
+        "401":
+          description: Login expired.
+          content: {}
+        "500":
+          description: Service unavailable.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+      x-codegen-request-body-name: body
+  /online-merchants:
+    post:
+      summary: List of online merchants
+      description: |
+        List of online merchants alphabetically ordered
+      operationId: getOnlineMerchants
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/OnlineMerchantSearchRequest'
+        required: false
+      responses:
+        "200":
+          description: List of online merchants for the given query parameters
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/OnlineMerchants'
+        "401":
+          description: Login expired.
+          content: {}
+        "500":
+          description: Service unavailable.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+      x-codegen-request-body-name: body
+  /offline-merchants:
+    post:
+      summary: List of merchants with a physical address
+      description: |
+        List of merchants with physical address, ordered by distance from the user by default
+      operationId: getOfflineMerchants
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/OfflineMerchantSearchRequest'
+        required: false
+      responses:
+        "200":
+          description: List of physical merchants for the given query parameters
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/OfflineMerchants'
+        "401":
+          description: Login expired.
+          content: {}
+        "500":
+          description: Service unavailable.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+      x-codegen-request-body-name: body
+  /merchants/{merchantId}:
+    get:
+      summary: Retrieve merchant details
+      description: |
+        Retrieve merchant details together with published discounts
+      operationId: getMerchant
+      parameters:
+      - name: merchantId
+        in: path
+        description: Merchant Identifier
+        required: true
+        schema:
+          minLength: 1
+          type: string
+      responses:
+        "200":
+          description: Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Merchant'
+        "401":
+          description: Login expired.
+          content: {}
+        "404":
+          description: Operator Not Found
+          content: {}
+        "500":
+          description: Service unavailable.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+  /discount-bucket-code/{discountId}:
+    get:
+      summary: Retrieve a discount bucket code
+      description: |
+        Retrieve a discount bucket code and burns it
+      operationId: getDiscountBucketCode
+      parameters:
+      - name: discountId
+        in: path
+        description: Discount Identifier
+        required: true
+        schema:
+          minLength: 1
+          type: string
+      responses:
+        "200":
+          description: Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/DiscountBucketCode'
+        "401":
+          description: Login expired.
+          content: {}
+        "404":
+          description: Bucket code Not Found
+          content: {}
+        "403":
+          description: Access data provided are invalid or CGN not valid
+          content: {}
+        "410":
+          description: Endpoint no longer available
+          content: {}
+        "500":
+          description: Service unavailable.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+components:
+  schemas:
+    ProblemJson:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/ProblemJson"
+    Merchant:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/Merchant"
+    SupportType:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/SupportType"
+    DiscountCodeType:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/DiscountCodeType"
+    OfflineMerchants:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/OfflineMerchants"
+    OfflineMerchant:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/OfflineMerchant"
+    OfflineMerchantSearchRequest:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/OfflineMerchantSearchRequest"
+    CountResult:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/CountResult"
+    SearchResult:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/SearchResult"
+    SearchItem:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/SearchItem"
+    OnlineMerchants:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/OnlineMerchants"
+    OnlineMerchant:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/OnlineMerchant"
+    SearchRequest:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/SearchRequest"
+    OnlineMerchantSearchRequest:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/OnlineMerchantSearchRequest"
+    Discount:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/Discount"
+    ProductCategory:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/ProductCategory"
+    Address:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/Address"
+    Coordinates:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/Coordinates"
+    BoundingBox:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/BoundingBox"
+    DiscountBucketCode:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/DiscountBucketCode"
+    PublishedProductCategories:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/PublishedProductCategories"
+    PublishedProductCategoriesWithNewDiscountsCount:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/PublishedProductCategoriesWithNewDiscountsCount"
+    PublishedProductCategoriesResult:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/PublishedProductCategoriesResult"
+    ProductCategoryWithNewDiscountsCount:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-cgn/refs/tags/search-func@3.5.0/apps/search-func/openapi/index.yaml#/definitions/ProductCategoryWithNewDiscountsCount"
+  securitySchemes:
+    Bearer:
+      type: apiKey
+      name: Authorization
+      in: header
