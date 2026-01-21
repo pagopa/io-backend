@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 18.4.0
+
+### Minor Changes
+
+- 0a471cd: Added new routes for B&P domain endpoints
+
 ## 18.3.0
 
 ### Minor Changes

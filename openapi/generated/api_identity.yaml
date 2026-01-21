@@ -1,6 +1,6 @@
 openapi: 3.0.2
 info:
-  version: 18.3.0
+  version: 18.4.0
   title: IO Auth&Identity API
   description: |
     API for managing user profile data, and service preferences.
