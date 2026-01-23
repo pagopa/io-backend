@@ -192,7 +192,7 @@ export const registerCommunicationRoutes = (
   );
 
   app.put(
-    `${basePath}/messages/:id/message-status`,
+    `${basePath}/messages/:id/status`,
     authMiddleware,
     toExpressHandler(
       communicationController.upsertMessageStatus,
@@ -239,7 +239,7 @@ export const registerCommunicationRoutes = (
 
   // Payment info route
   app.get(
-    `${basePath}/payment-info/:rptId`,
+    `${basePath}/payment/info/:rptId`,
     authMiddleware,
     toExpressHandler(
       pagoPAEcommerceController.getPaymentInfo,

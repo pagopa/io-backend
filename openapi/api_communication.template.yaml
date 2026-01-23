@@ -124,7 +124,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ProblemJson"
-  /messages/{id}/message-status:
+  /messages/{id}/status:
     put:
       operationId: upsertMessageStatusAttributes
       summary: UpsertMessageStatusAttributes
@@ -459,7 +459,7 @@ paths:
                 $ref: "#/components/schemas/ProblemJson"
   
   # Payment Info
-  /payment-info/{rptId}:
+  /payment/info/{rptId}:
     get:
       operationId: getPaymentInfoV2
       summary: Get Payment Info
