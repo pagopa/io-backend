@@ -10,7 +10,7 @@ on:
     branches:
       - master
     paths:
-      - 'api_communication.yaml'
+      - 'openapi/generated/api_communication.yaml'
       - '.github/workflows/pr_opex_api_communication.yml'
       - '.github/workflows/opex_api_communication.yml'
       - '.opex/api_communication/**'
