@@ -2,11 +2,8 @@ openapi: 3.0.1
 info:
   version: 1.0.1
   title: IO FIMS - Backend API
-  description: |
-    LEGACY SPEC. This is scheduled to be deleted after
-    api_fims_platform OpenAPI spec has been fully adopted
 servers:
-  - url: https://api-app.io.pagopa.it/api/v1/fims
+  - url: https://api-app.io.pagopa.it/api/fims/v1
 security:
   - Bearer: []
 
