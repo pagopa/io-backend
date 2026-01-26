@@ -536,7 +536,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaymentInfoUnavailableResponse'
+                $ref: '#/components/schemas/PartyConfigurationFaultPaymentProblemJson'
 components:
   parameters:
     MessageId:
@@ -1524,7 +1524,7 @@ components:
         - $ref: '#/components/schemas/GatewayFaultPaymentProblemJson'
         - $ref: '#/components/schemas/ValidationFaultPaymentUnavailableProblemJson'
       x-one-of: true
-    PaymentInfoUnavailableResponse:
+    PartyConfigurationFaultPaymentProblemJson:
       required:
         - faultCodeCategory
         - faultCodeDetail

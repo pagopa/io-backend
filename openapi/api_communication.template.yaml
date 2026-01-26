@@ -519,7 +519,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaymentInfoUnavailableResponse"
+                $ref: "#/components/schemas/PartyConfigurationFaultPaymentProblemJson"
 
 components:
   parameters:
@@ -769,7 +769,7 @@ components:
       $ref: "consumed/pagopa_ecommerce_v3.yaml#/components/schemas/PaymentInfoConflictResponse"
     PaymentInfoBadGatewayResponse:
       $ref: "consumed/pagopa_ecommerce_v3.yaml#/components/schemas/PaymentInfoBadGatewayResponse"
-    PaymentInfoUnavailableResponse:
+    PartyConfigurationFaultPaymentProblemJson:
       $ref: "consumed/pagopa_ecommerce_v3.yaml#/components/schemas/PartyConfigurationFaultPaymentProblemJson"
     # Payment error problem json types
     ValidationFaultPaymentUnknownProblemJson:
