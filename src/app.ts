@@ -70,7 +70,10 @@ import {
   registerIdentityRoutes,
   registerLegacyIdentityRoutes
 } from "./routes/identityRoutes";
-import { registerIoFimsAPIRoutes } from "./routes/ioFimsRoutes";
+import {
+  registerIoFimsAPIRoutes,
+  registerLegacyIoFimsAPIRoutes
+} from "./routes/ioFimsRoutes";
 import {
   registerIoSignAPIRoutes,
   registerIoSignAPIRoutesLegacy
@@ -462,12 +465,19 @@ export async function newApp({
         }
 
         if (FF_IO_FIMS_ENABLED) {
-          registerIoFimsAPIRoutes(
+          registerLegacyIoFimsAPIRoutes(
             app,
             IoFimsAPIBasePath,
             IO_FIMS_SERVICE,
             PROFILE_SERVICE,
             authMiddlewares.bearerSession
+          );
+
+          registerIoFimsAPIRoutes(
+            app,
+            IO_FIMS_SERVICE,
+            PROFILE_SERVICE,
+            authMiddlewares.xUserMiddleware
           );
         }
 
