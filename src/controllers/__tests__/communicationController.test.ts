@@ -6,8 +6,8 @@ import NewMessagesService from "../../services/newMessagesService";
 import CommunicationController from "../communicationController";
 import { mockedUser } from "../../__mocks__/user_mock";
 import { ResponseSuccessOctet } from "../../utils/responses";
-import { MessageStatusChange } from "../../../generated/io-messages-api/MessageStatusChange";
-import { Change_typeEnum as Reading_Change_typeEnum } from "../../../generated/io-messages-api/MessageStatusReadingChange";
+import { MessageStatusChange } from "../../../generated/communication/MessageStatusChange";
+import { Change_typeEnum as Reading_Change_typeEnum } from "../../../generated/communication/MessageStatusReadingChange";
 import { base64File } from "../../__mocks__/pn";
 import {
   lollipopParams,
