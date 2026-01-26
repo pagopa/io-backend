@@ -186,13 +186,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-  /remote-contents/{id}/precondition:
+  /third-party-messages/{id}/precondition:
     get:
       operationId: getRemoteContentPrecondition
-      summary: Retrieve remote content precondition
+      summary: Retrieve third party message precondition
       description: >-
         Returns the precondition associated to the provided message ID to
-        receive the remote content.
+        receive the third party message.
       parameters:
         - $ref: '#/components/parameters/MessageId'
       responses:
@@ -252,11 +252,11 @@ paths:
           description: Not Implemented
         '504':
           description: Gateway Timeout
-  /remote-contents/{id}:
+  /third-party-messages/{id}:
     get:
       operationId: getRemoteContent
-      summary: Retrieve remote content
-      description: Returns the remote content with the provided message ID.
+      summary: Retrieve third party message
+      description: Returns the third party message with the provided message ID.
       parameters:
         - $ref: '#/components/parameters/MessageId'
       responses:
@@ -323,10 +323,10 @@ paths:
                 $ref: '#/components/schemas/ProblemJson'
         '504':
           description: Gateway Timeout
-  /remote-contents/{id}/attachments/{attachment_url}:
+  /third-party-messages/{id}/attachments/{attachment_url}:
     get:
       operationId: getRemoteContentAttachment
-      summary: Retrieve an attachment of a remote content message
+      summary: Retrieve an attachment of a third party message
       parameters:
         - $ref: '#/components/parameters/MessageId'
         - name: attachment_url

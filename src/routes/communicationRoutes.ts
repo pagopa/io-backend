@@ -201,7 +201,7 @@ export const registerCommunicationRoutes = (
   );
 
   app.get(
-    `${basePath}/remote-contents/:id/precondition`,
+    `${basePath}/third-party-messages/:id/precondition`,
     authMiddleware,
     toExpressHandler(
       communicationController.getRemoteContentPrecondition,
@@ -210,7 +210,7 @@ export const registerCommunicationRoutes = (
   );
 
   app.get(
-    `${basePath}/remote-contents/:id`,
+    `${basePath}/third-party-messages/:id`,
     authMiddleware,
     toExpressHandler(
       communicationController.getRemoteContent,
@@ -219,7 +219,7 @@ export const registerCommunicationRoutes = (
   );
 
   app.get(
-    `${basePath}/remote-contents/:id/attachments/:attachment_url(*)`,
+    `${basePath}/third-party-messages/:id/attachments/:attachment_url(*)`,
     authMiddleware,
     toExpressHandler(
       communicationController.getRemoteContentAttachment,
