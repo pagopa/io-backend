@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 18.5.0
+
+### Minor Changes
+
+- 30746a4: Duplicate IO-COM endpoints
+
 ## 18.4.0
 
 ### Minor Changes
