@@ -142,6 +142,7 @@ Those are all Environment variables needed by the application:
 | LOLLIPOP_API_BASE_PATH                    | The io-function-lollipop api base path                                                               | string  |
 | FF_UNIQUE_EMAIL_ENFORCEMENT               | (Optional) Enable the unique email enforcement policy. Default: NONE                                 | string (enum: NONE, BETA, ALL) |
 | UNIQUE_EMAIL_ENFORCEMENT_USERS            | (Optional) Comma separated list of UNIQUE_EMAIL_ENFORCEMENT beta testers. Default: empty array       | string |
+| SERVICES_APP_BACKEND_API_KEY              | The key used to authenticate to the io-services-app-backend API                                      | string |
 | SERVICES_APP_BACKEND_BASE_PATH            | New Service APIs(include search engine) basepath                                                     | string |
 | SERVICES_APP_BACKEND_API_URL              | Services App Backend FunctionApp Url                                                                 | string |
 | SERVICES_APP_BACKEND_API_BASE_PATH        | Services App Backend FunctionApp Api Basepath                                                        | string |

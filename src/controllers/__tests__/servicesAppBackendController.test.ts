@@ -12,6 +12,7 @@ import { ServicesAppBackendAPIClient } from "../../clients/services-app-backend"
 import ServicesAppBackendService from "../../services/servicesAppBackendService";
 import ServiceAppBackendController from "../serviceAppBackendController";
 
+const API_KEY = "";
 const API_URL = "";
 const API_BASE_PATH = "";
 
@@ -32,7 +33,7 @@ jest.mock("../../services/servicesAppBackendService", () => {
   };
 });
 
-const apiClient = ServicesAppBackendAPIClient(API_URL, API_BASE_PATH);
+const apiClient = ServicesAppBackendAPIClient(API_KEY,API_URL, API_BASE_PATH);
 const serviceAppBackendService = new ServicesAppBackendService(apiClient);
 
 const mockFindInstitutionsResponse = {
