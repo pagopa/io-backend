@@ -188,7 +188,7 @@ paths:
                 $ref: '#/components/schemas/ProblemJson'
   /third-party-messages/{id}/precondition:
     get:
-      operationId: getRemoteContentPrecondition
+      operationId: getThirdPartyMessagePrecondition
       summary: Retrieve third party message precondition
       description: >-
         Returns the precondition associated to the provided message ID to
@@ -254,7 +254,7 @@ paths:
           description: Gateway Timeout
   /third-party-messages/{id}:
     get:
-      operationId: getRemoteContent
+      operationId: getThirdPartyMessage
       summary: Retrieve third party message
       description: Returns the third party message with the provided message ID.
       parameters:
@@ -325,7 +325,7 @@ paths:
           description: Gateway Timeout
   /third-party-messages/{id}/attachments/{attachment_url}:
     get:
-      operationId: getRemoteContentAttachment
+      operationId: getThirdPartyMessageAttachment
       summary: Retrieve an attachment of a third party message
       parameters:
         - $ref: '#/components/parameters/MessageId'

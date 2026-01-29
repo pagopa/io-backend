@@ -183,7 +183,7 @@ paths:
   # Third Party Messages
   /third-party-messages/{id}/precondition:
     get:
-      operationId: getRemoteContentPrecondition
+      operationId: getThirdPartyMessagePrecondition
       summary: Retrieve third party message precondition
       description: |-
         Returns the precondition associated to the provided message ID to receive the third party message.
@@ -237,7 +237,7 @@ paths:
           description: Gateway Timeout
   /third-party-messages/{id}:
     get:
-      operationId: getRemoteContent
+      operationId: getThirdPartyMessage
       summary: Retrieve third party message
       description: |-
         Returns the third party message with the provided message ID.
@@ -306,7 +306,7 @@ paths:
           description: Gateway Timeout
   /third-party-messages/{id}/attachments/{attachment_url}:
     get:
-      operationId: getRemoteContentAttachment
+      operationId: getThirdPartyMessageAttachment
       summary: Retrieve an attachment of a third party message
       parameters:
         - $ref: "#/components/parameters/MessageId"
