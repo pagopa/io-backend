@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 18.6.0
+
+### Minor Changes
+
+- 98816d6: Duplicated IO-FIMS endpoints with new base path
+
 ## 18.5.0
 
 ### Minor Changes
