@@ -19,7 +19,7 @@ export function ServicesAppBackendAPIClient(
     withDefaults: (op) => (params) =>
       op({
         ...params,
-        ApiKey: token
+        ApiKeyAuth: token
       })
   });
 }
