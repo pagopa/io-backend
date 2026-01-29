@@ -1,6 +1,11 @@
 /**
- * This controller handles reading messages from the app by
- * forwarding the call to the API system.
+ * This controller handles reading messages for the Communication API
+ * by forwarding calls to the API system.
+ *
+ * This is the modernized version of MessagesController that:
+ * - Does NOT use sessionStorage (stateless)
+ * - Uses extractLollipopLocalsFromLollipopHeaders (no Redis dependency)
+ * - Uses withUserIdentityFromRequest (new authentication)
  */
 
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
@@ -24,23 +29,23 @@ import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
 import * as B from "fp-ts/boolean";
 import { pipe } from "fp-ts/lib/function";
-import { CreatedMessageWithContentAndAttachments } from "generated/communication/CreatedMessageWithContentAndAttachments";
 import * as t from "io-ts";
 import * as QueryString from "qs";
 import NewMessagesService from "src/services/newMessagesService";
 
+import { CreatedMessageWithContentAndAttachments } from "../../generated/communication/CreatedMessageWithContentAndAttachments";
+import { MessageStatusAttributes } from "../../generated/communication/MessageStatusAttributes";
+import { MessageStatusChange } from "../../generated/communication/MessageStatusChange";
 import { PaginatedPublicMessagesCollection } from "../../generated/communication/PaginatedPublicMessagesCollection";
 import { ThirdPartyMessagePrecondition } from "../../generated/communication/ThirdPartyMessagePrecondition";
 import { ThirdPartyMessageWithContent } from "../../generated/communication/ThirdPartyMessageWithContent";
-import { MessageStatusAttributes } from "../../generated/io-messages-api/MessageStatusAttributes";
-import { MessageStatusChange } from "../../generated/io-messages-api/MessageStatusChange";
+import { UserIdentity } from "../../generated/io-auth/UserIdentity";
 import { GetMessageParameters } from "../../generated/parameters/GetMessageParameters";
 import { GetMessagesParameters } from "../../generated/parameters/GetMessagesParameters";
 import { LollipopApiClient } from "../clients/lollipop";
-import { ISessionStorage } from "../services/ISessionStorage";
 import { LollipopLocalsType, LollipopRequiredHeaders } from "../types/lollipop";
-import { User, withUserFromRequest } from "../types/user";
-import { extractLollipopLocalsFromLollipopHeadersLegacy } from "../utils/lollipop";
+import { withUserIdentityFromRequest } from "../types/user";
+import { extractLollipopLocalsFromLollipopHeaders } from "../utils/lollipop";
 import { checkIfLollipopIsEnabled } from "../utils/lollipop";
 import {
   IResponseErrorNotImplemented,
@@ -65,17 +70,15 @@ export const withGetThirdPartyAttachmentParams = async <T>(
   );
 
 /**
- * LEGACY Messages Controller
+ * Communication Messages Controller
  *
- * Uses legacy session storage and lollipop client to access third party messages
- * It will be removed once all clients use the new stateless authentication mechanism
+ * Stateless controller for the Communication API that does not depend on session storage.
+ * Uses modern authentication (UserIdentity) and Lollipop without Redis.
  */
-export default class MessagesController {
-  // eslint-disable-next-line max-params
+export default class CommunicationController {
   constructor(
     private readonly messageService: NewMessagesService,
-    private readonly lollipopClient: ReturnType<typeof LollipopApiClient>,
-    private readonly sessionStorage: ISessionStorage
+    private readonly lollipopClient: ReturnType<typeof LollipopApiClient>
   ) {}
 
   /**
@@ -90,7 +93,7 @@ export default class MessagesController {
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<PaginatedPublicMessagesCollection>
   > =>
-    withUserFromRequest(req, async (user) =>
+    withUserIdentityFromRequest(req, async (user) =>
       withValidatedOrValidationError(
         GetMessagesParameters.decode({
           /* eslint-disable sort-keys */
@@ -117,7 +120,7 @@ export default class MessagesController {
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<CreatedMessageWithContentAndAttachments>
   > =>
-    withUserFromRequest(req, async (user) =>
+    withUserIdentityFromRequest(req, async (user) =>
       withValidatedOrValidationError(
         GetMessageParameters.decode({
           id: req.params.id,
@@ -137,7 +140,7 @@ export default class MessagesController {
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<MessageStatusAttributes>
   > =>
-    withUserFromRequest(req, async (user) =>
+    withUserIdentityFromRequest(req, async (user) =>
       withValidatedOrValidationError(Ulid.decode(req.params.id), (messageId) =>
         withValidatedOrValidationError(
           MessageStatusChange.decode(req.body),
@@ -151,9 +154,14 @@ export default class MessagesController {
       )
     );
 
+  /**
+   * Check if Lollipop is enabled and extract locals from headers.
+   * This version uses the stateless extractLollipopLocalsFromLollipopHeaders
+   * which does NOT require sessionStorage.
+   */
   public readonly checkLollipopAndGetLocalsOrDefault = (
     req: express.Request,
-    user: User,
+    user: UserIdentity,
     messageId: Ulid
   ) =>
     pipe(
@@ -195,11 +203,11 @@ export default class MessagesController {
                     ),
                   (lollipopHeaders) =>
                     pipe(
-                      extractLollipopLocalsFromLollipopHeadersLegacy(
+                      // Use the stateless version that gets assertionRef from UserIdentity
+                      extractLollipopLocalsFromLollipopHeaders(
                         this.lollipopClient,
-                        this.sessionStorage,
-                        user.fiscal_code,
-                        lollipopHeaders
+                        lollipopHeaders,
+                        user
                       ),
                       TE.mapLeft(() =>
                         ResponseErrorInternal(
@@ -215,9 +223,9 @@ export default class MessagesController {
     );
 
   /**
-   * Returns the precondition for the required third party message.
+   * Returns the precondition for the required remote content.
    */
-  public readonly getThirdPartyMessagePrecondition = async (
+  public readonly getRemoteContentPrecondition = async (
     req: express.Request
   ): Promise<
     | IResponseErrorInternal
@@ -228,7 +236,7 @@ export default class MessagesController {
     | IResponseSuccessNoContent
     | IResponseSuccessJson<ThirdPartyMessagePrecondition>
   > =>
-    withUserFromRequest(req, async (user) =>
+    withUserIdentityFromRequest(req, async (user) =>
       withValidatedOrValidationError(Ulid.decode(req.params.id), (messageId) =>
         pipe(
           this.checkLollipopAndGetLocalsOrDefault(req, user, messageId),
@@ -252,9 +260,9 @@ export default class MessagesController {
     );
 
   /**
-   * Returns the Third Party message identified by the message id.
+   * Returns the remote content identified by the message id.
    */
-  public readonly getThirdPartyMessage = (
+  public readonly getRemoteContent = (
     req: express.Request
   ): Promise<
     | IResponseErrorInternal
@@ -265,7 +273,7 @@ export default class MessagesController {
     | IResponseErrorBadGateway
     | IResponseSuccessJson<ThirdPartyMessageWithContent>
   > =>
-    withUserFromRequest(req, async (user) =>
+    withUserIdentityFromRequest(req, async (user) =>
       withValidatedOrValidationError(Ulid.decode(req.params.id), (messageId) =>
         pipe(
           this.checkLollipopAndGetLocalsOrDefault(req, user, messageId),
@@ -289,9 +297,9 @@ export default class MessagesController {
     );
 
   /**
-   * Returns the Third Party message attachments identified by the Third Party message id and the attachment relative url.
+   * Returns the remote content attachments identified by the message id and the attachment relative url.
    */
-  public readonly getThirdPartyMessageAttachment = (
+  public readonly getRemoteContentAttachment = (
     req: express.Request
   ): Promise<
     | IResponseErrorInternal
@@ -304,7 +312,7 @@ export default class MessagesController {
     | IResponseErrorUnsupportedMediaType
     | IResponseSuccessOctet<Buffer>
   > =>
-    withUserFromRequest(req, (user) =>
+    withUserIdentityFromRequest(req, (user) =>
       withGetThirdPartyAttachmentParams(req, async (messageId, attachmentUrl) =>
         pipe(
           this.checkLollipopAndGetLocalsOrDefault(req, user, messageId),

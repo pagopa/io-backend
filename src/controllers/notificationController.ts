@@ -3,29 +3,20 @@
  */
 
 import {
-  IResponseErrorInternal,
   IResponseErrorValidation,
   IResponseSuccessJson,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import { Millisecond } from "@pagopa/ts-commons/lib/units";
 import * as express from "express";
-import * as E from "fp-ts/lib/Either";
-import * as TE from "fp-ts/lib/TaskEither";
-import { pipe } from "fp-ts/lib/function";
 import { NotificationServiceFactory } from "src/services/notificationServiceFactory";
 
-import { Installation } from "../../generated/backend/Installation";
-import { InstallationID } from "../../generated/backend/InstallationID";
-import { Notification } from "../../generated/notifications/Notification";
-import { SuccessResponse } from "../../generated/notifications/SuccessResponse";
-import RedisSessionStorage from "../services/redisSessionStorage";
+import { Installation } from "../../generated/communication/Installation";
+import { InstallationID } from "../../generated/communication/InstallationID";
+import { SuccessResponse } from "../../generated/communication/SuccessResponse";
 import { withUserFromRequest } from "../types/user";
 import { log } from "../utils/logger";
-import {
-  withCatchAsInternalError,
-  withValidatedOrValidationError
-} from "../utils/responses";
+import { withValidatedOrValidationError } from "../utils/responses";
 
 const delay = (ms: Millisecond) => new Promise((ok) => setTimeout(ok, ms));
 
@@ -36,55 +27,8 @@ export interface INotificationControllerOptions {
 
 export default class NotificationController {
   constructor(
-    private readonly notificationServiceFactory: NotificationServiceFactory,
-    private readonly sessionStorage: RedisSessionStorage,
-    private readonly opts: INotificationControllerOptions
+    private readonly notificationServiceFactory: NotificationServiceFactory
   ) {}
-
-  public readonly notify = async (
-    req: express.Request
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorValidation
-    | IResponseSuccessJson<SuccessResponse>
-  > =>
-    withCatchAsInternalError(async () =>
-      withValidatedOrValidationError(
-        Notification.decode(req.body),
-        (data: Notification) =>
-          pipe(
-            TE.tryCatch(
-              () =>
-                this.sessionStorage.userHasActiveSessionsOrLV(
-                  data.message.fiscal_code
-                ),
-              E.toError
-            ),
-            TE.chain(TE.fromEither),
-            TE.map(async (userHasActiveSessions) =>
-              userHasActiveSessions && "content" in data.message
-                ? // send the full message only if the user has an
-                  // active session and the message content is defined
-                  await this.notificationServiceFactory(
-                    data.message.fiscal_code
-                  ).notify(data, data.message.content.subject)
-                : // send a generic message
-                  // if the user does not have an active session
-                  // or the message content is not defined
-                  await this.notificationServiceFactory(
-                    data.message.fiscal_code
-                  ).notify(
-                    data,
-                    this.opts.notificationDefaultSubject,
-                    this.opts.notificationDefaultTitle
-                  )
-            ),
-            TE.getOrElse((error) => {
-              throw error;
-            })
-          )()
-      )
-    );
 
   public async createOrUpdateInstallation(
     req: express.Request

@@ -2,7 +2,10 @@ swagger: "2.0"
 info:
   version: 16.7.0
   title: Proxy API
-  description: Mobile and web proxy API gateway.
+  description: |
+    Mobile and web proxy API gateway.
+    LEGACY SPEC. This is scheduled to be deleted after
+    new OpenAPI spec has been fully adopted
 host: localhost
 basePath: /api/v1
 schemes:

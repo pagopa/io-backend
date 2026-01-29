@@ -46,7 +46,6 @@ microservice-chart:
           type: Utilization
           value: '70'
   envConfig:
-    ALLOW_NOTIFY_IP_SOURCE_RANGE: '127.0.0.0/0'
     API_BASE_PATH: '/api/v1'
     API_URL: 'https://io-p-app-fn-1.azurewebsites.net/api/v1'
     APP_MESSAGES_API_URL: 'https://io-p-app-messages-fn-1.azurewebsites.net/api/v1'

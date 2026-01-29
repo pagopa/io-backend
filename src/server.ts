@@ -16,7 +16,6 @@ import * as path from "path";
 
 import { newApp } from "./app";
 import {
-  ALLOW_NOTIFY_IP_SOURCE_RANGE,
   API_BASE_PATH,
   CDC_SUPPORT_IO_API_BASE_PATH,
   CGN_API_BASE_PATH,
@@ -96,7 +95,6 @@ newApp({
   IoWalletAPIBasePath,
   IoWalletUatAPIBasePath,
   ServicesAppBackendBasePath,
-  allowNotifyIPSourceRange: ALLOW_NOTIFY_IP_SOURCE_RANGE,
   appInsightsClient: O.toUndefined(maybeAppInsightsClient),
   env: ENV
 })

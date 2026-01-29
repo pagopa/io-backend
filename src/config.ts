@@ -41,7 +41,6 @@ import {
   getIsUserEligibleForNewFeature
 } from "./utils/featureFlag";
 import { log } from "./utils/logger";
-import { decodeCIDRs } from "./utils/network";
 import { ognlTypeFor } from "./utils/ognl";
 import { CommaSeparatedListOf } from "./utils/separated-list";
 
@@ -75,20 +74,6 @@ export const CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS: number = parseInt(
   process.env.CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS ||
     DEFAULT_CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS,
   10
-);
-
-// IP(s) or CIDR(s) allowed for notification
-export const ALLOW_NOTIFY_IP_SOURCE_RANGE = pipe(
-  process.env.ALLOW_NOTIFY_IP_SOURCE_RANGE,
-  decodeCIDRs,
-  E.getOrElseW((errs) => {
-    log.error(
-      `Missing or invalid ALLOW_NOTIFY_IP_SOURCE_RANGE environment variable: ${readableReport(
-        errs
-      )}`
-    );
-    return process.exit(1);
-  })
 );
 
 const DEFAULT_REQUEST_TIMEOUT_MS = 10000 as Millisecond;
@@ -378,11 +363,6 @@ export const APP_BACKEND_SECONDARY_KEY = pipe(
   O.chain((value) => O.fromEither(NonEmptyString.decode(value))),
   O.toUndefined
 );
-
-// Push notifications
-export const NOTIFICATION_DEFAULT_SUBJECT =
-  "Entra nell'app per leggere il contenuto";
-export const NOTIFICATION_DEFAULT_TITLE = "Hai un nuovo messaggio su IO";
 
 export const BARCODE_ALGORITHM = pipe(
   process.env.BARCODE_ALGORITHM,

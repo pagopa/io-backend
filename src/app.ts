@@ -6,7 +6,7 @@ import {
   NodeEnvironment,
   NodeEnvironmentEnum
 } from "@pagopa/ts-commons/lib/environment";
-import { CIDR, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as appInsights from "applicationinsights";
 import * as bodyParser from "body-parser";
 import * as express from "express";
@@ -55,7 +55,6 @@ import {
   PUSH_NOTIFICATIONS_STORAGE_CONNECTION_STRING,
   SERVICES_APP_BACKEND_CLIENT
 } from "./config";
-import { registerAPIRoutes } from "./routes/baseRoutes";
 import {
   registerCdcSupportAPIRoutes,
   registerLegacyCdcSupportAPIRoutes
@@ -67,6 +66,10 @@ import {
   registerLegacyCgnOperatorSearchAPIRoutes
 } from "./routes/cgnRoutes";
 import {
+  registerCommunicationRoutes,
+  registerLegacyCommunicationRoutes
+} from "./routes/communicationRoutes";
+import {
   registerIdentityRoutes,
   registerLegacyIdentityRoutes
 } from "./routes/identityRoutes";
@@ -76,7 +79,10 @@ import {
   registerIoSignAPIRoutesLegacy
 } from "./routes/ioSignRoutes";
 import { registerIoWalletAPIRoutes } from "./routes/ioWalletRoutes";
-import { registerPNRoutes } from "./routes/pnRoutes";
+import {
+  registerLegacySENDRoutes,
+  registerSendActivationRoutes
+} from "./routes/pnRoutes";
 import { registerPublicRoutes } from "./routes/publicRoutes";
 import { registerServicesAppBackendRoutes } from "./routes/servicesRoutes";
 import CdcSupportService from "./services/cdcSupportService";
@@ -114,7 +120,6 @@ const defaultModule = {
 export interface IAppFactoryParameters {
   readonly env: NodeEnvironment;
   readonly appInsightsClient?: appInsights.TelemetryClient;
-  readonly allowNotifyIPSourceRange: ReadonlyArray<CIDR>;
   readonly APIBasePath: string;
   readonly CdcSupportAPIbasePath: string;
   readonly CGNAPIBasePath: string;
@@ -128,7 +133,6 @@ export interface IAppFactoryParameters {
 
 export async function newApp({
   env,
-  allowNotifyIPSourceRange,
   appInsightsClient,
   APIBasePath,
   CdcSupportAPIbasePath,
@@ -360,15 +364,25 @@ export async function newApp({
           PAGOPA_ECOMMERCE_UAT_CLIENT
         );
 
-        registerAPIRoutes(
+        // Register legacy Communication routes (/api/v1/messages, /api/v1/installations, etc.)
+        registerLegacyCommunicationRoutes(
           app,
           APIBasePath,
-          allowNotifyIPSourceRange,
+          authMiddlewares.bearerSession,
           APP_MESSAGES_SERVICE,
           notificationServiceFactory,
           SESSION_STORAGE,
           PAGOPA_ECOMMERCE_SERVICE,
-          authMiddlewares.bearerSession,
+          LOLLIPOP_API_CLIENT
+        );
+
+        // Register Communication API routes with new authentication middleware (NO sessionStorage)
+        registerCommunicationRoutes(
+          app,
+          authMiddlewares.xUserMiddleware,
+          APP_MESSAGES_SERVICE,
+          notificationServiceFactory,
+          PAGOPA_ECOMMERCE_SERVICE,
           LOLLIPOP_API_CLIENT
         );
 
@@ -483,11 +497,17 @@ export async function newApp({
           O.isSome(PN_ADDRESS_BOOK_CLIENT_SELECTOR)
         ) {
           const pnService = PNService(PN_ADDRESS_BOOK_CLIENT_SELECTOR.value);
-          registerPNRoutes(
+          registerLegacySENDRoutes(
             app,
             PNAddressBookConfig.PN_ACTIVATION_BASE_PATH,
             pnService,
             authMiddlewares.bearerSession
+          );
+
+          registerSendActivationRoutes(
+            app,
+            authMiddlewares.xUserMiddleware,
+            pnService
           );
         }
 
