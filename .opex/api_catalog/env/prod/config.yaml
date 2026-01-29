@@ -1,0 +1,14 @@
+oa3_spec: openapi/generated/api_catalog.yaml
+name: opex_iobackend_api_catalog
+location: West Europe
+timespan: 5m
+evaluation_frequency: 10
+evaluation_time_window: 20
+event_occurrences: 1
+data_source: /subscriptions/ec285037-c673-4f58-b594-d7c480da4e8b/resourceGroups/io-p-itn-common-rg-01/providers/Microsoft.Network/applicationGateways/io-p-itn-agw-01
+action_groups:
+  - /subscriptions/ec285037-c673-4f58-b594-d7c480da4e8b/resourceGroups/io-p-itn-svc-rg-01/providers/Microsoft.Insights/actiongroups/io-p-svc-offcall-ag-01
+overrides:
+  hosts:
+    - app-backend.io.italia.it
+    - api-app.io.pagopa.it
