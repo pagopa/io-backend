@@ -23,8 +23,6 @@ import {
   ENV,
   IO_FIMS_API_BASE_PATH,
   IO_SIGN_API_BASE_PATH,
-  IO_WALLET_API_BASE_PATH,
-  IO_WALLET_UAT_API_BASE_PATH,
   SERVER_PORT,
   SERVICES_APP_BACKEND_BASE_PATH,
   errorOrAppInsightConfig
@@ -45,8 +43,6 @@ const IoSignAPIBasePath = IO_SIGN_API_BASE_PATH;
 const IoFimsAPIBasePath = IO_FIMS_API_BASE_PATH;
 const CGNOperatorSearchAPIBasePath = CGN_OPERATOR_SEARCH_API_BASE_PATH;
 const ServicesAppBackendBasePath = SERVICES_APP_BACKEND_BASE_PATH;
-const IoWalletAPIBasePath = IO_WALLET_API_BASE_PATH;
-const IoWalletUatAPIBasePath = IO_WALLET_UAT_API_BASE_PATH;
 
 // Set default for graceful-shutdown
 const DEFAULT_SHUTDOWN_SIGNALS = "SIGINT SIGTERM";
@@ -92,8 +88,6 @@ newApp({
   CGNOperatorSearchAPIBasePath,
   IoFimsAPIBasePath,
   IoSignAPIBasePath,
-  IoWalletAPIBasePath,
-  IoWalletUatAPIBasePath,
   ServicesAppBackendBasePath,
   appInsightsClient: O.toUndefined(maybeAppInsightsClient),
   env: ENV

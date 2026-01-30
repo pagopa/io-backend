@@ -61,8 +61,6 @@ const aCgnOperatorSearchAPIBasePath = "/api/v1/cgn-operator-search";
 const aIoFimsAPIBasePath = "/api/v1/fims";
 const aIoSignAPIBasePath = "/api/v1/sign";
 const aServicesAppBackendBasePath = "/api/v2";
-const aIoWalletAPIBasePath = "/api/v1/wallet";
-const aIoWalletUatAPIBasePath = "/api/v1/wallet/uat";
 
 describe("Success app start", () => {
   // tslint:disable:no-let
@@ -75,8 +73,6 @@ describe("Success app start", () => {
       CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
       IoFimsAPIBasePath: aIoFimsAPIBasePath,
       IoSignAPIBasePath: aIoSignAPIBasePath,
-      IoWalletAPIBasePath: aIoWalletAPIBasePath,
-      IoWalletUatAPIBasePath: aIoWalletUatAPIBasePath,
       ServicesAppBackendBasePath: aServicesAppBackendBasePath,
       env: NodeEnvironmentEnum.PRODUCTION
     });
@@ -180,8 +176,6 @@ describe("Failure app start", () => {
         CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
         IoFimsAPIBasePath: aIoFimsAPIBasePath,
         IoSignAPIBasePath: aIoSignAPIBasePath,
-        IoWalletAPIBasePath: aIoWalletAPIBasePath,
-        IoWalletUatAPIBasePath: aIoWalletUatAPIBasePath,
         ServicesAppBackendBasePath: aServicesAppBackendBasePath,
         env: NodeEnvironmentEnum.PRODUCTION
       });
