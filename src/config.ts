@@ -28,7 +28,6 @@ import { CgnOperatorSearchAPIClient } from "./clients/cgn-operator-search";
 import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
 import { IoFimsAPIClient } from "./clients/io-fims";
 import { IoSignAPIClient } from "./clients/io-sign";
-import { IoWalletAPIClient } from "./clients/io-wallet";
 import { LollipopApiClient } from "./clients/lollipop";
 import { getPagoPaEcommerceClient } from "./clients/pagopa-ecommerce";
 import { PNClientFactory } from "./clients/pn-clients";
@@ -507,34 +506,6 @@ export const FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED =
     () => false,
     FF_UNIQUE_EMAIL_ENFORCEMENT
   );
-
-export const IO_WALLET_API_KEY = getRequiredENVVar("IO_WALLET_API_KEY");
-export const IO_WALLET_API_URL = getRequiredENVVar("IO_WALLET_API_URL");
-export const IO_WALLET_API_BASE_PATH = getRequiredENVVar(
-  "IO_WALLET_API_BASE_PATH"
-);
-export const IO_WALLET_TRIAL_ID = getRequiredENVVar("IO_WALLET_TRIAL_ID");
-export const IO_WALLET_API_CLIENT = IoWalletAPIClient(
-  IO_WALLET_API_KEY,
-  IO_WALLET_API_BASE_PATH,
-  IO_WALLET_API_URL,
-  httpOrHttpsApiFetch
-);
-export const FF_IO_WALLET_ENABLED = process.env.FF_IO_WALLET_ENABLED === "1";
-export const FF_IO_WALLET_TRIAL_ENABLED =
-  process.env.FF_IO_WALLET_TRIAL_ENABLED === "1";
-
-const IO_WALLET_UAT_API_KEY = getRequiredENVVar("IO_WALLET_UAT_API_KEY");
-export const IO_WALLET_UAT_API_BASE_PATH = getRequiredENVVar(
-  "IO_WALLET_UAT_API_BASE_PATH"
-);
-const IO_WALLET_UAT_API_URL = getRequiredENVVar("IO_WALLET_UAT_API_URL");
-export const IO_WALLET_UAT_API_CLIENT = IoWalletAPIClient(
-  IO_WALLET_UAT_API_KEY,
-  "",
-  IO_WALLET_UAT_API_URL,
-  httpOrHttpsApiFetch
-);
 
 export const FF_IO_X_USER_TOKEN = pipe(
   process.env.FF_IO_X_USER_TOKEN,
