@@ -10,7 +10,7 @@ on:
     branches:
       - master
     paths:
-      - 'api_identity.yaml'
+      - 'openapi/generated/api_identity.yaml'
       - '.github/workflows/pr_opex_api_identity.yml'
       - '.github/workflows/opex_api_identity.yml'
       - '.opex/api_identity/**'
