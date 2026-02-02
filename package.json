@@ -57,8 +57,6 @@
     "generate:test-certs": "sh ./scripts/generate-test-certs.sh certs",
     "generate:lollipop-definitions": "rimraf generated/lollipop && gen-api-models --api-spec openapi/lollipop_definitions.yaml --out-dir generated/lollipop",
     "generate:lollipop-first-sign": "rimraf generated/lollipop-first-consumer && gen-api-models --api-spec openapi/consumed/lollipop_first_consumer.yaml --out-dir generated/lollipop-first-consumer --request-types --response-decoders --client",
-    "generate:api:io-wallet": "rimraf generated/io-wallet-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-wallet/io-wallet-user-func@4.0.0/apps/io-wallet-user-func/openapi.yaml --no-strict --out-dir generated/io-wallet-api --request-types --response-decoders --client",
-    "generate:proxy:io-wallet-models": "rimraf generated/io-wallet && gen-api-models --api-spec api_io_wallet.yaml --out-dir generated/io-wallet",
     "generate:proxy:cdc-support-platform-func-models": "rimraf generated/cdc-support-platform && gen-api-models --api-spec openapi/generated/api_cdc_support_platform.yaml --out-dir generated/cdc-support-platform",
     "generate:api:cdc-support-func": "rimraf generated/io-cdc-support-func-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-cdc/ce96163722b89824686a28ce1489597001f2c1b5/apps/support-func/api/internal.yaml --no-strict --out-dir generated/io-cdc-support-func-api --request-types --response-decoders --client",
     "dist:modules": "modclean -r -n default:safe && yarn install --production",

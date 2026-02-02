@@ -32,7 +32,6 @@ import {
   FF_CGN_ENABLED,
   FF_IO_FIMS_ENABLED,
   FF_IO_SIGN_ENABLED,
-  FF_IO_WALLET_ENABLED,
   FF_IO_X_USER_TOKEN,
   FF_IO_X_USER_TOKEN_BETA_TESTER_SHA_LIST,
   FF_IO_X_USER_TOKEN_CANARY_SHA_USERS_REGEX,
@@ -42,8 +41,6 @@ import {
   FIRST_LOLLIPOP_CONSUMER_CLIENT,
   IO_FIMS_API_CLIENT,
   IO_SIGN_API_CLIENT,
-  IO_WALLET_API_CLIENT,
-  IO_WALLET_UAT_API_CLIENT,
   LOLLIPOP_API_CLIENT,
   NOTIFICATIONS_QUEUE_NAME,
   NOTIFICATIONS_STORAGE_CONNECTION_STRING,
@@ -81,7 +78,6 @@ import {
   registerIoSignAPIRoutes,
   registerIoSignAPIRoutesLegacy
 } from "./routes/ioSignRoutes";
-import { registerIoWalletAPIRoutes } from "./routes/ioWalletRoutes";
 import {
   registerLegacySENDRoutes,
   registerSendActivationRoutes
@@ -94,7 +90,6 @@ import CgnService from "./services/cgnService";
 import IoFimsService from "./services/fimsService";
 import FunctionsAppService from "./services/functionAppService";
 import IoSignService from "./services/ioSignService";
-import IoWalletService from "./services/ioWalletService";
 import NewMessagesService from "./services/newMessagesService";
 import NotificationService from "./services/notificationService";
 import { getNotificationServiceFactory } from "./services/notificationServiceFactory";
@@ -129,8 +124,6 @@ export interface IAppFactoryParameters {
   readonly CGNOperatorSearchAPIBasePath: string;
   readonly IoSignAPIBasePath: string;
   readonly IoFimsAPIBasePath: string;
-  readonly IoWalletAPIBasePath: string;
-  readonly IoWalletUatAPIBasePath: string;
   readonly ServicesAppBackendBasePath: string;
 }
 
@@ -142,8 +135,6 @@ export async function newApp({
   CGNAPIBasePath,
   IoSignAPIBasePath,
   IoFimsAPIBasePath,
-  IoWalletAPIBasePath,
-  IoWalletUatAPIBasePath,
   CGNOperatorSearchAPIBasePath,
   ServicesAppBackendBasePath
 }: IAppFactoryParameters): Promise<Express> {
@@ -301,14 +292,6 @@ export async function newApp({
         // Create the the io-services-app-backend service
         const SERVICES_APP_BACKEND_SERVICE = new ServicesAppBackendService(
           SERVICES_APP_BACKEND_CLIENT
-        );
-
-        // Create the io wallet
-        const IO_WALLET_SERVICE = new IoWalletService(IO_WALLET_API_CLIENT);
-
-        // Create the io wallet - uat routes
-        const IO_WALLET_UAT_SERVICE = new IoWalletService(
-          IO_WALLET_UAT_API_CLIENT
         );
 
         // Create the Notification Service
@@ -518,22 +501,6 @@ export async function newApp({
             app,
             authMiddlewares.xUserMiddleware,
             pnService
-          );
-        }
-
-        if (FF_IO_WALLET_ENABLED) {
-          registerIoWalletAPIRoutes(
-            app,
-            IoWalletAPIBasePath,
-            IO_WALLET_SERVICE,
-            authMiddlewares.bearerSession
-          );
-
-          registerIoWalletAPIRoutes(
-            app,
-            IoWalletUatAPIBasePath,
-            IO_WALLET_UAT_SERVICE,
-            authMiddlewares.bearerSession
           );
         }
 
