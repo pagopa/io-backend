@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 18.6.1
+
+### Patch Changes
+
+- 10a0f03: Removed wallet routes
+
 ## 18.6.0
 
 ### Minor Changes
