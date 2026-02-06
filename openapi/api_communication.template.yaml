@@ -790,6 +790,8 @@ components:
       $ref: "consumed/pagopa_ecommerce_v3.yaml#/components/schemas/PaymentDuplicatedStatusFaultPaymentProblemJson"
     GatewayFaultPaymentProblemJson:
       $ref: "consumed/pagopa_ecommerce_v3.yaml#/components/schemas/GatewayFaultPaymentProblemJson"
+    PaymentFaultV2:
+      $ref: "consumed/pagopa_ecommerce_v3.yaml#/components/schemas/PaymentFaultV2"
     InstallationID:
       type: string
       minLength: 1
