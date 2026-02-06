@@ -643,6 +643,8 @@ components:
       $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/ThirdPartyData"
     HasPrecondition:
       $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/HasPrecondition"
+    RemoteContentDetails:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/RemoteContentDetails"
     Ulid:
       $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/Ulid"
     LegalData:

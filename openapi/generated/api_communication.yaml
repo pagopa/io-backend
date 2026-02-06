@@ -980,6 +980,16 @@ components:
         - ALWAYS
         - ONCE
         - NEVER
+    RemoteContentDetails:
+      type: object
+      properties:
+        markdown:
+          $ref: '#/components/schemas/MessageBodyMarkdown'
+        subject:
+          $ref: '#/components/schemas/MessageSubject'
+      required:
+        - markdown
+        - subject
     Ulid:
       type: string
       description: Ulid string.
