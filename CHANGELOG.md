@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 18.7.0
+
+### Minor Changes
+
+- e1d4764: Update Services App Backend Client
+
 ## 18.6.1
 
 ### Patch Changes

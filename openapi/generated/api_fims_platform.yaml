@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  version: 18.6.1
+  version: 18.7.0
   title: IO FIMS - Backend API
 servers:
   - url: https://api-app.io.pagopa.it/api/fims/v1
