@@ -118,6 +118,7 @@ microservice-chart:
     NOTIFICATIONS_STORAGE_CONNECTION_STRING: 'appbackend-NORIFICATIONS-STORAGE'
     LOLLIPOP_API_KEY: 'appbackend-LOLLIPOP-API-KEY'
     THIRD_PARTY_CONFIG_LIST: 'appbackend-THIRD-PARTY-CONFIG-LIST'
+    SERVICES_APP_BACKEND_API_KEY: 'appbackend-SERVICES-APP-BACKEND-API-KEY'
   keyvault:
     name: 'io-p-kv-common'
     tenantId: '7788edaf-0346-4068-9d79-c868aed15b3d'

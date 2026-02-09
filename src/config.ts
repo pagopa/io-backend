@@ -202,6 +202,10 @@ export const CGN_OPERATOR_SEARCH_API_CLIENT = CgnOperatorSearchAPIClient(
   httpOrHttpsApiFetch
 );
 
+export const SERVICES_APP_BACKEND_API_KEY = getRequiredENVVar(
+  "SERVICES_APP_BACKEND_API_KEY"
+);
+
 export const SERVICES_APP_BACKEND_API_BASE_PATH = getRequiredENVVar(
   "SERVICES_APP_BACKEND_API_BASE_PATH"
 );
@@ -211,6 +215,7 @@ export const SERVICES_APP_BACKEND_API_URL = getRequiredENVVar(
 
 // TODO: creare servicesAppBackend client
 export const SERVICES_APP_BACKEND_CLIENT = ServicesAppBackendAPIClient(
+  SERVICES_APP_BACKEND_API_KEY,
   SERVICES_APP_BACKEND_API_URL,
   SERVICES_APP_BACKEND_API_BASE_PATH,
   httpOrHttpsApiFetch
