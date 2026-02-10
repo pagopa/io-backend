@@ -455,6 +455,8 @@ components:
       $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/IsEmailValidated"
     IsEmailAlreadyTaken:
       $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/IsEmailAlreadyTaken"
+    UpdateProfile412ErrorTypes:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v29.1.1/openapi/problemJson_definitions.yaml#/UpdateProfile412ErrorTypes"
     ReminderStatus:
       $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/ReminderStatus"
     PushNotificationsContentType:

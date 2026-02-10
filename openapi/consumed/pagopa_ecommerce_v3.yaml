@@ -678,6 +678,8 @@ components:
           type: string
           description: Payment notice description
       description: Payment notice informations
+    PaymentFaultV2:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-for-io.yaml#/definitions/PaymentFaultV2"
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
