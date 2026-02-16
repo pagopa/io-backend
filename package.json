@@ -12,7 +12,7 @@
   "description": "IO app and web backend",
   "main": "dist/src/server.js",
   "engines": {
-    "node": "20.17.0"
+    "node": "20.20.0"
   },
   "scripts": {
     "watch": "tsc -w",
@@ -59,7 +59,7 @@
     "generate:lollipop-first-sign": "rimraf generated/lollipop-first-consumer && gen-api-models --api-spec openapi/consumed/lollipop_first_consumer.yaml --out-dir generated/lollipop-first-consumer --request-types --response-decoders --client",
     "generate:proxy:cdc-support-platform-func-models": "rimraf generated/cdc-support-platform && gen-api-models --api-spec openapi/generated/api_cdc_support_platform.yaml --out-dir generated/cdc-support-platform",
     "generate:api:cdc-support-func": "rimraf generated/io-cdc-support-func-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-cdc/ce96163722b89824686a28ce1489597001f2c1b5/apps/support-func/api/internal.yaml --no-strict --out-dir generated/io-cdc-support-func-api --request-types --response-decoders --client",
-    "dist:modules": "modclean -r -n default:safe && yarn install --production",
+    "dist:modules": "modclean -r -n default:safe && pnpm install --production",
     "predeploy": "npm-run-all generate build dist:modules",
     "version": "changeset version && npm-run-all bump:*",
     "release": "changeset tag",
@@ -196,5 +196,5 @@
     "@types/node": "^20.17.0",
     "@types/express-serve-static-core": "4.17.34"
   },
-  "packageManager": "yarn@1.22.22"
+  "packageManager": "pnpm@10.28.1"
 }

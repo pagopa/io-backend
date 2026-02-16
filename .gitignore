@@ -7,11 +7,14 @@
 !.vscode/tasks.json
 .idea
 
-# Exclude Yarn managed depencencies.
+# Exclude package manager managed dependencies.
 /node_modules
 yarn-error.log
 npm-debug.log
 dist
+
+# Exclude pnpm store
+.pnpm-store
 
 # Exclude Jest coverage reports.
 /coverage

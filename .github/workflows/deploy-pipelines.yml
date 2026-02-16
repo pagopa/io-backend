@@ -35,15 +35,15 @@ jobs:
         uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
         with:
           node-version-file: ".node-version"
-          cache: "yarn"
-          cache-dependency-path: "yarn.lock"
+          cache: "pnpm"
+          cache-dependency-path: "pnpm-lock.yaml"
 
       - name: Install dependencies
-        run: yarn install --immutable
+        run: pnpm install --frozen-lockfile
         working-directory: .
 
       - name: Build
-        run: yarn predeploy
+        run: pnpm predeploy
         working-directory: .
 
       - name: Copy deploy files
@@ -75,6 +75,7 @@ jobs:
             !tsconfig.json
             !tslint.json
             !yarn.lock
+            !pnpm-lock.yaml
             !Dangerfile.js
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"

@@ -1,13 +1,15 @@
-FROM node:20.17.0 as builder
+FROM node:20.20.0 as builder
 
 WORKDIR /usr/src/app
 
+RUN corepack enable
+
 COPY / /usr/src/app/
 
-RUN yarn install \
-  && yarn predeploy
+RUN pnpm install --frozen-lockfile \
+  && pnpm predeploy
 
-FROM node:20.17.0-alpine
+FROM node:20.20.0-alpine
 LABEL maintainer="https://pagopa.gov.it"
 
 # Install major CA certificates to cover

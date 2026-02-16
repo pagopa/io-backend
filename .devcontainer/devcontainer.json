@@ -15,14 +15,14 @@
     "ghcr.io/devcontainers/features/node:1": {
       "version": "20",
       "installYarnUsingApt": false,
-      "pnpmVersion": "none",
+      "pnpmVersion": "10.28.1",
       "nvmInstallPath": "/opt/nvm"
     },
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
   },
   "postStartCommand": {
     "set-workspace-as-safe-dir": "git config --global --add safe.directory ${containerWorkspaceFolder}",
-    "install-yarn-and-deps": "COREPACK_ENABLE_DOWNLOAD_PROMPT=0 yarn install"
+    "install-pnpm-and-deps": "COREPACK_ENABLE_DOWNLOAD_PROMPT=0 pnpm install"
   },
   "customizations": {
     "vscode": {

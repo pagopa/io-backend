@@ -70,9 +70,9 @@ A Linux/macOS environment is required at the moment.
 
 1. clone the project in a folder called `io-backend`
 2. go to the project's folder
-3. install dependencies with `yarn install`
-4. generate proxy models with `yarn generate`
-5. build the project with `yarn build`
+3. install dependencies with `pnpm install`
+4. generate proxy models with `pnpm generate`
+5. build the project with `pnpm build`
 6. run `scripts/generate-test-certs.sh` to create certificates needed to start the HTTPS server in DEV mode
 7. edit your `/etc/hosts` file by adding:
 
@@ -211,7 +211,7 @@ To handle the mobile app compatibility with the latest implementation of PagoPA 
 ### Dependencies
 
 * [nodenv](https://github.com/nodenv/nodenv)
-* [YARN](https://yarnpkg.com/)
+* [PNPM](https://pnpm.io/)
 * [Docker](https://www.docker.com/community-edition) (optional)
 
 A Linux/macOS environment is required at the moment.

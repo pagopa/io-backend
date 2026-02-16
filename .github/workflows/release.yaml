@@ -1,4 +1,3 @@
-
 name: Release
 
 on:
@@ -24,20 +23,20 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@v3
         with:
-          node-version-file: '.node-version'
-          cache: 'yarn'
-          cache-dependency-path: "yarn.lock"
+          node-version-file: ".node-version"
+          cache: "pnpm"
+          cache-dependency-path: "pnpm-lock.yaml"
 
       - name: Install Dependencies
-        run: yarn
+        run: pnpm install --frozen-lockfile
 
       - name: Create Release Pull Request or Tag
         id: changesets
         uses: changesets/action@v1
         with:
-          version: yarn run version
-          publish: yarn run release
-          commit: 'ci(changesets): version packages'
+          version: pnpm run version
+          publish: pnpm run release
+          commit: "ci(changesets): version packages"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
