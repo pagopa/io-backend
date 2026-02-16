@@ -15,4 +15,4 @@ overrides:
   endpoints:
     /api/v1/profile:
       response_time_threshold: 8
-      availability_threshold: 0.70
+      availability_threshold: 0.71
