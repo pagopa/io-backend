@@ -15,21 +15,21 @@ overrides:
     - app-backend.io.italia.it
     - api-app.io.pagopa.it
   endpoints:
-    /api/v1/sign/metadata:
+    /api/sign/v1/metadata:
       availability_threshold: 0.90
       response_time_threshold: 3
-    /api/v1/sign/qtsp/clauses:
+    /api/sign/v1/qtsp/clauses:
       availability_threshold: 0.90
       response_time_threshold: 3
-    /api/v1/sign/qtsp/clauses/filled_document:
+    /api/sign/v1/qtsp/clauses/filled_document:
       availability_threshold: 0.90
       response_time_threshold: 3
-    /api/v1/sign/signatures:
+    /api/sign/v1/signatures:
       availability_threshold: 0.90
       response_time_threshold: 3
-    /api/v1/sign/signature-requests:
+    /api/sign/v1/signature-requests:
       availability_threshold: 0.90
       response_time_threshold: 3
-    /api/v1/sign/signature-requests/{id}:
+    /api/sign/v1/signature-requests/{id}:
       availability_threshold: 0.90
       response_time_threshold: 3
