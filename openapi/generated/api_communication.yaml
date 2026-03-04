@@ -1230,6 +1230,7 @@ components:
       enum:
         - apns
         - gcm
+        - fcmv1
     PushChannel:
       type: string
       description: >-
