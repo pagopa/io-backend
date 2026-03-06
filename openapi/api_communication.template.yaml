@@ -179,7 +179,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ProblemJson"
-  
+
   # Third Party Messages
   /third-party-messages/{id}/precondition:
     get:
@@ -348,7 +348,7 @@ paths:
           description: Not Implemented
         '504':
           description: Gateway Timeout
-  
+
   # SEND Activation
   /send/activation:
     get:
@@ -417,7 +417,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ProblemJson"
-  
+
   # Installation
   /installations/{installationID}:
     put:
@@ -457,7 +457,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ProblemJson"
-  
+
   # Payment Info
   /payment/info/{rptId}:
     get:
@@ -679,7 +679,7 @@ components:
       $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/PaymentAmount"
     PaymentNoticeNumber:
       $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/PaymentNoticeNumber"
-   
+
     # Local definitions
     MessageContentWithAttachments:
       allOf:
@@ -732,6 +732,7 @@ components:
       enum:
         - apns
         - gcm
+        - fcmv1
     PushChannel:
       type: string
       description: |-
@@ -741,10 +742,10 @@ components:
       type: object
       properties:
         message:
-          type: string 
+          type: string
     # Payment info definitions from PagoPA ecommerce
     PaymentInfoResponse:
-      $ref: "consumed/pagopa_ecommerce_v3.yaml#/components/schemas/PaymentRequestsGetResponse"  
+      $ref: "consumed/pagopa_ecommerce_v3.yaml#/components/schemas/PaymentRequestsGetResponse"
     # Payment error fault codes
     ValidationFaultPaymentUnknown:
       $ref: "consumed/pagopa_ecommerce_v3.yaml#/components/schemas/ValidationFaultPaymentUnknown"
@@ -763,7 +764,7 @@ components:
     GatewayFault:
       $ref: "consumed/pagopa_ecommerce_v3.yaml#/components/schemas/GatewayFault"
     PartyConfigurationFault:
-      $ref: "consumed/pagopa_ecommerce_v3.yaml#/components/schemas/PartyConfigurationFault"  
+      $ref: "consumed/pagopa_ecommerce_v3.yaml#/components/schemas/PartyConfigurationFault"
     # Payment response types
     PaymentInfoNotFoundResponse:
       $ref: "consumed/pagopa_ecommerce_v3.yaml#/components/schemas/PaymentInfoNotFoundResponse"
