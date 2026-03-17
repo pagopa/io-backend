@@ -8,6 +8,7 @@ import { EycaActivationDetail } from "@pagopa/io-functions-cgn-sdk/EycaActivatio
 import { EycaCard } from "@pagopa/io-functions-cgn-sdk/EycaCard";
 import { InstanceId } from "@pagopa/io-functions-cgn-sdk/InstanceId";
 import { Otp } from "@pagopa/io-functions-cgn-sdk/Otp";
+import { ProblemJson as CGNProblemJson } from "@pagopa/io-functions-cgn-sdk/ProblemJson";
 import {
   IResponseErrorConflict,
   IResponseErrorForbiddenNotAuthorized,
@@ -67,11 +68,7 @@ export default class CgnService {
           case 404:
             return ResponseErrorNotFound("Not Found", "CGN not found");
           case 500:
-            return ResponseErrorInternal(
-              // Cast is needed to avoid a type error due to the fact that the Cgn API client
-              // is not using the exact same type for status property of the ProblemJson
-              readableProblem(response.value as ProblemJson)
-            );
+            return ResponseErrorInternal(toReadableProblem(response.value));
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
@@ -111,11 +108,7 @@ export default class CgnService {
               "EYCA Card is missing while citizen is eligible to obtain it or a CGN is already activated"
             );
           case 500:
-            return ResponseErrorInternal(
-              // Cast is needed to avoid a type error due to the fact that the Cgn API client
-              // is not using the exact same type for status property of the ProblemJson
-              readableProblem(response.value as ProblemJson)
-            );
+            return ResponseErrorInternal(toReadableProblem(response.value));
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
@@ -163,11 +156,7 @@ export default class CgnService {
               "Cannot start a new CGN activation because the CGN is already active, revoked or expired"
             );
           case 500:
-            return ResponseErrorInternal(
-              // Cast is needed to avoid a type error due to the fact that the Cgn API client
-              // is not using the exact same type for status property of the ProblemJson
-              readableProblem(response.value as ProblemJson)
-            );
+            return ResponseErrorInternal(toReadableProblem(response.value));
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
@@ -202,11 +191,7 @@ export default class CgnService {
               "No User CGN activation found"
             );
           case 500:
-            return ResponseErrorInternal(
-              // Cast is needed to avoid a type error due to the fact that the Cgn API client
-              // is not using the exact same type for status property of the ProblemJson
-              readableProblem(response.value as ProblemJson)
-            );
+            return ResponseErrorInternal(toReadableProblem(response.value));
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
@@ -254,11 +239,7 @@ export default class CgnService {
               "Cannot start a new EYCA activation because EYCA card is already active, revoked or expired"
             );
           case 500:
-            return ResponseErrorInternal(
-              // Cast is needed to avoid a type error due to the fact that the Cgn API client
-              // is not using the exact same type for status property of the ProblemJson
-              readableProblem(response.value as ProblemJson)
-            );
+            return ResponseErrorInternal(toReadableProblem(response.value));
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
@@ -293,11 +274,7 @@ export default class CgnService {
               "No EYCA Card activation found"
             );
           case 500:
-            return ResponseErrorInternal(
-              // Cast is needed to avoid a type error due to the fact that the Cgn API client
-              // is not using the exact same type for status property of the ProblemJson
-              readableProblem(response.value as ProblemJson)
-            );
+            return ResponseErrorInternal(toReadableProblem(response.value));
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
@@ -345,11 +322,7 @@ export default class CgnService {
               "Cannot start a new CGN unsubscription"
             );
           case 500:
-            return ResponseErrorInternal(
-              // Cast is needed to avoid a type error due to the fact that the Cgn API client
-              // is not using the exact same type for status property of the ProblemJson
-              readableProblem(response.value as ProblemJson)
-            );
+            return ResponseErrorInternal(toReadableProblem(response.value));
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
@@ -381,14 +354,16 @@ export default class CgnService {
           case 403:
             return ResponseErrorForbiddenNotAuthorized;
           case 500:
-            return ResponseErrorInternal(
-              // Cast is needed to avoid a type error due to the fact that the Cgn API client
-              // is not using the exact same type for status property of the ProblemJson
-              readableProblem(response.value as ProblemJson)
-            );
+            return ResponseErrorInternal(toReadableProblem(response.value));
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
       });
     });
+}
+
+function toReadableProblem(responseValue: CGNProblemJson): string {
+  // Cast is needed to avoid a type error due to the fact that the Cgn API client
+  // is not using the exact same type for status property of the ProblemJson
+  return readableProblem(responseValue as ProblemJson);
 }
