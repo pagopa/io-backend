@@ -83,6 +83,7 @@ export function sessionIdPreprocessor(
         envelope.tags[ai.defaultClient.context.keys.sessionId] =
           sessionTrackingId;
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       // ignore errors caused by missing properties
     }

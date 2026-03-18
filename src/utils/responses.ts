@@ -34,8 +34,7 @@ import { errorsToError } from "./errorsFormatter";
  * Interface for a no content response returning a empty object.
  */
 export interface IResponseNoContent extends IResponse<"IResponseNoContent"> {
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  readonly value: {};
+  readonly value: object;
 }
 /**
  * Returns a no content json response.

@@ -11,7 +11,6 @@ import * as t from "io-ts";
  * @param value value
  * @returns the input object with value set in the field pointed by path
  */
-// eslint-disable-next-line @typescript-eslint/ban-types
 export const set = <T extends object>(
   obj: T,
   path: string | ReadonlyArray<string>,

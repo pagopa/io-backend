@@ -113,7 +113,7 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.1",
-    "@pagopa/eslint-config": "^4.0.0",
+    "@pagopa/eslint-config": "^4.0.6",
     "@pagopa/openapi-codegen-ts": "^14.0.0",
     "@types/dotenv": "^4.0.2",
     "@types/express": "4.17.11",
