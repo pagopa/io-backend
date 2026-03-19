@@ -23,5 +23,5 @@ export function multipleErrorsFormatter(
 export const errorsToError = (errors: Errors): Error =>
   new Error(errorsToReadableMessages(errors).join(" / "));
 
-export const readableProblem = (problem: ProblemJson) =>
+export const readableProblem = (problem: Pick<ProblemJson, "title" | "type">) =>
   `${problem.title} (${problem.type || "no problem type specified"})`;
