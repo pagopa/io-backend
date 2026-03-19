@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 19.0.0
+
+### Major Changes
+
+- bc73447: Bump Node version to 22.22.0, Typescript to ^5.9
+
 ## 18.8.0
 
 ### Minor Changes
