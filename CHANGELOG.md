@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 18.8.0
+
+### Minor Changes
+
+- f51c3c0: Update functions-commons ref in openapi v3
+
 ## 18.7.0
 
 ### Minor Changes
