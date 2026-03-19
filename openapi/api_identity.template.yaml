@@ -432,59 +432,59 @@ components:
       example: DOWNLOAD
   schemas:
     AcceptedTosVersion:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/AcceptedTosVersion"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/c258312149f075dd17c72905bb97cda2a730fd42/openapi/definitions_v3.yaml#/AcceptedTosVersion"
     AppVersion:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/AppVersion"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/c258312149f075dd17c72905bb97cda2a730fd42/openapi/definitions_v3.yaml#/AppVersion"
     BlockedInboxOrChannels:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/BlockedInboxOrChannels"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/c258312149f075dd17c72905bb97cda2a730fd42/openapi/definitions_v3.yaml#/BlockedInboxOrChannels"
     EmailAddress:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/EmailAddress"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/c258312149f075dd17c72905bb97cda2a730fd42/openapi/definitions_v3.yaml#/EmailAddress"
     PreferredLanguage:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/PreferredLanguage"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/c258312149f075dd17c72905bb97cda2a730fd42/openapi/definitions_v3.yaml#/PreferredLanguage"
     PreferredLanguages:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/PreferredLanguages"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/c258312149f075dd17c72905bb97cda2a730fd42/openapi/definitions_v3.yaml#/PreferredLanguages"
     Profile:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/Profile"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/c258312149f075dd17c72905bb97cda2a730fd42/openapi/definitions_v3.yaml#/Profile"
     FiscalCode:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/FiscalCode"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/c258312149f075dd17c72905bb97cda2a730fd42/openapi/definitions_v3.yaml#/FiscalCode"
     IsEmailEnabled:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/IsEmailEnabled"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/c258312149f075dd17c72905bb97cda2a730fd42/openapi/definitions_v3.yaml#/IsEmailEnabled"
     IsInboxEnabled:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/IsInboxEnabled"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/c258312149f075dd17c72905bb97cda2a730fd42/openapi/definitions_v3.yaml#/IsInboxEnabled"
     IsEmailValidated:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/IsEmailValidated"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/c258312149f075dd17c72905bb97cda2a730fd42/openapi/definitions_v3.yaml#/IsEmailValidated"
     IsEmailAlreadyTaken:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/IsEmailAlreadyTaken"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/c258312149f075dd17c72905bb97cda2a730fd42/openapi/definitions_v3.yaml#/IsEmailAlreadyTaken"
     UpdateProfile412ErrorTypes:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v29.1.1/openapi/problemJson_definitions.yaml#/UpdateProfile412ErrorTypes"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/c258312149f075dd17c72905bb97cda2a730fd42/openapi/problemJson_definitions.yaml#/UpdateProfile412ErrorTypes"
     ReminderStatus:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/ReminderStatus"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/c258312149f075dd17c72905bb97cda2a730fd42/openapi/definitions_v3.yaml#/ReminderStatus"
     PushNotificationsContentType:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/PushNotificationsContentType"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/c258312149f075dd17c72905bb97cda2a730fd42/openapi/definitions_v3.yaml#/PushNotificationsContentType"
     IsWebhookEnabled:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/IsWebhookEnabled"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/c258312149f075dd17c72905bb97cda2a730fd42/openapi/definitions_v3.yaml#/IsWebhookEnabled"
     ProblemJson:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/ProblemJson"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/c258312149f075dd17c72905bb97cda2a730fd42/openapi/definitions_v3.yaml#/ProblemJson"
     Timestamp:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/Timestamp"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/c258312149f075dd17c72905bb97cda2a730fd42/openapi/definitions_v3.yaml#/Timestamp"
     UserDataProcessingStatus:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/UserDataProcessingStatus"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/c258312149f075dd17c72905bb97cda2a730fd42/openapi/definitions_v3.yaml#/UserDataProcessingStatus"
     UserDataProcessingChoice:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/UserDataProcessingChoice"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/c258312149f075dd17c72905bb97cda2a730fd42/openapi/definitions_v3.yaml#/UserDataProcessingChoice"
     UserDataProcessingChoiceRequest:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/UserDataProcessingChoiceRequest"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/c258312149f075dd17c72905bb97cda2a730fd42/openapi/definitions_v3.yaml#/UserDataProcessingChoiceRequest"
     UserDataProcessing:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/UserDataProcessing"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/c258312149f075dd17c72905bb97cda2a730fd42/openapi/definitions_v3.yaml#/UserDataProcessing"
     ServicePreferencesSettings:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/ServicePreferencesSettings"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/c258312149f075dd17c72905bb97cda2a730fd42/openapi/definitions_v3.yaml#/ServicePreferencesSettings"
     ServicesPreferencesMode:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/ServicesPreferencesMode"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/c258312149f075dd17c72905bb97cda2a730fd42/openapi/definitions_v3.yaml#/ServicesPreferencesMode"
     BasicServicePreference:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/BasicServicePreference"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/c258312149f075dd17c72905bb97cda2a730fd42/openapi/definitions_v3.yaml#/BasicServicePreference"
     ServicePreference:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/ServicePreference"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/c258312149f075dd17c72905bb97cda2a730fd42/openapi/definitions_v3.yaml#/ServicePreference"
     UpsertServicePreference:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/openapi-v3-definitions/openapi/definitions_v3.yaml#/UpsertServicePreference"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/c258312149f075dd17c72905bb97cda2a730fd42/openapi/definitions_v3.yaml#/UpsertServicePreference"
     InitializedProfile:
       type: object
       title: Initialized profile
