@@ -108,6 +108,7 @@ import { expressErrorMiddleware } from "./utils/middleware/express";
 import { getAuthenticatedXUserMiddleware } from "./utils/middleware/session";
 import { RedisClientMode, RedisClientSelector } from "./utils/redis";
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 import expressEnforcesSsl = require("express-enforces-ssl");
 
 const defaultModule = {

@@ -465,7 +465,7 @@ export const PN_CONFIGURATION_ID = pipe(
 export const FF_ROUTING_PUSH_NOTIF = pipe(
   process.env.FF_ROUTING_PUSH_NOTIF,
   FeatureFlag.decode,
-  E.getOrElse(() => FeatureFlagEnum.NONE)
+  E.getOrElseW(() => FeatureFlagEnum.NONE)
 );
 
 export const FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST = pipe(
@@ -515,7 +515,7 @@ export const FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED =
 export const FF_IO_X_USER_TOKEN = pipe(
   process.env.FF_IO_X_USER_TOKEN,
   FeatureFlag.decode,
-  E.getOrElse(() => FeatureFlagEnum.NONE)
+  E.getOrElseW(() => FeatureFlagEnum.NONE)
 );
 export const FF_IO_X_USER_TOKEN_BETA_TESTER_SHA_LIST = pipe(
   process.env.FF_IO_X_USER_TOKEN_BETA_TESTER_SHA_LIST,
