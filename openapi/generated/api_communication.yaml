@@ -209,11 +209,11 @@ paths:
                   Aprire il messaggio su IO equivale infatti a firmare la
                   ricevuta di ritorno di una raccomandata tradizionale.
 
-                  **Mittente**: Comune di Xxxxxxx  
+                  **Mittente**: Comune di Xxxxxxx
 
-                  **Oggetto**: Infrazione al codice della strada  
+                  **Oggetto**: Infrazione al codice della strada
 
-                  **Data e ora**: 12 Luglio 2022 - 12.36  
+                  **Data e ora**: 12 Luglio 2022 - 12.36
 
                   **Codice IUN**: YYYYMM-1-ABCD-EFGH-X
         '204':
@@ -323,13 +323,13 @@ paths:
                 $ref: '#/components/schemas/ProblemJson'
         '504':
           description: Gateway Timeout
-  /third-party-messages/{id}/attachments/{attachment_url}:
+  /third-party-messages/{id}/attachments/{*attachment_url}:
     get:
       operationId: getThirdPartyMessageAttachment
       summary: Retrieve an attachment of a third party message
       parameters:
         - $ref: '#/components/parameters/MessageId'
-        - name: attachment_url
+        - name: "*attachment_url"
           in: path
           required: true
           schema:
