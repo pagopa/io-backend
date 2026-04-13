@@ -68,7 +68,7 @@ microservice-chart:
     FF_IO_X_USER_TOKEN: 'ALL'
     FF_IO_X_USER_TOKEN_CANARY_SHA_USERS_REGEX: '^([(0-9)|(a-f)|(A-F)]{63}[(0-4)]{1})$'
     IO_SIGN_API_BASE_PATH: '/api/v1/sign'
-    IO_SIGN_API_URL: 'https://io-p-sign-user-func.azurewebsites.net'
+    IO_SIGN_API_URL: 'https://io-p-itn-sign-user-func-01.azurewebsites.net'
     IO_SIGN_SERVICE_ID: '01GQQZ9HF5GAPRVKJM1VDAVFHM'
     JWT_SUPPORT_TOKEN_EXPIRATION: '1209600'
     JWT_SUPPORT_TOKEN_ISSUER: 'app-backend.io.italia.it'
