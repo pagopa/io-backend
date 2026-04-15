@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 20.0.0
+
+### Major Changes
+
+- 3c2a31c: Removed TEST_CGN_FISCAL_CODES
+
 ## 19.0.0
 
 ### Major Changes
