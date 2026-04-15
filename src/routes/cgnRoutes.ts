@@ -2,7 +2,6 @@ import { Express } from "express";
 import * as express from "express";
 import * as passport from "passport";
 
-import { TEST_CGN_FISCAL_CODES } from "../config";
 import CgnController from "../controllers/cgnController";
 import CgnOperatorSearchController from "../controllers/cgnOperatorSearchController";
 import CgnOperatorSearchService from "../services/cgnOperatorSearchService";
@@ -38,10 +37,7 @@ export const registerLegacyCgnAPIRoutes = (
   cgnService: CgnService,
   bearerSessionTokenAuth: ReturnType<passport.Authenticator["authenticate"]>
 ): void => {
-  const cgnController: CgnController = new CgnController(
-    cgnService,
-    TEST_CGN_FISCAL_CODES
-  );
+  const cgnController: CgnController = new CgnController(cgnService);
 
   app.get(
     `${basePath}/status`,
@@ -105,10 +101,7 @@ export const registerCgnCardAPIRoutes = (
   authMiddleware: express.RequestHandler
 ): void => {
   const basePath = CGN_PLATFORM_API_BASE_PATH;
-  const cgnController: CgnController = new CgnController(
-    cgnService,
-    TEST_CGN_FISCAL_CODES
-  );
+  const cgnController: CgnController = new CgnController(cgnService);
 
   app.get(
     `${basePath}/status`,

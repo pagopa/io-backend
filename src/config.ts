@@ -396,16 +396,6 @@ export const FF_CDC_ENABLED = process.env.FF_CDC_ENABLED === "1";
 export const FF_IO_SIGN_ENABLED = process.env.FF_IO_SIGN_ENABLED === "1";
 export const FF_IO_FIMS_ENABLED = process.env.FF_IO_FIMS_ENABLED === "1";
 
-export const TEST_CGN_FISCAL_CODES = pipe(
-  process.env.TEST_CGN_FISCAL_CODES || "",
-  CommaSeparatedListOf(FiscalCode).decode,
-  E.getOrElseW((err) => {
-    throw new Error(
-      `Invalid TEST_CGN_FISCAL_CODES value: ${readableReport(err)}`
-    );
-  })
-);
-
 // PEC SERVER config
 export const PecServerConfig = t.interface({
   basePath: t.string,
