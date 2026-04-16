@@ -8,32 +8,36 @@ on:
       - reopened
       - synchronize
 
+permissions:
+  pull-requests: write
+
+
 jobs:
   lint:
     name: Validate PR title And link Jira Issue
     runs-on: ubuntu-22.04
     env:
       JIRA_COMMENT_REGEX: "^.*Jira.*"
+      PR_TITLE: ${{ github.event.pull_request.title }}
     steps:
-      - uses: Slashgear/action-check-pr-title@860e8dc639f8e60335a6f5e8936ba67ed2536890
+      - uses: Slashgear/action-check-pr-title@860e8dc639f8e60335a6f5e8936ba67ed2536890 #v4.3.0
         id: lint
         with:
           regexp: "\\[(#?[A-Z]*-[0-9]*( |, )?){1,}\\]" # Regex the title should match.
         continue-on-error: true
 
       - name: Find Jira Comment
-        uses: peter-evans/find-comment@81e2da3af01c92f83cb927cf3ace0e085617c556
+        uses: peter-evans/find-comment@81e2da3af01c92f83cb927cf3ace0e085617c556 #v2
         id: fc
         with:
           issue-number: ${{ github.event.pull_request.number }}
           comment-author: 'github-actions[bot]'
-          body-regex: "${{ env.JIRA_COMMENT_REGEX }}"
+          body-regex: '${{ env.JIRA_COMMENT_REGEX }}'
 
       - name: Extract Jira Issue to Link
         id: extract_jira_issue
         if: steps.lint.outcome == 'success'
         run: |
-          PR_TITLE=$(echo "${{ github.event.pull_request.title }}")
           ISSUES_STR=$(awk -F'\\[|\\]' '{print $2}' <<< "$PR_TITLE" | sed "s/#//g" | sed "s/,//g")
           ISSUES=($ISSUES_STR)
           JIRA_ISSUE=$(echo ${ISSUES_STR##* })
@@ -56,7 +60,7 @@ jobs:
       
       - name: Create Jira Link comment
         if: steps.lint.outcome == 'success'
-        uses: peter-evans/create-or-update-comment@5adcb0bb0f9fb3f95ef05400558bdb3f329ee808
+        uses: peter-evans/create-or-update-comment@67dcc547d311b736a8e6c5c236542148a47adc3d #v2
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
@@ -66,7 +70,7 @@ jobs:
           edit-mode: replace
       - name: Create Empty Jira Link comment
         if: steps.lint.outcome != 'success'
-        uses: peter-evans/create-or-update-comment@5adcb0bb0f9fb3f95ef05400558bdb3f329ee808
+        uses: peter-evans/create-or-update-comment@67dcc547d311b736a8e6c5c236542148a47adc3d #v2
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
@@ -78,5 +82,5 @@ jobs:
       - name: Failure message
         if: steps.lint.outcome != 'success'
         run: |
-          echo "Pull request title (${{ github.event.pull_request.title }}) is not properly formatted or it is not related to any Jira issue"
+          echo "Pull request title ($PR_TITLE) is not properly formatted or it is not related to any Jira issue"
           exit 1
