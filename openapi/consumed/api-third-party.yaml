@@ -218,10 +218,10 @@ paths:
                 $ref: '#/components/schemas/ProblemJson'
         503:
           description: Service Unavailable, check the Retry-After header to retry
-          headers: 
+          headers:
             Retry-After:
-              description: The value in seconds after which you can retry 
-              schema: 
+              description: The value in seconds after which you can retry
+              schema:
                 type: string
                 example: 120
           content:
@@ -375,7 +375,7 @@ components:
         category:
           type: string
           minLength: 2
-          maxLenght: 30
+          maxLength: 30
           pattern: '[A-Z0-9_]+'
           default: DOCUMENT
     ProblemJson:
