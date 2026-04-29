@@ -1,5 +1,6 @@
 import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as t from "io-ts";
+import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { DocumentToSign } from "../../../generated/io-sign-api/DocumentToSign";
 import { Id } from "../../../generated/io-sign-api/Id";
 import { QtspClauses } from "../../../generated/io-sign-api/QtspClauses";
@@ -42,6 +43,7 @@ const mockFakeSuccess = jest.fn();
 const fakeDocumentUrl = "https://fakedomain.com/mock.pdf" as NonEmptyString;
 const fakeEmail = "mock@fakedomain.com" as EmailString;
 const fakeSignerId = "0000000000000" as NonEmptyString;
+const fakeSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL3"];
 const fakeIssuerEmail = "issuer@fakedomain.com" as EmailString;
 const fakeIssuerDescription = "Fake description" as NonEmptyString;
 
@@ -661,7 +663,7 @@ describe("IoSignService#getSignatureRequest", () => {
     );
 
     expect(mockGetSignatureRequest).toHaveBeenCalledWith({
-      id: fakeSignatureRequest.id,
+      signatureRequestId: fakeSignatureRequest.id,
       "x-iosign-signer-id": fakeSignatureRequest.signer_id,
     });
   });
@@ -815,7 +817,8 @@ describe("IoSignService#createSignature", () => {
     await service.createSignature(
       lollipopRequestHeaders,
       createSignatureBody,
-      fakeSignatureRequest.signer_id
+      fakeSignatureRequest.signer_id,
+      fakeSpidLevel
     );
 
     expect(mockCreateSignature).toHaveBeenCalledWith({
@@ -826,6 +829,7 @@ describe("IoSignService#createSignature", () => {
         qtsp_clauses: fakeQtspAcceptedClauses,
       },
       "x-iosign-signer-id": fakeSignerId,
+      "x-iosign-spid-level": fakeSpidLevel,
       ...lollipopRequestHeaders,
     });
   });
@@ -836,7 +840,8 @@ describe("IoSignService#createSignature", () => {
     const res = await service.createSignature(
       lollipopRequestHeaders,
       createSignatureBody,
-      fakeSignatureRequest.signer_id
+      fakeSignatureRequest.signer_id,
+      fakeSpidLevel
     );
 
     expect(res).toMatchObject({
@@ -854,7 +859,8 @@ describe("IoSignService#createSignature", () => {
     const res = await service.createSignature(
       lollipopRequestHeaders,
       createSignatureBody,
-      fakeSignatureRequest.signer_id
+      fakeSignatureRequest.signer_id,
+      fakeSpidLevel
     );
 
     expect(res).toMatchObject({
@@ -872,7 +878,8 @@ describe("IoSignService#createSignature", () => {
     const res = await service.createSignature(
       lollipopRequestHeaders,
       createSignatureBody,
-      fakeSignatureRequest.signer_id
+      fakeSignatureRequest.signer_id,
+      fakeSpidLevel
     );
 
     expect(res).toMatchObject({
@@ -890,7 +897,8 @@ describe("IoSignService#createSignature", () => {
     const res = await service.createSignature(
       lollipopRequestHeaders,
       createSignatureBody,
-      fakeSignatureRequest.signer_id
+      fakeSignatureRequest.signer_id,
+      fakeSpidLevel
     );
 
     expect(res).toMatchObject({
@@ -910,7 +918,8 @@ describe("IoSignService#createSignature", () => {
     const res = await service.createSignature(
       lollipopRequestHeaders,
       createSignatureBody,
-      fakeSignatureRequest.signer_id
+      fakeSignatureRequest.signer_id,
+      fakeSpidLevel
     );
 
     expect(res).toMatchObject({
@@ -927,7 +936,8 @@ describe("IoSignService#createSignature", () => {
     const res = await service.createSignature(
       lollipopRequestHeaders,
       createSignatureBody,
-      fakeSignatureRequest.signer_id
+      fakeSignatureRequest.signer_id,
+      fakeSpidLevel
     );
 
     expect(res).toMatchObject({
@@ -945,7 +955,8 @@ describe("IoSignService#createSignature", () => {
     const res = await service.createSignature(
       lollipopRequestHeaders,
       createSignatureBody,
-      fakeSignatureRequest.signer_id
+      fakeSignatureRequest.signer_id,
+      fakeSpidLevel
     );
 
     expect(res).toMatchObject({

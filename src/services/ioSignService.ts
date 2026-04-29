@@ -26,6 +26,7 @@ import * as O from "fp-ts/lib/Option";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
+import { SpidLevel } from "../../generated/backend/SpidLevel";
 import { FilledDocumentDetailView } from "../../generated/io-sign/FilledDocumentDetailView";
 import { Id } from "../../generated/io-sign/Id";
 import { IssuerEnvironment } from "../../generated/io-sign/IssuerEnvironment";
@@ -35,7 +36,6 @@ import { SignatureRequestDetailView } from "../../generated/io-sign/SignatureReq
 import { CreateSignatureBody as CreateSignatureBodyApiModel } from "../../generated/io-sign-api/CreateSignatureBody";
 import { SignatureRequestList } from "../../generated/io-sign-api/SignatureRequestList";
 import { SignerDetailView } from "../../generated/io-sign-api/SignerDetailView";
-import { SpidLevel } from "../../generated/backend/SpidLevel";
 import { IoSignAPIClient } from "../clients/io-sign";
 import { IoSignLollipopLocalsType } from "../controllers/ioSignController";
 import { readableProblem } from "../utils/errorsFormatter";
