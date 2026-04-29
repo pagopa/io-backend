@@ -225,7 +225,8 @@ export default class IoSignController {
               this.ioSignService.createSignature(
                 ioSignLollipopLocals,
                 body,
-                signerId
+                signerId,
+                user.spid_level
               )
             )
           )

@@ -35,6 +35,7 @@ import { SignatureRequestDetailView } from "../../generated/io-sign/SignatureReq
 import { CreateSignatureBody as CreateSignatureBodyApiModel } from "../../generated/io-sign-api/CreateSignatureBody";
 import { SignatureRequestList } from "../../generated/io-sign-api/SignatureRequestList";
 import { SignerDetailView } from "../../generated/io-sign-api/SignerDetailView";
+import { SpidLevel } from "../../generated/backend/SpidLevel";
 import { IoSignAPIClient } from "../clients/io-sign";
 import { IoSignLollipopLocalsType } from "../controllers/ioSignController";
 import { readableProblem } from "../utils/errorsFormatter";
@@ -201,7 +202,8 @@ export default class IoSignService {
   public readonly createSignature = (
     ioSignLollipopLocals: IoSignLollipopLocalsType,
     body: CreateSignatureBodyApiModel,
-    signerId: Id
+    signerId: Id,
+    spidLevel: SpidLevel
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
@@ -212,7 +214,8 @@ export default class IoSignService {
       const validated = await this.ioSignApiClient.createSignature({
         ...ioSignLollipopLocals,
         body,
-        "x-iosign-signer-id": signerId
+        "x-iosign-signer-id": signerId,
+        "x-iosign-spid-level": spidLevel
       });
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
