@@ -261,7 +261,7 @@ export default class IoSignService {
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.ioSignApiClient.getSignatureRequestById({
-        id: signatureRequestId,
+        signatureRequestId: signatureRequestId,
         "x-iosign-signer-id": signerId
       });
       return withValidatedOrInternalError(validated, (response) => {
