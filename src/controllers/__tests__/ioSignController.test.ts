@@ -538,7 +538,8 @@ describe("IoSignController#createSignature", () => {
         ...body,
         email: mockedInitializedProfile.email
       },
-      signerDetailMock.id
+      signerDetailMock.id,
+      mockedUser.spid_level
     );
   });
 

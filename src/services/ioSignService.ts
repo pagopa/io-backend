@@ -26,6 +26,7 @@ import * as O from "fp-ts/lib/Option";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
+import { SpidLevel } from "../../generated/backend/SpidLevel";
 import { FilledDocumentDetailView } from "../../generated/io-sign/FilledDocumentDetailView";
 import { Id } from "../../generated/io-sign/Id";
 import { IssuerEnvironment } from "../../generated/io-sign/IssuerEnvironment";
@@ -201,7 +202,8 @@ export default class IoSignService {
   public readonly createSignature = (
     ioSignLollipopLocals: IoSignLollipopLocalsType,
     body: CreateSignatureBodyApiModel,
-    signerId: Id
+    signerId: Id,
+    spidLevel: SpidLevel
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
@@ -212,7 +214,8 @@ export default class IoSignService {
       const validated = await this.ioSignApiClient.createSignature({
         ...ioSignLollipopLocals,
         body,
-        "x-iosign-signer-id": signerId
+        "x-iosign-signer-id": signerId,
+        "x-iosign-spid-level": spidLevel
       });
       return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
@@ -258,7 +261,7 @@ export default class IoSignService {
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.ioSignApiClient.getSignatureRequestById({
-        id: signatureRequestId,
+        signatureRequestId: signatureRequestId,
         "x-iosign-signer-id": signerId
       });
       return withValidatedOrInternalError(validated, (response) => {
