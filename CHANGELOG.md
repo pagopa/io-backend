@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 20.1.0
+
+### Minor Changes
+
+- 8ac8b3d: Pass SPID level to io-sign createSignature endpoint
+
 ## 20.0.0
 
 ### Major Changes
