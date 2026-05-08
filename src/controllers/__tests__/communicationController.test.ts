@@ -356,84 +356,71 @@ describe("CommunicationController#getThirdPartyAttachment", () => {
 
   const buffer = Buffer.from(base64File);
 
-  it("should call the getThirdPartyAttachment on the CommunicationController with valid values with no query params", async () => {
-    const req = mockReq();
+  it.each([
+    [
+      "with valid values with no query params",
+      anAttachmentUrl,
+      undefined as Record<string, unknown> | undefined,
+      anAttachmentUrl
+    ],
+    [
+      "with valid values and transfer query params",
+      anAttachmentUrl,
+      { attachmentIdx: anAttachmentIdx } as Record<string, unknown>,
+      `${anAttachmentUrl}?attachmentIdx=${anAttachmentIdx}`
+    ],
+    [
+      "with a base64url-encoded attachment_url with embedded query string",
+      Buffer.from(`/an/attachment/url/?attachmentIdx=1`).toString("base64url"),
+      undefined as Record<string, unknown> | undefined,
+      `/an/attachment/url/?attachmentIdx=1`
+    ],
+    [
+      "with a base64url-encoded attachment_url without query string",
+      Buffer.from(`/an/attachment/url/`).toString("base64url"),
+      undefined as Record<string, unknown> | undefined,
+      `/an/attachment/url/`
+    ]
+  ])(
+    "should call the getThirdPartyAttachment on the CommunicationController %s",
+    async (_, attachmentUrl, query, expectedUrl) => {
+      const req = mockReq();
 
-    mockGetThirdPartyMessageFnApp.mockReturnValue(
-      TE.of(proxyThirdPartyMessageResponse)
-    );
+      mockGetThirdPartyMessageFnApp.mockReturnValue(
+        TE.of(proxyThirdPartyMessageResponse)
+      );
 
-    mockGetThirdPartyAttachment.mockReturnValue(
-      Promise.resolve(ResponseSuccessOctet(buffer))
-    );
+      mockGetThirdPartyAttachment.mockReturnValue(
+        Promise.resolve(ResponseSuccessOctet(buffer))
+      );
 
-    req.user = mockedUser;
-    req.params = {
-      id: aValidMessageId,
-      attachment_url: anAttachmentUrl
-    };
+      req.user = mockedUser;
+      req.params = { id: aValidMessageId, attachment_url: attachmentUrl };
+      if (query !== undefined) {
+        req.query = query;
+      }
 
-    const controller = new CommunicationController(
-      newMessageService,
-      mockLollipopApiClient
-    );
+      const controller = new CommunicationController(
+        newMessageService,
+        mockLollipopApiClient
+      );
 
-    const response = await controller.getRemoteContentAttachment(req);
+      const response = await controller.getRemoteContentAttachment(req);
 
-    expect(mockGetThirdPartyAttachment).toHaveBeenCalledWith(
-      proxyThirdPartyMessageResponse,
-      req.params.attachment_url,
-      aRemoteContentConfigurationWithBothEnv,
-      undefined // we expect lollipopLocals to be undefined because lollipop is disabled here
-    );
+      expect(mockGetThirdPartyAttachment).toHaveBeenCalledWith(
+        proxyThirdPartyMessageResponse,
+        expectedUrl,
+        aRemoteContentConfigurationWithBothEnv,
+        undefined // we expect lollipopLocals to be undefined because lollipop is disabled here
+      );
 
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessOctet",
-      value: buffer
-    });
-  });
-
-  it("should call the getThirdPartyAttachment on the CommunicationController with valid values and transfer query params", async () => {
-    const req = mockReq();
-
-    mockGetThirdPartyMessageFnApp.mockReturnValue(
-      TE.of(proxyThirdPartyMessageResponse)
-    );
-
-    mockGetThirdPartyAttachment.mockReturnValue(
-      Promise.resolve(ResponseSuccessOctet(buffer))
-    );
-
-    req.user = mockedUser;
-    req.params = {
-      id: aValidMessageId,
-      attachment_url: anAttachmentUrl
-    };
-    req.query = {
-      attachmentIdx: anAttachmentIdx
-    };
-
-    const controller = new CommunicationController(
-      newMessageService,
-      mockLollipopApiClient
-    );
-
-    const response = await controller.getRemoteContentAttachment(req);
-
-    expect(mockGetThirdPartyAttachment).toHaveBeenCalledWith(
-      proxyThirdPartyMessageResponse,
-      `${req.params.attachment_url}?attachmentIdx=${anAttachmentIdx}`,
-      aRemoteContentConfigurationWithBothEnv,
-      undefined // we expect lollipopLocals to be undefined because lollipop is disabled here
-    );
-
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessOctet",
-      value: buffer
-    });
-  });
+      expect(response).toEqual({
+        apply: expect.any(Function),
+        kind: "IResponseSuccessOctet",
+        value: buffer
+      });
+    }
+  );
 
   it("should not call the getThirdPartyAttachment on the CommunicationController with empty user", async () => {
     const req = mockReq();
@@ -459,88 +446,6 @@ describe("CommunicationController#getThirdPartyAttachment", () => {
 
     expect(mockGetThirdPartyAttachment).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
-  });
-
-  it("should decode a base64url-encoded attachment_url with embedded query string", async () => {
-    const req = mockReq();
-
-    mockGetThirdPartyMessageFnApp.mockReturnValue(
-      TE.of(proxyThirdPartyMessageResponse)
-    );
-
-    mockGetThirdPartyAttachment.mockReturnValue(
-      Promise.resolve(ResponseSuccessOctet(buffer))
-    );
-
-    const plainUrl = `/an/attachment/url/?attachmentIdx=1`;
-    const encodedUrl = Buffer.from(plainUrl).toString("base64url");
-
-    req.user = mockedUser;
-    req.params = {
-      id: aValidMessageId,
-      attachment_url: encodedUrl
-    };
-
-    const controller = new CommunicationController(
-      newMessageService,
-      mockLollipopApiClient
-    );
-
-    const response = await controller.getRemoteContentAttachment(req);
-
-    expect(mockGetThirdPartyAttachment).toHaveBeenCalledWith(
-      proxyThirdPartyMessageResponse,
-      plainUrl,
-      aRemoteContentConfigurationWithBothEnv,
-      undefined
-    );
-
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessOctet",
-      value: buffer
-    });
-  });
-
-  it("should decode a base64url-encoded attachment_url without query string", async () => {
-    const req = mockReq();
-
-    mockGetThirdPartyMessageFnApp.mockReturnValue(
-      TE.of(proxyThirdPartyMessageResponse)
-    );
-
-    mockGetThirdPartyAttachment.mockReturnValue(
-      Promise.resolve(ResponseSuccessOctet(buffer))
-    );
-
-    const plainUrl = `/an/attachment/url/`;
-    const encodedUrl = Buffer.from(plainUrl).toString("base64url");
-
-    req.user = mockedUser;
-    req.params = {
-      id: aValidMessageId,
-      attachment_url: encodedUrl
-    };
-
-    const controller = new CommunicationController(
-      newMessageService,
-      mockLollipopApiClient
-    );
-
-    const response = await controller.getRemoteContentAttachment(req);
-
-    expect(mockGetThirdPartyAttachment).toHaveBeenCalledWith(
-      proxyThirdPartyMessageResponse,
-      plainUrl,
-      aRemoteContentConfigurationWithBothEnv,
-      undefined
-    );
-
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessOctet",
-      value: buffer
-    });
   });
 });
 
