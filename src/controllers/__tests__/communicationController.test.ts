@@ -370,7 +370,7 @@ describe("CommunicationController#getThirdPartyAttachment", () => {
     req.user = mockedUser;
     req.params = {
       id: aValidMessageId,
-      attachment_url: Buffer.from(anAttachmentUrl).toString("base64url")
+      attachment_url: anAttachmentUrl
     };
 
     const controller = new CommunicationController(
@@ -382,7 +382,7 @@ describe("CommunicationController#getThirdPartyAttachment", () => {
 
     expect(mockGetThirdPartyAttachment).toHaveBeenCalledWith(
       proxyThirdPartyMessageResponse,
-      anAttachmentUrl,
+      req.params.attachment_url,
       aRemoteContentConfigurationWithBothEnv,
       undefined // we expect lollipopLocals to be undefined because lollipop is disabled here
     );
@@ -405,12 +405,13 @@ describe("CommunicationController#getThirdPartyAttachment", () => {
       Promise.resolve(ResponseSuccessOctet(buffer))
     );
 
-    const urlWithQuery = `${anAttachmentUrl}?attachmentIdx=${anAttachmentIdx}`;
-
     req.user = mockedUser;
     req.params = {
       id: aValidMessageId,
-      attachment_url: Buffer.from(urlWithQuery).toString("base64url")
+      attachment_url: anAttachmentUrl
+    };
+    req.query = {
+      attachmentIdx: anAttachmentIdx
     };
 
     const controller = new CommunicationController(
@@ -422,7 +423,7 @@ describe("CommunicationController#getThirdPartyAttachment", () => {
 
     expect(mockGetThirdPartyAttachment).toHaveBeenCalledWith(
       proxyThirdPartyMessageResponse,
-      urlWithQuery,
+      `${req.params.attachment_url}?attachmentIdx=${anAttachmentIdx}`,
       aRemoteContentConfigurationWithBothEnv,
       undefined // we expect lollipopLocals to be undefined because lollipop is disabled here
     );
