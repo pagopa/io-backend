@@ -57,17 +57,16 @@ import {
 export const resolveAttachmentUrl = (req: express.Request): string => {
   const rawAttachmentParam = decodeURIComponent(req.params.attachment_url);
   try {
-    const decodedAttachmentParam = decodeURIComponent(rawAttachmentParam);
-    const decodedAttachmentUrl = atob(decodedAttachmentParam);
+    const decodedAttachmentUrl = atob(rawAttachmentParam);
     if (
       btoa(decodedAttachmentUrl).replace(/=+$/, "") !==
-      decodedAttachmentParam.replace(/=+$/, "")
+      rawAttachmentParam.replace(/=+$/, "")
     ) {
-      return `${req.params.attachment_url}${QueryString.stringify(req.query, { addQueryPrefix: true })}`;
+      return `${rawAttachmentParam}${QueryString.stringify(req.query, { addQueryPrefix: true })}`;
     }
     return decodedAttachmentUrl;
   } catch (e) {
-    return `${req.params.attachment_url}${QueryString.stringify(req.query, { addQueryPrefix: true })}`;
+    return `${rawAttachmentParam}${QueryString.stringify(req.query, { addQueryPrefix: true })}`;
   }
 };
 
