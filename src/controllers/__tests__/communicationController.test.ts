@@ -1,6 +1,7 @@
 import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 
 import mockReq from "../../__mocks__/request";
+import { resolveAttachmentUrl } from "../communicationController";
 import mockRes from "../../__mocks__/response";
 import NewMessagesService from "../../services/newMessagesService";
 import CommunicationController from "../communicationController";
@@ -369,7 +370,7 @@ describe("CommunicationController#getThirdPartyAttachment", () => {
     req.user = mockedUser;
     req.params = {
       id: aValidMessageId,
-      attachment_url: anAttachmentUrl
+      attachment_url: Buffer.from(anAttachmentUrl).toString("base64url")
     };
 
     const controller = new CommunicationController(
@@ -381,7 +382,7 @@ describe("CommunicationController#getThirdPartyAttachment", () => {
 
     expect(mockGetThirdPartyAttachment).toHaveBeenCalledWith(
       proxyThirdPartyMessageResponse,
-      req.params.attachment_url,
+      anAttachmentUrl,
       aRemoteContentConfigurationWithBothEnv,
       undefined // we expect lollipopLocals to be undefined because lollipop is disabled here
     );
@@ -404,13 +405,12 @@ describe("CommunicationController#getThirdPartyAttachment", () => {
       Promise.resolve(ResponseSuccessOctet(buffer))
     );
 
+    const urlWithQuery = `${anAttachmentUrl}?attachmentIdx=${anAttachmentIdx}`;
+
     req.user = mockedUser;
     req.params = {
       id: aValidMessageId,
-      attachment_url: anAttachmentUrl
-    };
-    req.query = {
-      attachmentIdx: anAttachmentIdx
+      attachment_url: Buffer.from(urlWithQuery).toString("base64url")
     };
 
     const controller = new CommunicationController(
@@ -422,7 +422,7 @@ describe("CommunicationController#getThirdPartyAttachment", () => {
 
     expect(mockGetThirdPartyAttachment).toHaveBeenCalledWith(
       proxyThirdPartyMessageResponse,
-      `${req.params.attachment_url}?attachmentIdx=${anAttachmentIdx}`,
+      urlWithQuery,
       aRemoteContentConfigurationWithBothEnv,
       undefined // we expect lollipopLocals to be undefined because lollipop is disabled here
     );
@@ -458,6 +458,88 @@ describe("CommunicationController#getThirdPartyAttachment", () => {
 
     expect(mockGetThirdPartyAttachment).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
+  });
+
+  it("should decode a base64url-encoded attachment_url with embedded query string", async () => {
+    const req = mockReq();
+
+    mockGetThirdPartyMessageFnApp.mockReturnValue(
+      TE.of(proxyThirdPartyMessageResponse)
+    );
+
+    mockGetThirdPartyAttachment.mockReturnValue(
+      Promise.resolve(ResponseSuccessOctet(buffer))
+    );
+
+    const plainUrl = `/an/attachment/url/?attachmentIdx=1`;
+    const encodedUrl = Buffer.from(plainUrl).toString("base64url");
+
+    req.user = mockedUser;
+    req.params = {
+      id: aValidMessageId,
+      attachment_url: encodedUrl
+    };
+
+    const controller = new CommunicationController(
+      newMessageService,
+      mockLollipopApiClient
+    );
+
+    const response = await controller.getRemoteContentAttachment(req);
+
+    expect(mockGetThirdPartyAttachment).toHaveBeenCalledWith(
+      proxyThirdPartyMessageResponse,
+      plainUrl,
+      aRemoteContentConfigurationWithBothEnv,
+      undefined
+    );
+
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessOctet",
+      value: buffer
+    });
+  });
+
+  it("should decode a base64url-encoded attachment_url without query string", async () => {
+    const req = mockReq();
+
+    mockGetThirdPartyMessageFnApp.mockReturnValue(
+      TE.of(proxyThirdPartyMessageResponse)
+    );
+
+    mockGetThirdPartyAttachment.mockReturnValue(
+      Promise.resolve(ResponseSuccessOctet(buffer))
+    );
+
+    const plainUrl = `/an/attachment/url/`;
+    const encodedUrl = Buffer.from(plainUrl).toString("base64url");
+
+    req.user = mockedUser;
+    req.params = {
+      id: aValidMessageId,
+      attachment_url: encodedUrl
+    };
+
+    const controller = new CommunicationController(
+      newMessageService,
+      mockLollipopApiClient
+    );
+
+    const response = await controller.getRemoteContentAttachment(req);
+
+    expect(mockGetThirdPartyAttachment).toHaveBeenCalledWith(
+      proxyThirdPartyMessageResponse,
+      plainUrl,
+      aRemoteContentConfigurationWithBothEnv,
+      undefined
+    );
+
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessOctet",
+      value: buffer
+    });
   });
 });
 
@@ -627,4 +709,56 @@ describe("CommunicationController#upsertMessageStatus", () => {
       expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
     }
   );
+});
+
+describe("resolveAttachmentUrl", () => {
+  it("decodes a base64url-encoded URL without a query string", () => {
+    const plainUrl = "pagopa-docx-b087e832-ba6d-4e6c-ae34-df8f7318ec6e.pdf";
+    const req = mockReq();
+    req.params = { attachment_url: Buffer.from(plainUrl).toString("base64url") };
+
+    expect(resolveAttachmentUrl(req)).toBe(plainUrl);
+  });
+
+  it("decodes a base64url-encoded URL with an embedded query string", () => {
+    const plainUrl = "delivery/notifications/received/SOME-ID/attachments/documents/0?attachmentIdx=1&foo=bar";
+    const req = mockReq();
+    req.params = { attachment_url: Buffer.from(plainUrl).toString("base64url") };
+
+    expect(resolveAttachmentUrl(req)).toBe(plainUrl);
+  });
+
+  it("decodes a URL-percent-encoded base64url value", () => {
+    const plainUrl = "delivery/notifications/received/SOME-ID/attachments/documents/0";
+    const base64urlEncoded = Buffer.from(plainUrl).toString("base64url");
+    const percentEncoded = encodeURIComponent(base64urlEncoded);
+    const req = mockReq();
+    req.params = { attachment_url: percentEncoded };
+
+    expect(resolveAttachmentUrl(req)).toBe(plainUrl);
+  });
+
+  it("falls back to raw param when value is not valid base64", () => {
+    const rawUrl = "delivery/notifications/received/b087e832-ba6d-4e6c-ae34-df8f7318ec6e/attachments/documents/0";
+    const req = mockReq();
+    req.params = { attachment_url: rawUrl };
+
+    expect(resolveAttachmentUrl(req)).toBe(rawUrl);
+  });
+
+  it("appends req.query to raw param in the fallback path", () => {
+    const rawUrl = "delivery/notifications/received/b087e832-ba6d-4e6c-ae34-df8f7318ec6e/attachments/documents/0";
+    const req = mockReq();
+    req.params = { attachment_url: rawUrl };
+    req.query = { attachmentIdx: "0", foo: "bar" };
+
+    expect(resolveAttachmentUrl(req)).toBe(`${rawUrl}?attachmentIdx=0&foo=bar`);
+  });
+
+  it("returns an empty string when the base64url-encoded input decodes to empty", () => {
+    const req = mockReq();
+    req.params = { attachment_url: Buffer.from("").toString("base64url") };
+
+    expect(resolveAttachmentUrl(req)).toBe("");
+  });
 });

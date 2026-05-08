@@ -54,17 +54,23 @@ import {
   withValidatedOrValidationError
 } from "../utils/responses";
 
+export const resolveAttachmentUrl = (req: express.Request): string => {
+  const rawAttachmentParam = req.params.attachment_url;
+  try {
+    const decodedAttachmentParam = decodeURIComponent(rawAttachmentParam);
+    return atob(decodedAttachmentParam);
+  } catch (e) {
+    return `${rawAttachmentParam}${QueryString.stringify(req.query, { addQueryPrefix: true })}`;
+  }
+};
+
 export const withGetThirdPartyAttachmentParams = async <T>(
   req: express.Request,
   f: (id: Ulid, attachment_url: NonEmptyString) => Promise<T>
 ) =>
   withValidatedOrValidationError(Ulid.decode(req.params.id), (id) =>
     withValidatedOrValidationError(
-      pipe(
-        QueryString.stringify(req.query, { addQueryPrefix: true }),
-        (queryString) => `${req.params.attachment_url}${queryString}`,
-        NonEmptyString.decode
-      ),
+      NonEmptyString.decode(resolveAttachmentUrl(req)),
       (attachment_url) => f(id, attachment_url)
     )
   );
