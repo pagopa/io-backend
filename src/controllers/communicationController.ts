@@ -60,8 +60,8 @@ export const resolveAttachmentUrl = (req: express.Request): string => {
   try {
     const decodedAttachmentUrl = atob(rawAttachmentParam);
     if (
-      btoa(decodedAttachmentUrl).replace(/=+$/, "") !==
-      rawAttachmentParam.replace(/=+$/, "")
+      btoa(decodedAttachmentUrl).split("=")[0] !==
+      rawAttachmentParam.split("=")[0]
     ) {
       return fallback;
     }
