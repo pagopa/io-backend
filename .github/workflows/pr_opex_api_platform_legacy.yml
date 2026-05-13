@@ -1,4 +1,4 @@
-name: PR - Opex Dashboard api_public
+name: PR - Opex Dashboard api_platform_legacy
 
 on:
   pull_request:

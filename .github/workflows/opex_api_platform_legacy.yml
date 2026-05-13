@@ -1,4 +1,4 @@
-name: Opex Dashboard api_public
+name: Opex Dashboard api_platform_legacy
 
 on:
   push:
