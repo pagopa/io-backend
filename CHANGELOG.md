@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 20.1.1
+
+### Patch Changes
+
+- 61e8567: Upgrade platform OpenAPI specs
+
 ## 20.1.0
 
 ### Minor Changes
