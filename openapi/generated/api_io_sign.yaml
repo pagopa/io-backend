@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  version: 20.1.0
+  version: 20.1.1
   title: IO Sign - Backend API
 servers:
   - url: https://localhost/api/sign/v1
