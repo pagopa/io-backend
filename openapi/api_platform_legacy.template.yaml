@@ -199,8 +199,3 @@ components:
         - CRITICAL
         - PARTIAL_AVAILABILITY
         - MANTAINANCE
-  securitySchemes:
-    Bearer:
-      type: apiKey
-      name: Authorization
-      in: header
