@@ -5,9 +5,9 @@ on:
     branches:
       - master
     paths:
-      - 'api_public.yaml'
-      - '.github/workflows/opex_api_public.yml'
-      - '.opex/api_public/**'
+      - './openapi/generated/api_platform_legacy.yaml'
+      - '.github/workflows/opex_api_platform_legacy.yml'
+      - '.opex/api_platform_legacy/**'
 
   workflow_dispatch:
 
@@ -28,4 +28,4 @@ jobs:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
     with:
-      api_name: api_public
+      api_name: api_platform_legacy
