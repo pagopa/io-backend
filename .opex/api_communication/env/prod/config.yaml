@@ -12,3 +12,10 @@ overrides:
   hosts:
     - app-backend.io.italia.it
     - api-app.io.pagopa.it
+  endpoints:
+    /api/communication/v1/payment/info/{rptId}:
+      response_time_threshold: 3
+      availability_threshold: 0.95
+    /api/communication/v1/third-party-messages/{id}:
+      response_time_threshold: 3
+      availability_threshold: 0.98
