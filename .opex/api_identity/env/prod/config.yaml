@@ -12,3 +12,6 @@ overrides:
   hosts:
     - app-backend.io.italia.it
     - api-app.io.pagopa.it
+  endpoints:
+    /api/identity/v1/email-validation-process:
+      availability_threshold: 0.85
