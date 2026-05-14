@@ -14,4 +14,4 @@ overrides:
     - api-app.io.pagopa.it
   endpoints:
     /api/identity/v1/email-validation-process:
-      availability_threshold: 0.70
+      availability_threshold: 0.85
