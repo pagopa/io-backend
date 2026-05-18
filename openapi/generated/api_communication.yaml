@@ -209,11 +209,11 @@ paths:
                   Aprire il messaggio su IO equivale infatti a firmare la
                   ricevuta di ritorno di una raccomandata tradizionale.
 
-                  **Mittente**: Comune di Xxxxxxx  
+                  **Mittente**: Comune di Xxxxxxx
 
-                  **Oggetto**: Infrazione al codice della strada  
+                  **Oggetto**: Infrazione al codice della strada
 
-                  **Data e ora**: 12 Luglio 2022 - 12.36  
+                  **Data e ora**: 12 Luglio 2022 - 12.36
 
                   **Codice IUN**: YYYYMM-1-ABCD-EFGH-X
         '204':
@@ -455,7 +455,7 @@ paths:
             schema:
               $ref: '#/components/schemas/Installation'
             example:
-              platform: gcm
+              platform: fcmv1
               pushChannel: push-notification-service-handle
       responses:
         '200':
@@ -1229,7 +1229,6 @@ components:
       description: The platform type where the installation happened.
       enum:
         - apns
-        - gcm
         - fcmv1
     PushChannel:
       type: string
