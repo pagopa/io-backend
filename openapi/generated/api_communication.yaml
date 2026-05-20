@@ -455,7 +455,7 @@ paths:
             schema:
               $ref: '#/components/schemas/Installation'
             example:
-              platform: gcm
+              platform: fcmv1
               pushChannel: push-notification-service-handle
       responses:
         '200':
@@ -1229,7 +1229,6 @@ components:
       description: The platform type where the installation happened.
       enum:
         - apns
-        - gcm
         - fcmv1
     PushChannel:
       type: string

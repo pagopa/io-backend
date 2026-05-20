@@ -534,7 +534,7 @@ paths:
           required: true
           x-examples:
             application/json:
-              platform: "gcm"
+              platform: "fcmv1"
               pushChannel: "push-notification-service-handle"
       responses:
         "200":
@@ -1098,7 +1098,6 @@ definitions:
     description: The platform type where the installation happened.
     x-extensible-enum:
       - apns
-      - gcm
       - fcmv1
   PushChannel:
     type: string

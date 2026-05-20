@@ -9,7 +9,6 @@ definitions:
     description: The platform type where the installation happened.
     x-extensible-enum:
       - apns
-      - gcm
       - fcmv1
   NotificationMessageKind:
     type: string

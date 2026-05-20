@@ -28,13 +28,13 @@ const anAppleInstallation: CreateOrUpdateInstallationMessage = {
   tags: [aFiscalCodeHash] // This is the sha256 of "GRBGPP87L04L741X"
 };
 const aGoogleDevice = {
-  platform: PlatformEnum.gcm,
+  platform: PlatformEnum.fcmv1,
   pushChannel: aPushChannel
 };
 const aGoogleInstallation: CreateOrUpdateInstallationMessage = {
   installationId: toFiscalCodeHash(aFiscalCode),
   kind: CreateOrUpdateKind.CreateOrUpdateInstallation,
-  platform: PlatformEnum.gcm,
+  platform: PlatformEnum.fcmv1,
   pushChannel: aPushChannel,
   tags: [aFiscalCodeHash] // This is the sha256 of "GRBGPP87L04L741X"
 };
@@ -75,7 +75,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
     );
   });
 
-  it("should submit a correct installation to the Queue Storage, Google platform", async () => {
+  it("should submit a correct installation to the Queue Storage, FCMv1 platform", async () => {
     mockSendMessage.mockImplementation((_) => Promise.resolve());
 
     const service = new NotificationService("", "");
