@@ -260,9 +260,9 @@ paths:
                 subject: "my subject ............",
                 third_party_data: [{id: "aThirdPartyMessageId"}]
               },
-              third_party_message: {
-                attachments: [],
-                custom_property: "a custom property"
+              third_party_message: { 
+                attachments: [], 
+                custom_property: "a custom property" 
               },
               created_at: "2018-06-06T12:22:24.523Z",
               fiscal_code: "LSSLCU79B24L219P",
@@ -1217,7 +1217,7 @@ definitions:
     example: '2018-10-13T00:00:00.000Z'
   PaymentNoticeNumber:
     description: >-
-      The field "Numero Avviso" of pagoPa, needed to identify the payment.
+      The field "Numero Avviso" of pagoPa, needed to identify the payment. 
       Format is `<aux digit(1n)>[<application code> (2n)]<codice IUV (15|17n)>`.
       See [pagoPa
       specs](https://docs.pagopa.it/saci/specifiche-attuative-dei-codici-identificativi-di-versamento-riversamento-e-rendicontazione/premessa)
