@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 20.1.2
+
+### Patch Changes
+
+- 2fc7ce4: remove gcm platform enum from notification api
+
 ## 20.1.1
 
 ### Patch Changes
