@@ -843,3 +843,49 @@ components:
       properties:
         response:
           type: string
+    ExtendedProfile:
+      description: |-
+        Describes the citizen's profile, mostly interesting for preferences
+        attributes.
+      type: object
+      properties:
+        email:
+          $ref: '#/components/schemas/EmailAddress'
+        service_preferences_settings:
+          $ref: '#/components/schemas/ServicePreferencesSettings'
+        blocked_inbox_or_channels:
+          $ref: '#/components/schemas/BlockedInboxOrChannels'
+        preferred_languages:
+          $ref: '#/components/schemas/PreferredLanguages'
+        is_inbox_enabled:
+          $ref: '#/components/schemas/IsInboxEnabled'
+        accepted_tos_version:
+          $ref: '#/components/schemas/AcceptedTosVersion'
+        is_webhook_enabled:
+          $ref: '#/components/schemas/IsWebhookEnabled'
+        is_email_enabled:
+          $ref: '#/components/schemas/IsEmailEnabled'
+        is_email_validated:
+          $ref: '#/components/schemas/IsEmailValidated'
+        is_email_already_taken:
+          $ref: '#/components/schemas/IsEmailAlreadyTaken'
+        reminder_status:
+          $ref: '#/components/schemas/ReminderStatus'
+        is_test_profile:
+          type: boolean
+          description: True if the user's profile is only for test purpose.
+          default: false
+        last_app_version:
+          $ref: '#/components/schemas/AppVersion'
+        push_notifications_content_type:
+          $ref: '#/components/schemas/PushNotificationsContentType'
+        version:
+          type: integer
+      required:
+        - is_email_enabled
+        - is_email_validated
+        - is_email_already_taken
+        - is_inbox_enabled
+        - is_webhook_enabled
+        - service_preferences_settings
+        - version

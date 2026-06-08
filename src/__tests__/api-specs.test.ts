@@ -1,16 +1,7 @@
 import * as SwaggerParser from "swagger-parser";
 
 describe("API proxy specs", () => {
-  const specFilePath = `${__dirname}/../../api_backend.yaml`;
-
-  it("should be valid", async () => {
-    const api = await SwaggerParser.bundle(specFilePath);
-    expect(api).toBeDefined();
-  });
-});
-
-describe("API notifications specs", () => {
-  const specFilePath = `${__dirname}/../../api_notifications.yaml`;
+  const specFilePath = `${__dirname}/../../openapi/generated/api_backend.yaml`;
 
   it("should be valid", async () => {
     const api = await SwaggerParser.bundle(specFilePath);

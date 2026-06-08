@@ -11,7 +11,7 @@ import * as O from "fp-ts/Option";
 import * as TE from "fp-ts/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 
-import { PNActivation } from "../../generated/api_piattaforma-notifiche-courtesy/PNActivation";
+import { SendActivation } from "../../generated/communication/SendActivation";
 import { PNEnvironment } from "../clients/pn-clients";
 import { PNService } from "../services/pnService";
 import { withUserFromRequest } from "../types/user";
@@ -33,45 +33,49 @@ export const upsertPNActivationController =
     IResponseErrorValidation | IResponseErrorInternal | IResponseNoContent
   > =>
     withUserFromRequest(req, async (user) =>
-      withValidatedOrValidationError(PNActivation.decode(req.body), (payload) =>
-        pipe(
-          O.fromNullable(req.query.isTest),
-          O.map((_) => _.toString().toLowerCase() === "true"),
-          O.getOrElse(() => false),
-          TE.of,
-          TE.map((isTest) =>
-            isTest ? PNEnvironment.UAT : PNEnvironment.PRODUCTION
-          ),
-          TE.chainW((pnEnvironment) =>
-            pipe(
-              TE.tryCatch(
-                () =>
-                  upsertPnActivation(pnEnvironment, user.fiscal_code, {
-                    activationStatus: payload.activation_status
-                  }),
-                () => ResponseErrorInternal("Error calling the PN service")
-              ),
-              TE.chainEitherKW(
-                E.mapLeft(() =>
-                  ResponseErrorInternal("Unexpected PN service response")
+      withValidatedOrValidationError(
+        SendActivation.decode(req.body),
+        (payload) =>
+          pipe(
+            O.fromNullable(req.query.isTest),
+            O.map((_) => _.toString().toLowerCase() === "true"),
+            O.getOrElse(() => false),
+            TE.of,
+            TE.map((isTest) =>
+              isTest ? PNEnvironment.UAT : PNEnvironment.PRODUCTION
+            ),
+            TE.chainW((pnEnvironment) =>
+              pipe(
+                TE.tryCatch(
+                  () =>
+                    upsertPnActivation(pnEnvironment, user.fiscal_code, {
+                      activationStatus: payload.activation_status
+                    }),
+                  () => ResponseErrorInternal("Error calling the PN service")
+                ),
+                TE.chainEitherKW(
+                  E.mapLeft(() =>
+                    ResponseErrorInternal("Unexpected PN service response")
+                  )
                 )
               )
-            )
-          ),
-          TE.map((_) => {
-            switch (_.status) {
-              case 204:
-                return ResponseNoContent();
-              case 400:
-                return ResponseErrorInternal(
-                  "PN service response is bad request"
-                );
-              default:
-                return ResponseErrorInternal("Unexpected response status code");
-            }
-          }),
-          TE.toUnion
-        )()
+            ),
+            TE.map((_) => {
+              switch (_.status) {
+                case 204:
+                  return ResponseNoContent();
+                case 400:
+                  return ResponseErrorInternal(
+                    "PN service response is bad request"
+                  );
+                default:
+                  return ResponseErrorInternal(
+                    "Unexpected response status code"
+                  );
+              }
+            }),
+            TE.toUnion
+          )()
       )
     );
 
@@ -82,7 +86,7 @@ export const getPNActivationController =
   ): Promise<
     | IResponseErrorValidation
     | IResponseErrorInternal
-    | IResponseSuccessJson<PNActivation>
+    | IResponseSuccessJson<SendActivation>
   > =>
     withUserFromRequest(req, async (user) =>
       pipe(

@@ -5,7 +5,7 @@
 import * as E from "fp-ts/lib/Either";
 import mockReq from "../../__mocks__/request";
 import { EmailAddress } from "../../../generated/identity/EmailAddress";
-import { ExtendedProfile as ExtendedProfileBackend } from "../../../generated/backend/ExtendedProfile";
+import { ExtendedProfile as ExtendedProfileBackend } from "../../../generated/identity/ExtendedProfile";
 import { IsInboxEnabled } from "../../../generated/identity/IsInboxEnabled";
 import { IsWebhookEnabled } from "../../../generated/identity/IsWebhookEnabled";
 import {

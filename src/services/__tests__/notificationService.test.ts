@@ -2,7 +2,7 @@
 
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
-import { PlatformEnum } from "../../../generated/backend/Platform";
+import { PlatformEnum } from "../../../generated/communication/Platform";
 import {
   CreateOrUpdateInstallationMessage,
   KindEnum as CreateOrUpdateKind
