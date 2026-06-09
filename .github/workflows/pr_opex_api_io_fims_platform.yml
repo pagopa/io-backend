@@ -1,4 +1,4 @@
-name: PR - Opex Dashboard api_io_fims
+name: PR - Opex Dashboard api_io_fims_platform
 
 on:
   pull_request:
@@ -10,10 +10,10 @@ on:
     branches:
       - master
     paths:
-      - 'api_io_fims.yaml'
-      - '.github/workflows/pr_opex_api_io_fims.yml'
-      - '.github/workflows/opex_api_io_fims.yml'
-      - '.opex/api_io_fims/**'
+      - 'openapi/generated/api_fims_platform.yaml'
+      - '.github/workflows/pr_opex_api_io_fims_platform.yml'
+      - '.github/workflows/opex_api_io_fims_platform.yml'
+      - '.opex/api_io_fims_platform/**'
 
   workflow_dispatch:
 
