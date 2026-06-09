@@ -14,8 +14,6 @@ paths:
         "200":
           description: "ok"
 components:
-  securitySchemes:
-  parameters:
   schemas:
     SpidLevel:
       type: string

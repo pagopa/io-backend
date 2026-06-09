@@ -16,8 +16,8 @@ import { SuccessResponse } from "../../generated/communication/SuccessResponse";
 import {
   CreateOrUpdateInstallationMessage,
   KindEnum as CreateOrUpdateKind
-} from "../../generated/messages/CreateOrUpdateInstallationMessage";
-import { NotificationMessageKindEnum } from "../../generated/messages/NotificationMessageKind";
+} from "../../generated/communication/CreateOrUpdateInstallationMessage";
+import { NotificationMessageKindEnum } from "../../generated/communication/NotificationMessageKind";
 import { toFiscalCodeHash } from "../types/notification";
 import { base64EncodeObject } from "../utils/messages";
 

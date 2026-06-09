@@ -6,7 +6,7 @@ import { PlatformEnum } from "../../../generated/communication/Platform";
 import {
   CreateOrUpdateInstallationMessage,
   KindEnum as CreateOrUpdateKind
-} from "../../../generated/messages/CreateOrUpdateInstallationMessage";
+} from "../../../generated/communication/CreateOrUpdateInstallationMessage";
 import { toFiscalCodeHash } from "../../types/notification";
 import { base64EncodeObject } from "../../utils/messages";
 import NotificationService from "../notificationService";

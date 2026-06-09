@@ -13,8 +13,6 @@ paths:
         '200':
           description: ok
 components:
-  securitySchemes: null
-  parameters: null
   schemas:
     SpidLevel:
       type: string
