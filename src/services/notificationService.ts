@@ -11,13 +11,13 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
-import { Installation } from "../../generated/communication/Installation";
-import { SuccessResponse } from "../../generated/communication/SuccessResponse";
 import {
   CreateOrUpdateInstallationMessage,
   KindEnum as CreateOrUpdateKind
 } from "../../generated/communication/CreateOrUpdateInstallationMessage";
+import { Installation } from "../../generated/communication/Installation";
 import { NotificationMessageKindEnum } from "../../generated/communication/NotificationMessageKind";
+import { SuccessResponse } from "../../generated/communication/SuccessResponse";
 import { toFiscalCodeHash } from "../types/notification";
 import { base64EncodeObject } from "../utils/messages";
 
