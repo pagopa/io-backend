@@ -1,6 +1,5 @@
 import { Express } from "express";
 import * as express from "express";
-import * as passport from "passport";
 
 import CgnController from "../controllers/cgnController";
 import CgnOperatorSearchController from "../controllers/cgnOperatorSearchController";
@@ -10,83 +9,6 @@ import { toExpressHandler } from "../utils/express";
 
 export const CGN_PLATFORM_API_BASE_PATH = "/api/cgn-card/v1";
 export const CGN_SEARCH_PLATFORM_API_BASE_PATH = "/api/cgn-search/v1";
-
-/**
- * IMPORTANT: CGN Routes Management Strategy
- *
- * This file contains BOTH the new CGN API routes (/api/cgn-card/v1, /api/cgn-search/v1)
- * AND the legacy routes (/api/v1/cgn/*, /api/v1/cgn/operator-search/*) for cgn-related endpoints.
- *
- * WHY? To prevent accidental divergence during development:
- * - When adding/modifying cgn endpoints, developers MUST update both versions
- * - Having them in the same file makes this requirement explicit and hard to miss
- * - Legacy routes will be removed once new CGN base paths are fully adopted
- */
-
-/**
- * Mount the cgn LEGACY routes into the Express application
- *
- * @param app The Express application
- * @param basePath The base path for the cgn APIs
- * @param cgnService The service that handles the cgn requests
- * @param bearerSessionTokenAuth The autentication middleware for user session token
- */
-export const registerLegacyCgnAPIRoutes = (
-  app: Express,
-  basePath: string,
-  cgnService: CgnService,
-  bearerSessionTokenAuth: ReturnType<passport.Authenticator["authenticate"]>
-): void => {
-  const cgnController: CgnController = new CgnController(cgnService);
-
-  app.get(
-    `${basePath}/status`,
-    bearerSessionTokenAuth,
-    toExpressHandler(cgnController.getCgnStatus, cgnController)
-  );
-
-  app.get(
-    `${basePath}/eyca/status`,
-    bearerSessionTokenAuth,
-    toExpressHandler(cgnController.getEycaStatus, cgnController)
-  );
-
-  app.post(
-    `${basePath}/activation`,
-    bearerSessionTokenAuth,
-    toExpressHandler(cgnController.startCgnActivation, cgnController)
-  );
-
-  app.get(
-    `${basePath}/activation`,
-    bearerSessionTokenAuth,
-    toExpressHandler(cgnController.getCgnActivation, cgnController)
-  );
-
-  app.post(
-    `${basePath}/eyca/activation`,
-    bearerSessionTokenAuth,
-    toExpressHandler(cgnController.startEycaActivation, cgnController)
-  );
-
-  app.get(
-    `${basePath}/eyca/activation`,
-    bearerSessionTokenAuth,
-    toExpressHandler(cgnController.getEycaActivation, cgnController)
-  );
-
-  app.post(
-    `${basePath}/delete`,
-    bearerSessionTokenAuth,
-    toExpressHandler(cgnController.startCgnUnsubscription, cgnController)
-  );
-
-  app.post(
-    `${basePath}/otp`,
-    bearerSessionTokenAuth,
-    toExpressHandler(cgnController.generateOtp, cgnController)
-  );
-};
 
 /**
  * Mount the cgn routes into the Express application
@@ -149,81 +71,6 @@ export const registerCgnCardAPIRoutes = (
     `${basePath}/otp`,
     authMiddleware,
     toExpressHandler(cgnController.generateOtp, cgnController)
-  );
-};
-
-/**
- * Mount the cgn operator search LEGACY routes into the Express application
- *
- * @param app The Express application
- * @param basePath The base path for the cgn APIs
- * @param cgnService The service that handles the cgn requests
- * @param cgnOperatorSearchService The operator search service
- * @param bearerSessionTokenAuth The autentication middleware for user session token
- */
-export const registerLegacyCgnOperatorSearchAPIRoutes = (
-  app: Express,
-  basePath: string,
-  cgnService: CgnService,
-  cgnOperatorSearchService: CgnOperatorSearchService,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any
-): void => {
-  const cgnOperatorController: CgnOperatorSearchController =
-    new CgnOperatorSearchController(cgnService, cgnOperatorSearchService);
-
-  app.get(
-    `${basePath}/published-product-categories`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      cgnOperatorController.getPublishedProductCategories,
-      cgnOperatorController
-    )
-  );
-
-  app.get(
-    `${basePath}/merchants/:merchantId`,
-    bearerSessionTokenAuth,
-    toExpressHandler(cgnOperatorController.getMerchant, cgnOperatorController)
-  );
-
-  app.get(
-    `${basePath}/count`,
-    bearerSessionTokenAuth,
-    toExpressHandler(cgnOperatorController.count, cgnOperatorController)
-  );
-
-  app.post(
-    `${basePath}/search`,
-    bearerSessionTokenAuth,
-    toExpressHandler(cgnOperatorController.search, cgnOperatorController)
-  );
-
-  app.post(
-    `${basePath}/online-merchants`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      cgnOperatorController.getOnlineMerchants,
-      cgnOperatorController
-    )
-  );
-
-  app.post(
-    `${basePath}/offline-merchants`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      cgnOperatorController.getOfflineMerchants,
-      cgnOperatorController
-    )
-  );
-
-  app.get(
-    `${basePath}/discount-bucket-code/:discountId`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      cgnOperatorController.getDiscountBucketCode,
-      cgnOperatorController
-    )
   );
 };
 

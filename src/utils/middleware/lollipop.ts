@@ -5,62 +5,10 @@ import * as TE from "fp-ts/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 
 import { LollipopApiClient } from "../../clients/lollipop";
-import { ISessionStorage } from "../../services/ISessionStorage";
 import { withLollipopHeadersFromRequest } from "../../types/lollipop";
-import {
-  withUserFromRequest,
-  withUserIdentityFromRequest
-} from "../../types/user";
+import { withUserIdentityFromRequest } from "../../types/user";
 import { log } from "../logger";
-import {
-  extractLollipopLocalsFromLollipopHeaders,
-  extractLollipopLocalsFromLollipopHeadersLegacy
-} from "../lollipop";
-
-/**
- * @deprecated
- */
-export const expressLollipopMiddlewareLegacy: (
-  lollipopClient: ReturnType<typeof LollipopApiClient>,
-  sessionStorage: ISessionStorage
-) => (req: Request, res: Response, next: NextFunction) => Promise<void> =
-  (lollipopClient, sessionStorage) => (req, res, next) =>
-    pipe(
-      TE.tryCatch(
-        () =>
-          withUserFromRequest(req, async (user) =>
-            withLollipopHeadersFromRequest(req, async (lollipopHeaders) =>
-              pipe(
-                extractLollipopLocalsFromLollipopHeadersLegacy(
-                  lollipopClient,
-                  sessionStorage,
-                  user.fiscal_code,
-                  lollipopHeaders
-                ),
-                TE.map((lollipopLocals) => {
-                  res.locals = { ...res.locals, ...lollipopLocals };
-                }),
-                TE.toUnion
-              )()
-            )
-          ),
-        (err) => {
-          log.error(
-            "lollipopMiddleware|error executing the middleware [%s]",
-            E.toError(err).message
-          );
-          return ResponseErrorInternal("Error executing middleware");
-        }
-      ),
-      TE.chain((maybeErrorResponse) =>
-        maybeErrorResponse === undefined
-          ? TE.of(void 0)
-          : TE.left(maybeErrorResponse)
-      ),
-      TE.mapLeft((response) => response.apply(res)),
-      TE.map(() => next()),
-      TE.toUnion
-    )();
+import { extractLollipopLocalsFromLollipopHeaders } from "../lollipop";
 
 /**
  * ⚠️ This middleware should only be used once the `FF_IO_X_USER_TOKEN` feature flag is set to `ALL`.

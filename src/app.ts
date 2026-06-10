@@ -49,41 +49,19 @@ import {
   PN_ADDRESS_BOOK_CLIENT_SELECTOR,
   PNAddressBookConfig,
   PUSH_NOTIFICATIONS_QUEUE_NAME,
-  PUSH_NOTIFICATIONS_STORAGE_CONNECTION_STRING,
-  SERVICES_APP_BACKEND_CLIENT
+  PUSH_NOTIFICATIONS_STORAGE_CONNECTION_STRING
 } from "./config";
-import {
-  registerCdcSupportAPIRoutes,
-  registerLegacyCdcSupportAPIRoutes
-} from "./routes/cdcSupportRoutes";
+import { registerCdcSupportAPIRoutes } from "./routes/cdcSupportRoutes";
 import {
   registerCgnCardAPIRoutes,
-  registerCgnSearchAPIRoutes,
-  registerLegacyCgnAPIRoutes,
-  registerLegacyCgnOperatorSearchAPIRoutes
+  registerCgnSearchAPIRoutes
 } from "./routes/cgnRoutes";
-import {
-  registerCommunicationRoutes,
-  registerLegacyCommunicationRoutes
-} from "./routes/communicationRoutes";
-import {
-  registerIdentityRoutes,
-  registerLegacyIdentityRoutes
-} from "./routes/identityRoutes";
-import {
-  registerIoFimsAPIRoutes,
-  registerLegacyIoFimsAPIRoutes
-} from "./routes/ioFimsRoutes";
-import {
-  registerIoSignAPIRoutes,
-  registerIoSignAPIRoutesLegacy
-} from "./routes/ioSignRoutes";
-import {
-  registerLegacySENDRoutes,
-  registerSendActivationRoutes
-} from "./routes/pnRoutes";
+import { registerCommunicationRoutes } from "./routes/communicationRoutes";
+import { registerIdentityRoutes } from "./routes/identityRoutes";
+import { registerIoFimsAPIRoutes } from "./routes/ioFimsRoutes";
+import { registerIoSignAPIRoutes } from "./routes/ioSignRoutes";
+import { registerSendActivationRoutes } from "./routes/pnRoutes";
 import { registerPublicRoutes } from "./routes/publicRoutes";
-import { registerServicesAppBackendRoutes } from "./routes/servicesRoutes";
 import CdcSupportService from "./services/cdcSupportService";
 import CgnOperatorSearchService from "./services/cgnOperatorSearchService";
 import CgnService from "./services/cgnService";
@@ -97,7 +75,6 @@ import PagoPAEcommerceService from "./services/pagoPAEcommerceService";
 import { PNService } from "./services/pnService";
 import ProfileService from "./services/profileService";
 import RedisSessionStorage from "./services/redisSessionStorage";
-import ServicesAppBackendService from "./services/servicesAppBackendService";
 import UserDataProcessingService from "./services/userDataProcessingService";
 import bearerSessionTokenStrategy from "./strategies/bearerSessionTokenStrategy";
 import { User } from "./types/user";
@@ -119,25 +96,11 @@ const defaultModule = {
 export interface IAppFactoryParameters {
   readonly env: NodeEnvironment;
   readonly appInsightsClient?: appInsights.TelemetryClient;
-  readonly APIBasePath: string;
-  readonly CdcSupportAPIbasePath: string;
-  readonly CGNAPIBasePath: string;
-  readonly CGNOperatorSearchAPIBasePath: string;
-  readonly IoSignAPIBasePath: string;
-  readonly IoFimsAPIBasePath: string;
-  readonly ServicesAppBackendBasePath: string;
 }
 
 export async function newApp({
   env,
-  appInsightsClient,
-  APIBasePath,
-  CdcSupportAPIbasePath,
-  CGNAPIBasePath,
-  IoSignAPIBasePath,
-  IoFimsAPIBasePath,
-  CGNOperatorSearchAPIBasePath,
-  ServicesAppBackendBasePath
+  appInsightsClient
 }: IAppFactoryParameters): Promise<Express> {
   const isDevEnvironment = ENV === NodeEnvironmentEnum.DEVELOPMENT;
   const REDIS_CLIENT_SELECTOR = await RedisClientSelector(
@@ -290,11 +253,6 @@ export async function newApp({
           API_CLIENT
         );
 
-        // Create the the io-services-app-backend service
-        const SERVICES_APP_BACKEND_SERVICE = new ServicesAppBackendService(
-          SERVICES_APP_BACKEND_CLIENT
-        );
-
         // Create the Notification Service
         const OLD_NOTIFICATION_SERVICE = pipe(
           E.tryCatch(
@@ -351,18 +309,6 @@ export async function newApp({
           PAGOPA_ECOMMERCE_UAT_CLIENT
         );
 
-        // Register legacy Communication routes (/api/v1/messages, /api/v1/installations, etc.)
-        registerLegacyCommunicationRoutes(
-          app,
-          APIBasePath,
-          authMiddlewares.bearerSession,
-          APP_MESSAGES_SERVICE,
-          notificationServiceFactory,
-          SESSION_STORAGE,
-          PAGOPA_ECOMMERCE_SERVICE,
-          LOLLIPOP_API_CLIENT
-        );
-
         // Register Communication API routes with new authentication middleware (NO sessionStorage)
         registerCommunicationRoutes(
           app,
@@ -371,19 +317,6 @@ export async function newApp({
           notificationServiceFactory,
           PAGOPA_ECOMMERCE_SERVICE,
           LOLLIPOP_API_CLIENT
-        );
-
-        // Register legacy A&I routes (/api/v1/profile, /api/v1/user-data-processing, etc.)
-        registerLegacyIdentityRoutes(
-          app,
-          APIBasePath,
-          authMiddlewares.bearerSession,
-          PROFILE_SERVICE,
-          SERVICE_PREFERENCES_SERVICE,
-          SESSION_STORAGE,
-          USER_DATA_PROCESSING_SERVICE,
-          LOLLIPOP_API_CLIENT,
-          FIRST_LOLLIPOP_CONSUMER_CLIENT
         );
 
         // Register A&I API routes with new authentication middleware
@@ -398,25 +331,10 @@ export async function newApp({
         );
 
         if (FF_CGN_ENABLED) {
-          registerLegacyCgnAPIRoutes(
-            app,
-            CGNAPIBasePath,
-            CGN_SERVICE,
-            authMiddlewares.bearerSession
-          );
-
           registerCgnCardAPIRoutes(
             app,
             CGN_SERVICE,
             authMiddlewares.xUserMiddleware
-          );
-
-          registerLegacyCgnOperatorSearchAPIRoutes(
-            app,
-            CGNOperatorSearchAPIBasePath,
-            CGN_SERVICE,
-            CGN_OPERATOR_SEARCH_SERVICE,
-            authMiddlewares.bearerSession
           );
 
           registerCgnSearchAPIRoutes(
@@ -428,13 +346,6 @@ export async function newApp({
         }
 
         if (FF_CDC_ENABLED) {
-          registerLegacyCdcSupportAPIRoutes(
-            app,
-            CdcSupportAPIbasePath,
-            CDC_SUPPORT_SERVICE,
-            authMiddlewares.bearerSession
-          );
-
           registerCdcSupportAPIRoutes(
             app,
             CDC_SUPPORT_SERVICE,
@@ -450,27 +361,9 @@ export async function newApp({
             PROFILE_SERVICE,
             LOLLIPOP_API_CLIENT
           );
-
-          registerIoSignAPIRoutesLegacy(
-            app,
-            IoSignAPIBasePath,
-            IO_SIGN_SERVICE,
-            PROFILE_SERVICE,
-            authMiddlewares.bearerSession,
-            LOLLIPOP_API_CLIENT,
-            SESSION_STORAGE
-          );
         }
 
         if (FF_IO_FIMS_ENABLED) {
-          registerLegacyIoFimsAPIRoutes(
-            app,
-            IoFimsAPIBasePath,
-            IO_FIMS_SERVICE,
-            PROFILE_SERVICE,
-            authMiddlewares.bearerSession
-          );
-
           registerIoFimsAPIRoutes(
             app,
             IO_FIMS_SERVICE,
@@ -479,25 +372,11 @@ export async function newApp({
           );
         }
 
-        registerServicesAppBackendRoutes(
-          app,
-          ServicesAppBackendBasePath,
-          SERVICES_APP_BACKEND_SERVICE,
-          authMiddlewares.bearerSession
-        );
-
         if (
           PNAddressBookConfig.FF_PN_ACTIVATION_ENABLED === "1" &&
           O.isSome(PN_ADDRESS_BOOK_CLIENT_SELECTOR)
         ) {
           const pnService = PNService(PN_ADDRESS_BOOK_CLIENT_SELECTOR.value);
-          registerLegacySENDRoutes(
-            app,
-            PNAddressBookConfig.PN_ACTIVATION_BASE_PATH,
-            pnService,
-            authMiddlewares.bearerSession
-          );
-
           registerSendActivationRoutes(
             app,
             authMiddlewares.xUserMiddleware,

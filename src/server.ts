@@ -15,18 +15,7 @@ import * as https from "https";
 import * as path from "path";
 
 import { newApp } from "./app";
-import {
-  API_BASE_PATH,
-  CDC_SUPPORT_IO_API_BASE_PATH,
-  CGN_API_BASE_PATH,
-  CGN_OPERATOR_SEARCH_API_BASE_PATH,
-  ENV,
-  IO_FIMS_API_BASE_PATH,
-  IO_SIGN_API_BASE_PATH,
-  SERVER_PORT,
-  SERVICES_APP_BACKEND_BASE_PATH,
-  errorOrAppInsightConfig
-} from "./config";
+import { ENV, SERVER_PORT, errorOrAppInsightConfig } from "./config";
 import {
   StartupEventName,
   initTelemetryClient,
@@ -35,14 +24,6 @@ import {
 import { initHttpGracefulShutdown } from "./utils/gracefulShutdown";
 import { log } from "./utils/logger";
 import { TimeTracer } from "./utils/timer";
-
-const APIBasePath = API_BASE_PATH;
-const CdcSupportAPIbasePath = CDC_SUPPORT_IO_API_BASE_PATH;
-const CGNAPIBasePath = CGN_API_BASE_PATH;
-const IoSignAPIBasePath = IO_SIGN_API_BASE_PATH;
-const IoFimsAPIBasePath = IO_FIMS_API_BASE_PATH;
-const CGNOperatorSearchAPIBasePath = CGN_OPERATOR_SEARCH_API_BASE_PATH;
-const ServicesAppBackendBasePath = SERVICES_APP_BACKEND_BASE_PATH;
 
 // Set default for graceful-shutdown
 const DEFAULT_SHUTDOWN_SIGNALS = "SIGINT SIGTERM";
@@ -82,13 +63,6 @@ const maybeAppInsightsClient = pipe(
 );
 
 newApp({
-  APIBasePath,
-  CdcSupportAPIbasePath,
-  CGNAPIBasePath,
-  CGNOperatorSearchAPIBasePath,
-  IoFimsAPIBasePath,
-  IoSignAPIBasePath,
-  ServicesAppBackendBasePath,
   appInsightsClient: O.toUndefined(maybeAppInsightsClient),
   env: ENV
 })
