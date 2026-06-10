@@ -580,3 +580,5 @@ components:
       properties:
         response:
           type: string
+    ExtendedProfile:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/c258312149f075dd17c72905bb97cda2a730fd42/openapi/definitions_v3.yaml#/ExtendedProfile"

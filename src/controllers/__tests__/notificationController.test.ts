@@ -1,8 +1,8 @@
 /* tslint:disable:no-object-mutation */
 import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { FiscalCode, EmailString } from "@pagopa/ts-commons/lib/strings";
-import { InstallationID } from "../../../generated/backend/InstallationID";
-import { PlatformEnum } from "../../../generated/backend/Platform";
+import { InstallationID } from "../../../generated/communication/InstallationID";
+import { PlatformEnum } from "../../../generated/communication/Platform";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
