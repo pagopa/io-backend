@@ -10,7 +10,6 @@ import {
 } from "../../generated/io-profile/PreferredLanguage";
 import { ServicePreferencesSettings } from "../../generated/io-profile/ServicePreferencesSettings";
 import { ServicesPreferencesModeEnum } from "../../generated/io-profile/ServicesPreferencesMode";
-import { SessionToken } from "../types/token";
 import { User } from "../types/user";
 import { UserIdentity } from "../../generated/io-auth/UserIdentity";
 
@@ -23,8 +22,6 @@ export const aValidFamilyname = "Garibaldi" as NonEmptyString;
 export const aValidDateofBirth = "2000-06-02";
 export const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 export const aSessionTrackingId = "a-ssn-id";
-export const mockSessionToken =
-  "c77de47586c841adbd1a1caeb90dce25dcecebed620488a4f932a6280b10ee99a77b6c494a8a6e6884ccbeb6d3fe736b" as SessionToken;
 
 // mock for a valid User
 export const mockedUser: User = {

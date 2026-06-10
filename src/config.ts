@@ -484,26 +484,3 @@ export const FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED =
     () => false,
     FF_UNIQUE_EMAIL_ENFORCEMENT
   );
-
-export const FF_IO_X_USER_TOKEN = pipe(
-  process.env.FF_IO_X_USER_TOKEN,
-  FeatureFlag.decode,
-  E.getOrElseW(() => FeatureFlagEnum.NONE)
-);
-export const FF_IO_X_USER_TOKEN_BETA_TESTER_SHA_LIST = pipe(
-  process.env.FF_IO_X_USER_TOKEN_BETA_TESTER_SHA_LIST,
-  CommaSeparatedListOf(NonEmptyString).decode,
-  E.getOrElseW((errs) => {
-    log.error(
-      `Missing or invalid FF_IO_X_USER_TOKEN_BETA_TESTER_SHA_LIST environment variable: ${readableReport(
-        errs
-      )}`
-    );
-    return process.exit(1);
-  })
-);
-export const FF_IO_X_USER_TOKEN_CANARY_SHA_USERS_REGEX = pipe(
-  process.env.FF_IO_X_USER_TOKEN_CANARY_SHA_USERS_REGEX,
-  NonEmptyString.decode,
-  E.getOrElse(() => "XYZ" as NonEmptyString)
-);

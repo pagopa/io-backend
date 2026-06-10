@@ -7,7 +7,6 @@ import {
   NodeEnvironmentEnum
 } from "@pagopa/ts-commons/lib/environment";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as appInsights from "applicationinsights";
 import * as bodyParser from "body-parser";
 import * as express from "express";
 import { Express } from "express";
@@ -17,7 +16,6 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import * as helmet from "helmet";
 import * as morgan from "morgan";
-import * as passport from "passport";
 
 import {
   API_CLIENT,
@@ -27,14 +25,10 @@ import {
   CDC_SUPPORT_API_CLIENT,
   CGN_API_CLIENT,
   CGN_OPERATOR_SEARCH_API_CLIENT,
-  ENV,
   FF_CDC_ENABLED,
   FF_CGN_ENABLED,
   FF_IO_FIMS_ENABLED,
   FF_IO_SIGN_ENABLED,
-  FF_IO_X_USER_TOKEN,
-  FF_IO_X_USER_TOKEN_BETA_TESTER_SHA_LIST,
-  FF_IO_X_USER_TOKEN_CANARY_SHA_USERS_REGEX,
   FF_ROUTING_PUSH_NOTIF,
   FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST,
   FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX,
@@ -74,16 +68,10 @@ import { getNotificationServiceFactory } from "./services/notificationServiceFac
 import PagoPAEcommerceService from "./services/pagoPAEcommerceService";
 import { PNService } from "./services/pnService";
 import ProfileService from "./services/profileService";
-import RedisSessionStorage from "./services/redisSessionStorage";
 import UserDataProcessingService from "./services/userDataProcessingService";
-import bearerSessionTokenStrategy from "./strategies/bearerSessionTokenStrategy";
 import { User } from "./types/user";
-import { attachTrackingData } from "./utils/appinsights";
-import { getRequiredENVVar } from "./utils/container";
-import { log } from "./utils/logger";
 import { expressErrorMiddleware } from "./utils/middleware/express";
 import { getAuthenticatedXUserMiddleware } from "./utils/middleware/session";
-import { RedisClientMode, RedisClientSelector } from "./utils/redis";
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 import expressEnforcesSsl = require("express-enforces-ssl");
@@ -95,43 +83,11 @@ const defaultModule = {
 
 export interface IAppFactoryParameters {
   readonly env: NodeEnvironment;
-  readonly appInsightsClient?: appInsights.TelemetryClient;
 }
 
-export async function newApp({
-  env,
-  appInsightsClient
-}: IAppFactoryParameters): Promise<Express> {
-  const isDevEnvironment = ENV === NodeEnvironmentEnum.DEVELOPMENT;
-  const REDIS_CLIENT_SELECTOR = await RedisClientSelector(
-    !isDevEnvironment,
-    appInsightsClient
-  )(
-    getRequiredENVVar("REDIS_URL"),
-    process.env.REDIS_PASSWORD,
-    process.env.REDIS_PORT
-  );
-
-  // Create the Session Storage service
-  const SESSION_STORAGE = new RedisSessionStorage(REDIS_CLIENT_SELECTOR);
-  // Setup Passport.
-  // Add the strategy to authenticate proxy clients.
-  passport.use(
-    "bearer.session",
-    bearerSessionTokenStrategy(
-      FF_IO_X_USER_TOKEN_BETA_TESTER_SHA_LIST,
-      FF_IO_X_USER_TOKEN_CANARY_SHA_USERS_REGEX,
-      FF_IO_X_USER_TOKEN,
-      SESSION_STORAGE,
-      attachTrackingData
-    )
-  );
-
+export async function newApp({ env }: IAppFactoryParameters): Promise<Express> {
   // Creates middlewares for each implemented strategy
   const authMiddlewares = {
-    bearerSession: passport.authenticate("bearer.session", {
-      session: false
-    }),
     xUserMiddleware: getAuthenticatedXUserMiddleware(
       "x-appbackend-api-key" as NonEmptyString,
       APP_BACKEND_PRIMARY_KEY,
@@ -195,16 +151,6 @@ export async function newApp({
   // Setup parsers
   //
 
-  // Parse the incoming request body. This is needed by Passport spid strategy.
-  app.use(
-    bodyParser.json({
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      verify: (_req, res: express.Response, buf, _encoding: BufferEncoding) => {
-        res.locals.body = buf;
-      }
-    })
-  );
-
   // Parse an urlencoded body.
   app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -213,12 +159,6 @@ export async function newApp({
   //
 
   app.use(express.static("public"));
-
-  //
-  // Initializes Passport for incoming requests.
-  //
-
-  app.use(passport.initialize());
 
   //
   // Setup routes
@@ -389,26 +329,8 @@ export async function newApp({
       (err) => new Error(`Error on app routes setup: [${err}]`)
     ),
     TE.map((_) => {
-      _.app.on("server:stop", () => {
-        // Graceful redis connection shutdown.
-        for (const client of REDIS_CLIENT_SELECTOR.select(
-          RedisClientMode.ALL
-        )) {
-          log.info(`Graceful closing redis connection`);
-          pipe(
-            O.fromNullable(client.quit),
-            O.map((redisQuitFn) =>
-              redisQuitFn().catch((err) =>
-                log.error(
-                  `An Error occurred closing the redis connection: [${
-                    E.toError(err).message
-                  }]`
-                )
-              )
-            )
-          );
-        }
-      });
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      _.app.on("server:stop", () => {});
       return _.app;
     }),
     TE.map((_) => {
