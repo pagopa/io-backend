@@ -17,10 +17,10 @@ overrides:
       response_time_threshold: 3
       availability_threshold: 0.95
     /api/communication/v1/third-party-messages/{id}:
-      response_time_threshold: 3
+      response_time_threshold: 6
       availability_threshold: 0.98
     /api/communication/v1/third-party-messages/{id}/attachments/{attachment_url}:
-      response_time_threshold: 3
+      response_time_threshold: 6
       availability_threshold: 0.99
     /api/communication/v1/third-party-messages/{id}/precondition:
       response_time_threshold: 1.5
