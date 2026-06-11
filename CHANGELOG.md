@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 21.0.0
+
+### Major Changes
+
+- c853746: Remove Legacy API pre IO Proxy
+
 ## 20.1.2
 
 ### Patch Changes
