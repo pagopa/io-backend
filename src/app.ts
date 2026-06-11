@@ -151,6 +151,19 @@ export async function newApp({ env }: IAppFactoryParameters): Promise<Express> {
   // Setup parsers
   //
 
+  //
+  // Setup body parsers for json body.
+  // The json body parser also saves the raw body in res.locals.body for later use
+  //
+  app.use(
+    bodyParser.json({
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      verify: (_req, res: express.Response, buf, _encoding: BufferEncoding) => {
+        res.locals.body = buf;
+      }
+    })
+  );
+
   // Parse an urlencoded body.
   app.use(bodyParser.urlencoded({ extended: true }));
 
