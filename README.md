@@ -111,7 +111,6 @@ Those are all Environment variables needed by the application:
 | REDIS_URL                                 | The URL of a Redis instance                                                                          | string |
 | NOTIFICATIONS_STORAGE_CONNECTION_STRING   | Connection string to Azure queue storage for notification hub messages                               | string |
 | NOTIFICATIONS_QUEUE_NAME                  | Queue name of Azure queue storage for notification hub messages                                      | string |
-| CACHE_MAX_AGE_SECONDS                     | The value in seconds for duration of in-memory api cache                                             | int    |
 | APICACHE_DEBUG                            | When is `true` enable the apicache debug mode                                                        | boolean |
 | GITHUB_TOKEN                              | The value of your Github Api Key, used in build phase                                                | string |
 | FETCH_KEEPALIVE_ENABLED                   | When is `true` enables `keepalive` agent in the API client (defaults to `false`)                     | boolean |
@@ -139,15 +138,6 @@ Those are all Environment variables needed by the application:
 | LOLLIPOP_API_KEY                          | The key used to authenticate to the io-function-lollipop API                                         | string  |
 | LOLLIPOP_API_URL                          | The io-function-lollipop URL                                                                         | string  |
 | LOLLIPOP_API_BASE_PATH                    | The io-function-lollipop api base path                                                               | string  |
-| FF_UNIQUE_EMAIL_ENFORCEMENT               | (Optional) Enable the unique email enforcement policy. Default: NONE                                 | string (enum: NONE, BETA, ALL) |
-| UNIQUE_EMAIL_ENFORCEMENT_USERS            | (Optional) Comma separated list of UNIQUE_EMAIL_ENFORCEMENT beta testers. Default: empty array       | string |
-| SERVICES_APP_BACKEND_API_KEY              | The key used to authenticate to the io-services-app-backend API                                      | string |
-| SERVICES_APP_BACKEND_BASE_PATH            | New Service APIs(include search engine) basepath                                                     | string |
-| SERVICES_APP_BACKEND_API_URL              | Services App Backend FunctionApp Url                                                                 | string |
-| SERVICES_APP_BACKEND_API_BASE_PATH        | Services App Backend FunctionApp Api Basepath                                                        | string |
-| FF_IO_X_USER_TOKEN                        | Enables/disables the use of the x-user header                                                        | string (enum: NONE, BETA, ALL) |
-| FF_IO_X_USER_TOKEN_BETA_TESTER_SHA_LIST   | List of fiscal codes enabled for the feature                                                         | csv     |
-| FF_IO_X_USER_TOKEN_CANARY_SHA_USERS_REGEX | Regex used to identify canary users enabled for the feature                                          | regex   |
 
 Notes:
  * `FETCH_KEEPALIVE_ENABLED` should be enabled when deploying on Azure App Service to avoid [SNAT Exhaustion](https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-outbound-connections)
