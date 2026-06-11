@@ -1,3 +1,7 @@
+# Exclude agents configuration files.
+.agents
+skills-lock.json
+
 # Exclude OS Folders
 .DS_Store
 

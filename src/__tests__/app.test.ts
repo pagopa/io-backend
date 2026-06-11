@@ -54,26 +54,11 @@ import { mockQuit, mockRedisClusterType, mockSelect } from "../__mocks__/redis";
 }; */
 const X_FORWARDED_PROTO_HEADER = "X-Forwarded-Proto";
 
-const aAPIBasePath = "/api/v1";
-const aCgnAPIBasePath = "/api/v1/cgn";
-const aCdcIOAPIBasePath = "/api/v1/cdc";
-const aCgnOperatorSearchAPIBasePath = "/api/v1/cgn-operator-search";
-const aIoFimsAPIBasePath = "/api/v1/fims";
-const aIoSignAPIBasePath = "/api/v1/sign";
-const aServicesAppBackendBasePath = "/api/v2";
-
 describe("Success app start", () => {
   // tslint:disable:no-let
   let app: Express;
   beforeAll(async () => {
     app = await appModule.newApp({
-      APIBasePath: aAPIBasePath,
-      CdcSupportAPIbasePath: aCdcIOAPIBasePath,
-      CGNAPIBasePath: aCgnAPIBasePath,
-      CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
-      IoFimsAPIBasePath: aIoFimsAPIBasePath,
-      IoSignAPIBasePath: aIoSignAPIBasePath,
-      ServicesAppBackendBasePath: aServicesAppBackendBasePath,
       env: NodeEnvironmentEnum.PRODUCTION
     });
   });
@@ -170,13 +155,6 @@ describe("Failure app start", () => {
     expect.assertions(1);
     try {
       await appModule.newApp({
-        APIBasePath: aAPIBasePath,
-        CdcSupportAPIbasePath: aCdcIOAPIBasePath,
-        CGNAPIBasePath: aCgnAPIBasePath,
-        CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
-        IoFimsAPIBasePath: aIoFimsAPIBasePath,
-        IoSignAPIBasePath: aIoSignAPIBasePath,
-        ServicesAppBackendBasePath: aServicesAppBackendBasePath,
         env: NodeEnvironmentEnum.PRODUCTION
       });
     } catch (err) {

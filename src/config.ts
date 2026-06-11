@@ -31,7 +31,6 @@ import { IoSignAPIClient } from "./clients/io-sign";
 import { LollipopApiClient } from "./clients/lollipop";
 import { getPagoPaEcommerceClient } from "./clients/pagopa-ecommerce";
 import { PNClientFactory } from "./clients/pn-clients";
-import { ServicesAppBackendAPIClient } from "./clients/services-app-backend";
 import ApiClientFactory from "./services/apiClientFactory";
 import { getRequiredENVVar } from "./utils/container";
 import {
@@ -105,7 +104,6 @@ export const getHttpsApiFetchWithBearer = (bearer: string) =>
 
 export const API_KEY = getRequiredENVVar("API_KEY");
 export const API_URL = getRequiredENVVar("API_URL");
-export const API_BASE_PATH = getRequiredENVVar("API_BASE_PATH");
 export const API_CLIENT = new ApiClientFactory(
   API_KEY,
   API_URL,
@@ -156,9 +154,6 @@ export const CDC_SUPPORT_API_KEY = getRequiredENVVar("CDC_SUPPORT_API_KEY");
 export const CDC_SUPPORT_API_URL = getRequiredENVVar("CDC_SUPPORT_API_URL");
 export const CDC_SUPPORT_API_BASE_PATH = getRequiredENVVar(
   "CDC_SUPPORT_API_BASE_PATH"
-);
-export const CDC_SUPPORT_IO_API_BASE_PATH = getRequiredENVVar(
-  "CDC_SUPPORT_IO_API_BASE_PATH"
 );
 export const CDC_SUPPORT_API_CLIENT = CdcSupportAPIClient(
   CDC_SUPPORT_API_KEY,
@@ -211,14 +206,6 @@ export const SERVICES_APP_BACKEND_API_BASE_PATH = getRequiredENVVar(
 );
 export const SERVICES_APP_BACKEND_API_URL = getRequiredENVVar(
   "SERVICES_APP_BACKEND_API_URL"
-);
-
-// TODO: creare servicesAppBackend client
-export const SERVICES_APP_BACKEND_CLIENT = ServicesAppBackendAPIClient(
-  SERVICES_APP_BACKEND_API_KEY,
-  SERVICES_APP_BACKEND_API_URL,
-  SERVICES_APP_BACKEND_API_BASE_PATH,
-  httpOrHttpsApiFetch
 );
 
 /**
@@ -301,10 +288,6 @@ export const PAGOPA_ECOMMERCE_UAT_CLIENT = getPagoPaEcommerceClient(
   pagoPAEcommerceUatApiUrl,
   pagoPAEcommerceUatApiKey,
   simpleHttpsApiFetch
-);
-
-export const SERVICES_APP_BACKEND_BASE_PATH = getRequiredENVVar(
-  "SERVICES_APP_BACKEND_BASE_PATH"
 );
 
 // Needed to forward push notifications actions events
