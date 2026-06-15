@@ -15,7 +15,6 @@ This repository contains the code of the backend used by the
   - [Table of content](#table-of-content)
   - [What is this?](#what-is-this)
   - [Authentication process](#authentication-process)
-    - [Token authentication](#token-authentication)
   - [How to run the application](#how-to-run-the-application)
     - [Dependencies](#dependencies)
     - [Installation steps](#installation-steps)
@@ -23,8 +22,6 @@ This repository contains the code of the backend used by the
     - [Environment variables](#environment-variables)
     - [Logs](#logs)
   - [API Monitoring](#api-monitoring)
-  - [Redis Database](#redis-database)
-    - [Data Structure](#data-structure)
   - [Mobile App compatibility](#mobile-app-compatibility)
     - [Backend](#backend)
     - [PagoPa](#pagopa)
@@ -46,17 +43,11 @@ This project is part of the Italian Digital Citizenship initiative, see the
 
 ## Authentication process
 
-The `io-app` application will authenticate using the APIs exposed by the service `Session Manager` in [IO Auth monorepo](https://github.com/pagopa/io-auth-n-identity-domain).
+Authenticated API requests sent to the backend require:
+- An API Key via custom header (such as `x-appbackend-api-key`).
+- An `x-user` custom header containing a base64-encoded JSON representation of the `UserIdentity`.
 
-Once the token is obtained it can be used to call authenticated APIs of this repository.
-
-### Token authentication
-
-All API requests sent by the client to the backend must have an `Authorization: Bearer` header with the value of the
-token obtained from the SPID authentication process. The token is used to retrieve the User object from the
-`SessionStorage` service.
-
-The code that manage this flow are in the `src/strategies/bearerSessionTokenStrategy.ts` file.
+The middleware responsible for parsing and validating this header is `xUserMiddleware`, which populates `req.user` with the decoded user structure. The code that manages this flow can be found in [src/utils/middleware/session.ts](src/utils/middleware/session.ts#L19).
 
 ## How to run the application
 
@@ -108,10 +99,8 @@ Those are all Environment variables needed by the application:
 | CGN_API_URL                               | The io-functions-cgn  URL                                                                            | string |
 | CGN_API_BASE_PATH                         | The root path for the backend cgn api endpoints                                                      | string |
 | PORT                                      | The HTTP port the Express server is listening to                                                     | int    |
-| REDIS_URL                                 | The URL of a Redis instance                                                                          | string |
 | NOTIFICATIONS_STORAGE_CONNECTION_STRING   | Connection string to Azure queue storage for notification hub messages                               | string |
 | NOTIFICATIONS_QUEUE_NAME                  | Queue name of Azure queue storage for notification hub messages                                      | string |
-| CACHE_MAX_AGE_SECONDS                     | The value in seconds for duration of in-memory api cache                                             | int    |
 | APICACHE_DEBUG                            | When is `true` enable the apicache debug mode                                                        | boolean |
 | GITHUB_TOKEN                              | The value of your Github Api Key, used in build phase                                                | string |
 | FETCH_KEEPALIVE_ENABLED                   | When is `true` enables `keepalive` agent in the API client (defaults to `false`)                     | boolean |
@@ -139,15 +128,6 @@ Those are all Environment variables needed by the application:
 | LOLLIPOP_API_KEY                          | The key used to authenticate to the io-function-lollipop API                                         | string  |
 | LOLLIPOP_API_URL                          | The io-function-lollipop URL                                                                         | string  |
 | LOLLIPOP_API_BASE_PATH                    | The io-function-lollipop api base path                                                               | string  |
-| FF_UNIQUE_EMAIL_ENFORCEMENT               | (Optional) Enable the unique email enforcement policy. Default: NONE                                 | string (enum: NONE, BETA, ALL) |
-| UNIQUE_EMAIL_ENFORCEMENT_USERS            | (Optional) Comma separated list of UNIQUE_EMAIL_ENFORCEMENT beta testers. Default: empty array       | string |
-| SERVICES_APP_BACKEND_API_KEY              | The key used to authenticate to the io-services-app-backend API                                      | string |
-| SERVICES_APP_BACKEND_BASE_PATH            | New Service APIs(include search engine) basepath                                                     | string |
-| SERVICES_APP_BACKEND_API_URL              | Services App Backend FunctionApp Url                                                                 | string |
-| SERVICES_APP_BACKEND_API_BASE_PATH        | Services App Backend FunctionApp Api Basepath                                                        | string |
-| FF_IO_X_USER_TOKEN                        | Enables/disables the use of the x-user header                                                        | string (enum: NONE, BETA, ALL) |
-| FF_IO_X_USER_TOKEN_BETA_TESTER_SHA_LIST   | List of fiscal codes enabled for the feature                                                         | csv     |
-| FF_IO_X_USER_TOKEN_CANARY_SHA_USERS_REGEX | Regex used to identify canary users enabled for the feature                                          | regex   |
 
 Notes:
  * `FETCH_KEEPALIVE_ENABLED` should be enabled when deploying on Azure App Service to avoid [SNAT Exhaustion](https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-outbound-connections)
@@ -163,13 +143,6 @@ With this **connection string** as value:
 The **connection string** has a default value needed to connect to Azurite, a local emulator used to provide a free local environment for testing an Azure Blob, Queue Storage, and Table Storage application.
 As for docker-compose instructions, the Azurite docker image runs the Blob service on port 20003, the Queue service on port 20004 and the Table service on port 20005. If Azurite is executed on different address or ports, the **connection string** must be changed according to the service.
 
-You must also set the following variables:
- * REDIS_URL
- * REDIS_PORT
- * REDIS_PASSWORD
-
-With the same values defined in the docker-compose.yml file.
-
 ### Logs
 
 Application logs are saved into the logs folder.
@@ -180,20 +153,6 @@ Application logs are saved into the logs folder.
 
 Is possible link the API to AppInsignts service by setting the ENV variable `APPINSIGHTS_CONNECTION_STRING`. Stats of API CPU and RAM usage, API call execution time, success or failure of API calls are collected.
 Realtime data collection is enabled.
-
-## Redis Database
-
-### Data Structure
-
-Redis Database stores data required only by application side functionalities. Below a table with an example of data for an hypothetical user with fiscal code `MRARSS80A01H501T` and with session token `HexToken`.
-
-
-| Key                          | Value                                                              | type   | expire in |
-|----------------------------------------|-----------------------------------------------------------------------------------|--------|-----------|
-| SESSION-HexToken       | a JSON representing the user object | `User` | TOKEN_DURATION_IN_SECONDS |
-| WALLET-WalletHexToken   | `"SESSION-HexToken"` | `String` | TOKEN_DURATION_IN_SECONDS |
-| SESSIONINFO-HexToken   | a JSON representing the `SessionInfo` object | `SessionInfo` | TOKEN_DURATION_IN_SECONDS |
-| USERSESSIONS-MRARSS80A01H501T | a Set of SessionInfo Keys | `Set<SessionInfoKey>` | never |
 
 ## Mobile App compatibility
 

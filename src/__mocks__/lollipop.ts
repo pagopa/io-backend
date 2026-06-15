@@ -13,11 +13,8 @@ import { LollipopJWTAuthorization } from "../../generated/io-sign-api/LollipopJW
 import { LollipopPublicKey } from "../../generated/io-sign-api/LollipopPublicKey";
 import { aFiscalCode } from "./user_mock";
 import { LollipopApiClient } from "../clients/lollipop";
-import { ISessionStorage } from "../services/ISessionStorage";
 import { LoginTypeEnum } from "../utils/fastLogin";
 
-import * as E from "fp-ts/lib/Either";
-import * as O from "fp-ts/lib/Option";
 import { getASAMLResponse } from "../utils/__mocks__/spid";
 import { SpidLevelEnum } from "../../generated/backend/SpidLevel";
 
@@ -73,16 +70,6 @@ export const mockLollipopApiClient = {
   generateLCParams: jest.fn(),
   reservePubKey: jest.fn(),
 } as ReturnType<LollipopApiClient>;
-
-const mockGetlollipopAssertionRefForUser = jest
-  .fn()
-  .mockImplementation(async () => {
-    return E.right(O.some(anAssertionRef));
-  });
-
-export const mockSessionStorage = {
-  getLollipopAssertionRefForUser: mockGetlollipopAssertionRefForUser,
-} as unknown as ISessionStorage;
 
 export const lollipopRequiredHeaders = {
   signature:

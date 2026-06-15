@@ -12,7 +12,6 @@ import {
 import { IntegerFromString } from "@pagopa/ts-commons/lib/numbers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString, Ulid } from "@pagopa/ts-commons/lib/strings";
-import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { Millisecond } from "@pagopa/ts-commons/lib/units";
 import { HttpsUrlFromString, UrlFromString } from "@pagopa/ts-commons/lib/url";
 import * as dotenv from "dotenv";
@@ -33,13 +32,8 @@ import { getPagoPaEcommerceClient } from "./clients/pagopa-ecommerce";
 import { PNClientFactory } from "./clients/pn-clients";
 import ApiClientFactory from "./services/apiClientFactory";
 import { getRequiredENVVar } from "./utils/container";
-import {
-  FeatureFlag,
-  FeatureFlagEnum,
-  getIsUserEligibleForNewFeature
-} from "./utils/featureFlag";
+import { FeatureFlag, FeatureFlagEnum } from "./utils/featureFlag";
 import { log } from "./utils/logger";
-import { ognlTypeFor } from "./utils/ognl";
 import { CommaSeparatedListOf } from "./utils/separated-list";
 
 // Without this, the environment variables loaded by dotenv aren't available in
@@ -52,27 +46,6 @@ const DEFAULT_SERVER_PORT = "80";
 export const SERVER_PORT = process.env.PORT || DEFAULT_SERVER_PORT;
 
 export const ENV = getNodeEnvironmentFromProcessEnv(process.env);
-
-// Default cache control max-age value is 5 minutes
-const DEFAULT_CACHE_MAX_AGE_SECONDS: string = "300";
-
-// Resolve cache control default max-age value
-// @deprecated this value is not used anymore.
-export const CACHE_MAX_AGE_SECONDS: number = parseInt(
-  process.env.CACHE_MAX_AGE_SECONDS || DEFAULT_CACHE_MAX_AGE_SECONDS,
-  10
-);
-
-// Default cache control max-age value is 1 hour
-const DEFAULT_CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS: string = "3600";
-
-// Resolve cache control default max-age value
-// @deprecated this value is not used anymore.
-export const CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS: number = parseInt(
-  process.env.CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS ||
-    DEFAULT_CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS,
-  10
-);
 
 const DEFAULT_REQUEST_TIMEOUT_MS = 10000 as Millisecond;
 
@@ -195,17 +168,6 @@ export const CGN_OPERATOR_SEARCH_API_CLIENT = CgnOperatorSearchAPIClient(
   CGN_OPERATOR_SEARCH_API_URL,
   CGN_OPERATOR_SEARCH_API_BASE_PATH,
   httpOrHttpsApiFetch
-);
-
-export const SERVICES_APP_BACKEND_API_KEY = getRequiredENVVar(
-  "SERVICES_APP_BACKEND_API_KEY"
-);
-
-export const SERVICES_APP_BACKEND_API_BASE_PATH = getRequiredENVVar(
-  "SERVICES_APP_BACKEND_API_BASE_PATH"
-);
-export const SERVICES_APP_BACKEND_API_URL = getRequiredENVVar(
-  "SERVICES_APP_BACKEND_API_URL"
 );
 
 /**
@@ -379,35 +341,6 @@ export const FF_CDC_ENABLED = process.env.FF_CDC_ENABLED === "1";
 export const FF_IO_SIGN_ENABLED = process.env.FF_IO_SIGN_ENABLED === "1";
 export const FF_IO_FIMS_ENABLED = process.env.FF_IO_FIMS_ENABLED === "1";
 
-// PEC SERVER config
-export const PecServerConfig = t.interface({
-  basePath: t.string,
-  secret: NonEmptyString,
-  serviceId: NonEmptyString,
-  url: NonEmptyString
-});
-export type PecServerConfig = t.TypeOf<typeof PecServerConfig>;
-
-export const PecServersConfig = t.interface({
-  aruba: PecServerConfig,
-  poste: PecServerConfig
-});
-export type PecServersConfig = t.TypeOf<typeof PecServersConfig>;
-
-export const PECSERVERS = pipe(
-  process.env,
-  ognlTypeFor<PecServersConfig>(PecServersConfig, "PECSERVERS").decode,
-  E.getOrElseW((errs) => {
-    log.error(
-      `Missing or invalid PECSERVERS environment variable: ${readableReport(
-        errs
-      )}`
-    );
-    return process.exit(1);
-  })
-);
-//
-
 // PN Service Id
 export const PN_SERVICE_ID = pipe(
   process.env.PN_SERVICE_ID,
@@ -455,55 +388,6 @@ export const FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST = pipe(
 );
 export const FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX = pipe(
   process.env.FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX,
-  NonEmptyString.decode,
-  E.getOrElse(() => "XYZ" as NonEmptyString)
-);
-
-// UNIQUE EMAIL ENFORCEMENT variables
-
-export const FF_UNIQUE_EMAIL_ENFORCEMENT = pipe(
-  process.env.FF_UNIQUE_EMAIL_ENFORCEMENT,
-  FeatureFlag.decode,
-  E.getOrElseW(() => FeatureFlagEnum.NONE)
-);
-
-export const UNIQUE_EMAIL_ENFORCEMENT_USERS = pipe(
-  process.env.UNIQUE_EMAIL_ENFORCEMENT_USERS,
-  // TODO(IOPID-1256): produce a ReadonlySet instead of ReadonlyArray
-  CommaSeparatedListOf(FiscalCode).decode,
-  E.getOrElseW((err) => {
-    throw new Error(
-      `Invalid UNIQUE_EMAIL_ENFORCEMENT_USERS value: ${readableReport(err)}`
-    );
-  })
-);
-
-export const FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED =
-  getIsUserEligibleForNewFeature<FiscalCode>(
-    (fiscalCode) => UNIQUE_EMAIL_ENFORCEMENT_USERS.includes(fiscalCode),
-    () => false,
-    FF_UNIQUE_EMAIL_ENFORCEMENT
-  );
-
-export const FF_IO_X_USER_TOKEN = pipe(
-  process.env.FF_IO_X_USER_TOKEN,
-  FeatureFlag.decode,
-  E.getOrElseW(() => FeatureFlagEnum.NONE)
-);
-export const FF_IO_X_USER_TOKEN_BETA_TESTER_SHA_LIST = pipe(
-  process.env.FF_IO_X_USER_TOKEN_BETA_TESTER_SHA_LIST,
-  CommaSeparatedListOf(NonEmptyString).decode,
-  E.getOrElseW((errs) => {
-    log.error(
-      `Missing or invalid FF_IO_X_USER_TOKEN_BETA_TESTER_SHA_LIST environment variable: ${readableReport(
-        errs
-      )}`
-    );
-    return process.exit(1);
-  })
-);
-export const FF_IO_X_USER_TOKEN_CANARY_SHA_USERS_REGEX = pipe(
-  process.env.FF_IO_X_USER_TOKEN_CANARY_SHA_USERS_REGEX,
   NonEmptyString.decode,
   E.getOrElse(() => "XYZ" as NonEmptyString)
 );

@@ -63,7 +63,6 @@ const maybeAppInsightsClient = pipe(
 );
 
 newApp({
-  appInsightsClient: O.toUndefined(maybeAppInsightsClient),
   env: ENV
 })
   .then((app) => {

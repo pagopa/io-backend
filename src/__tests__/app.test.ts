@@ -8,15 +8,9 @@ import * as E from "fp-ts/lib/Either";
 import { NodeEnvironmentEnum } from "@pagopa/ts-commons/lib/environment";
 import * as request from "supertest";
 import { ServerInfo } from "../../generated/public/ServerInfo";
-import * as redisUtils from "../utils/redis";
 
 jest.mock("@azure/storage-queue");
-
-jest.mock("../services/redisSessionStorage");
 jest.mock("../services/apiClientFactory");
-jest
-  .spyOn(redisUtils, "createClusterRedisClient")
-  .mockImplementation((_) => async () => mockRedisClusterType);
 
 const mockNotify = jest.fn();
 jest.mock("../controllers/notificationController", () => {
@@ -34,8 +28,6 @@ jest.mock("../services/notificationService", () => {
 });
 
 import appModule from "../app";
-import { mockQuit, mockRedisClusterType, mockSelect } from "../__mocks__/redis";
-
 /* const aValidNotification = {
   message: {
     content: {
@@ -131,13 +123,6 @@ describe("Success app start", () => {
         .set(X_FORWARDED_PROTO_HEADER, "https")
         .expect(200);
       expect(E.isRight(ServerInfo.decode(response.body)));
-    });
-  });
-
-  describe("Graceful redis shutdown", () => {
-    it("should call quit method for each redis when the server stops", async () => {
-      app.emit("server:stop");
-      expect(mockQuit).toBeCalledTimes(mockSelect().length);
     });
   });
 });
