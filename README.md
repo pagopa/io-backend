@@ -92,7 +92,6 @@ Those are all Environment variables needed by the application:
 |----------------------------------------   |------------------------------------------------------------------------------------------------------|--------|
 | API_KEY                                   | The key used to authenticate to the io-functions-app API                                             | string |
 | API_URL                                   | The io-functions-app URL                                                                             | string |
-| API_BASE_PATH                             | The root path for the backend api endpoints                                                          | string |
 | APP_BACKEND_PRIMARY_KEY                   | The primary key used to authenticate caller                                                          | string |
 | APP_BACKEND_SECONDARY_KEY                 | (Optional) The secondary key used to authenticate caller                                 		   | string |
 | CGN_API_KEY                               | The key used to authenticate to the io-functions-cgn API                                             | string |
