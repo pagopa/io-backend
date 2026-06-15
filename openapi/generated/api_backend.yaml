@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  version: 21.0.0
+  version: 21.1.0
   title: IO API backend shared definitions
   description: |
     shared definitions for IO API backend services

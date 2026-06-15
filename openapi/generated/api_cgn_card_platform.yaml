@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
   title: Carta Giovani Nazionale API
-  version: 21.0.0
+  version: 21.1.0
 servers:
   - url: https://localhost/api/cgn-card/v1
 security:
