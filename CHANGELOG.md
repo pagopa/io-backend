@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 21.1.0
+
+### Minor Changes
+
+- 887ffa9: Remove REDIS and unused configurations
+
 ## 21.0.0
 
 ### Major Changes
