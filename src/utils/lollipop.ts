@@ -81,8 +81,6 @@ export const checkIfLollipopIsEnabled = (
   );
 
 /**
- * ⚠️ This function should only be used once the `FF_IO_X_USER_TOKEN` feature flag is set to `ALL`.
- *
  * Retrieves Lollipop LC parameters if the user has a valid Lollipop session.
  */
 export const extractLollipopLocalsFromLollipopHeaders = (
