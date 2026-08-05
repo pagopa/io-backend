@@ -26,7 +26,6 @@ import { CgnAPIClient } from "./clients/cgn";
 import { CgnOperatorSearchAPIClient } from "./clients/cgn-operator-search";
 import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
 import { IoFimsAPIClient } from "./clients/io-fims";
-import { IoSignAPIClient } from "./clients/io-sign";
 import { LollipopApiClient } from "./clients/lollipop";
 import { getPagoPaEcommerceClient } from "./clients/pagopa-ecommerce";
 import { PNClientFactory } from "./clients/pn-clients";
@@ -89,17 +88,6 @@ export const APP_MESSAGES_API_URL = getRequiredENVVar("APP_MESSAGES_API_URL");
 export const APP_MESSAGES_API_CLIENT = AppMessagesAPIClient(
   APP_MESSAGES_API_KEY,
   APP_MESSAGES_API_URL,
-  httpOrHttpsApiFetch
-);
-
-export const IO_SIGN_API_KEY = getRequiredENVVar("IO_SIGN_API_KEY");
-export const IO_SIGN_API_URL = getRequiredENVVar("IO_SIGN_API_URL");
-export const IO_SIGN_SERVICE_ID = getRequiredENVVar("IO_SIGN_SERVICE_ID");
-export const IO_SIGN_API_BASE_PATH = getRequiredENVVar("IO_SIGN_API_BASE_PATH");
-export const IO_SIGN_API_CLIENT = IoSignAPIClient(
-  IO_SIGN_API_KEY,
-  IO_SIGN_API_URL,
-  IO_SIGN_API_BASE_PATH,
   httpOrHttpsApiFetch
 );
 
@@ -338,7 +326,6 @@ export const errorOrAppInsightConfig: t.Validation<AppInsightsConfig> =
 // Feature flags
 export const FF_CGN_ENABLED = process.env.FF_CGN_ENABLED === "1";
 export const FF_CDC_ENABLED = process.env.FF_CDC_ENABLED === "1";
-export const FF_IO_SIGN_ENABLED = process.env.FF_IO_SIGN_ENABLED === "1";
 export const FF_IO_FIMS_ENABLED = process.env.FF_IO_FIMS_ENABLED === "1";
 
 // PN Service Id
