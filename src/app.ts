@@ -28,13 +28,11 @@ import {
   FF_CDC_ENABLED,
   FF_CGN_ENABLED,
   FF_IO_FIMS_ENABLED,
-  FF_IO_SIGN_ENABLED,
   FF_ROUTING_PUSH_NOTIF,
   FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST,
   FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX,
   FIRST_LOLLIPOP_CONSUMER_CLIENT,
   IO_FIMS_API_CLIENT,
-  IO_SIGN_API_CLIENT,
   LOLLIPOP_API_CLIENT,
   NOTIFICATIONS_QUEUE_NAME,
   NOTIFICATIONS_STORAGE_CONNECTION_STRING,
@@ -53,7 +51,6 @@ import {
 import { registerCommunicationRoutes } from "./routes/communicationRoutes";
 import { registerIdentityRoutes } from "./routes/identityRoutes";
 import { registerIoFimsAPIRoutes } from "./routes/ioFimsRoutes";
-import { registerIoSignAPIRoutes } from "./routes/ioSignRoutes";
 import { registerSendActivationRoutes } from "./routes/pnRoutes";
 import { registerPublicRoutes } from "./routes/publicRoutes";
 import CdcSupportService from "./services/cdcSupportService";
@@ -61,7 +58,6 @@ import CgnOperatorSearchService from "./services/cgnOperatorSearchService";
 import CgnService from "./services/cgnService";
 import IoFimsService from "./services/fimsService";
 import FunctionsAppService from "./services/functionAppService";
-import IoSignService from "./services/ioSignService";
 import NewMessagesService from "./services/newMessagesService";
 import NotificationService from "./services/notificationService";
 import { getNotificationServiceFactory } from "./services/notificationServiceFactory";
@@ -190,9 +186,6 @@ export async function newApp({ env }: IAppFactoryParameters): Promise<Express> {
         // Create the cgn service
         const CGN_SERVICE = new CgnService(CGN_API_CLIENT);
 
-        // Create the io sign
-        const IO_SIGN_SERVICE = new IoSignService(IO_SIGN_API_CLIENT);
-
         // Create the io fims service
         const IO_FIMS_SERVICE = new IoFimsService(IO_FIMS_API_CLIENT);
 
@@ -303,16 +296,6 @@ export async function newApp({ env }: IAppFactoryParameters): Promise<Express> {
             app,
             CDC_SUPPORT_SERVICE,
             authMiddlewares.xUserMiddleware
-          );
-        }
-
-        if (FF_IO_SIGN_ENABLED) {
-          registerIoSignAPIRoutes(
-            app,
-            authMiddlewares.xUserMiddleware,
-            IO_SIGN_SERVICE,
-            PROFILE_SERVICE,
-            LOLLIPOP_API_CLIENT
           );
         }
 
