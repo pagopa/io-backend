@@ -68,15 +68,3 @@ export function toExpressMiddleware<T, P>(
       TE.toUnion
     )();
 }
-
-/**
- * An Express handler that always respond with the same response object
- */
-export function constantExpressHandler<T>(
-  response: IResponse<T>
-): (req: express.Request, res: express.Response) => void {
-  return (_, res) => {
-    res.locals.detail = response.detail;
-    response.apply(res);
-  };
-}

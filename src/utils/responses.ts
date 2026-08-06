@@ -56,24 +56,6 @@ export const ResponseErrorDismissed = ResponseErrorNotFound(
 );
 
 /**
- * Returns a `403` as `Not Found` error
- *
- * @param detail The error message
- */
-export function ResponseErrorNotFound403(
-  detail: string
-): IResponseErrorNotFound {
-  return {
-    ...ResponseErrorGeneric(
-      HttpStatusCodeEnum.HTTP_STATUS_403,
-      "Not Found",
-      detail
-    ),
-    kind: "IResponseErrorNotFound"
-  };
-}
-
-/**
  * Transforms async failures into internal errors
  */
 export const withCatchAsInternalError = <T>(
