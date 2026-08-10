@@ -1,6 +1,6 @@
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { LollipopJWTAuthorization } from "../../../generated/io-sign-api/LollipopJWTAuthorization";
-import { LollipopPublicKey } from "../../../generated/io-sign-api/LollipopPublicKey";
+import { LollipopJWTAuthorization } from "../../../generated/lollipop-first-consumer/LollipopJWTAuthorization";
+import { LollipopPublicKey } from "../../../generated/lollipop-first-consumer/LollipopPublicKey";
 import { AssertionTypeEnum } from "../../../generated/lollipop-api/AssertionType";
 import { LollipopLocalsType } from "../../types/lollipop";
 import {

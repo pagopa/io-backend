@@ -78,28 +78,28 @@ describe("LollipopContentDigest", () => {
 
 describe("LollipopSignatureInput", () => {
   it("should decode a valid signature input", async () => {
-    const value = `sig1=("x-io-sign-qtspclauses");created=1675258547;nonce="aNonce";alg="ecdsa-p384-sha384";keyid="aKeyId"`;
+    const value = `sig1=("x-custom-header");created=1675258547;nonce="aNonce";alg="ecdsa-p384-sha384";keyid="aKeyId"`;
 
     const res = LollipopSignatureInput.decode(value);
     expect(res).toMatchObject(E.right(value));
   });
 
   it("should decode a valid multi-signature input without space", async () => {
-    const value = `sig1=("x-io-sign-qtspclauses");created=1675258547;nonce="aNonce";alg="ecdsa-p384-sha384";keyid="aKeyId,sig2=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url");created=1675258547;nonce="aNonce";alg="ecdsa-p384-sha384";keyid="aKeyId"`;
+    const value = `sig1=("x-custom-header");created=1675258547;nonce="aNonce";alg="ecdsa-p384-sha384";keyid="aKeyId,sig2=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url");created=1675258547;nonce="aNonce";alg="ecdsa-p384-sha384";keyid="aKeyId"`;
 
     const res = LollipopSignatureInput.decode(value);
     expect(res).toMatchObject(E.right(value));
   });
 
   it("should decode a valid multi-signature input", async () => {
-    const value = `sig1=("x-io-sign-qtspclauses");created=1675258547;nonce="aNonce";alg="ecdsa-p384-sha384";keyid="aKeyId, sig2=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url");created=1675258547;nonce="aNonce";alg="ecdsa-p384-sha384";keyid="aKeyId"`;
+    const value = `sig1=("x-custom-header");created=1675258547;nonce="aNonce";alg="ecdsa-p384-sha384";keyid="aKeyId, sig2=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url");created=1675258547;nonce="aNonce";alg="ecdsa-p384-sha384";keyid="aKeyId"`;
 
     const res = LollipopSignatureInput.decode(value);
     expect(res).toMatchObject(E.right(value));
   });
 
   it("should fail with an invalid signature input", async () => {
-    const value = `("x-io-sign-qtspclauses");created=1675258547;nonce="aNonce";alg="ecdsa-p384-sha384";keyid="aKeyId", sig2=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url");created=1675258547;nonce="aNonce";alg="ecdsa-p384-sha384";keyid="aKeyId`;
+    const value = `("x-custom-header");created=1675258547;nonce="aNonce";alg="ecdsa-p384-sha384";keyid="aKeyId", sig2=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url");created=1675258547;nonce="aNonce";alg="ecdsa-p384-sha384";keyid="aKeyId`;
 
     const res = LollipopSignatureInput.decode(value);
     expect(res).toMatchObject(E.left(expect.any(Array)));

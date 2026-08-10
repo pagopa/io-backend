@@ -8,9 +8,9 @@ import { LollipopSignatureInput } from "../../generated/lollipop/LollipopSignatu
 import { LollipopMethod } from "../../generated/lollipop/LollipopMethod";
 import { LollipopOriginalURL } from "../../generated/lollipop/LollipopOriginalURL";
 import { LollipopLocalsType, Thumbprint } from "../types/lollipop";
-import { AssertionTypeEnum } from "../../generated/io-sign-api/AssertionType";
-import { LollipopJWTAuthorization } from "../../generated/io-sign-api/LollipopJWTAuthorization";
-import { LollipopPublicKey } from "../../generated/io-sign-api/LollipopPublicKey";
+import { AssertionTypeEnum } from "../../generated/lollipop-first-consumer/AssertionType";
+import { LollipopJWTAuthorization } from "../../generated/lollipop-first-consumer/LollipopJWTAuthorization";
+import { LollipopPublicKey } from "../../generated/lollipop-first-consumer/LollipopPublicKey";
 import { aFiscalCode } from "./user_mock";
 import { LollipopApiClient } from "../clients/lollipop";
 import { LoginTypeEnum } from "../utils/fastLogin";
