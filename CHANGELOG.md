@@ -1,5 +1,11 @@
 # @pagopa/io-backend
 
+## 21.2.0
+
+### Minor Changes
+
+- c8466a8: remove all code and references to io-sign
+
 ## 21.1.0
 
 ### Minor Changes
