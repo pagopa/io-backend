@@ -25,3 +25,6 @@ overrides:
     /api/communication/v1/third-party-messages/{id}/precondition:
       response_time_threshold: 1.5
       availability_threshold: 0.99
+    /api/communication/v1/messages:
+      response_time_threshold: 2
+      availability_threshold: 0.99
